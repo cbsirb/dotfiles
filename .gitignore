@@ -1,1 +1,8 @@
-elpa/
+/emacs.d/elpa/
+/emacs.d/.cache/
+/emacs.d/irony/
+/emacs.d/bookmarks
+/vim/plugged/
+/vim/cache/
+/vim/plug-local/
+/vim/defaults.vim
