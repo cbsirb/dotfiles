@@ -9,3 +9,7 @@
 /.bak
 /mpd/state
 /mpd/playlists/
+/mpd/database
+/mpd/log
+/mpd/pid
+/mpd/sticker.sql
