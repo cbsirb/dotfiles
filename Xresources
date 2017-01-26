@@ -1,0 +1,105 @@
+Xcursor.theme:  DMZ-White
+
+Xft.antialias: 1
+Xft.autohint: 0
+Xft.dpi: 96
+Xft.hinting: 1
+Xft.hintstyle: hintfull
+Xft.lcdfilter: lcddefault
+Xft.rgba: rgb
+
+URxvt.font: xft:Cousine:pixelsize=14:hinting=True:antialias=True
+URxvt.boldFont: xft:Cousine:pixelsize=14:hinting=True:antialias=True:bold
+URxvt.italicFont: xft:Cousine:pixelsize=14:hinting=True:antialias=True:italic
+URxvt.boldItalicFont: xft:Cousine:pixelsize=14:hinting=True:antialias=True:bold:italic
+! URxvt.font: xft:Inconsolata:pixelsize=14:hinting=True:antialias=True
+! URxvt.font: xft:Hack:pixelsize=14:hinting=True:antialias=True
+! URxvt.font: xft:Source Code Pro:pixelsize=14:hinting=True:antialias=True
+! URxvt.font: xft:DejaVu Sans Mono:pixelsize=14:hinting=True;antialias=True
+! URxvt.boldFont: xft:Inconsolata:pixelsize=14:bold
+! URxvt.italicFont: xft:Inconsolata:pixelsize=14:italic
+! URxvt.boldItalicFont: xft:Inconsolata:pixelsize=14:bold:italic
+
+
+xterm*faceName: Cousine:pixelsize=14:hinting=True:antialias=True
+! xterm*faceName: Hack:pixelsize=14:hinting=True:antialias=True
+! xterm*faceName: Source Code Pro:pixelsize=14:hinting=True:antialias=True
+! xterm*faceName: DejaVu Sans Mono:pixelsize=14:hinting=True:antialias=True
+! xterm*faceName: Inconsolata:pixelsize=14:hinting=True:antialias=True
+
+! No colorscheme (white text, black background)
+! *background: #000000
+! *foreground: #ffffff
+
+! hard contrast: *background: #1d2021
+*background: #282828
+! soft contrast: *background: #32302f
+*foreground: #ebdbb2
+! Black + DarkGrey
+*color0:  #282828
+*color8:  #928374
+! DarkRed + Red
+*color1:  #cc241d
+*color9:  #fb4934
+! DarkGreen + Green
+*color2:  #98971a
+*color10: #b8bb26
+! DarkYellow + Yellow
+*color3:  #d79921
+*color11: #fabd2f
+! DarkBlue + Blue
+*color4:  #458588
+*color12: #83a598
+! DarkMagenta + Magenta
+*color5:  #b16286
+*color13: #d3869b
+! DarkCyan + Cyan
+*color6:  #689d6a
+*color14: #8ec07c
+! LightGrey + White
+*color7:  #a89984
+*color15: #ebdbb2
+
+! Xterm config
+xterm*termName: xterm-256color
+xterm*locale:           true
+xterm*metaSendsEscape:  true
+XTerm*eightBitInput:    false
+
+xterm*scrollTtyKeypress:  true
+xterm*scrollTtyOutput:    false
+
+! URxvt config
+URxvt*depth: 32
+URxvt*buffered: true
+! URxvt*letterSpace: -1
+
+URxvt*iconFile: /usr/share/icons/Adwaita/scalable/apps/utilities-terminal-symbolic.svg
+URxvt*iconName: urxvt
+
+!Disables the insanely annoying Ctrl+Shift shortcut that enters ISO14755 mode
+URxvt*iso14755:     false
+URxvt*iso14755_52:  false
+
+! This is nice-looking
+URxvt*scrollstyle:      plain
+URxvt*scrollBar_right:  true
+
+! Do not scroll with output
+URxvt*scrollTtyOutput: false
+
+! Scroll in relation to buffer (with mouse scroll or Shift+Page Up)
+URxvt*scrollWithBuffer: true
+
+! Scroll back to the bottom on keypress
+URxvt*scrollTtyKeypress: true
+
+! Shift+PgUp/Down will not work in vim/less/etc.
+! This is how it is suposed to be
+URxvt*secondaryScreen: 1
+URxvt*secondaryScroll: 0
+
+! URxvt.perl-ext-common: default,matcher
+! URxvt.url-launcher: /usr/bin/xdg-open
+! URxvt.matcher.button: 1
+! URxvt.matcher.rend.0: Uline Bold fg5
