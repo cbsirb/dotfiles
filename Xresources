@@ -8,10 +8,10 @@ Xft.hintstyle: hintfull
 Xft.lcdfilter: lcddefault
 Xft.rgba: rgb
 
-URxvt.font: xft:Cousine:pixelsize=14:hinting=True:antialias=True
-URxvt.boldFont: xft:Cousine:pixelsize=14:hinting=True:antialias=True:bold
-URxvt.italicFont: xft:Cousine:pixelsize=14:hinting=True:antialias=True:italic
-URxvt.boldItalicFont: xft:Cousine:pixelsize=14:hinting=True:antialias=True:bold:italic
+URxvt.font: xft:Cousine:pixelsize=15:hinting=True:antialias=True
+URxvt.boldFont: xft:Cousine:pixelsize=15:hinting=True:antialias=True:bold
+URxvt.italicFont: xft:Cousine:pixelsize=15:hinting=True:antialias=True:italic
+URxvt.boldItalicFont: xft:Cousine:pixelsize=15:hinting=True:antialias=True:bold:italic
 ! URxvt.font: xft:Inconsolata:pixelsize=14:hinting=True:antialias=True
 ! URxvt.font: xft:Hack:pixelsize=14:hinting=True:antialias=True
 ! URxvt.font: xft:Source Code Pro:pixelsize=14:hinting=True:antialias=True
