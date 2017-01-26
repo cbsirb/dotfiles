@@ -1,0 +1,7 @@
+[alias]
+	co = checkout
+	br = branch
+	ci = commit
+	st = status
+	unstage = reset HEAD --
+	pullff = pull --ff-only 

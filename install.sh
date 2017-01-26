@@ -49,6 +49,8 @@ install_dotfile "bash_logout"
 install_dotfile "bash_profile"
 install_dotfile "bashrc"
 
+install_dotfile "gitconfig"
+
 install_dotfile "tmux.conf"
 
 backup_dir "$HOME/.tmux.d"
