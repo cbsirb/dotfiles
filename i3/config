@@ -25,7 +25,7 @@ floating_modifier $mod
 
 # start a terminal
 # bindsym $mod+Return exec i3-sensible-terminal
-bindsym $mod+Return exec urxvtc
+bindsym $mod+Return exec xterm
 
 # kill focused window
 bindsym $mod+Shift+q kill
@@ -170,7 +170,7 @@ for_window [window_role="pop-up"] floating enable
 for_window [window_role="About"] floating enable
 for_window [window_role="task_dialog"] floating enable
 for_window [class="Wicd-client.py"] floating enable
-for_window [class="XTerm"] floating enable
+#for_window [class="XTerm"] floating enable
 for_window [class="Pavucontrol"] floating enable
 for_window [class="Lxappearance"] floating enable
 
