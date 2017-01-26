@@ -6,6 +6,10 @@ case $- in
       *) return;;
 esac
 
+if [ -z "$DISPLAY" ] && [ "$(fgconsole)" -eq 1 ]; then
+    exec startx
+fi
+
 # don't put duplicate lines or lines starting with space in the history.
 export HISTCONTROL=ignoreboth:erasedups
 
@@ -49,11 +53,6 @@ case "$TERM" in
     rxvt-unicode-256color) color_prompt=yes;;
 esac
 
-# uncomment for a colored prompt, if the terminal has the capability; turned
-# off by default to not distract the user: the focus in a terminal window
-# should be on the output of commands, not on the prompt
-#force_color_prompt=yes
-
 if [ -n "$force_color_prompt" ]; then
     if [ -x /usr/bin/tput ] && tput setaf 1 >&/dev/null; then
 	# We have color support; assume it's compliant with Ecma-48
@@ -65,28 +64,27 @@ if [ -n "$force_color_prompt" ]; then
     fi
 fi
 
-# In case git-prompt.sh is missing
-parse_git_branch() {
-	git branch 2> /dev/null | sed -e '/^[^*]/d' -e 's/* \(.*\)/(\1)/'
-}
-
 export PROMPT_DIRTRIM=3
 PROMPT_COMMAND=_bash_history_sync
+
+if [ -f /usr/share/git/completion/git-prompt.sh ]; then
+    source /usr/share/git/completion/git-prompt.sh
+elif [ -f /usr/share/git/git-prompt.sh ]; then
+    source /usr/share/git/git-prompt.sh
+else
+    function __git_ps1 {
+        git branch 2> /dev/null | sed -e '/^[^*]/d' -e 's/* \(.*\)/ (\1)/'
+    }
+fi
+
+export GIT_PS1_SHOWUPSTREAM=verbose
+export GIT_PS1_SHOWDIRTYSTATE=1
+export GIT_PS1_SHOWCOLORHINTS=1
 
 if [ "$color_prompt" = yes ]; then
     case "$TERM" in
         xterm*|rxvt*|tmux*|screen*|eterm*)
-            if [ -f /usr/share/git/completion/git-prompt.sh ]; then
-                source /usr/share/git/completion/git-prompt.sh
-
-                export GIT_PS1_SHOWUPSTREAM=verbose
-                export GIT_PS1_SHOWDIRTYSTATE=1
-                export GIT_PS1_SHOWCOLORHINTS=1
-
-                export PS1="\[\033[38;5;1m\]\u\[$(tput sgr0)\] @ \[$(tput sgr0)\]\[\033[38;5;12m\]\w\[$(tput sgr0)\]\[\033[38;5;15m\]\[$(tput sgr0)\]\$(__git_ps1 ' (%s)')\[\033[38;5;1m\] >\[$(tput sgr0)\]\[\033[38;5;15m\] \[$(tput sgr0)\]"
-            else
-                export PS1='\[\033[38;5;1m\]\u\[$(tput sgr0)\] @ \[$(tput sgr0)\]\[\033[38;5;12m\]\w\[$(tput sgr0)\]\[\033[38;5;15m\] \[$(tput sgr0)\]\$(parse_git_branch)\[\033[38;5;1m\] >\[$(tput sgr0)\]\[\033[38;5;15m\] \[$(tput sgr0)\]'
-            fi
+            export PS1="\[\033[38;5;1m\]\u\[$(tput sgr0)\] @ \[$(tput sgr0)\]\[\033[38;5;12m\]\w\[$(tput sgr0)\]\[\033[38;5;15m\]\[$(tput sgr0)\]\$(__git_ps1 ' (%s)')\[\033[38;5;1m\] >\[$(tput sgr0)\]\[\033[38;5;15m\] \[$(tput sgr0)\]"
             ;;
         *)
             PS1='\u@\h:\w\$ '
@@ -96,6 +94,10 @@ else
     PS1='\u@\h:\w\$ '
 fi
 unset color_prompt force_color_prompt
+
+if [ -f ~/.bash_init ]; then
+  source ~/.bash_init
+fi
 
 if [ -f ~/.bash_env ]; then
    . ~/.bash_env
@@ -113,18 +115,13 @@ fi
 # enable programmable completion features (you don't need to enable
 # this, if it's already enabled in /etc/bash.bashrc and /etc/profile
 # sources /etc/bash.bashrc).
-if ! shopt -oq posix; then
-  if [ -f /usr/share/bash-completion/bash_completion ]; then
-    . /usr/share/bash-completion/bash_completion
-  elif [ -f /etc/bash_completion ]; then
-    . /etc/bash_completion
-  fi
-fi
-
-
-if [ -f ~/.bash_init ]; then
-  source ~/.bash_init
-fi
+# if ! shopt -oq posix; then
+#   if [ -f /usr/share/bash-completion/bash_completion ]; then
+#     . /usr/share/bash-completion/bash_completion
+#   elif [ -f /etc/bash_completion ]; then
+#     . /etc/bash_completion
+#   fi
+# fi
 
 # typing '/etc' is the same as 'cd /etc'
 shopt -s autocd
@@ -164,5 +161,3 @@ shopt -s complete_fullquote
 shopt -s checkwinsize
 
 PATH=$PATH:~/bin
-
-[ -f ~/.fzf.bash ] && source ~/.fzf.bash

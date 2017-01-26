@@ -172,6 +172,7 @@ for_window [window_role="task_dialog"] floating enable
 for_window [class="Wicd-client.py"] floating enable
 for_window [class="XTerm"] floating enable
 for_window [class="Pavucontrol"] floating enable
+for_window [class="Lxappearance"] floating enable
 
 bindsym $mod+i [class="Emacs"] focus
 bindsym $mod+Shift+i [class="Firefox"] focus

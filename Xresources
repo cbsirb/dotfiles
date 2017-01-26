@@ -72,7 +72,7 @@ xterm*scrollTtyOutput:    false
 ! URxvt config
 URxvt*depth: 32
 URxvt*buffered: true
-! URxvt*letterSpace: -1
+URxvt*letterSpace: -1
 
 URxvt*iconFile: /usr/share/icons/Adwaita/scalable/apps/utilities-terminal-symbolic.svg
 URxvt*iconName: urxvt
