@@ -164,3 +164,5 @@ shopt -s complete_fullquote
 shopt -s checkwinsize
 
 PATH=$PATH:~/bin
+
+[ -f ~/.fzf.bash ] && source ~/.fzf.bash
