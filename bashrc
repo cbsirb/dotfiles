@@ -118,6 +118,10 @@ fi
 # if ! shopt -oq posix; then
 #   if [ -f /usr/share/bash-completion/bash_completion ]; then
 #     . /usr/share/bash-completion/bash_completion
+#     for f in /usr/share/bash-completion/completions/*
+#     do
+#         . $f
+#     done
 #   elif [ -f /etc/bash_completion ]; then
 #     . /etc/bash_completion
 #   fi
@@ -161,3 +165,12 @@ shopt -s complete_fullquote
 shopt -s checkwinsize
 
 PATH=$PATH:~/bin
+
+# FZF options
+if  [ -x /usr/bin/fzf ]; then
+  export FZF_TMUX=1
+
+  if [ -f /usr/share/doc/fzf/key-bindings.bash ]; then
+    . /usr/share/doc/fzf/key-bindings.bash
+  fi
+fi
