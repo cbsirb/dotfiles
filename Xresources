@@ -15,13 +15,13 @@ URxvt.boldItalicFont: xft:Cousine:pixelsize=15:hinting=True:antialias=True:bold:
 ! URxvt.font: xft:Inconsolata:pixelsize=14:hinting=True:antialias=True
 ! URxvt.font: xft:Hack:pixelsize=14:hinting=True:antialias=True
 ! URxvt.font: xft:Source Code Pro:pixelsize=14:hinting=True:antialias=True
-! URxvt.font: xft:DejaVu Sans Mono:pixelsize=14:hinting=True;antialias=True
+! URxvt.font: xft:DejaVu Sans Mono:pixelsize=16:hinting=True;antialias=True
 ! URxvt.boldFont: xft:Inconsolata:pixelsize=14:bold
 ! URxvt.italicFont: xft:Inconsolata:pixelsize=14:italic
 ! URxvt.boldItalicFont: xft:Inconsolata:pixelsize=14:bold:italic
 
 
-xterm*faceName: Cousine:pixelsize=14:hinting=True:antialias=True
+xterm*faceName: Cousine:pixelsize=14
 ! xterm*faceName: Hack:pixelsize=14:hinting=True:antialias=True
 ! xterm*faceName: Source Code Pro:pixelsize=14:hinting=True:antialias=True
 ! xterm*faceName: DejaVu Sans Mono:pixelsize=14:hinting=True:antialias=True
@@ -62,12 +62,15 @@ xterm*faceName: Cousine:pixelsize=14:hinting=True:antialias=True
 
 ! Xterm config
 xterm*termName: xterm-256color
-xterm*locale:           true
-xterm*metaSendsEscape:  true
-XTerm*eightBitInput:    false
+xterm*locale: true
+xterm*metaSendsEscape: true
+XTerm*eightBitInput: false
 
-xterm*scrollTtyKeypress:  true
-xterm*scrollTtyOutput:    false
+xterm*scrollTtyKeypress: true
+xterm*scrollTtyOutput: false
+
+xterm*saveLines: 10000
+xterm*bellIsUrgent: true
 
 ! URxvt config
 URxvt*depth: 32
