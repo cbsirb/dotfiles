@@ -10,9 +10,9 @@ Xft.rgba: rgba
 
 ! URxvt.font: xft:Cousine:pixelsize=15:hinting=True:antialias=True
 URxvt.font: xft:Hack:size=11
-URxvt.boldFont: xft:Cousine:size=11:bold
-URxvt.italicFont: xft:Cousine:size=11:italic
-URxvt.boldItalicFont: xft:Cousine:size=11:bold:italic
+URxvt.boldFont: xft:Hack:size=11:bold
+URxvt.italicFont: xft:Hack:size=11:italic
+URxvt.boldItalicFont: xft:Hack:size=11:bold:italic
 ! URxvt.font: xft:Inconsolata:pixelsize=14:hinting=True:antialias=True
 ! URxvt.font: xft:Hack:pixelsize=14:hinting=True:antialias=True
 ! URxvt.font: xft:Source Code Pro:pixelsize=14:hinting=True:antialias=True
