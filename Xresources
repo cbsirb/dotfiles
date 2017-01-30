@@ -6,12 +6,13 @@ Xft.dpi: 96
 Xft.hinting: 1
 Xft.hintstyle: hintfull
 Xft.lcdfilter: lcddefault
-Xft.rgba: rgb
+Xft.rgba: rgba
 
-URxvt.font: xft:Cousine:pixelsize=15:hinting=True:antialias=True
-URxvt.boldFont: xft:Cousine:pixelsize=15:hinting=True:antialias=True:bold
-URxvt.italicFont: xft:Cousine:pixelsize=15:hinting=True:antialias=True:italic
-URxvt.boldItalicFont: xft:Cousine:pixelsize=15:hinting=True:antialias=True:bold:italic
+! URxvt.font: xft:Cousine:pixelsize=15:hinting=True:antialias=True
+URxvt.font: xft:Hack:size=11
+URxvt.boldFont: xft:Cousine:size=11:bold
+URxvt.italicFont: xft:Cousine:size=11:italic
+URxvt.boldItalicFont: xft:Cousine:size=11:bold:italic
 ! URxvt.font: xft:Inconsolata:pixelsize=14:hinting=True:antialias=True
 ! URxvt.font: xft:Hack:pixelsize=14:hinting=True:antialias=True
 ! URxvt.font: xft:Source Code Pro:pixelsize=14:hinting=True:antialias=True
@@ -75,7 +76,7 @@ xterm*bellIsUrgent: true
 ! URxvt config
 URxvt*depth: 32
 URxvt*buffered: true
-URxvt*letterSpace: -1
+! URxvt*letterSpace: -1
 
 URxvt*iconFile: /usr/share/icons/Adwaita/scalable/apps/utilities-terminal-symbolic.svg
 URxvt*iconName: urxvt
@@ -85,8 +86,9 @@ URxvt*iso14755:     false
 URxvt*iso14755_52:  false
 
 ! This is nice-looking
-URxvt*scrollstyle:      plain
-URxvt*scrollBar_right:  true
+URxvt*scrollBar: false
+! URxvt*scrollBar_right: true
+URxvt*scrollstyle: plain
 
 ! Do not scroll with output
 URxvt*scrollTtyOutput: false
