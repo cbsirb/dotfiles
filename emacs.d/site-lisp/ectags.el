@@ -39,24 +39,16 @@
   :version "24.4"
   :group 'tools)
 
-(defcustom ectags-big-file-command-format
+(defcustom ectags-external-search-command
   "rg --no-heading --no-line-number \"^%s\\b\" %s"
-  "The command used to search the tags file when it's too big.  \
+  "The command used to search the tags file.  \
 The first '%s' is for the tag name, the second '%s' for the tag filename.  \
 Will use the following priority (times based on linux kernel's tag \
 file of 489 MB):
 - rg   0.756s
-- grep 1.192s
-See `ectags-big-file-size' for when that will happen."
+- grep 1.192s"
   :group 'ectags
   :type 'string)
-
-(defcustom ectags-big-file-size (* 10 1024 1024)
-  "When the tags file is bigger than this, \
-will use `ectags-big-file-command-format'
-to search the tag."
-  :group 'ectags
-  :type 'number)
 
 (defcustom ectags-max-candidates 24
   "How many candidates to select between."
@@ -107,40 +99,6 @@ there is only one match."
   "Holds the current function name (from where the tag search was initiated).")
 
 
-(defun extract-ectags (tag-buffer obarray-to-use)
-  "Extract a list of tags from a buffer and adds it to \
-the array `obarray-to-use'."
-  (save-excursion
-    (when tag-buffer
-      (set-buffer tag-buffer))
-    (goto-char (point-min))
-
-    (while (= (char-after (point)) ?!)
-      (forward-line))
-
-    (while (/= (point) (point-max))
-      (beginning-of-line)
-
-      (let* ((start (point))
-             (end (progn
-                    (re-search-forward "\t")
-                    (backward-char)
-                    (point))))
-        (intern (buffer-substring-no-properties start end) obarray-to-use))
-
-      (forward-line)
-      ))
-  obarray-to-use)
-
-(defun make-ectags-obarray ()
-  (let ((result (make-vector 65535 0)))
-    (mapc (lambda (b)
-            (when (bufferp b)
-              (save-excursion
-                (extract-ectags b result))))
-            (ectags-table-list))
-    (setq ectags--obarray result)))
-
 (defun ectags-table-list ()
   "Return a list of available tag tables."
   (let (tags-table-list)
@@ -185,8 +143,6 @@ the array `obarray-to-use'."
         (progn
           (setq ectags--file-name local-tags-filename)
           t)
-      ;; (progn (message "Valid tags table")
-      ;;        (setq ectags--obarray (make-ectags-obarray)))
       (error "Not a valid tags table")
       nil)))
 
@@ -261,20 +217,9 @@ the array `obarray-to-use'."
                   (string-to-number tline)
                   (s-trim tinfo)))))
 
-(defun ectags-scan (fn tag-buffer)
-  "Scan a tag table buffer for a match with a tag. Applies fn to all matches."
-  (save-excursion
-    (set-buffer tag-buffer)
-    (goto-char (point-min))
-
-    (while (re-search-forward (format "^%s\t" ectags--regexp) nil t)
-      (ectags-match (buffer-substring-no-properties
-                     (line-beginning-position)
-                     (line-end-position))))))
-
 (defun ectags-scan-external ()
-  "Binary scans a tag table buffer for a match with a tag.  \
-Usefull for very big files."
+  "Search the `ectags--file-name' for the `ectags--regexp'.
+Calls `ectags-match' for each line that matches."
   ;; vlf-re-search-forward - too slow
   ;; binary search - too slow and the tags file has to be sorted
   (if ectags--file-name
@@ -282,36 +227,12 @@ Usefull for very big files."
                          "\n"
                          (shell-command-to-string
                           (format
-                           ectags-big-file-command-format
+                           ectags-external-search-command
                            ectags--regexp
                            ectags--file-name))
                          t))
         (ectags-match tag-line))
     (message "No `ectags--file-name' for the current buffer!")))
-
-    ;; (let ((right (string-to-number
-    ;;               (car (s-split
-    ;;                     " "
-    ;;                     (shell-command-to-string
-    ;;                      (format "wc -l %s" (buffer-file-name)))))))
-    ;;       (line nil)
-    ;;       (middle 0)
-    ;;       (left 0))
-    ;;   (vlf-beginning-of-file)
-    ;;   (while (> right left)
-    ;;     (setq middle (/ (+ left right) 2))
-    ;;     ;; (message "!!!!!!!! Parsing line %d (l: %d, r: %d)" middle left right)
-    ;;     (vlf-goto-line middle)
-
-    ;;     (if (looking-at (format ectags-line-parsing-regex-format ectags--regexp))
-    ;;         (progn
-    ;;           (message "!!!!!!!! Found %s at line %d\n" ectags--regexp (line-number-at-pos))
-    ;;           )
-    ;;       (if (string-lessp ectags--regexp (thing-at-point 'symbol))
-    ;;           (progn ;; (message "!!!!!!!! %s < %s" (thing-at-point 'symbol) ectags--regexp)
-    ;;                  (setq right middle))
-    ;;         ;; (message "!!!!!!!! %s > %s" (thing-at-point 'symbol) ectags--regexp)
-    ;;         (setq left (1+ middle))))))))
 
 (defun ectags-seek (tag-name)
   "Seek a match for the current regexp with the tags in \
@@ -319,21 +240,9 @@ the current tag table buffer"
   (setq ectags--matches nil)
   (setq ectags--regexp tag-name)
 
-  ;; Open the tags file now if it wasn't already
-  ;; (when (not (ectags-table-list))
-  ;;   (ectags-visit-tags-table "tags"))
-  (setq debug-on-error t)
   (ectags-visit-tags-table "tags")
 
   (ectags-scan-external))
-  ;; (dolist (tags-buffer (ectags-table-list))
-    ;; (if (assoc 'vlf-batch-size (buffer-local-variables tags-buffer))
-    ;; (funcall #'ectags-scan-external 'ectags-match tags-buffer)))
-    ;;  (funcall #'ectags-scan 'ectags-match tags-buffer))))
-
-  ;; (setq ectags--matches
-  ;;       (sort ectags--matches #'(lambda (x y)
-  ;;                                  (< (car x) (car y))))))
 
 ;;* Helper functions
 (defun ectags-get-tag-signature (&optional tag-name)
@@ -551,6 +460,45 @@ another completion system for narrowing down by substring."
   (interactive)
   (ectags-find (completing-read "Tag to find: " ectags--obarray)))
 
+(defun counsel-ectags-function (input)
+  (if (not ectags--file-name)
+      (ectags-visit-tags-table "tags"))
+
+  (if (< (length input) 3)
+      (counsel-more-chars 3)
+    (counsel--async-command
+     (format "rg -N %s %s" input ectags--file-name))
+    '("" "working...")))
+
+(defun counsel-ectags-action (tag-line)
+  (ectags-match tag-line)
+
+  (when ectags--matches
+    (with-ivy-window
+      (xref-push-marker-stack)
+
+      (find-file (file-relative-name (ectags-match-filename (car ectags--matches))))
+      (goto-char (point-min))
+      (forward-line (1- (ectags-match-linenumber (car ectags--matches))))
+      (recenter-top-bottom)
+      (unless (eq ivy-exit 'done)
+        (swiper--cleanup)
+        (swiper--add-overlays (ivy--regex ivy-text))))))
+
+;;;###autoload
+(defun counsel-ectags (&optional initial-input)
+  (interactive)
+  (ectags-visit-tags-table "tags")
+  (ivy-read "Find tag: "
+            #'counsel-ectags-function
+            :initial-input (concat "^" initial-input)
+            :dynamic-collection t
+            :action #'counsel-ectags-action
+            :unwind (lambda ()
+                      (counsel-delete-process)
+                      (swiper--cleanup))
+            :caller 'counsel-ectags))
+
 ;;;###autoload
 (defun ectags-find-tag ()
   "Do a find tag.  If only one match is found, see the \
@@ -689,12 +637,12 @@ Global bindings:
   (set-syntax-table text-mode-syntax-table)
   (use-local-map ectags-mode-map)
 
-  (unless ectags-big-file-command-format
+  (unless ectags-external-search-command
     (unless (executable-find "rg")
       (if (executable-find "grep")
-          (setq ectags-big-file-command-format "grep \"^%s\\b\" %s")
+          (setq ectags-external-search-command "grep \"^%s\\b\" %s")
         (message "Warning: rg or grep not installed. Will be slow for big files")
-        (setq ectags-big-file-command-format nil))))
+        (setq ectags-external-search-command nil))))
 
   (setq-local show-trailing-whitespace nil)
   (setq-local overlay-arrow-position nil)
