@@ -198,9 +198,9 @@ For anything else there is ctags."
     ;; (ectags-xref-setup t)
 
     (define-key c-mode-map (kbd "M-.") #'ectags-find-tag-at-point)
-    (define-key c-mode-map (kbd "M-o") #'ectags-search-tag)
+    (define-key c-mode-map (kbd "M-o") #'counsel-ectags)
     (define-key c++-mode-map (kbd "M-.") #'ectags-find-tag-at-point)
-    (define-key c++-mode-map (kbd "M-o") #'ectags-search-tag)
+    (define-key c++-mode-map (kbd "M-o") #'counsel-ectags)
 
     (setq fast-but-imprecise-scrolling t)))
 
