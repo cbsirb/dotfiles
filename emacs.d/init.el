@@ -181,7 +181,6 @@ FRAME is ignored in this function."
   (require 'vlf-setup))
 
 (use-package uniquify
-  :ensure nil
   :init
   (csetq uniquify-buffer-name-style 'post-forward)
   (csetq uniquify-separator ":")
@@ -251,7 +250,7 @@ FRAME is ignored in this function."
   :diminish which-key-mode
   :init (which-key-mode t)
   :config
-  (csetq which-key-idle-delay 0.4)
+  (csetq which-key-idle-delay 0.5)
   (csetq which-key-sort-order 'which-key-prefix-then-key-order)
   (which-key-setup-side-window-bottom))
   ;;(which-key-setup-side-window-right-bottom))
@@ -886,12 +885,12 @@ Taken from http://stackoverflow.com/a/3072831/355252."
   :init
   (csetq notmuch-tree-show-out t))
 
-(use-package mingus
-  :ensure t
-  :bind ("<f12>" . mingus)
-  :config
-  (require 'mingus-stays-home)
-  (add-hook 'mingus-playlist-hooks #'mingus-goto-current-song))
+;; (use-package mingus
+;;   :ensure t
+;;   :bind ("<f12>" . mingus)
+;;   :config
+;;   (require 'mingus-stays-home)
+;;   (add-hook 'mingus-playlist-hooks #'mingus-goto-current-song))
 
 ;; Keybindings
 (bind-key "C-c t d" #'toggle-debug-on-error)
