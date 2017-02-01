@@ -237,6 +237,11 @@ FRAME is ignored in this function."
   :config
   (recentf-mode t))
 
+(use-package tramp
+  :defer t
+  :init
+  (csetq tramp-persistency-file-name (expand-file-name "tramp" user-cache-directory)))
+
 (use-package bookmark
   :defer t
   :config
