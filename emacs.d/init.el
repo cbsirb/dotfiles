@@ -917,19 +917,13 @@ Taken from http://stackoverflow.com/a/3072831/355252."
 
 (use-package notmuch-tree
   :defer t
+  :after notmuch
   :bind (:map notmuch-tree-mode-map
          ("a" . nil)
          ("A" . nil)
          ("Z" . notmuch-search-from-tree-current-query))
   :init
   (csetq notmuch-tree-show-out t))
-
-;; (use-package mingus
-;;   :ensure t
-;;   :bind ("<f12>" . mingus)
-;;   :config
-;;   (require 'mingus-stays-home)
-;;   (add-hook 'mingus-playlist-hooks #'mingus-goto-current-song))
 
 ;; Keybindings
 (bind-key "C-c t d" #'toggle-debug-on-error)
