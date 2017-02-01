@@ -1,10 +1,23 @@
-(setq enable-local-variables :safe)
+;;; user-sensible.el --- -*- lexical-binding: t; -*-
+
+;;; Commentary:
+
+;; Contains sensible defaults (for me, anyhow)
+
+;;; Code:
+
+(csetq enable-local-variables :safe)
 
 ;; Add the --diff argument
-(csetq ediff-split-window-function 'split-window-horizontally)
-(csetq ediff-window-setup-function 'ediff-setup-windows-plain)
+(use-package ediff
+  :defer t
+  :config
+  (csetq ediff-split-window-function 'split-window-horizontally)
+  (csetq ediff-window-setup-function 'ediff-setup-windows-plain))
 
-(defun user-command-line-diff (switch)
+(defun user-command-line-diff (_switch)
+  "Add the --diff <file1> <file2> argument to Emacs.
+_SWITCH should be 'diff'."
   (let ((file1 (pop command-line-args-left))
         (file2 (pop command-line-args-left)))
     (ediff file1 file2)))
@@ -15,11 +28,13 @@
 (csetq use-dialog-box nil)
 (csetq view-read-only t)
 (csetq ad-redefinition-action 'accept)
-(csetq imenu-auto-rescan t)
-(csetq enable-recursive-minibuffers t)
 
-(csetq comint-prompt-read-only t)
-(csetq comint-process-echoes t)
+(use-package imenu
+  :defer t
+  :config
+  (csetq imenu-auto-rescan t))
+
+(csetq enable-recursive-minibuffers t)
 
 ;; Use UTF-8 as default
 (csetq locale-coding-system 'utf-8)
@@ -54,7 +69,7 @@
 (csetq eval-expression-print-level nil)
 
 (when user-is-linux
-  (setq x-selection-timeout 100))
+  (csetq x-selection-timeout 100))
 
 (remove-hook 'post-self-insert-hook 'blink-paren-post-self-insert-function)
 
@@ -109,16 +124,23 @@
 (csetq scroll-preserve-screen-position t)
 (csetq isearch-allow-scroll t)
 
+(defun user-minibuffer-setup-hook ()
+  "Hook to run when entering the minibuffer."
+  (csetq gc-cons-threshold most-positive-fixnum)
+  (setq-local show-trailing-whitespace nil))
+
+(defun user-minibuffer-exit-hook ()
+  "Hook to run when exiting the minibuffer."
+  (csetq gc-cons-threshold user-original-gc-cons))
+
 ;; Increase the memory while in the minibuffer
-(add-hook 'minibuffer-setup-hook (lambda ()
-                                   (csetq gc-cons-threshold most-positive-fixnum)
-                                   (setq-local show-trailing-whitespace nil)))
-(add-hook 'minibuffer-exit-hook (lambda ()
-                                  (csetq gc-cons-threshold user-original-gc-cons)))
+(add-hook 'minibuffer-setup-hook #'user-minibuffer-setup-hook)
+(add-hook 'minibuffer-exit-hook #'user-minibuffer-exit-hook)
 
 ;; Needed for some company backends
 (when user-is-windows
   (csetq w32-pipe-read-delay 0))
 
 (provide 'user-sensible)
+
 ;;; user-sensible.el ends here

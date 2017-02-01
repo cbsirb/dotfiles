@@ -1,3 +1,11 @@
+;;; init.el --- -*- lexical-binding: t; -*-
+
+;;; Commentary:
+
+;; It's init.el, that says enough.
+
+;;; Code:
+
 ;; Easier customization
 (defmacro csetq (variable value)
   `(funcall (or (get ',variable 'custom-set) 'set-default) ',variable ,value))
@@ -71,8 +79,10 @@
 (require 'use-package)
 (csetq use-package-enable-imenu-support t)
 
+;; Some special file names
+(add-to-list 'auto-mode-alist '("\\.?bash.*" . shell-script-mode))
+
 (use-package cus-edit
-  :ensure nil
   :defer t
   :init
   (if (file-exists-p user-custom-file)
@@ -162,18 +172,18 @@ FRAME is ignored in this function."
 
 (use-package user-advices)
 
-(use-package paradox
-  :ensure t
-  :bind (("C-c a p" . paradox-list-packages)
-         ("C-c a P" . paradox-upgrade-packages))
-  :config
-  (csetq paradox-execute-asynchronously t)
-  (csetq paradox-spinner-type 'moon)
-  (csetq paradox-display-download-count t)
-  (csetq paradox-display-star-count t)
-  (csetq paradox-automatically-star nil)
-  (csetq paradox-use-homepage-buttons nil)
-  (csetq paradox-hide-wiki-packages t))
+;; (use-package paradox
+;;   :ensure t
+;;   :bind (("C-c a p" . paradox-list-packages)
+;;          ("C-c a P" . paradox-upgrade-packages))
+;;   :config
+;;   (csetq paradox-execute-asynchronously t)
+;;   (csetq paradox-spinner-type 'moon)
+;;   (csetq paradox-display-download-count t)
+;;   (csetq paradox-display-star-count t)
+;;   (csetq paradox-automatically-star nil)
+;;   (csetq paradox-use-homepage-buttons nil)
+;;   (csetq paradox-hide-wiki-packages t))
 
 (use-package vlf
   :ensure t
@@ -343,8 +353,7 @@ FRAME is ignored in this function."
 
 (use-package misc
   :bind (("M-z" . zap-up-to-char)
-         ("<C-right>" . forward-to-word))
-  :ensure nil)
+         ("<C-right>" . forward-to-word)))
 
 (use-package mouse-copy)
 
@@ -568,7 +577,8 @@ FRAME is ignored in this function."
   :defer t
   :init
   (defun user-dired-hook ()
-    (dired-hide-details-mode -1))
+    (dired-hide-details-mode -1)
+    (toggle-truncate-lines))
 
   (add-hook 'dired-mode-hook #'user-dired-hook)
 
@@ -619,7 +629,6 @@ FRAME is ignored in this function."
 (use-package ivy
   :ensure t
   :diminish ivy-mode
-  :defer t
   :bind (("C-c C-r" . ivy-resume)
          :map ivy-mode-map
          ([escape] . user-minibuffer-keyboard-quit))
@@ -630,6 +639,8 @@ FRAME is ignored in this function."
   (csetq ivy-count-format "(%d/%d) ")
   (csetq ivy-height 11)
   (csetq ivy-wrap t)
+  ;; I still prefer space as separator
+  ;; (csetq ivy-re-builders-alist '((t . ivy--regex-fuzzy)))
   :config
   (ivy-mode t))
 
@@ -653,6 +664,18 @@ FRAME is ignored in this function."
     ;; on windows it doesn't work without the '--vimgrep' part
     (csetq counsel-ag-base-command "ag --ignore tags --ignore TAGS --ignore elpa --vimgrep %s"))
   (counsel-mode t))
+
+(use-package comint
+  :bind (:map comint-mode-map
+         ("<down>" . comint-next-input)
+         ("<up>" . comint-previous-input)
+         ("C-n" . comint-next-input)
+         ("C-p" . comint-previous-input)
+         ("C-r" . comint-history-isearch-backward))
+  :init
+  (csetq comint-process-echoes t)
+  (csetq comint-prompt-read-only t)
+  (csetq comint-history-isearch t))
 
 ;; Genral programming
 (defun user-programming-setup ()
@@ -726,7 +749,22 @@ Taken from http://stackoverflow.com/a/3072831/355252."
   :ensure t
   :defer t
   :init
-  (add-to-list 'auto-mode-alist '("\\.js\\'" . js2-mode)))
+  (add-to-list 'auto-mode-alist '("\\.js\\'" . js2-mode))
+  :config
+  (setf js2-skip-preprocessor-directives t)
+  (setq-default js2-additional-externs
+                '("$" "unsafeWindow" "localStorage" "jQuery"
+                  "setTimeout" "setInterval" "location" "skewer"
+                  "console" "phantom")))
+
+(use-package json-mode
+  :ensure t
+  :bind (:map json-mode-map
+         ("M-q" . json-reformat-region))
+  :config
+  (csetq json-reformat:indent-width 4)
+  (csetq json-reformat:pretty-string? t))
+
 
 (defun user-web-mode-hook ()
   "Hook to run when `web-mode' is active."
@@ -788,7 +826,6 @@ Taken from http://stackoverflow.com/a/3072831/355252."
          (lambda ()
            (dired (projectile-project-root)))))
 
-
 ;; Git
 (use-package magit
   :ensure t
@@ -815,7 +852,6 @@ Taken from http://stackoverflow.com/a/3072831/355252."
                                      ag-mode magit-mode))
   :config
   (global-git-gutter-mode t))
-
 
 ;; Mail
 (use-package notmuch
@@ -874,6 +910,9 @@ Taken from http://stackoverflow.com/a/3072831/355252."
   ;; (add-hook 'notmuch-show-hook #'user-message-display-hook)
 
   :config
+  (require 'email-setup)
+  (require 'notmuch-address)
+
   (add-to-list 'notmuch-tag-formats '("signed" (propertize tag 'invisible t))))
 
 (use-package notmuch-tree
@@ -903,4 +942,5 @@ Taken from http://stackoverflow.com/a/3072831/355252."
 (unbind-key "C-x f")
 
 (provide 'init)
+
 ;;; init.el ends here

@@ -1,3 +1,11 @@
+;;; user-files.el --- -*- lexical-binding: t; -*-
+
+;;; Commentary:
+
+;; Contains functions for manipulating files
+
+;;; Code:
+
 ;;;###autoload
 (defun user-delete-file-and-buffer ()
   "Delete the current file and kill the buffer."
@@ -27,4 +35,5 @@
       (set-visited-file-name new-name 'no-query 'along-with-file)))))
 
 (provide 'user-files)
-;; user-files.el ends here
+
+;;; user-files.el ends here

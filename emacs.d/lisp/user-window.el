@@ -1,3 +1,11 @@
+;;; user-window.el --- -*- lexical-binding: t; -*-
+
+;;; Commentary:
+
+;; Contains functions for manipulating windows
+
+;;; Code:
+
 ;;;###autoload
 (defun user-switch-to-minibuffer ()
   "Switch to current minibuffer window (if active)."
@@ -27,10 +35,10 @@ If SIDE is non-nil only get windows on that side."
       (when (window-live-p window)
         (delete-window window)))))
 
-;; From http://dfan.org/blog/2009/02/19/emacs-dedicated-windows/
 ;;;###autoload
 (defun user-toggle-current-window-dedication ()
-  "Toggle dedication state of a window."
+  "Toggle dedication state of a window.
+Taken from http://dfan.org/blog/2009/02/19/emacs-dedicated-windows"
   (interactive)
   (let* ((window    (selected-window))
          (dedicated (window-dedicated-p window)))
@@ -40,4 +48,5 @@ If SIDE is non-nil only get windows on that side."
              (buffer-name))))
 
 (provide 'user-window)
+
 ;;; user-window.el ends here

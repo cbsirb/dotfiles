@@ -1,13 +1,13 @@
-;;; ectags.el --- Select from multiple tags
+;;; ectags.el --- Select from multiple tags -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2007  Scott Frazer and (C) 2008 John Connors
-;; Copyright (C) 2016  rompy
+;; Copyright (C) 2017  rompy
 
+;; Author: rompy
 ;; Author: John Connors <johnc@yagc.ndo.co.uk>
 ;; Author: Scott Frazer <frazer.scott@gmail.com>
-;; Author: rompy
 ;; Maintainer: rompy
-;;
+
 ;; Keywords: exuberant-ctags universal-ctags ectags tag select
 
 ;; This file is free software; you can redistribute it and/or modify
@@ -24,25 +24,29 @@
 ;; along with GNU Emacs; see the file COPYING.  If not, write to
 ;; the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
 ;; Boston, MA 02110-1301, USA.
-                                        ;
-;; Commentary:
-;;
 
+;;; Commentary:
+
+;; This package originated from John Connors etags-select.el
 
 ;;; Code:
+
 (require 'cl)
 (require 's)
 
 ;;* Customization
+
 (defgroup ectags nil
   "Universal Ctags Support for Emacs"
   :version "24.4"
   :group 'tools)
 
-(defcustom ectags-external-search-command
+(defcustom ectags-search-command
   "rg --no-heading --no-line-number \"^%s\\b\" %s"
   "The command used to search the tags file.  \
 The first '%s' is for the tag name, the second '%s' for the tag filename.  \
+It will use ripgrep by default, but you can change this to grep like \
+by setting this to \"grep \"^%s\\b\" %s\"
 Will use the following priority (times based on linux kernel's tag \
 file of 489 MB):
 - rg   0.756s
@@ -227,7 +231,7 @@ Calls `ectags-match' for each line that matches."
                          "\n"
                          (shell-command-to-string
                           (format
-                           ectags-external-search-command
+                           ectags-search-command
                            ectags--regexp
                            ectags--file-name))
                          t))
@@ -309,18 +313,20 @@ the current tag table buffer"
                     (ectags-match-pattern match)
                     "\n"
                     (or (ectags-match-kind match) "")
-                    "\t" (ectags-sanitize-info (ectags-match-tag-info match)) "\n")))))
+                    "\t" (ectags-sanitize-info (ectags-match-tag-info match)) "\n"))))
+
+  (set-buffer-modified-p nil)
+  (setq buffer-read-only t)
+  (goto-char (point-min))
+  (ectags-next-tag))
 
 (defun ectags-find (tagname)
   "Actually find TAGNAME and show the tags select buffer."
-  ;; (setq *ectags-source-buffer* (buffer-name))
   (setq ectags--fn-name
-        (replace-regexp-in-string "%" "%%"
-                                  (or
-                                   (gethash
-                                    (selected-window)
-                                    which-func-table)
-                                   which-func-unknown)))
+        (replace-regexp-in-string
+         "%" "%%"
+         (or
+          (gethash (selected-window) which-func-table) which-func-unknown)))
 
   (ectags-seek tagname)
 
@@ -332,18 +338,11 @@ the current tag table buffer"
       (unless (string-match
                (concat "function:" ectags--fn-name)
                (ectags-match-tag-info match))
-        (message "Delete: %s" match)
         (setq ectags--matches (delete match ectags--matches)))))
 
   (if (> (length ectags--matches) 0)
       (progn
         (ectags-insert-matches tagname)
-        (set-buffer ectags-buffer-name)
-        (goto-char (point-min))
-        (ectags-next-tag)
-        (set-buffer-modified-p nil)
-        (setq buffer-read-only t)
-        ;; (setq *ectags-opened-window* (selected-window))
         (unless (get-buffer-window ectags-buffer-name)
           (goto-char (point-min))
           (select-window (split-window-vertically))
@@ -363,10 +362,6 @@ the current tag table buffer"
 an ectags select mode window."
   (interactive)
   (let ((case-fold-search (not ectags-case-sensitive)))
-    ;; (save-mark-and-excursion
-    ;;   (goto-char (point-min))
-    ;;   (re-search-forward "Finding tag: \\(.*\\)$")
-    ;;   (setq tagname (match-string-no-properties 1)))
     (beginning-of-line)
     (if (not (looking-at "<"))
         (message "Please put the cursor on a line with a tag")
@@ -376,7 +371,8 @@ an ectags select mode window."
             (fname (match-string-no-properties 2))
             (lnno (match-string-no-properties 3))
             (pattern (match-string-no-properties 4)))
-        (ectags-quit)
+        (ectags-quit-buffer)
+
         (xref-push-marker-stack)
         (find-file fname)
 
@@ -387,7 +383,7 @@ an ectags select mode window."
           (if (not (zerop patline))
               (progn
                 (goto-char (point-min))
-                (forward-line patline))
+                (forward-line (1- patline)))
 
             (goto-char (point-min))
             (if (re-search-forward
@@ -403,7 +399,6 @@ an ectags select mode window."
                 ;; search the actual tag
                 (re-search-backward (concat "\\<" tag "\\>") (line-beginning-position) t)
               (goto-line lnno))))
-
         (recenter)))))
 
 (defun ectags-next-tag ()
@@ -423,10 +418,9 @@ an ectags select mode window."
     (unless (re-search-backward "^<[0-9]+>: " (point-min) t)
       (goto-char s-pos))))
 
-(defun ectags-quit ()
-  "Quit ectags buffer."
-  (interactive)
-  (kill-buffer nil)
+(defun ectags-quit-buffer ()
+  "Quit ectags buffer deleting it's window"
+  (kill-buffer)
   (delete-window))
 
 (defun ectags-by-tag-number (first-digit)
@@ -511,20 +505,20 @@ another completion system for narrowing down by substring."
       (setq tagname (find-tag-default)))
     (ectags-find tagname)))
 
-(defun c-eldoc-scope ()
-  "Try to figure out our scope."
-  (save-excursion
-    (c-end-of-defun)
-    (c-beginning-of-defun-1)
-    (forward-line -1)
-    (c-syntactic-re-search-forward "::")
-    (backward-char 2)
-    (when (c-on-identifier)
-      (let* ((id-end (point))
-             (id-start (progn (backward-char 1) (c-beginning-of-current-token) (point))))
-        (buffer-substring-no-properties id-start id-end)))))
+;; (defun c-eldoc-scope ()
+;;   "Try to figure out our scope."
+;;   (save-excursion
+;;     (c-end-of-defun)
+;;     (c-beginning-of-defun-1)
+;;     (forward-line -1)
+;;     (c-syntactic-re-search-forward "::")
+;;     (backward-char 2)
+;;     (when (c-on-identifier)
+;;       (let* ((id-end (point))
+;;              (id-start (progn (backward-char 1) (c-beginning-of-current-token) (point))))
+;;         (buffer-substring-no-properties id-start id-end)))))
 
-(defun c-eldoc-function (&optional limit)
+(defun ectags-current-symbol (&optional limit)
   "Finds the current function and position in argument list."
   (let* ((literal-limits (c-literal-limits))
          (literal-type (c-literal-type literal-limits)))
@@ -556,57 +550,55 @@ another completion system for narrowing down by substring."
             (buffer-substring-no-properties id-start id-end)))))))
 
 ;;;###autoload
-(defun ectags-eldoc-print-current-symbol-info ()
-  "Print the ectags info associated with the current eldoc symbol.
+(defun ectags-print-current-symbol-info ()
+  "Return the ectags info associated with the current symbol.
 Non scoped verison for more conservative languages."
-  (let* ((eldoc-sym (c-eldoc-function (- (point) 1000))))
+  (let* ((eldoc-sym (ectags-current-symbol (- (point) 1000))))
     (ectags-seek eldoc-sym)
     (when (> (length ectags--matches) 0)
       (let ((tag-info (ectags-match-tag-info (car ectags--matches))))
         (setq tag-info (replace-regexp-in-string "end:[0-9]+" "" tag-info))
         (setq tag-info (replace-regexp-in-string "typeref:typename:" "type:" tag-info))
-        tag-info))
-      ;; (format "Unknown %s " eldoc-sym)
-      ))
+        tag-info))))
 
 ;; scoped version for cpp and the like : tries to find symbol in current scope first
 ;; scope format is a format string that concatenates the cureend scope and the symbol with the scope operator
 ;; eg "%s::%s" for c++
 ;;;###autoload
-(defun ectags-eldoc-print-current-scoped-symbol-info ()
-  "Try to find the meaning of the symbol in the current scope.  \
-Probably only useful for cpp mode."
-  (let* ((eldoc-scope (c-eldoc-scope))
-         (eldoc-sym (c-eldoc-function (- (point) 1000))))
-    (when eldoc-sym
-      (ectags-seek (format "%s::%s" eldoc-scope eldoc-sym))
-      (if (> (length ectags--matches) 0)
-          (format "%s::%s %s" eldoc-scope eldoc-sym (ectags-match-tag-info (car ectags--matches)))
-        (progn
-          (ectags-seek eldoc-sym)
-          (if (> (length ectags--matches) 0)
-              (format "%s %s" eldoc-sym (ectags-match-tag-info (car ectags--matches)))
-            (if eldoc-scope
-                (format "Scope %s " eldoc-scope))
-            (format "Unknown %s " eldoc-sym)))))))
+;; (defun ectags-eldoc-print-current-scoped-symbol-info ()
+;;   "Try to find the meaning of the symbol in the current scope.  \
+;; Probably only useful for cpp mode."
+;;   (let* ((eldoc-scope (c-eldoc-scope))
+;;          (eldoc-sym (ectags-current-symbol (- (point) 1000))))
+;;     (when eldoc-sym
+;;       (ectags-seek (format "%s::%s" eldoc-scope eldoc-sym))
+;;       (if (> (length ectags--matches) 0)
+;;           (format "%s::%s %s" eldoc-scope eldoc-sym (ectags-match-tag-info (car ectags--matches)))
+;;         (progn
+;;           (ectags-seek eldoc-sym)
+;;           (if (> (length ectags--matches) 0)
+;;               (format "%s %s" eldoc-sym (ectags-match-tag-info (car ectags--matches)))
+;;             (if eldoc-scope
+;;                 (format "Scope %s " eldoc-scope))
+;;             (format "Unknown %s " eldoc-sym)))))))
 
 ;;;###autoload
-(defun ectags-turn-on-eldoc-mode (&optional scope-format)
-  (interactive)
-  (if scope-format
-      (set (make-local-variable 'eldoc-documentation-function)
-           'ectags-eldoc-print-current-scoped-symbol-info)
-    (set (make-local-variable 'eldoc-documentation-function)
-         'ectags-eldoc-print-current-symbol-info)
-    (eldoc-mode)))
+;; (defun ectags-turn-on-eldoc-mode (&optional scope-format)
+;;   (interactive)
+;;   (if scope-format
+;;       (set (make-local-variable 'eldoc-documentation-function)
+;;            'ectags-eldoc-print-current-scoped-symbol-info)
+;;     (set (make-local-variable 'eldoc-documentation-function)
+;;          'ectags-print-current-symbol-info)
+;;     (eldoc-mode)))
 
 (defvar ectags-mode-map
   (let ((map (make-keymap)))
     (define-key map (kbd "<return>") #'ectags-goto-tag)
     (define-key map (kbd "n") #'ectags-next-tag)
     (define-key map (kbd "p")  #'ectags-previous-tag)
-    (define-key map (kbd "q") #'ectags-quit)
-    (define-key map (kbd "C-g") #'ectags-quit)
+    (define-key map (kbd "q") #'ectags-quit-buffer)
+    (define-key map (kbd "C-g") #'ectags-quit-buffer)
     (define-key map (kbd "1") (lambda () (interactive) (ectags-by-tag-number "1")))
     (define-key map (kbd "2") (lambda () (interactive) (ectags-by-tag-number "2")))
     (define-key map (kbd "3") (lambda () (interactive) (ectags-by-tag-number "3")))
@@ -628,6 +620,13 @@ Probably only useful for cpp mode."
      (5 font-lock-comment-face)))
   "Highlight for ectags `font-lock-keywords'.")
 
+(unless ectags-search-command
+  (unless (executable-find "rg")
+    (if (executable-find "grep")
+        (setq ectags-search-command "grep \"^%s\\b\" %s")
+      (message "ERROR: rg or grep not installed! We cannot search tag files")
+      (setq ectags-search-command nil))))
+
 ;;;###autoload
 (define-derived-mode ectags-mode fundamental-mode "Ectags Select"
   "Major mode for browsing through exuberant ctags.
@@ -636,13 +635,6 @@ Global bindings:
   (setq font-lock-defaults '(ectags-mode-highlights))
   (set-syntax-table text-mode-syntax-table)
   (use-local-map ectags-mode-map)
-
-  (unless ectags-external-search-command
-    (unless (executable-find "rg")
-      (if (executable-find "grep")
-          (setq ectags-external-search-command "grep \"^%s\\b\" %s")
-        (message "Warning: rg or grep not installed. Will be slow for big files")
-        (setq ectags-external-search-command nil))))
 
   (setq-local show-trailing-whitespace nil)
   (setq-local overlay-arrow-position nil)
@@ -755,4 +747,5 @@ Warning: this will not run `xref-after-jump-hook'"
   (define-key xref--xref-buffer-mode-map (kbd "9") (lambda () (interactive) (ectags--xref-goto-by-number 9))))
 
 (provide 'ectags)
+
 ;;; ectags.el ends here

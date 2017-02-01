@@ -1,3 +1,12 @@
+;;; user-utils.el --- -*- lexical-binding: t; -*-
+
+;;; Commentary:
+
+;; Contains various functions (most of them interactive, to be binded)
+
+;;; Code:
+
+;;;###autoload
 (defun user-minibuffer-keyboard-quit ()
   "Abort recursive edit.
 In Delete Selection mode, if the mark is active, just deactivate it;
@@ -8,6 +17,7 @@ then it takes a second \\[keyboard-quit] to abort the minibuffer."
     (when (get-buffer "*Completions*") (delete-windows-on "*Completions*"))
     (abort-recursive-edit)))
 
+;;;###autoload
 (defun user-forward-paragraph (&optional n)
   "Advance just past next blank line.
 With N goes forward that many paragraphs."
@@ -31,6 +41,7 @@ With N goes forward that many paragraphs."
       )
     ))
 
+;;;###autoload
 (defun user-backward-paragraph (&optional n)
   "Go back up to previous blank line.
 With N goes back that many paragraphs."
@@ -54,6 +65,7 @@ prefix argument."
          (call-interactively ',function))
        ',name)))
 
+;;;###autoload
 (defun user-isearch-delete ()
   "Delete non-matching text or the last character.
 If it's a regexp delete only the last char but only if
@@ -82,6 +94,7 @@ That way we don't remove the whole regexp for a simple typo.
   (isearch-push-state)
   (isearch-update))
 
+;;;###autoload
 (defun user-smarter-move-beginning-of-line (arg)
   "Move point back to indentation of beginning of line.
 
@@ -105,6 +118,7 @@ point reaches the beginning or end of the buffer, stop there."
     (when (= orig-point (point))
       (move-beginning-of-line 1))))
 
+;;;###autoload
 (defun user-open-line-above (arg)
   "Same thing as vim 'O' command.  With ARG opens that many lines."
   (interactive "p")
@@ -113,6 +127,7 @@ point reaches the beginning or end of the buffer, stop there."
   (open-line arg)
   (indent-according-to-mode))
 
+;;;###autoload
 (defun user-smarter-backward-kill-word ()
   "Deletes the previous word, respecting:
 1. If the cursor is at the beginning of line, delete the '\n'.
@@ -146,6 +161,7 @@ point reaches the beginning or end of the buffer, stop there."
         ;; 4
         (delete-char -1)))))
 
+;;;###autoload
 (defun user-smarter-kill-word-or-region ()
   "If the region is active, will call `kill-region'.
 Else it will use `user-smarter-backward-kill-word'.
@@ -155,6 +171,7 @@ Basically simulates `C-w' in bash or vim when no region is active."
       (kill-region (region-beginning) (region-end))
     (user-smarter-backward-kill-word)))
 
+;;;###autoload
 (defun user-comment-dwim (arg)
   "If a region is selected, it comments the region like `comment-dwim'.
 If we are at the end of line, adds a comment like `comment-dwim'.
@@ -168,16 +185,16 @@ The prefix ARG is given to the comment function."
         (comment-dwim arg)
       (comment-line arg))))
 
+;;;###autoload
 (defun user-ispell-word-on-line ()
   "Call `ispell-word'.
 If there's nothing wrong with the word at point, keep looking for a typo
 until the beginning of line.  You can skip typos you don't want to fix
 with `SPC', and you can abort completely with `C-g'."
   (interactive "P")
-  (let (bef
-        (stop (line-beginning-position)))
+  (let ((stop (line-beginning-position)))
     (save-excursion
-      (while (if (setq bef (thing-at-point 'word))
+      (while (if (thing-at-point 'word)
                  (if (ispell-word nil 'quiet)
                      nil ; End the loop.
 
@@ -187,10 +204,11 @@ with `SPC', and you can abort completely with `C-g'."
                (forward-word -1)
                (> (point) stop))))))
 
+;;;###autoload
 (defun user-ispell-dwim ()
-  "Call `ispell-buffer' of `ispell-comments-and-strings', depending
-if the current major mode is a programming one.  Saves the
-position before.  You can skip typos you don't want to fix with
+  "Call `ispell-buffer' of `ispell-comments-and-strings'.
+Depends if the current major mode is derived from `prog-mode'.
+Saves the position before.  You can skip typos you don't want to fix with
 `SPC', and you can abort completely with `C-g'."
   (interactive)
   (save-excursion
@@ -198,22 +216,26 @@ position before.  You can skip typos you don't want to fix with
         (ispell-comments-and-strings)
       (ispell-buffer))))
 
+;;;###autoload
 (defun user-next-error ()
   "Go to the next compilation error/search item (ignoring any elisp errors)."
   (interactive)
   (ignore-errors
     (next-error)))
 
+;;;###autoload
 (defun user-prev-error ()
   "Go to the previous compilation error/search item (ignoring any elisp errors)."
   (interactive)
   (ignore-errors
     (previous-error)))
 
+;;;###autoload
 (defun user-join-line ()
   "Join line like VIM."
   (interactive)
   (join-line -1))
 
 (provide 'user-utils)
+
 ;;; user-utils.el ends here

@@ -1,16 +1,12 @@
-(defvar yank-indent-modes '(emacs-lisp-mode
-                            lisp-interaction-mode
-                            js-mode
-                            js2-mode
-                            web-mode
-                            html-mode
-                            css-mode
-                            c-mode
-                            c++-mode
-                            perl-mode
-                            ruby-mode
-                            python-mode
-                            LaTeX-mode
+;;; user-advices.el --- -*- lexical-binding: t; -*-
+
+;;; Commentary:
+
+;; Contains advices (such as indenting the yanked region)
+
+;;; Code:
+
+(defvar yank-indent-modes '(LaTeX-mode
                             TeX-mode)
   "Modes in which to indent regions that are yanked (or yank-popped).")
 (make-variable-buffer-local 'yank-indent-modes)
@@ -27,16 +23,20 @@ BEG is the beginning of region, END is the end."
     (message "[YANK] Region size %d too big!" (- end beg))))
 
 (defadvice yank (after yank-indent activate)
-  "If current mode is one of 'yank-indent-modes, indent yanked text (with prefix arg don't indent)."
+  "Indent yanked text (with prefix arg don't indent).
+If current mode is one of `yank-indent-modes' or derived from `prog-mode'."
   (if (and (not (ad-get-arg 0))
-           (member major-mode yank-indent-modes))
+           (or (derived-mode-p 'prog-mode)
+               (member major-mode yank-indent-modes)))
       (let ((transient-mark-mode nil))
         (yank-advised-indent-function (region-beginning) (region-end)))))
 
 (defadvice yank-pop (after yank-pop-indent activate)
-  "If current mode is one of 'yank-indent-modes, indent yanked text (with prefix arg don't indent)."
+  "Indent yanked text (with prefix arg don't indent).
+If current mode is one of `yank-indent-modes' or derived from `prog-mode'."
   (if (and (not (ad-get-arg 0))
-           (member major-mode yank-indent-modes))
+           (or (derived-mode-p 'prog-mode)
+               (member major-mode yank-indent-modes)))
     (let ((transient-mark-mode nil))
       (yank-advised-indent-function (region-beginning) (region-end)))))
 
@@ -45,11 +45,12 @@ BEG is the beginning of region, END is the end."
 Try the repeated popping up to 10 times.
 ARGS is passed to the ORIG-FUNC."
   (let ((p (point)))
-    (dotimes (i 10)
+    (dotimes (_i 10)
       (when (= p (point))
         (apply orig-func args)))))
 
 (advice-add 'pop-to-mark-command :around #'multi-pop-to-mark)
 
 (provide 'user-advices)
+
 ;;; user-advices.el ends here
