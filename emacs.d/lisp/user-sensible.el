@@ -11,17 +11,21 @@
 ;; Add the --diff argument
 (use-package ediff
   :defer t
+  :init
+  (defun user-command-line-diff (_switch)
+    "Add the -diff <file1> <file2> argument to Emacs.
+_SWITCH should be 'diff'."
+    (if (> 2 (length command-line-args-left))
+        (error "The -diff requires 2 files")
+      (let ((file1 (pop command-line-args-left))
+            (file2 (pop command-line-args-left)))
+        (ediff file1 file2))))
+
+  (add-to-list 'command-switch-alist '("diff"  . user-command-line-diff))
+
   :config
   (csetq ediff-split-window-function 'split-window-horizontally)
   (csetq ediff-window-setup-function 'ediff-setup-windows-plain))
-
-(defun user-command-line-diff (_switch)
-  "Add the --diff <file1> <file2> argument to Emacs.
-_SWITCH should be 'diff'."
-  (let ((file1 (pop command-line-args-left))
-        (file2 (pop command-line-args-left)))
-    (ediff file1 file2)))
-(add-to-list 'command-switch-alist '("diff"  . user-command-line-diff))
 
 (defalias 'yes-or-no-p 'y-or-n-p)
 

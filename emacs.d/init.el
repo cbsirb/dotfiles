@@ -8,6 +8,7 @@
 
 ;; Easier customization
 (defmacro csetq (variable value)
+  "Set the VARIABLE to VALUE, but use `set-default' if needed."
   `(funcall (or (get ',variable 'custom-set) 'set-default) ',variable ,value))
 
 ;; Will reset at the end of loading
@@ -108,7 +109,7 @@
 (setq default-frame-alist '((height . 55)
                             (width . 125)))
 
-(defun user-gui (&optional frame)
+(defun user-gui (&optional _frame)
   "Run when a new frame is created.
 Applies the theme/menu-bar/tool-bar/scroll-bar preferences to each frame.
 FRAME is ignored in this function."
@@ -305,9 +306,9 @@ FRAME is ignored in this function."
   :diminish volatile-highlights-mode
   :config
   (volatile-highlights-mode t)
-
-  (vhl/define-extension 'vhl-undo-tree 'undo-tree-move 'undo-tree-undo 'undo-tree-redo)
   (csetq Vhl/highlight-zero-width-ranges t)
+
+  (vhl/define-extension 'vhl-undo-tree #'undo-tree-move #'undo-tree-undo #'undo-tree-redo)
   (vhl/install-extension 'vhl-undo-tree))
 
 (use-package embrace
@@ -499,15 +500,14 @@ FRAME is ignored in this function."
   (dolist (ign-dir grep-find-ignored-directories)
     (add-to-list 'ag-ignore-list ign-dir)))
 
-(defun user-enable-wgrep-for-map (map)
-  "Enables the wgrep standard key (C-c C-p) for the given MAP."
-  (bind-key "C-c C-p" #'wgrep-change-to-wgrep-mode map))
-
 (use-package wgrep
   :ensure t
   :defer t
   :init
-  (csetq wgrep-auto-save-buffer t))
+  (csetq wgrep-auto-save-buffer t)
+  (defun user-enable-wgrep-for-map (map)
+    "Enables the wgrep standard key (C-c C-p) for the given MAP."
+    (bind-key "C-c C-p" #'wgrep-change-to-wgrep-mode map)))
 
 (use-package wgrep-ag
   :ensure t
