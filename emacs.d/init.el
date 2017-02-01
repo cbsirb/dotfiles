@@ -316,23 +316,55 @@ FRAME is ignored in this function."
   (vhl/define-extension 'vhl-undo-tree #'undo-tree-move #'undo-tree-undo #'undo-tree-redo)
   (vhl/install-extension 'vhl-undo-tree))
 
-(use-package embrace
+(use-package smartparens
+  :demand t
+  :bind (("C-M-k" . sp-kill-sexp)
+         ("C-M-n" . sp-next-sexp)
+         ("C-M-p" . sp-previous-sexp)
+         ("C-M-f" . sp-forward-sexp)
+         ("C-M-b" . sp-backward-sexp))
   :ensure t
-  :bind (("C-;" . user-embrace/body))
-  :init
-  (defhydra user-embrace ()
-    "Embrace"
-    ("a" embrace-add "add")
-    ("c" embrace-change "change")
-    ("d" embrace-delete "delete")
-    ("q" nil "quit"))
-  (add-hook 'org-mode-hook 'embrace-org-mode-hook))
-
-(use-package wrap-region
-  :ensure t
-  :diminish wrap-region-mode
   :config
-  (wrap-region-global-mode t))
+  (defun user-open-block-c-mode (_id action _context)
+    (case action
+     ((insert) (progn
+                 (newline)
+                 (newline)
+                 (indent-according-to-mode)
+                 (forward-line -1)
+                 (indent-according-to-mode)))
+
+     ((wrap) (progn
+               (let* ((c (char-equal (char-before) ?{))
+                      (rb (if c (region-beginning) (1+ (region-beginning))))
+                      (re (if c (region-end) (1- (region-end))))
+                      (buf (buffer-substring rb re))
+                      (ret-line))
+                 (delete-region rb re)
+                 (when (not c)
+                   (backward-char))
+                 (newline)
+                 (newline)
+                 (forward-line -1)
+                 (setq ret-line (line-number-at-pos))
+                 (insert buf)
+                 (sp-forward-sexp)
+                 (sp-backward-sexp)
+                 (sp-mark-sexp)
+                 (indent-region (region-beginning) (region-end))
+                 (goto-char (point-min))
+                 (forward-line (1- ret-line)))))))
+
+  (require 'smartparens-config)
+
+  (sp-local-pair 'c-mode "{" nil :post-handlers '(:add user-open-block-c-mode))
+  (sp-local-pair 'c++-mode "{" nil :post-handlers '(:add user-open-block-c-mode))
+
+  (show-smartparens-global-mode t)
+  (add-hook 'prog-mode-hook #'smartparens-mode))
+
+  ;; (add-hook 'emacs-lisp-mode-hook #'smartparens-strict-mode)
+  ;; (add-hook 'lisp-interaction-mode-hook #'smartparens-strict-mode))
 
 (use-package undo-tree
   :ensure t
@@ -915,7 +947,6 @@ Taken from http://stackoverflow.com/a/3072831/355252."
   ;; (add-hook 'notmuch-show-hook #'user-message-display-hook)
 
   :config
-  (require 'email-setup)
   (require 'notmuch-address)
 
   (add-to-list 'notmuch-tag-formats '("signed" (propertize tag 'invisible t))))

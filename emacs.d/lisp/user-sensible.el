@@ -97,8 +97,8 @@ _SWITCH should be 'diff'."
 (transient-mark-mode t)
 (delete-selection-mode t)
 (winner-mode t)
-(show-paren-mode t)
 (minibuffer-depth-indicate-mode t)
+;; (show-paren-mode t)
 
 (csetq frame-resize-pixelwise t)
 (csetq window-combination-resize t)
