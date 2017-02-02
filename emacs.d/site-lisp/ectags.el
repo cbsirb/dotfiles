@@ -31,7 +31,7 @@
 
 ;;; Code:
 
-(require 'cl)
+(require 'cl-generic)
 (require 's)
 
 ;;* Customization
@@ -96,9 +96,6 @@ there is only one match."
 (defvar ectags--regexp nil
   "Holds regexp currently being sought in tags.")
 
-(defvar ectags--obarray nil
-  "Obarray used for tags completion.")
-
 (defvar ectags--fn-name nil
   "Holds the current function name (from where the tag search was initiated).")
 
@@ -111,20 +108,21 @@ there is only one match."
         (push buffer tags-table-list)))
     tags-table-list))
 
-(defun ectags-expand-table-name (file)
+(defun ectags-expand-tag-file-name (file)
+  "Expand the given FILE to full path if needed."
   (setq file (expand-file-name file))
   (if (file-directory-p file)
       (expand-file-name "tags" file)
     file))
 
 (defun ectags-verify-tags-file (file)
-  "Given a file, validate that is a valid ctags table."
+  "Validate that the FILE is a valid ctags table."
   (string-prefix-p
    "!_TAG_FILE_FORMAT"
    (shell-command-to-string (format "head -n1 %s" file))))
 
 ;;;###autoload
-(defun ectags-visit-tags-table (name)
+(defun ectags-visit-tags-table ()
   "Visit an exuberant ctags file and add it to the current list of tags tables."
   (interactive
    (list (read-file-name "Visit tags table (default tags): "
@@ -133,13 +131,13 @@ there is only one match."
                                            default-directory)
                          t)))
   (let ((current-dir default-directory)
-        (local-tags-filename (ectags-expand-table-name default-directory))
+        (local-tags-filename (ectags-expand-tag-file-name default-directory))
         (checked-dirs 5))
     (while (and (not (file-exists-p local-tags-filename))
                 (not (ectags-verify-tags-file local-tags-filename))
                 (> checked-dirs 0))
       (setq current-dir (file-name-directory (directory-file-name current-dir)))
-      (setq local-tags-filename (ectags-expand-table-name current-dir))
+      (setq local-tags-filename (ectags-expand-tag-file-name current-dir))
       (setq checked-dirs (1- checked-dirs)))
 
     (if (and (> checked-dirs 0)
@@ -151,25 +149,31 @@ there is only one match."
       nil)))
 
 (defun ectags-match-tagname (tag-match)
+  "Return the tag name from the TAG-MATCH."
   (nth 0 tag-match))
 
 (defun ectags-match-filename (tag-match)
+  "Return the file name from the TAG-MATCH."
   (replace-regexp-in-string "\\\\\\\\" "/" (nth 1 tag-match)))
 
 (defun ectags-match-pattern (tag-match)
+  "Return the search pattern from the TAG-MATCH."
   (nth 2 tag-match))
 
 (defun ectags-match-kind (tag-match)
+  "Return the kind from the TAG-MATCH."
   (nth 3 tag-match))
 
 (defun ectags-match-linenumber (tag-match)
+  "Return the line number from the TAG-MATCH."
   (nth 4 tag-match))
 
 (defun ectags-match-tag-info (tag-match)
+  "Return the info from the TAG-MATCH."
   (nth 5 tag-match))
 
 (defun ectags-kind-full (kind)
-  "Given a tag kind, it expands to the full name if it's not already."
+  "Given a tag KIND, it expands to the full name if it's not already."
   ;; TODO: Add for all languages
   (if (> 1 (length kind))
       kind
@@ -194,7 +198,7 @@ there is only one match."
             ((= ?N kind-char) "name import")))))
 
 (defun ectags-match (tag-line)
-  "Given a tags match line, parse it and returns the the tag as a list."
+  "Parse the given TAG-LINE and return the the tag as a list."
   (let* ((tag-name (if (string-match "^\\([^\t]+\\)" tag-line)
                        (match-string-no-properties 1 tag-line)))
          (tfname (if (string-match "^[^\t]+\t\\([^\t]+\\)" tag-line)
@@ -223,6 +227,7 @@ there is only one match."
 
 (defun ectags-scan-external ()
   "Search the `ectags--file-name' for the `ectags--regexp'.
+
 Calls `ectags-match' for each line that matches."
   ;; vlf-re-search-forward - too slow
   ;; binary search - too slow and the tags file has to be sorted
@@ -239,12 +244,11 @@ Calls `ectags-match' for each line that matches."
     (message "No `ectags--file-name' for the current buffer!")))
 
 (defun ectags-seek (tag-name)
-  "Seek a match for the current regexp with the tags in \
-the current tag table buffer"
+  "Seek a match for the TAG-NAME in the current tag table."
   (setq ectags--matches nil)
   (setq ectags--regexp tag-name)
 
-  (ectags-visit-tags-table "tags")
+  (ectags-visit-tags-table)
 
   (ectags-scan-external))
 
@@ -265,37 +269,14 @@ the current tag table buffer"
           (match-string-no-properties 1 tag-info)
         nil))))
 
-;;* Hippie expand tag
-(defun he-ectag-beg ()
-  (save-excursion
-    (backward-word 1)
-    (point)))
-
-;;;###autoload
-(defun try-expand-ectag (old)
-  (unless  old
-    (he-init-string (he-tag-beg) (point))
-    (setq he-expand-list
-          (sort
-           (all-completions he-search-string ectags--obarray) 'string-lessp))
-    (while (and he-expand-list
-                (he-string-member (car he-expand-list) he-tried-table))
-      (setq he-expand-list (cdr he-expand-list))))
-  (if (null he-expand-list)
-      (progn
-        (when old (he-reset-string))
-        ())
-    (he-substitute-string (car he-expand-list))
-    (setq he-expand-list (cdr he-expand-list))
-    t))
-
-
 (defun ectags-sanitize-info (tag-info)
+  "Sanitize some prefixes fro the TAG-INFO."
   (s-replace-all
    '(("typeref:typename:" . "type:"))
    tag-info))
 
-(defun ectags-insert-matches (tagname)
+(defun ectags-insert-matches ()
+  "Insert the `ectags--matches' into the ectags select buffer."
   (get-buffer-create ectags-buffer-name)
   (set-buffer ectags-buffer-name)
   (setq buffer-read-only nil)
@@ -342,7 +323,7 @@ the current tag table buffer"
 
   (if (> (length ectags--matches) 0)
       (progn
-        (ectags-insert-matches tagname)
+        (ectags-insert-matches)
         (unless (get-buffer-window ectags-buffer-name)
           (goto-char (point-min))
           (select-window (split-window-vertically))
@@ -419,11 +400,15 @@ an ectags select mode window."
       (goto-char s-pos))))
 
 (defun ectags-quit-buffer ()
-  "Quit ectags buffer deleting it's window"
+  "Quit ectags buffer deleting it's window."
   (kill-buffer)
   (delete-window))
 
 (defun ectags-by-tag-number (first-digit)
+  "Go to the tag by the number in the tag select buffer.
+FIRST-DIGIT is the first digit of the number.  If there are less than
+ten matches will jump directly.  Otherwise it will ask for a complete
+number."
   (let ((tag-num (progn
                    (if (> (length ectags--matches) 9)
                        (read-from-minibuffer "Tag number: " first-digit)
@@ -442,21 +427,15 @@ an ectags select mode window."
 found, see the `etags-no-select-for-one-match' variable to decide what
 to do."
   (interactive)
-  (let ((tag-to-find
-         (or (find-tag-default)
-             (completing-read "Tag to find: " ectags--obarray))))
-    (ectags-find tag-to-find)))
-
-;;;###autoload
-(defun ectags-search-tag ()
-  "Do a find tag with `completing-read'.  Usefull with `ivy' or \
-another completion system for narrowing down by substring."
-  (interactive)
-  (ectags-find (completing-read "Tag to find: " ectags--obarray)))
+  (ectags-find (find-tag-default)))
 
 (defun counsel-ectags-function (input)
+  "Helper function for `counsel-ectags'.
+
+This calls for the external program to search for the
+INPUT in the `ectags--file-name'."
   (if (not ectags--file-name)
-      (ectags-visit-tags-table "tags"))
+      (ectags-visit-tags-table))
 
   (if (< (length input) 3)
       (counsel-more-chars 3)
@@ -465,6 +444,9 @@ another completion system for narrowing down by substring."
     '("" "working...")))
 
 (defun counsel-ectags-action (tag-line)
+  "Go to the tag given by `counsel-ectags'.
+
+TAG-LINE is the line that the user selected."
   (ectags-match tag-line)
 
   (when ectags--matches
@@ -481,8 +463,12 @@ another completion system for narrowing down by substring."
 
 ;;;###autoload
 (defun counsel-ectags (&optional initial-input)
+  "Use an external program to search the tag file for a tag.
+
+If INITIAL-INPUT is not nil, then insert that input in the
+minibuffer initially."
   (interactive)
-  (ectags-visit-tags-table "tags")
+  (ectags-visit-tags-table)
   (ivy-read "Find tag: "
             #'counsel-ectags-function
             :initial-input (concat "^" initial-input)
@@ -495,8 +481,10 @@ another completion system for narrowing down by substring."
 
 ;;;###autoload
 (defun ectags-find-tag ()
-  "Do a find tag.  If only one match is found, see the \
-`etags-no-select-for-one-match' variable to decide what to do."
+  "Do a find tag.
+
+If only one match is found, see the `etags-no-select-for-one-match'
+variable to decide what to do."
   (interactive)
   (let ((tagname (read-from-minibuffer
                   (format "Find tag (default %s): " (find-tag-default)) nil nil
@@ -644,6 +632,7 @@ Global bindings:
 (defvar ectags--xref-count 0)
 
 (defun ectags--xref-make (tag)
+  "Return a xref object from the TAG."
   (setq ectags--xref-count (1+ ectags--xref-count))
   (xref-make (concat
               "<" (number-to-string ectags--xref-count) "> "
@@ -655,7 +644,10 @@ Global bindings:
               (ectags-match-linenumber tag)
               0)))
 
-(defun ectags--find-symbol (symbol)
+(defun ectags-xref-find-symbol (symbol)
+  "Find the given SYMBOL in the tagfile.
+
+Return a list of xref objects."
   (setq ectags--xref-count 0)
 
   (ectags-seek symbol)
@@ -668,25 +660,31 @@ Global bindings:
   'ectags)
 
 (cl-defmethod xref-backend-identifier-at-point ((_backend (eql ectags)))
+  "Return the current symbol name."
   (let ((current-symbol (symbol-at-point)))
     (when current-symbol
       (symbol-name current-symbol))))
 
 (cl-defmethod xref-backend-definitions ((_backend (eql ectags)) symbol)
-  (ectags--find-symbol symbol))
+  "Define the ectags backend for finding definitions."
+  (ectags-xref-find-symbol symbol))
 
 (cl-defmethod xref-backend-references ((_backend (eql ectags)) symbol)
-  (ectags--find-symbol symbol))
+  "Define the ectags backend for finding references."
+  (ectags-xref-find-symbol symbol))
 
 (cl-defmethod xref-backend-apropos ((_backend (eql ectags)) symbol)
-  (ectags--find-symbol symbol))
+  "Define the ectags backend for finding apropos."
+  (ectags-xref-find-symbol symbol))
 
 (defun ectags--xref-goto-by-number (number)
+  "Same as `ectags-by-tag-number', but for the xref buffer.
+
+NUMBER is the tag number to jump to."
   (interactive)
 
-  (<= -1 0)
   (goto-char (point-min))
-  (next-line)
+  (forward-line)
   (beginning-of-line)
 
   (if (<= number 0)
@@ -694,7 +692,7 @@ Global bindings:
     (let (succeded)
       (if (= number 1)
           (setq succeded t)
-        (dotimes (i number)
+        (dotimes (_i number)
           (setq succeded (re-search-forward "^[0-9]+" (point-max) t))))
 
       (when succeded
@@ -707,8 +705,9 @@ Global bindings:
 
 ;;;###autoload
 (defun ectags-xref-setup (&optional window-behaviour)
-  "Uses the ectags-xref-backend as the xref backed.  \
-If `window-behaviour' is non nil it will also call the
+  "Use the `ectags-xref-backend' as the xref backed.
+
+If WINDOW-BEHAVIOUR is non nil it will also call the
 `ectags-xref-set-window-behaviour'."
   (add-to-list 'xref-backend-functions 'ectags-xref-backend)
 
@@ -717,12 +716,13 @@ If `window-behaviour' is non nil it will also call the
 
 (defun ectags-xref-set-window-behaviour ()
   "Will setup the window appearance and keymaps as follows:
+
 1. The window will be displayed at the bottom of the screen, \
 taking 0.2 of the Emacs height and never taking over another window \
 2. After jumping to a tag, the window will close itself.
 3. keys 0-9 jumps to the coresponding tag
 
-Warning: this will not run `xref-after-jump-hook'"
+WARNING: this will not run `xref-after-jump-hook'"
   (add-hook 'xref-after-jump-hook
             (lambda ()
               (when (get-buffer-window xref-buffer-name)
