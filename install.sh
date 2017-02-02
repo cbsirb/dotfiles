@@ -53,6 +53,8 @@ install_dotfile "gitconfig"
 
 install_dotfile "tmux.conf"
 
+install_dotfile "gdbinit"
+
 backup_dir "$HOME/.tmux.d"
 mkdir "$HOME/.tmux.d"
 git clone https://github.com/tmux-plugins/tmux-yank "$HOME/.tmux.d/tmux-yank"
