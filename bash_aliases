@@ -40,3 +40,6 @@ alias gcd='git checkout devel'
 alias gcm='git checkout master'
 alias gf='git flow'
 alias gd='git diff'
+
+alias down-mp3='youtube-dl --restrict-filenames -x -f bestaudio --audio-format mp3 --audio-quality 0 -o "%(title)s.%(ext)s" -i'
+alias down-list='youtube-dl --restrict-file-names -x -f bestaudio --audio-format mp3 --audio-quality 0 -o "%(playlist)s/%(playlist_index)s - %(title)s.%(ext)s" -i'

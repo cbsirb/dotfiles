@@ -31,7 +31,9 @@
 
 ;;; Code:
 
-(require 'cl-generic)
+(eval-when-compile
+  (require 'cl-generic))
+
 (require 's)
 
 ;;* Customization
