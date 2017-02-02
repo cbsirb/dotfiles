@@ -317,6 +317,7 @@ FRAME is ignored in this function."
   (vhl/install-extension 'vhl-undo-tree))
 
 (use-package smartparens
+  :diminish smartparens-mode
   :demand t
   :bind (("C-M-k" . sp-kill-sexp)
          ("C-M-n" . sp-next-sexp)
@@ -327,12 +328,13 @@ FRAME is ignored in this function."
   :config
   (defun user-open-block-c-mode (_id action _context)
     (case action
-     ((insert) (progn
-                 (newline)
-                 (newline)
-                 (indent-according-to-mode)
-                 (forward-line -1)
-                 (indent-according-to-mode)))
+      ((insert) (progn
+                  (indent-according-to-mode)
+                  (newline)
+                  (newline)
+                  (indent-according-to-mode)
+                  (forward-line -1)
+                  (indent-according-to-mode)))
 
      ((wrap) (progn
                (let* ((c (char-equal (char-before) ?{))
