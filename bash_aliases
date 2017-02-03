@@ -49,4 +49,4 @@ alias e=$EDITOR
 alias ec=$EMACS_CLIENT
 alias ecd='emacs --daemon'
 alias eck='emacsclient -e "(kill-emacs)"'
-alias magit='$EMACS_CLIENT -e "(magit-status \"$PWD\")"'
+alias magit='$EMACS_CLIENT -e "(magit-status \"$(git rev-parse --show-toplevel)\")"'

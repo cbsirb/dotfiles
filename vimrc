@@ -162,29 +162,23 @@ if has('gui_running')
   set background=light
   colorscheme gruvbox
 else
-  set t_Co=256
-
   if has('termguicolors')
     if $TERM ==# 'screen-256color' || $TERM ==# 'tmux-256color' || $TERM ==# 'xterm-256color'
       set t_8f=[38;2;%lu;%lu;%lum " Needed in tmux
       set t_8b=[48;2;%lu;%lu;%lum " Ditto
+      set termguicolors
     endif
 
     " set cursor shapes by mode in tmux
     " let &t_SI = "\<Esc>[6 q"
     " let &t_SR = "\<Esc>[4 q"
     " let &t_EI = "\<Esc>[2 q"
-
-    set termguicolors
   endif
 
   set background=dark
-
-  " colorscheme badwolf
   colorscheme gruvbox
 
   set colorcolumn=+1
-
   set cursorline
 endif
 
