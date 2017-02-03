@@ -783,6 +783,10 @@ Taken from http://stackoverflow.com/a/3072831/355252."
 
 (use-package user-c)
 
+(use-package nasm-mode
+  :ensure t
+  :defer t)
+
 ;; Web stuff
 (use-package js2-mode
   :ensure t
