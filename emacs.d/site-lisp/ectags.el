@@ -339,6 +339,12 @@ Calls `ectags-match' for each line that matches."
       (message "Failed to find tag: %s " tagname)
       (ding))))
 
+(defun ectags-quit-buffer ()
+  "Quit ectags buffer deleting it's window."
+  (interactive)
+
+  (kill-buffer)
+  (delete-window))
 
 (defun ectags-goto-tag ()
   "Goto the tag we currently have the point over in \
@@ -400,11 +406,6 @@ an ectags select mode window."
     (beginning-of-line)
     (unless (re-search-backward "^<[0-9]+>: " (point-min) t)
       (goto-char s-pos))))
-
-(defun ectags-quit-buffer ()
-  "Quit ectags buffer deleting it's window."
-  (kill-buffer)
-  (delete-window))
 
 (defun ectags-by-tag-number (first-digit)
   "Go to the tag by the number in the tag select buffer.
