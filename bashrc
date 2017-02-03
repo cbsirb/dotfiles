@@ -10,6 +10,8 @@ if [ -z "$DISPLAY" ] && [ "$(fgconsole)" -eq 1 ]; then
     exec startx
 fi
 
+fortune showerthoughts
+
 # don't put duplicate lines or lines starting with space in the history.
 export HISTCONTROL=ignoreboth:erasedups
 

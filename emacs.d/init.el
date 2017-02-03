@@ -214,7 +214,10 @@ FRAME is ignored in this function."
 (use-package savehist
   :init
   (csetq savehist-file (expand-file-name "history" user-cache-directory))
-  (csetq savehist-additional-variables '(search-ring regexp-search-ring))
+  (csetq savehist-additional-variables
+         '(search-ring
+           regexp-search-ring
+           compile-command))
   (csetq savehist-autosave-interval 60)
   (csetq history-length 1000)
   :config

@@ -45,3 +45,8 @@ alias down-mp3='youtube-dl --restrict-filenames -x -f bestaudio --audio-format m
 alias down-list='youtube-dl --restrict-file-names -x -f bestaudio --audio-format mp3 --audio-quality 0 -o "%(playlist)s/%(playlist_index)s - %(title)s.%(ext)s" -i'
 
 alias gdb='gdb -q'
+alias e=$EDITOR
+alias ec=$EMACS_CLIENT
+alias ecd='emacs --daemon'
+alias eck='emacsclient -e "(kill-emacs)"'
+alias magit='$EMACS_CLIENT -e "(magit-status \"$PWD\")"'
