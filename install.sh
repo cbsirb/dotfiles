@@ -17,9 +17,13 @@ function backup_file {
 
 function backup_dir {
     if [ ! -h "$1" ] && [ -d "$1" ]; then
+        if [ -d ".bak/$(basename $1)" ]; then
+            echo "Warning: removing old backup for $(basename $1)"
+            rm -rf ".bak/$(basename $1)"
+        fi
         mv "$1" .bak/
     elif [ -h "$1" ]; then
-        rm "$1"
+        rm -r "$1"
     fi
 }
 
@@ -48,6 +52,7 @@ install_dotfile "bash_init"
 install_dotfile "bash_logout"
 install_dotfile "bash_profile"
 install_dotfile "bashrc"
+install_dotfile "inputrc"
 
 install_dotfile "gitconfig"
 
