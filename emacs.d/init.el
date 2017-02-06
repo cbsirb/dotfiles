@@ -332,13 +332,18 @@ FRAME is ignored in this function."
   :config
   (defun user-open-block-c-mode (_id action _context)
     (case action
-      ((insert) (progn
-                  (indent-according-to-mode)
-                  (newline)
-                  (newline)
-                  (indent-according-to-mode)
-                  (forward-line -1)
-                  (indent-according-to-mode)))
+      ((insert) (let (should-indent)
+                  (save-excursion
+                    (goto-char (line-beginning-position))
+                    ;; if|when|for (expr) or just whitespace
+                    (setq should-indent (looking-at-p "\\s-+\\(\\(if\\|when\\|for\\).*\\)?{}$")))
+                  (when should-indent
+                    (indent-according-to-mode)
+                    (newline)
+                    (newline)
+                    (indent-according-to-mode)
+                    (forward-line -1)
+                    (indent-according-to-mode))))
 
      ((wrap) (progn
                (let* ((c (char-equal (char-before) ?{))
