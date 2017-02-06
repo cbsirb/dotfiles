@@ -233,6 +233,7 @@ FRAME is ignored in this function."
                                "PKGBUILD"         ; ArchLinux aur
                                "COMMIT_MSG"
                                "COMMIT_EDITMSG"
+                               "crontab.*"
                                #'ignoramus-boring-p))
   ;; disable recentf-cleanup on Emacs start, because it can
   ;; cause problems with remote files
@@ -597,8 +598,9 @@ FRAME is ignored in this function."
          ("ESC" . company-abort))
   :init
   (csetq company-dabbrev-downcase nil)
-  (csetq company-dabbrev-code-ignore-case t)
   (csetq company-dabbrev-ignore-case t)
+
+  (csetq company-dabbrev-code-ignore-case t)
 
   (csetq company-transformers '(company-sort-by-occurrence))
   (csetq company-idle-delay 0)
@@ -786,6 +788,14 @@ Taken from http://stackoverflow.com/a/3072831/355252."
 
 (use-package user-c)
 
+(use-package highlight-symbol
+  :diminish highlight-symbol-mode
+  :ensure t
+  :init
+  (csetq highlight-symbol-idle-delay 0.5)
+  (csetq highlight-symbol-highlight-single-occurrence nil)
+  (add-hook 'prog-mode-hook #'highlight-symbol-mode))
+
 (use-package nasm-mode
   :ensure t
   :defer t)
@@ -862,6 +872,7 @@ Taken from http://stackoverflow.com/a/3072831/355252."
   (csetq projectile-indexing-method 'alien)
   (csetq projectile-enable-caching t)
   (csetq projectile-verbose t)
+  (csetq projectile-use-git-grep t)
 
   (projectile-mode t)
 

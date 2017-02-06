@@ -163,7 +163,7 @@ if has('gui_running')
   colorscheme gruvbox
 else
   if has('termguicolors')
-    if $TERM ==# 'screen-256color' || $TERM ==# 'tmux-256color' || $TERM ==# 'xterm-256color'
+    if $TERM ==# 'tmux-256color' || $TERM ==# 'xterm-256color'
       set t_8f=[38;2;%lu;%lu;%lum " Needed in tmux
       set t_8b=[48;2;%lu;%lu;%lum " Ditto
       set termguicolors
