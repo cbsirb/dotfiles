@@ -358,7 +358,7 @@ an ectags select mode window."
       (re-search-forward ": \\([^ ]+\\) in \\(.*\\) at \\([0-9]+\\) \\(.*\\)$")
       (let ((tag (match-string-no-properties 1))
             (fname (match-string-no-properties 2))
-            (lnno (match-string-no-properties 3))
+            (lnno (string-to-number (match-string-no-properties 3)))
             (pattern (match-string-no-properties 4)))
         (ectags-quit-buffer)
 
