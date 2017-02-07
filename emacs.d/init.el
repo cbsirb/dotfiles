@@ -122,7 +122,6 @@ FRAME is ignored in this function."
   (set-face-attribute 'variable-pitch nil
                       :family "Noto Sans" :height 110 :weight 'regular)
 
-  ;; (load-theme 'leuven t))
   (use-package gruvbox-theme
     :ensure t
     :config
@@ -130,6 +129,7 @@ FRAME is ignored in this function."
 
 (add-hook 'after-init-hook #'user-gui)
 
+(csetq fast-but-imprecise-scrolling t)
 (line-number-mode t)
 (column-number-mode t)
 
@@ -275,9 +275,15 @@ FRAME is ignored in this function."
   (which-key-setup-side-window-bottom))
   ;;(which-key-setup-side-window-right-bottom))
 
+(use-package jump-char
+  :ensure t
+  :bind (("M-m" . jump-char-forward)
+         ("M-M" . jump-char-backward)))
+
 (use-package avy
   :ensure t
   :bind (("C-'" . avy-goto-char-in-line)
+         ("C-;" . avy-goto-word-1)
          ("C-\"" . avy-goto-char-timer))
   :init
   (csetq avy-background t)
@@ -624,6 +630,8 @@ FRAME is ignored in this function."
 
 (use-package dired
   :defer t
+  :bind (:map dired-mode-map
+         ("C-c C-w" . wdired-change-to-wdired-mode))
   :init
   (defun user-dired-hook ()
     (dired-hide-details-mode -1)
@@ -793,14 +801,6 @@ Taken from http://stackoverflow.com/a/3072831/355252."
 
 (use-package user-c)
 
-(use-package highlight-symbol
-  :diminish highlight-symbol-mode
-  :ensure t
-  :init
-  (csetq highlight-symbol-idle-delay 0.5)
-  (csetq highlight-symbol-highlight-single-occurrence nil)
-  (add-hook 'prog-mode-hook #'highlight-symbol-mode))
-
 (use-package nasm-mode
   :ensure t
   :defer t)
@@ -856,7 +856,7 @@ Taken from http://stackoverflow.com/a/3072831/355252."
   :defer t)
 
 (use-package imenu
-  :bind ("M-m" . imenu)
+  :bind ("M-i" . imenu)
   :init
   (add-hook 'imenu-after-jump-hook (lambda () (recenter-top-bottom))))
 
