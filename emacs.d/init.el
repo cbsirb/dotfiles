@@ -122,6 +122,12 @@ FRAME is ignored in this function."
   (set-face-attribute 'variable-pitch nil
                       :family "Noto Sans" :height 110 :weight 'regular)
 
+  (size-indication-mode -1)
+  (line-number-mode t)
+  (column-number-mode t)
+
+  (csetq visible-cursor nil)
+
   (use-package gruvbox-theme
     :ensure t
     :config
@@ -130,30 +136,28 @@ FRAME is ignored in this function."
 (add-hook 'after-init-hook #'user-gui)
 
 (csetq fast-but-imprecise-scrolling t)
-(line-number-mode t)
-(column-number-mode t)
 
-(use-package spaceline-config
-  :ensure spaceline
-  :config
-  (spaceline-compile
-   'user
-   ;; Left side of the mode line (all the important stuff)
-   '(((buffer-modified buffer-size input-method) :face highlight-face)
-     anzu
-     '(buffer-id remote-host buffer-encoding-abbrev)
-     ((point-position line-column buffer-position selection-info)
-      :separator " | ")
-     major-mode
-     process
-     (flycheck-error flycheck-warning flycheck-info)
-     (python-pyvenv :fallback python-pyenv)
-     ((which-function projectile-root) :separator " @ ")
-     ((minor-modes :separator spaceline-minor-modes-separator) :when active))
-   ;; Right segment (the unimportant stuff)
-   '((version-control :when active)))
-  (csetq powerline-default-separator 'utf-8)
-  (csetq mode-line-format '("%e" (:eval (spaceline-ml-user)))))
+;; (use-package spaceline-config
+;;   :ensure spaceline
+;;   :config
+;;   (spaceline-compile
+;;    'user
+;;    ;; Left side of the mode line (all the important stuff)
+;;    '(((buffer-modified buffer-size input-method) :face highlight-face)
+;;      anzu
+;;      '(buffer-id remote-host buffer-encoding-abbrev)
+;;      ((point-position line-column buffer-position selection-info)
+;;       :separator " | ")
+;;      major-mode
+;;      process
+;;      (flycheck-error flycheck-warning flycheck-info)
+;;      (python-pyvenv :fallback python-pyenv)
+;;      ((which-function projectile-root) :separator " @ ")
+;;      ((minor-modes :separator spaceline-minor-modes-separator) :when active))
+;;    ;; Right segment (the unimportant stuff)
+;;    '((version-control :when active)))
+;;   (csetq powerline-default-separator 'utf-8)
+;;   (csetq mode-line-format '("%e" (:eval (spaceline-ml-user)))))
 
 (use-package hl-todo
   :ensure t
@@ -898,6 +902,11 @@ Taken from http://stackoverflow.com/a/3072831/355252."
   (csetq projectile-switch-project-action
          (lambda ()
            (dired (projectile-project-root)))))
+
+(use-package vc
+  :init
+  (setcdr (assq 'vc-mode mode-line-format)
+          '((:eval (replace-regexp-in-string "^ Git[-:]" " " vc-mode)))))
 
 ;; Git
 (use-package magit

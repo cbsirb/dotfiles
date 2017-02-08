@@ -1,7 +1,19 @@
 [alias]
-	co = checkout
-	br = branch
-	ci = commit
-	st = status
-	unstage = reset HEAD --
-	pullff = pull --ff-only 
+    co = checkout
+    br = branch
+    ci = commit
+    st = status
+    unstage = reset HEAD --
+    pullff = pull --ff-only
+    pullr = pull --rebase
+
+[mergetool.ediff]
+    cmd = ~/bin/emerge.sh
+
+[merge]
+    tool = ediff
+    conflictstyle = diff3
+
+[core]
+    # ignore executable bit
+    fileMode = false
