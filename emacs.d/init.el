@@ -326,6 +326,11 @@ FRAME is ignored in this function."
   (vhl/define-extension 'vhl-undo-tree #'undo-tree-move #'undo-tree-undo #'undo-tree-redo)
   (vhl/install-extension 'vhl-undo-tree))
 
+(use-package move-text
+  :ensure t
+  :bind (("<M-up>" . move-text-up)
+         ("<M-down>" . move-text-down)))
+
 (use-package smartparens
   :diminish smartparens-mode
   :demand t
@@ -463,21 +468,27 @@ FRAME is ignored in this function."
    ;; Put REPLs and error lists into the bottom side window
    (,(rx bos
          (or "*Help"                         ; Help buffers
-             "*Warnings*"                    ; Emacs warnings
-             "*Compile-Log*"                 ; Emacs byte compiler log
-             "*compilation"                  ; Compilation buffers
-             "*Flycheck errors*"             ; Flycheck error list
              "*shell"                        ; Shell window
              "*sbt"                          ; SBT REPL and compilation buffer
              "*SQL"                          ; SQL REPL
              "*Cargo"                        ; Cargo process buffers
-             (and (1+ nonl) " output*")      ; AUCTeX command output
              ))
     (display-buffer-reuse-window
      display-buffer-in-side-window)
     (side            . bottom)
     (reusable-frames . visible)
     (window-height   . 0.33))
+   (,(rx bos
+         (or "*Compile-Log*"                 ; Emacs byte compiler log
+             "*compilation"                  ; Compilation buffers
+             "*Flycheck errors*"             ; Flycheck error list
+             (and (1+ nonl) " output*")      ; AUCTeX command output
+             ))
+    (display-buffer-reuse-window
+     display-buffer-in-side-window)
+    (side            . bottom)
+    (reusable-frames . visible)
+    (window-height   . 0.2))
    ;; Let `display-buffer' reuse visible frames for all buffers.  This must
    ;; be the last entry in `display-buffer-alist', because it overrides any
    ;; later entry with more specific actions.
