@@ -109,10 +109,9 @@
 (setq default-frame-alist '((height . 55)
                             (width . 125)))
 
-(defun user-gui (&optional _frame)
-  "Run when a new frame is created.
-Applies the theme/menu-bar/tool-bar/scroll-bar preferences to each frame.
-FRAME is ignored in this function."
+(defun user-gui ()
+  "Setups the gui appearance.
+Runs after init is done."
   (when (fboundp 'tool-bar-mode) (tool-bar-mode 0))
   (when (fboundp 'menu-bar-mode) (menu-bar-mode 0))
   (when (fboundp 'scroll-bar-mode) (scroll-bar-mode 0))
@@ -122,10 +121,12 @@ FRAME is ignored in this function."
   (set-face-attribute 'variable-pitch nil
                       :family "Noto Sans" :height 110 :weight 'regular)
 
+  (when (member "Symbola" (font-family-list))
+    (set-fontset-font t 'unicode "Symbola" nil 'prepend))
+
   (size-indication-mode -1)
   (line-number-mode t)
   (column-number-mode t)
-
   (csetq visible-cursor nil)
 
   (use-package gruvbox-theme
@@ -137,27 +138,27 @@ FRAME is ignored in this function."
 
 (csetq fast-but-imprecise-scrolling t)
 
-;; (use-package spaceline-config
-;;   :ensure spaceline
-;;   :config
-;;   (spaceline-compile
-;;    'user
-;;    ;; Left side of the mode line (all the important stuff)
-;;    '(((buffer-modified buffer-size input-method) :face highlight-face)
-;;      anzu
-;;      '(buffer-id remote-host buffer-encoding-abbrev)
-;;      ((point-position line-column buffer-position selection-info)
-;;       :separator " | ")
-;;      major-mode
-;;      process
-;;      (flycheck-error flycheck-warning flycheck-info)
-;;      (python-pyvenv :fallback python-pyenv)
-;;      ((which-function projectile-root) :separator " @ ")
-;;      ((minor-modes :separator spaceline-minor-modes-separator) :when active))
-;;    ;; Right segment (the unimportant stuff)
-;;    '((version-control :when active)))
-;;   (csetq powerline-default-separator 'utf-8)
-;;   (csetq mode-line-format '("%e" (:eval (spaceline-ml-user)))))
+(use-package spaceline-config
+  :ensure spaceline
+  :config
+  (spaceline-compile
+   'user
+   ;; Left side of the mode line (all the important stuff)
+   '(((buffer-modified buffer-size input-method) :face highlight-face)
+     anzu
+     '(buffer-id remote-host buffer-encoding-abbrev)
+     ((point-position line-column buffer-position selection-info)
+      :separator " | ")
+     major-mode
+     process
+     (flycheck-error flycheck-warning flycheck-info)
+     (python-pyvenv :fallback python-pyenv)
+     ((which-function projectile-root) :separator " @ ")
+     ((minor-modes :separator spaceline-minor-modes-separator) :when active))
+   ;; Right segment (the unimportant stuff)
+   '((version-control :when active)))
+  (csetq powerline-default-separator 'utf-8)
+  (csetq mode-line-format '("%e" (:eval (spaceline-ml-user)))))
 
 (use-package hl-todo
   :ensure t
@@ -176,19 +177,6 @@ FRAME is ignored in this function."
 (use-package user-sensible)
 
 (use-package user-advices)
-
-;; (use-package paradox
-;;   :ensure t
-;;   :bind (("C-c a p" . paradox-list-packages)
-;;          ("C-c a P" . paradox-upgrade-packages))
-;;   :config
-;;   (csetq paradox-execute-asynchronously t)
-;;   (csetq paradox-spinner-type 'moon)
-;;   (csetq paradox-display-download-count t)
-;;   (csetq paradox-display-star-count t)
-;;   (csetq paradox-automatically-star nil)
-;;   (csetq paradox-use-homepage-buttons nil)
-;;   (csetq paradox-hide-wiki-packages t))
 
 (use-package vlf
   :ensure t
@@ -466,37 +454,25 @@ FRAME is ignored in this function."
                (ibuffer-auto-mode 1)      ;auto update
                (ibuffer-switch-to-saved-filter-groups "default"))))
 
-(csetq
- display-buffer-alist
- `(
-   ;; Put REPLs and error lists into the bottom side window
-   (,(rx bos
-         (or "*Help"                         ; Help buffers
-             "*shell"                        ; Shell window
-             "*sbt"                          ; SBT REPL and compilation buffer
-             "*SQL"                          ; SQL REPL
-             "*Cargo"                        ; Cargo process buffers
-             ))
-    (display-buffer-reuse-window
-     display-buffer-in-side-window)
-    (side            . bottom)
-    (reusable-frames . visible)
-    (window-height   . 0.33))
-   (,(rx bos
-         (or "*Compile-Log*"                 ; Emacs byte compiler log
-             "*compilation"                  ; Compilation buffers
-             "*Flycheck errors*"             ; Flycheck error list
-             (and (1+ nonl) " output*")      ; AUCTeX command output
-             ))
-    (display-buffer-reuse-window
-     display-buffer-in-side-window)
-    (side            . bottom)
-    (reusable-frames . visible)
-    (window-height   . 0.2))
-   ;; Let `display-buffer' reuse visible frames for all buffers.  This must
-   ;; be the last entry in `display-buffer-alist', because it overrides any
-   ;; later entry with more specific actions.
-   ("." nil (reusable-frames . visible))))
+(csetq display-buffer-alist
+       `((,(rx bos
+               (or "*Compile-Log*"                 ; Emacs byte compiler log
+                   "*Warnings*"                    ; Emacs warnings
+                   "*compilation"                  ; Compilation buffers
+                   "*Flycheck errors*"             ; Flycheck error list
+                   "*rg*"                          ; Ripgrep search results
+                   "*ag search*"                   ; Ag search results
+                   (and (1+ nonl) " output*")      ; AUCTeX command output
+                   ))
+          (display-buffer-reuse-window
+           display-buffer-in-side-window)
+          (side            . bottom)
+          (reusable-frames . visible)
+          (window-height   . 0.25))
+         ;; Let `display-buffer' reuse visible frames for all buffers. This must be
+         ;; the last entry in `display-buffer-alist', because it overrides any later
+         ;; entry with more specific actions.
+         ("." nil (reusable-frames . nil))))
 
 (use-package user-utils
   :bind (("<C-return>" . user-open-line-above)
@@ -595,8 +571,8 @@ FRAME is ignored in this function."
   :init
   (csetq anzu-replace-to-string-separator " => ")
   :config
-  (global-anzu-mode t)
-  (csetq anzu-cons-mode-line-p nil))
+  (csetq anzu-cons-mode-line-p nil)
+  (global-anzu-mode t))
 
 (use-package rg
   :ensure t
@@ -749,8 +725,8 @@ FRAME is ignored in this function."
   (csetq comint-prompt-read-only t)
   (csetq comint-history-isearch t))
 
-;; Genral programming
 (defun user-programming-setup ()
+  "Settings for all programming modes."
   (setq-local show-trailing-whitespace t))
 
 (add-hook 'prog-mode-hook #'user-programming-setup)
@@ -803,10 +779,11 @@ Taken from http://stackoverflow.com/a/3072831/355252."
   :config
   (defhydra user-flycheck-errors ()
     "Flycheck errors"
+    ("c" flycheck-buffer "check" :exit t)
     ("n" flycheck-next-error "next")
     ("p" flycheck-previous-error "previous")
     ("f" flycheck-first-error "first")
-    ("l" flycheck-list-errors "list")
+    ("l" flycheck-list-errors "list" :exit t)
     ("w" flycheck-copy-errors-as-kill "copy message")
     ("q" nil "quit"))
   (global-flycheck-mode)
@@ -815,6 +792,17 @@ Taken from http://stackoverflow.com/a/3072831/355252."
          #'flycheck-display-error-messages-unless-error-list))
 
 (use-package user-c)
+
+(use-package gud
+  :defer t
+  :config
+  (csetq gdb-many-windows t)
+
+  (defun user-gud ()
+    "Hook to run when GUD mode is activated."
+    (company-mode -1))
+
+  (add-hook 'gud-mode-hook #'user-gud))
 
 (use-package nasm-mode
   :ensure t
@@ -903,12 +891,7 @@ Taken from http://stackoverflow.com/a/3072831/355252."
          (lambda ()
            (dired (projectile-project-root)))))
 
-(use-package vc
-  :init
-  (setcdr (assq 'vc-mode mode-line-format)
-          '((:eval (replace-regexp-in-string "^ Git[-:]" " " vc-mode)))))
-
-;; Git
+; Git
 (use-package magit
   :ensure t
   :bind (("<f9>" . magit-status))
