@@ -752,6 +752,35 @@ Runs after init is done."
   (csetq compilation-disable-input t)
   (csetq compilation-context-lines 3)
 
+  (defvar user-compile-process nil
+    "The current compilation process or nil if none.")
+
+  (defun user-compile-start (proc)
+    (setq user-compile-process proc))
+
+  (defun user-compile-done (buffer _msg)
+    (let ((exit-status (process-exit-status user-compile-process))
+          (has-errors)
+          (window (get-buffer-window buffer)))
+
+      (setq has-errors
+            (if (= 0 exit-status)
+                (save-mark-and-excursion
+                 (condition-case nil
+                     (progn
+                       (first-error)
+                       t)
+                   (error nil)))
+              t))
+
+      (when (and window (not has-errors))
+        (run-with-timer 1 nil #'delete-window window)))
+
+    (setq user-compile-process nil))
+
+  (add-hook 'compilation-start-hook #'user-compile-start)
+  (add-to-list 'compilation-finish-functions #'user-compile-done)
+
   (require 'ansi-color)
 
   (defun user-colorize-compilation-buffer ()
