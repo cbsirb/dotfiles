@@ -467,7 +467,7 @@ Runs after init is done."
           (display-buffer-reuse-window
            display-buffer-in-side-window)
           (side            . bottom)
-          (reusable-frames . visible)
+          (reusable-frames . nil)
           (window-height   . 0.25))
          ;; Let `display-buffer' reuse visible frames for all buffers. This must be
          ;; the last entry in `display-buffer-alist', because it overrides any later
@@ -820,8 +820,14 @@ Taken from http://stackoverflow.com/a/3072831/355252."
   (csetq flycheck-display-errors-function
          #'flycheck-display-error-messages-unless-error-list))
 
+;; C/C++
 (use-package user-c)
 
+(use-package nasm-mode
+  :ensure t
+  :defer t)
+
+;; Debugging
 (use-package gud
   :defer t
   :config
@@ -832,10 +838,6 @@ Taken from http://stackoverflow.com/a/3072831/355252."
     (company-mode -1))
 
   (add-hook 'gud-mode-hook #'user-gud))
-
-(use-package nasm-mode
-  :ensure t
-  :defer t)
 
 ;; Web stuff
 (use-package js2-mode
@@ -861,8 +863,7 @@ Taken from http://stackoverflow.com/a/3072831/355252."
 
 (defun user-web-mode-hook ()
   "Hook to run when `web-mode' is active."
-  (csetq web-mode-markup-indent-offset 2)
-  (csetq web-mode-css-indent-offset 2))
+  (smartparens-mode -1))
 
 (use-package web-mode
   :ensure t
@@ -876,6 +877,23 @@ Taken from http://stackoverflow.com/a/3072831/355252."
   (add-to-list 'auto-mode-alist '("\\.mustache\\'" . web-mode))
   (add-to-list 'auto-mode-alist '("\\.djhtml\\'" . web-mode))
   (add-to-list 'auto-mode-alist '("\\.html?\\'" . web-mode))
+
+  (csetq web-mode-code-indent-offset 4)
+  (csetq web-mode-markup-indent-offset 2)
+  (csetq web-mode-css-indent-offset 2)
+  (csetq web-mode-sql-indent-offset 4)
+  (csetq web-mode-attr-indent-offset 2)
+  (csetq web-mode-attr-value-indent-offset 2)
+
+  (csetq web-mode-enable-current-column-highlight t)
+  (csetq web-mode-enable-current-element-highlight t)
+  (csetq web-mode-enable-element-content-fontification t)
+  (csetq web-mode-enable-element-tag-fontification t)
+  (csetq web-mode-enable-html-entities-fontification t)
+  (csetq web-mode-enable-inlays t)
+  (csetq web-mode-enable-sql-detection t)
+  (csetq web-mode-enable-block-face t)
+  (csetq web-mode-enable-part-face t)
 
   (csetq web-mode-engines-alist
          '(("django" . "\\.html\\'")))
