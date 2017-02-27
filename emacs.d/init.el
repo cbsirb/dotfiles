@@ -36,6 +36,23 @@
 (defconst user-custom-file (expand-file-name "custom.el" user-emacs-directory)
   "File used to store settings from Customization UI.")
 
+(defvar user-keys-minor-mode-map
+  (make-sparse-keymap)
+  "Keymap for `user-keys-minor-mode'.")
+
+(defun user-keys-have-priority (_file)
+  "Try to ensure that my keybindings retain priority over other minor modes.
+
+Called via the `after-load-functions' special hook."
+  (unless (eq (caar minor-mode-map-alist) 'user-keys-minor-mode)
+    (let ((user-keys (assq 'user-keys-minor-mode minor-mode-map-alist)))
+      (assq-delete-all 'user-keys-minor-mode minor-mode-map-alist)
+      (add-to-list 'minor-mode-map-alist user-keys))))
+
+(define-minor-mode user-keys-minor-mode
+  "A minor mode so that my key settings override annoying major modes."
+  :init-value t)
+
 (if user-is-cygwin
     (csetq source-directory "/cygdrive/d/tools/prog/src/emacs/")
   (csetq source-directory "D:/tools/prog/src/emacs/"))
@@ -167,8 +184,8 @@ Runs after init is done."
 
 (global-hl-line-mode)
 
-(when user-is-linux
-  (global-linum-mode t))
+;; (when user-is-linux
+;;   (global-linum-mode t))
 
 (use-package visual-fill-column
   :ensure t
@@ -269,7 +286,8 @@ Runs after init is done."
 
 (use-package jump-char
   :ensure t
-  :bind (("M-m" . jump-char-forward)
+  :bind (:map user-keys-minor-mode-map
+         ("M-m" . jump-char-forward)
          ("M-M" . jump-char-backward)))
 
 (use-package avy
@@ -286,7 +304,8 @@ Runs after init is done."
 
 (use-package expand-region
   :ensure t
-  :bind (("M-2" . er/expand-region)
+  :bind (:map user-keys-minor-mode-map
+         ("M-2" . er/expand-region)
          ("M-@" . er/contract-region)
          ("C-c m r" . user-expand-region/body))
   :init
@@ -320,13 +339,15 @@ Runs after init is done."
 
 (use-package move-text
   :ensure t
-  :bind (("<M-up>" . move-text-up)
+  :bind (:map user-keys-minor-mode-map
+         ("<M-up>" . move-text-up)
          ("<M-down>" . move-text-down)))
 
 (use-package smartparens
   :diminish smartparens-mode
   :demand t
-  :bind (("C-M-k" . sp-kill-sexp)
+  :bind (:map user-keys-minor-mode-map
+         ("C-M-k" . sp-kill-sexp)
          ("C-M-n" . sp-next-sexp)
          ("C-M-p" . sp-previous-sexp)
          ("C-M-f" . sp-forward-sexp)
@@ -404,13 +425,15 @@ Runs after init is done."
       ad-do-it)))
 
 (use-package misc
-  :bind (("M-z" . zap-up-to-char)
+  :bind (:map user-keys-minor-mode-map
+         ("M-z" . zap-up-to-char)
          ("<C-right>" . forward-to-word)))
 
 (use-package mouse-copy)
 
 (use-package ibuffer
-  :bind ("C-x C-b" . ibuffer)
+  :bind (:map user-keys-minor-mode-map
+         ("C-x C-b" . ibuffer))
   :config
   (csetq ibuffer-saved-filter-groups
          '(("default"
@@ -475,7 +498,8 @@ Runs after init is done."
          ("." nil (reusable-frames . nil))))
 
 (use-package user-utils
-  :bind (("<C-return>" . user-open-line-above)
+  :bind (:map user-keys-minor-mode-map
+         ("<C-return>" . user-open-line-above)
          ("C-a" . user-smarter-move-beginning-of-line)
          ("C-w" . user-smarter-kill-word-or-region)
          ([remap backward-kill-word] . user-smarter-backward-kill-word)
@@ -498,33 +522,36 @@ Runs after init is done."
          ("<escape>" . user-minibuffer-keyboard-quit)))
 
 (use-package user-window
-  :bind (("C-c w d" . user-toggle-current-window-dedication)
+  :bind (:map user-keys-minor-mode-map
+         ("C-c w d" . user-toggle-current-window-dedication)
          ("C-c w q" . user-quit-all-side-windows)
          ("C-c w b" . user-switch-to-minibuffer))
   :init
-  (bind-key "C-c w w" #'other-window)
-  (bind-key "C-c w =" #'balance-windows)
-  (bind-key "C-c w k" #'delete-window)
-  (bind-key "C-c w /" #'split-window-right)
-  (bind-key "C-c w \\" #'split-window-right)
-  (bind-key "C-c w -" #'split-window-below)
-  (bind-key "C-c w m" #'delete-other-windows)
-  (bind-key "C-c w f" #'toggle-frame-fullscreen)
-  (bind-key "C-c w 1" #'delete-other-windows))
+  (bind-key "C-c w w" #'other-window user-keys-minor-mode-map)
+  (bind-key "C-c w =" #'balance-windows user-keys-minor-mode-map)
+  (bind-key "C-c w k" #'delete-window user-keys-minor-mode-map)
+  (bind-key "C-c w /" #'split-window-right user-keys-minor-mode-map)
+  (bind-key "C-c w \\" #'split-window-right user-keys-minor-mode-map)
+  (bind-key "C-c w -" #'split-window-below user-keys-minor-mode-map)
+  (bind-key "C-c w m" #'delete-other-windows user-keys-minor-mode-map)
+  (bind-key "C-c w f" #'toggle-frame-fullscreen user-keys-minor-mode-map)
+  (bind-key "C-c w 1" #'delete-other-windows user-keys-minor-mode-map))
 
 (use-package windmove
-  :bind (("C-c w <left>"  . windmove-left)
+  :bind (:map user-keys-minor-mode-map
+         ("C-c w <left>"  . windmove-left)
          ("C-c w <right>" . windmove-right)
          ("C-c w <up>"    . windmove-up)
          ("C-c w <down>" . windmove-down)))
 
 (use-package user-files
-  :bind (("C-c f D" . user-delete-file-and-buffer)
+  :bind (:map user-keys-minor-mode-map
+         ("C-c f D" . user-delete-file-and-buffer)
          ("C-c f r" . user-rename-file-and-buffer)))
 
-(bind-key "C-c f v d" #'add-dir-local-variable)
-(bind-key "C-c f v l" #'add-file-local-variable)
-(bind-key "C-c f v p" #'add-file-local-variable-prop-line)
+(bind-key "C-c f v d" #'add-dir-local-variable user-keys-minor-mode-map)
+(bind-key "C-c f v l" #'add-file-local-variable user-keys-minor-mode-map)
+(bind-key "C-c f v p" #'add-file-local-variable-prop-line user-keys-minor-mode-map)
 
 ;; Searching
 (use-package grep
@@ -534,7 +561,8 @@ Runs after init is done."
 
 (use-package ag
   :ensure t
-  :bind ("C-c s a" . ag)
+  :bind (:map user-keys-minor-mode-map
+         ("C-c s a" . ag))
   :init
   (csetq ag-reuse-buffers t)
   (csetq ag-reuse-window t)
@@ -560,7 +588,8 @@ Runs after init is done."
 
 (use-package anzu
   :ensure t
-  :bind (([remap query-replace] . anzu-query-replace)
+  :bind (:map user-keys-minor-mode-map
+         ([remap query-replace] . anzu-query-replace)
          ([remap query-replace-regexp] . anzu-query-replace-regexp)
          ("C-c r" . anzu-query-replace-at-cursor-thing)
          :map isearch-mode-map
@@ -576,7 +605,8 @@ Runs after init is done."
 
 (use-package rg
   :ensure t
-  :bind (("C-c s s" . rg)
+  :bind (:map user-keys-minor-mode-map
+         ("C-c s s" . rg)
          ("C-c p s r" . projectile-rg))
   :config
   (defun projectile-rg (regexp)
@@ -640,10 +670,10 @@ Runs after init is done."
   (use-package dired+
     :ensure t
     :bind (:map dired-mode-map
-                ("SPC" . dired-mark)
-                ("<M-right>" . diredp-find-file-reuse-dir-buffer)
-                ("<M-left>" . diredp-up-directory-reuse-dir-buffer)
-                ("<C-prior>"  . diredp-up-directory-reuse-dir-buffer))
+           ("SPC" . dired-mark)
+           ("<M-right>" . diredp-find-file-reuse-dir-buffer)
+           ("<M-left>" . diredp-up-directory-reuse-dir-buffer)
+           ("<C-prior>"  . diredp-up-directory-reuse-dir-buffer))
     :demand t
     :config
     (csetq diredp-dwim-any-frame-flag t)
@@ -651,7 +681,8 @@ Runs after init is done."
 
 (use-package multiple-cursors
   :ensure t
-  :bind (("C->" . mc/unmark-next-like-this)
+  :bind (:map user-keys-minor-mode-map
+         ("C->" . mc/unmark-next-like-this)
          ("C-<" . mc/unmark-previous-like-this)
          ("C-." . mc/mark-next-like-this)
          ("C-," . mc/mark-previous-like-this)
@@ -677,7 +708,8 @@ Runs after init is done."
 (use-package ivy
   :ensure t
   :diminish ivy-mode
-  :bind (("C-c C-r" . ivy-resume)
+  :bind (:map user-keys-minor-mode-map
+         ("C-c C-r" . ivy-resume)
          :map ivy-mode-map
          ([escape] . user-minibuffer-keyboard-quit))
   :init
@@ -701,7 +733,8 @@ Runs after init is done."
 (use-package counsel
   :ensure t
   :diminish counsel-mode
-  :bind (("C-c g l" . counsel-git-log)
+  :bind (:map user-keys-minor-mode-map
+         ("C-c g l" . counsel-git-log)
          ("C-c g g" . counsel-git-grep)
          ("C-c f r" . counsel-recentf)
          ("C-c f f" . counsel-find-file)
@@ -745,7 +778,9 @@ Runs after init is done."
 
 (use-package compile
   :diminish compilation-in-progress
-  :bind (("C-c c" . compile))
+  :bind (:map user-keys-minor-mode-map
+         ("C-c c" . compile)
+         ("C-c C-c" . recompile))
   :config
   (csetq compilation-scroll-output 'first-error)
   (csetq compilation-always-kill t)
@@ -754,6 +789,11 @@ Runs after init is done."
 
   (defvar user-compile-process nil
     "The current compilation process or nil if none.")
+
+  (defun user-delete-window (window)
+    "Kill the WINDOW, ignoring errors."
+    (ignore-errors
+      (delete-window window)))
 
   (defun user-compile-start (proc)
     (setq user-compile-process proc))
@@ -774,7 +814,7 @@ Runs after init is done."
               t))
 
       (when (and window (not has-errors))
-        (run-with-timer 1 nil #'delete-window window)))
+        (run-with-timer 1 nil #'user-delete-window window)))
 
     (setq user-compile-process nil))
 
@@ -803,18 +843,21 @@ Taken from http://stackoverflow.com/a/3072831/355252."
 (use-package flycheck
   :ensure t
   :defer t
-  :bind (("C-c e" . user-flycheck-errors/body)
+  :bind (:map user-keys-minor-mode-map
+         ("C-c e" . user-flycheck-errors/body)
          ("C-c t f" . flycheck-mode))
   :config
   (defhydra user-flycheck-errors ()
     "Flycheck errors"
-    ("c" flycheck-buffer "check" :exit t)
+    ("c" flycheck-buffer "check")
     ("n" flycheck-next-error "next")
     ("p" flycheck-previous-error "previous")
     ("f" flycheck-first-error "first")
     ("l" flycheck-list-errors "list" :exit t)
     ("w" flycheck-copy-errors-as-kill "copy message")
     ("q" nil "quit"))
+  (csetq flycheck-check-syntax-automatically '(save mode-enabled))
+
   (global-flycheck-mode)
   (csetq flycheck-standard-error-navigation nil)
   (csetq flycheck-display-errors-function
@@ -906,7 +949,8 @@ Taken from http://stackoverflow.com/a/3072831/355252."
   :defer t)
 
 (use-package imenu
-  :bind ("M-i" . imenu)
+  :bind (:map user-keys-minor-mode-map
+         ("M-i" . imenu))
   :init
   (add-hook 'imenu-after-jump-hook (lambda () (recenter-top-bottom))))
 
@@ -941,10 +985,14 @@ Taken from http://stackoverflow.com/a/3072831/355252."
 ; Git
 (use-package magit
   :ensure t
-  :bind (("<f9>" . magit-status))
+  :bind (:map user-keys-minor-mode-map
+         ("<f9>" . magit-status)
+         :map with-editor-mode-map
+         ("C-x C-s" . with-editor-finish))
   :init
   (csetq magit-display-buffer-function
          #'magit-display-buffer-fullframe-status-v1)
+  (csetq magit-completing-read-function #'magit-builtin-completing-read)
   :config
   (use-package magit-gitflow
     :ensure t
@@ -955,7 +1003,8 @@ Taken from http://stackoverflow.com/a/3072831/355252."
 (use-package git-gutter
   :ensure t
   :diminish git-gutter-mode
-  :bind (("C-c g n" . git-gutter:next-hunk)
+  :bind (:map user-keys-minor-mode-map
+         ("C-c g n" . git-gutter:next-hunk)
          ("C-c g p" . git-gutter:previous-hunk))
   :init
   (csetq git-gutter:disabled-modes '(dired-mode
@@ -968,7 +1017,8 @@ Taken from http://stackoverflow.com/a/3072831/355252."
 ;; Mail
 (use-package notmuch
   :ensure t
-  :bind (("C-x m" . notmuch-hello)
+  :bind (:map user-keys-minor-mode-map
+         ("C-x m" . notmuch-hello)
          ("<f10>" . notmuch-hello)
          :map notmuch-search-mode-map
          ("a" . nil))
@@ -1037,14 +1087,18 @@ Taken from http://stackoverflow.com/a/3072831/355252."
   (csetq notmuch-tree-show-out t))
 
 ;; Keybindings
-(bind-key "C-c t d" #'toggle-debug-on-error)
-(bind-key [remap just-one-space] #'cycle-spacing)
-(bind-key "M-g" #'goto-line)
+(bind-key "C-c t d" #'toggle-debug-on-error user-keys-minor-mode-map)
+(bind-key [remap just-one-space] #'cycle-spacing user-keys-minor-mode-map)
+(bind-key "M-g" #'goto-line user-keys-minor-mode-map)
 (bind-key "C-o" #'isearch-occur isearch-mode-map)
 
 (unbind-key "C-z")
 (unbind-key "C-x C-z")
 (unbind-key "C-x f")
+
+;; Last thing
+(user-keys-minor-mode t)
+(add-hook 'after-load-functions 'user-keys-have-priority)
 
 (provide 'init)
 

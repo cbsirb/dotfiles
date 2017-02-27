@@ -88,7 +88,7 @@ For anything else there is ctags."
 
     (irony-mode t)
     (irony-cdb-autosetup-compile-options)
-    (setq-local company-backends '(company-irony company-dabbrev-code company-files))
+    (setq-local company-backends '(company-irony-c-headers company-irony company-dabbrev-code company-files))
 
     (flycheck-mode t))
 
@@ -111,6 +111,10 @@ For anything else there is ctags."
       :defer t
       :init
       (csetq company-irony-ignore-case t))
+
+    (use-package company-irony-c-headers
+      :ensure t
+      :defer t)
 
     (use-package flycheck-irony
       :ensure t
