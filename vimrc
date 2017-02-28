@@ -40,7 +40,6 @@ endif
 
 " Colorschemes
 Plug 'morhetz/gruvbox'
-Plug 'sjl/badwolf'
 
 call plug#end()
 
