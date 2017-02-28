@@ -808,8 +808,7 @@ Runs after init is done."
 (use-package compile
   :diminish compilation-in-progress
   :bind (:map user-keys-minor-mode-map
-         ("C-c c" . compile)
-         ("C-c C-c" . recompile))
+         ("C-c c" . compile))
   :config
   (csetq compilation-scroll-output 'first-error)
   (csetq compilation-always-kill t)
@@ -1015,9 +1014,7 @@ Taken from http://stackoverflow.com/a/3072831/355252."
 (use-package magit
   :ensure t
   :bind (:map user-keys-minor-mode-map
-         ("<f9>" . magit-status)
-         :map with-editor-mode-map
-         ("C-x C-s" . with-editor-finish))
+         ("<f9>" . magit-status))
   :init
   (csetq magit-display-buffer-function
          #'magit-display-buffer-fullframe-status-v1)
