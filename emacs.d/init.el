@@ -112,6 +112,35 @@ Called via the `after-load-functions' special hook."
   (csetq custom-unlispify-tag-names nil)
   (csetq custom-unlispify-menu-entries nil))
 
+(use-package midnight
+  :init
+  (midnight-delay-set 'midnight-delay 1)
+  (csetq midnight-period (* 15 60))
+
+  ;; 15 minutes for special buffers
+  (csetq clean-buffer-list-delay-special 1800)
+
+  (midnight-mode t)
+  :config
+  (add-to-list 'clean-buffer-list-kill-buffer-names
+               '("*buffer-selection*"
+                 "*Finder*"
+                 "*rg*"
+                 "*ag search*"
+                 "*compilation*"
+                 "*Help*"
+                 "*Flycheck error messages*"
+                 "*Finder Category*"
+                 "*Finder-package*"
+                 "*RE-Builder*"
+                 "*vc-change-log*"))
+
+  (add-to-list 'clean-buffer-list-kill-regexps
+               '("\\`\\*Customize .*\\*\\'"
+                 "\\`\\*magit: .*\\*\\'"
+                 "\\`\\*magit-.*\\*\\'"
+                 "\\`\\*\\(Wo\\)?Man .*\\*\\'")))
+
 ;; (autoload 'rabin-mode "rabin-mode.el" "" t nil)
 
 (use-package bug-hunter
