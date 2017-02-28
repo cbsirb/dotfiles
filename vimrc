@@ -43,6 +43,10 @@ Plug 'morhetz/gruvbox'
 
 call plug#end()
 
+if !exists('g:loaded_fzf') && filereadable('/usr/share/vim/vimfiles/plugin/fzf.vim')
+  source /usr/share/vim/vimfiles/plugin/fzf.vim
+endif
+
 if has("patch2111") || v:version >= 800
   unlet! skip_defaults_vim
   source $VIMRUNTIME/defaults.vim
