@@ -186,7 +186,7 @@ else
 endif
 
 if executable("rg")
-    set grepprg=rg\ --vimgrep
+    set grepprg=rg\ --no-heading\ --vimgrep\ -g\ '!{.git,node_modules,vendor}/*'\ -g\ '!tags'\ -g\ '!TAGS'
     set grepformat=%f:%l:%c:%m,%f:%l:%m
 elseif executable("ag")
     set grepprg=ag\ --ignore\ tags\ --ignore\ TAGS\ --vimgrep
@@ -208,16 +208,16 @@ augroup VIMRC
   autocmd WinLeave,FocusLost,CmdwinLeave * setlocal nocursorline
 augroup END
 
-xnoremap <leader>y "+y
+xnoremap <space>y "+y
 nnoremap Y y$
 
-nnoremap <silent> <leader>0 :call clearmatches()<cr>
-nnoremap <silent> <leader>1 :call highlight#word(1)<cr>
-nnoremap <silent> <leader>2 :call highlight#word(2)<cr>
-nnoremap <silent> <leader>3 :call highlight#word(3)<cr>
-nnoremap <silent> <leader>4 :call highlight#word(4)<cr>
-nnoremap <silent> <leader>5 :call highlight#word(5)<cr>
-nnoremap <silent> <leader>6 :call highlight#word(6)<cr>
+nnoremap <silent> <space>0 :call clearmatches()<cr>
+nnoremap <silent> <space>1 :call highlight#word(1)<cr>
+nnoremap <silent> <space>2 :call highlight#word(2)<cr>
+nnoremap <silent> <space>3 :call highlight#word(3)<cr>
+nnoremap <silent> <space>4 :call highlight#word(4)<cr>
+nnoremap <silent> <space>5 :call highlight#word(5)<cr>
+nnoremap <silent> <space>6 :call highlight#word(6)<cr>
 
 " Don't move the cursor after * and #
 nnoremap <silent> * :let @/='\<<C-R>=expand("<cword>")<CR>\>'<CR>:set hls<CR>
@@ -233,6 +233,7 @@ nnoremap <space>V :vert sfind <C-R>=fnameescape(expand('%:p:h')).'/**/*'<CR>
 
 command! -nargs=+ -complete=file_in_path -bar Grep  silent! grep! <args> | redraw! | copen
 command! -nargs=+ -complete=file_in_path -bar LGrep silent! lgrep! <args> | redraw! | copen
+
 nnoremap <space>g :Grep <C-r><C-w>
 
 xnoremap <silent> <space>g :<C-u>let cmd = "Grep " . visual#GetSelection() <bar>
@@ -241,6 +242,9 @@ xnoremap <silent> <space>g :<C-u>let cmd = "Grep " . visual#GetSelection() <bar>
 
 nnoremap <silent> <C-l> :set hlsearch!<CR>
 nnoremap <BS> <C-^>
+
+nmap <space>q <Plug>(qf_qf_toggle_stay)
+nmap <space>l <Plug>(qf_loc_toggle_stay)
 
 " Improved n/N - center line after page scroll
 " Not very usefull for now
@@ -279,3 +283,5 @@ else
 endif
 
 let g:netrw_home = '~/.vim/cache/'
+
+let g:qf_mapping_ack_style = 1
