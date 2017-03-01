@@ -60,7 +60,7 @@ if has('gui_running')
   if has('win32')
     set guifont=DejaVu_Sans_Mono:h10.5
   else
-    set guifont=DejaVu\ Sans\ Mono\ 10.5
+    set guifont=Cousine\ 11
   endif
 
   set guioptions=egc "-TmLr
@@ -158,15 +158,15 @@ if !isdirectory(expand(&undodir))
   call mkdir(expand(&undodir), "p")
 endif
 
-if has('gui_running')
-  let g:solarized_italic=0
-  let g:solarized_visibility="normal"
-  let g:solarized_hitrail=1
-  set background=light
-  colorscheme gruvbox
-else
+set background=dark
+colorscheme gruvbox
+
+set colorcolumn=+1
+set cursorline
+
+if !has('gui_running')
   if has('termguicolors')
-    if $TERM ==# 'tmux-256color' || $TERM ==# 'xterm-256color'
+    if $TERM ==# 'tmux-256color' || $TERM ==# 'xterm-256color' || $TERM ==# 'screen-256color'
       set t_8f=[38;2;%lu;%lu;%lum " Needed in tmux
       set t_8b=[48;2;%lu;%lu;%lum " Ditto
       set termguicolors
@@ -177,12 +177,8 @@ else
     " let &t_SR = "\<Esc>[4 q"
     " let &t_EI = "\<Esc>[2 q"
   endif
-
-  set background=dark
-  colorscheme gruvbox
-
-  set colorcolumn=+1
-  set cursorline
+else
+  set guiheadroom=0
 endif
 
 if executable("rg")
