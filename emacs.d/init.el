@@ -984,6 +984,9 @@ Taken from http://stackoverflow.com/a/3072831/355252."
   :bind (:map user-keys-minor-mode-map
          ("M-i" . imenu))
   :init
+  (csetq imenu-auto-rescan t)
+  (csetq imenu-auto-rescan-maxout (* 1024 1024))
+
   (add-hook 'imenu-after-jump-hook (lambda () (recenter-top-bottom))))
 
 ;; Project
