@@ -10,9 +10,12 @@
 [mergetool.ediff]
     cmd = ~/bin/emerge.sh
 
+[mergetool.meld]
+    cmd = meld --auto-merge --output $MERGED $LOCAL $BASE $REMOTE --diff $BASE $LOCAL --diff $BASE $REMOTE
+
 [merge]
-    tool = ediff
     conflictstyle = diff3
+    tool = meld
 
 [core]
     # ignore executable bit
