@@ -366,11 +366,15 @@ Runs after init is done."
   (vhl/define-extension 'vhl-undo-tree #'undo-tree-move #'undo-tree-undo #'undo-tree-redo)
   (vhl/install-extension 'vhl-undo-tree))
 
-(use-package move-text
+(use-package drag-stuff
   :ensure t
   :bind (:map user-keys-minor-mode-map
-         ("<M-up>" . move-text-up)
-         ("<M-down>" . move-text-down)))
+         ("<M-up>" . drag-stuff-up)
+         ("<M-down>" . drag-stuff-down)
+         ("<M-left>" . drag-stuff-left)
+         ("<M-right>" . drag-stuff-right))
+  :init
+  (drag-stuff-global-mode t))
 
 (use-package smartparens
   :diminish smartparens-mode

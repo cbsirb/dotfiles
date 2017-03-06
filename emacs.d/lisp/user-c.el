@@ -112,6 +112,11 @@ For anything else there is ctags."
       :init
       (csetq company-irony-ignore-case t))
 
+    (use-package irony-eldoc
+      :ensure t
+      :init
+      (add-hook 'irony-mode-hook #'irony-eldoc))
+
     (use-package company-irony-c-headers
       :ensure t
       :defer t)
