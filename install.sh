@@ -1,6 +1,7 @@
-#!/usr/bin/bash
+#!/bin/bash
 
-set -e
+set -euo pipefail
+IFS=$'\n\t'
 
 # Create the backup directory
 if [ ! -d ".bak" ]; then

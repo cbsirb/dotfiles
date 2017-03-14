@@ -322,7 +322,6 @@ Runs after init is done."
 (use-package avy
   :ensure t
   :bind (("C-'" . avy-goto-char-in-line)
-         ("C-;" . avy-goto-word-1)
          ("C-\"" . avy-goto-char-timer))
   :init
   (csetq avy-background t)
@@ -869,6 +868,23 @@ Taken from http://stackoverflow.com/a/3072831/355252."
 
   (add-hook 'compilation-filter-hook #'user-colorize-compilation-buffer)
   (add-hook 'compilation-mode-hook #'user-results-buffer-hook))
+
+(use-package multi-term
+  :ensure t
+  :bind (:map user-keys-minor-mode-map
+         ("C-; C-;" . multi-term)
+         ("C-; c" . multi-term)
+         ("C-; d" . multi-term-dedicated-toggle)
+         ("C-; n" . multi-term-next)
+         ("C-; p" . multi-term-prev))
+  :init
+  (csetq multi-term-dedicated-select-after-open-p t)
+
+  (defun user-term-mode ()
+    (company-mode -1)
+    (setq-local scroll-margin 1))
+
+  (add-hook 'term-mode-hook #'user-term-mode))
 
 (use-package eldoc
   :defer t
