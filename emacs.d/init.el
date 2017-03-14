@@ -367,6 +367,7 @@ Runs after init is done."
   (vhl/install-extension 'vhl-undo-tree))
 
 (use-package drag-stuff
+  :diminish drag-stuff-mode
   :ensure t
   :bind (:map user-keys-minor-mode-map
          ("<M-up>" . drag-stuff-up)
@@ -436,6 +437,10 @@ Runs after init is done."
 
 (use-package undo-tree
   :ensure t
+  ;; See https://xkcd.com/1806/ for bindings
+  :bind (:map undo-tree-map
+         ("<C-mouse-5>" . undo-tree-redo)
+         ("<C-mouse-4>" . undo-tree-undo))
   :diminish undo-tree-mode
   :init
   (csetq undo-tree-visualizer-diff t)
@@ -867,6 +872,7 @@ Taken from http://stackoverflow.com/a/3072831/355252."
 
 (use-package eldoc
   :defer t
+  :diminish eldoc-mode
   :init
   (add-hook 'eval-expression-minibuffer-setup-hook #'eldoc-mode))
   ;;(csetq eldoc-documentation-function #'describe-char-eldoc))
@@ -1032,6 +1038,9 @@ Taken from http://stackoverflow.com/a/3072831/355252."
     :defer t
     :init
     (add-hook 'magit-mode-hook 'turn-on-magit-gitflow)))
+
+(use-package git-timemachine
+  :ensure t)
 
 (use-package git-gutter
   :ensure t

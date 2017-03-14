@@ -6,6 +6,7 @@
     unstage = reset HEAD --
     pullff = pull --ff-only
     pullr = pull --rebase
+    uncommit = reset --soft HEAD^
 
 [mergetool.ediff]
     cmd = ~/bin/emerge.sh

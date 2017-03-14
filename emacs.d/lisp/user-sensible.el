@@ -46,6 +46,7 @@ _SWITCH should be 'diff'."
 (set-keyboard-coding-system 'utf-8)
 (set-selection-coding-system 'utf-8)
 (prefer-coding-system 'utf-8)
+(set-language-environment "UTF-8")
 
 ;; More sane defaults
 (csetq backup-directory-alist `((".*" . ,(expand-file-name ".backup" user-cache-directory))))
@@ -127,6 +128,7 @@ _SWITCH should be 'diff'."
 (csetq scroll-conservatively 10000)
 (csetq scroll-preserve-screen-position t)
 (csetq isearch-allow-scroll t)
+(csetq scroll-margin 7)
 
 (defun user-minibuffer-setup-hook ()
   "Hook to run when entering the minibuffer."
