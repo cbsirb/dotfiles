@@ -56,13 +56,13 @@ endif
 
 runtime macros/matchit.vim
 
-if has('gui_running')
-  if has('win32')
-    set guifont=DejaVu_Sans_Mono:h10.5
-  else
-    set guifont=Cousine\ 11
-  endif
+if has('win32')
+  set guifont=DejaVu_Sans_Mono:h10.5
+else
+  set guifont=Cousine\ 11
+endif
 
+if has('gui_running')
   set guioptions=egc "-TmLr
   set lines=45 columns=125
 else
@@ -182,11 +182,11 @@ else
 endif
 
 if executable("rg")
-    set grepprg=rg\ --no-heading\ --vimgrep\ -g\ '!{.git,node_modules,vendor}/*'\ -g\ '!tags'\ -g\ '!TAGS'
-    set grepformat=%f:%l:%c:%m,%f:%l:%m
+  set grepprg=rg\ --no-heading\ --vimgrep\ -g\ '!{.git,node_modules,vendor}/*'\ -g\ '!tags'\ -g\ '!TAGS'
+  set grepformat=%f:%l:%c:%m,%f:%l:%m
 elseif executable("ag")
-    set grepprg=ag\ --ignore\ tags\ --ignore\ TAGS\ --vimgrep
-    set grepformat=%f:%l:%c:%m,%f:%l:%m
+  set grepprg=ag\ --ignore\ tags\ --ignore\ TAGS\ --vimgrep
+  set grepformat=%f:%l:%c:%m,%f:%l:%m
 endif
 
 augroup VIMRC
@@ -245,17 +245,17 @@ nmap <space>l <Plug>(qf_loc_toggle_stay)
 " Improved n/N - center line after page scroll
 " Not very usefull for now
 " function! s:nice_next(cmd)
-"     let topline  = line('w0')
+"   let topline  = line('w0')
+"   let v:errmsg = ""
+"   execute "silent! normal! " . a:cmd
+"   if v:errmsg =~ 'E38[45]:.*'
+"     echohl Error | unsilent echom v:errmsg | echohl None
 "     let v:errmsg = ""
-"     execute "silent! normal! " . a:cmd
-"     if v:errmsg =~ 'E38[45]:.*'
-"         echohl Error | unsilent echom v:errmsg | echohl None
-"         let v:errmsg = ""
-"         return
-"     endif
-"     if topline != line('w0')
-"         normal! zz
-"     endif
+"     return
+"   endif
+"   if topline != line('w0')
+"     normal! zz
+"   endif
 " endfun
 
 " nnoremap <silent> n :call <SID>nice_next('n')<cr>

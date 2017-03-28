@@ -1,18 +1,13 @@
 setlocal commentstring=//\ %s
-" setlocal foldmethod=syntax
 
 setlocal cindent
 setlocal cinoptions=t0,:0,(0
 
-inoremap <C-l> ->
+setlocal tabstop=4
+setlocal shiftwidth=4
+setlocal softtabstop=4
+setlocal expandtab
 
-" let b:switch_custom_definitions =
-"   \ [
-"   \   g:switch_builtins.cpp_pointer,
-"   \   {
-"   \     '\CTRUE':  'FALSE',
-"   \     '\CFALSE': 'TRUE',
-"   \     '\(\k\+\)Release': '\1Acquire',
-"   \     '\(\k\+\)Acquire': '\1Release'
-"   \   },
-"   \ ]
+setlocal tw=110
+
+inoremap <C-l> ->

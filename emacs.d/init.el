@@ -734,54 +734,146 @@ Runs after init is done."
   :init
   (csetq mc/list-file (expand-file-name ".mc-lists.el" user-cache-directory)))
 
-(use-package smex
+(use-package projectile
   :ensure t
-  :defer t
+  :diminish projectile-mode
   :init
-  (csetq smex-save-file (expand-file-name "smex-items" user-cache-directory))
+  (csetq projectile-cache-file
+         (expand-file-name "projectile.cache" user-cache-directory))
+  (csetq projectile-known-projects-file
+         (expand-file-name "projectile-bookmarks.eld" user-cache-directory))
+
+  (csetq projectile-project-root-files-bottom-up
+         '(".projectile" ".git" ".hg"))
+
+  (csetq projectile-completion-system 'helm)
+  (csetq projectile-indexing-method 'alien)
+  (csetq projectile-enable-caching t)
+  (csetq projectile-verbose t)
+  (csetq projectile-use-git-grep t)
+
+  (projectile-mode t)
+
   :config
-  (smex-initialize))
+  (add-to-list 'projectile-globally-ignored-directories ".vscode")
 
-(use-package ivy
+  (csetq projectile-switch-project-action
+         (lambda ()
+           (dired (projectile-project-root)))))
+
+(use-package helm
   :ensure t
-  :diminish ivy-mode
+  :diminish helm-mode
   :bind (:map user-keys-minor-mode-map
-         ("C-c C-r" . ivy-resume)
-         :map ivy-mode-map
-         ([escape] . user-minibuffer-keyboard-quit))
+         ("M-x" . helm-M-x)
+         ("M-y" . helm-show-kill-ring)
+         ("M-i" . helm-imenu)
+         ("M-I" . helm-imenu-in-all-buffers)
+         ("M-s o" . helm-occur)
+         ("C-x b" . helm-mini)
+         ("C-x C-f" . helm-find-files)
+         ("C-c C-r" . helm-resume)
+         ("C-c s h" . helm-do-grep-ag)
+         :map helm-map
+         ("TAB" . helm-execute-persistent-action)
+         ("C-z" . helm-select-action)
+         :map minibuffer-local-map
+         ("C-c C-l" . helm-minibuffer-history))
   :init
-  (csetq ivy-on-del-error-function nil) ; don't exit with backspace
-  (csetq ivy-display-style 'fancy)
-  (csetq ivy-use-virtual-buffers t)
-  (csetq ivy-count-format "(%d/%d) ")
-  (csetq ivy-height 11)
-  (csetq ivy-wrap t)
-  ;; I still prefer space as separator
-  ;; (csetq ivy-re-builders-alist '((t . ivy--regex-fuzzy)))
-  :config
-  (ivy-mode t))
+  (csetq helm-split-window-in-side-p t)
+  (csetq helm-move-to-line-cycle-in-source t)
+  (csetq helm-ff-search-library-in-sexp t)
+  (csetq helm-scroll-amount 8)
+  (csetq helm-ff-file-name-history-use-recentf t)
+  (csetq helm-echo-input-in-header-line t)
+  (csetq helm-autoresize-max-height 20)
+  (csetq helm-autoresize-min-height 20)
 
-(use-package ivy-hydra
-  :ensure t
-  :after ivy
-  :bind ((:map ivy-minibuffer-map
-          ("C-o" hydra-ivy/body))))
+  (defun user-helm-hide-minibuffer-maybe ()
+    "Hide minibuffer in Helm session if we use the header line as input field."
+    (when (with-helm-buffer helm-echo-input-in-header-line)
+      (let ((ov (make-overlay (point-min) (point-max) nil nil t)))
+        (overlay-put ov 'window (selected-window))
+        (overlay-put ov 'face
+                     (let ((bg-color (face-background 'default nil)))
+                       `(:background ,bg-color :foreground ,bg-color)))
+        (setq-local cursor-type nil))))
 
-(use-package counsel
-  :ensure t
-  :diminish counsel-mode
-  :bind (:map user-keys-minor-mode-map
-         ("C-c g l" . counsel-git-log)
-         ("C-c g g" . counsel-git-grep)
-         ("C-c f r" . counsel-recentf)
-         ("C-c f f" . counsel-find-file)
-         ("C-c s c" . counsel-ag))
-  :init
-  (if (executable-find "rg")
-      (csetq counsel-ag-base-command "rg --glob !elpa --no-heading --vimgrep %s")
-    ;; on windows it doesn't work without the '--vimgrep' part
-    (csetq counsel-ag-base-command "ag --ignore tags --ignore TAGS --ignore elpa --vimgrep %s"))
-  (counsel-mode t))
+  ;; (add-hook 'helm-minibuffer-set-up-hook
+  ;;           #'user-helm-hide-minibuffer-maybe)
+
+  (when (executable-find "curl")
+    (csetq helm-net-prefer-curl t))
+
+  (csetq helm-grep-ag-command
+         "rg --color=always --colors 'match:fg:black' --colors 'match:bg:yellow' --smart-case --no-heading --line-number %s %s %s")
+  (csetq helm-grep-ag-pipe-cmd-switches
+         '("--colors 'match:fg:black'" "--colors 'match:bg:yellow'"))
+
+  (csetq helm-M-x-fuzzy-match t)
+  ;; (csetq helm-buffers-fuzzy-matching t)
+  ;; (csetq helm-recentf-fuzzy-match t)
+  ;; (csetq helm-semantic-fuzzy-match t)
+  ;; (csetq helm-imenu-fuzzy-match t)
+  ;; (csetq helm-locate-fuzzy-match t)
+  ;; (csetq helm-apropos-fuzzy-match t)
+
+  (helm-mode t)
+  (helm-autoresize-mode t)
+
+  (use-package helm-projectile
+    :ensure t
+    :init
+    (helm-projectile-on)))
+
+;; (use-package smex
+;;   :ensure t
+;;   :defer t
+;;   :init
+;;   (csetq smex-save-file (expand-file-name "smex-items" user-cache-directory))
+;;   :config
+;;   (smex-initialize))
+
+;; (use-package ivy
+;;   :ensure t
+;;   :diminish ivy-mode
+;;   :bind (:map user-keys-minor-mode-map
+;;          ("C-c C-r" . ivy-resume)
+;;          :map ivy-mode-map
+;;          ([escape] . user-minibuffer-keyboard-quit))
+;;   :init
+;;   (csetq ivy-on-del-error-function nil) ; don't exit with backspace
+;;   (csetq ivy-display-style 'fancy)
+;;   (csetq ivy-use-virtual-buffers t)
+;;   (csetq ivy-count-format "(%d/%d) ")
+;;   (csetq ivy-height 11)
+;;   (csetq ivy-wrap t)
+;;   ;; I still prefer space as separator
+;;   ;; (csetq ivy-re-builders-alist '((t . ivy--regex-fuzzy)))
+;;   :config
+;;   (ivy-mode t))
+
+;; (use-package ivy-hydra
+;;   :ensure t
+;;   :after ivy
+;;   :bind ((:map ivy-minibuffer-map
+;;           ("C-o" hydra-ivy/body))))
+
+;; (use-package counsel
+;;   :ensure t
+;;   :diminish counsel-mode
+;;   :bind (:map user-keys-minor-mode-map
+;;          ("C-c g l" . counsel-git-log)
+;;          ("C-c g g" . counsel-git-grep)
+;;          ("C-c f r" . counsel-recentf)
+;;          ("C-c f f" . counsel-find-file)
+;;          ("C-c s c" . counsel-ag))
+;;   :init
+;;   (if (executable-find "rg")
+;;       (csetq counsel-ag-base-command "rg --glob !elpa --no-heading --vimgrep %s")
+;;     ;; on windows it doesn't work without the '--vimgrep' part
+;;     (csetq counsel-ag-base-command "ag --ignore tags --ignore TAGS --ignore elpa --vimgrep %s"))
+;;   (counsel-mode t))
 
 (use-package comint
   :bind (:map comint-mode-map
@@ -810,6 +902,7 @@ Runs after init is done."
 
 (defun user-results-buffer-hook ()
   "Set various settings on results buffers (compilation, grep, etc.)."
+  (setq-local scroll-margin 0)
   (setq-local truncate-lines t)
   (setq-local show-trailing-whitespace nil))
 
@@ -882,7 +975,7 @@ Taken from http://stackoverflow.com/a/3072831/355252."
 
   (defun user-term-mode ()
     (company-mode -1)
-    (setq-local scroll-margin 1))
+    (setq-local scroll-margin 0))
 
   (add-hook 'term-mode-hook #'user-term-mode))
 
@@ -1010,34 +1103,6 @@ Taken from http://stackoverflow.com/a/3072831/355252."
   (csetq imenu-auto-rescan-maxout (* 1024 1024))
 
   (add-hook 'imenu-after-jump-hook (lambda () (recenter-top-bottom))))
-
-;; Project
-(use-package projectile
-  :ensure t
-  :diminish projectile-mode
-  :init
-  (csetq projectile-cache-file
-         (expand-file-name "projectile.cache" user-cache-directory))
-  (csetq projectile-known-projects-file
-         (expand-file-name "projectile-bookmarks.eld" user-cache-directory))
-
-  (csetq projectile-project-root-files-bottom-up
-         '(".projectile" ".git" ".hg"))
-
-  (csetq projectile-completion-system 'ivy)
-  (csetq projectile-indexing-method 'alien)
-  (csetq projectile-enable-caching t)
-  (csetq projectile-verbose t)
-  (csetq projectile-use-git-grep t)
-
-  (projectile-mode t)
-
-  :config
-  (add-to-list 'projectile-globally-ignored-directories ".vscode")
-
-  (csetq projectile-switch-project-action
-         (lambda ()
-           (dired (projectile-project-root)))))
 
 ; Git
 (use-package magit
