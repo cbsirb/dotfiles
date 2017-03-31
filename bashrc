@@ -6,11 +6,11 @@ case $- in
       *) return;;
 esac
 
-if [ -z "$DISPLAY" ] && [ "$(fgconsole)" -eq 1 ]; then
-    exec startx
-fi
+# if [ -z "$DISPLAY" ] && [ "$(fgconsole)" -eq 1 ]; then
+#     exec startx
+# fi
 
-fortune showerthoughts
+# fortune showerthoughts
 
 # don't put duplicate lines or lines starting with space in the history.
 export HISTCONTROL=ignoreboth:erasedups
@@ -98,10 +98,6 @@ else
 fi
 unset color_prompt force_color_prompt
 
-if [ -f ~/.bash_init ]; then
-  source ~/.bash_init
-fi
-
 if [ -f ~/.bash_env ]; then
    . ~/.bash_env
 fi
@@ -113,6 +109,10 @@ fi
 # Functions definitions
 if [ -f ~/.bash_functions ]; then
   . ~/.bash_functions
+fi
+
+if [ -f ~/.bash_init ]; then
+  source ~/.bash_init
 fi
 
 # enable programmable completion features (you don't need to enable
@@ -167,7 +167,7 @@ shopt -s complete_fullquote
 # update the values of LINES and COLUMNS.
 shopt -s checkwinsize
 
-PATH=$PATH:~/bin
+PATH=$PATH:/usr/local/sbin:/usr/sbin:/sbin:~/bin
 
 # FZF options
 if  [ -x /usr/bin/fzf ]; then
@@ -176,4 +176,6 @@ if  [ -x /usr/bin/fzf ]; then
   if [ -f /usr/share/doc/fzf/key-bindings.bash ]; then
     . /usr/share/doc/fzf/key-bindings.bash
   fi
+else
+  [ -f ~/.fzf.bash ] && source ~/.fzf.bash
 fi

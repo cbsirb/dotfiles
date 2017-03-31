@@ -1,4 +1,7 @@
-#export DISPLAY=:0.0
+if [ -z "$DISPLAY" ]; then
+  export DISPLAY=:0.0
+fi
+
 export LIBGL_ALWAYS_INDIRECT=1
 export DEB_BUILD_HARDENING=1
 

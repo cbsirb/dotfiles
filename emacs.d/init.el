@@ -163,7 +163,7 @@ Runs after init is done."
   (when (fboundp 'scroll-bar-mode) (scroll-bar-mode 0))
 
   (set-face-attribute 'default nil
-                      :family "Cousine" :height 110)
+                      :family "DejaVu Sans Mono" :height 110)
   (set-face-attribute 'variable-pitch nil
                       :family "Noto Sans" :height 110 :weight 'regular)
 
