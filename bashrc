@@ -167,7 +167,7 @@ shopt -s complete_fullquote
 # update the values of LINES and COLUMNS.
 shopt -s checkwinsize
 
-PATH=$PATH:/usr/local/sbin:/usr/sbin:/sbin:~/bin
+# PATH=$PATH:/usr/local/sbin:/usr/sbin:/sbin:~/bin
 
 # FZF options
 if  [ -x /usr/bin/fzf ]; then

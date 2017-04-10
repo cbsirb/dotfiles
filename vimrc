@@ -28,6 +28,8 @@ Plug 'tommcdo/vim-lion'
 " Still thinking about this
 Plug 'maralla/completor.vim'
 
+Plug 'w0rp/ale'
+
 Plug 'kana/vim-textobj-user'
 Plug 'Julian/vim-textobj-brace' " j
 Plug 'kana/vim-textobj-indent' " i
@@ -59,7 +61,7 @@ runtime macros/matchit.vim
 if has('win32')
   set guifont=DejaVu_Sans_Mono:h10.5
 else
-  set guifont=Cousine\ 11
+  set guifont=DejaVu\ Sans\ Mono\ 10.5
 endif
 
 if has('gui_running')
@@ -92,11 +94,12 @@ set sidescroll=1
 set number
 
 set wildignore+=*.swp,*.bak
-set wildignore+=*.pyc,*.class,*.sln,*.vcxproj,*.vcproj,*.sdf
-set wildignore+=*.dll,*.exe,*.pdb,*.lib,*.o
+set wildignore+=*.pyc,*.class,*.sln,*.aps
+set wildignore+=*.vcxproj,*.vcproj,*.sdf,*.filters,*.user
+set wildignore+=*.dll,*.exe,*.pdb,*.lib,*.o,*.db
 set wildignore+=*/.git/**/*,*/.hg/**/*,*/.svn/**/*
 set wildignore+=tags,cscope.*,TAGS
-set wildignore+=*.tar.*
+set wildignore+=*.tar.*,*.zip,*.rar
 set wildignorecase
 set wildmode=full
 set wildcharm=<C-z>
@@ -104,7 +107,7 @@ set wildcharm=<C-z>
 set path=.,**
 
 set statusline=%*%<\ %n\ %r%m%f
-set statusline+=\ %l:%c
+set statusline+=\ %l:%c\ [%{ALEGetStatusLine()}]
 set statusline+=%=%w%q%y[%{&ff}][%{&enc}]
 
 " Fix slow o/O insert
@@ -226,6 +229,7 @@ nnoremap <space>v :vert sfind *
 nnoremap <space>F :find <C-R>=fnameescape(expand('%:p:h')).'/**/*'<CR>
 nnoremap <space>S :sfind <C-R>=fnameescape(expand('%:p:h')).'/**/*'<CR>
 nnoremap <space>V :vert sfind <C-R>=fnameescape(expand('%:p:h')).'/**/*'<CR>
+nnoremap gb :ls<CR>:b<Space>
 
 command! -nargs=+ -complete=file_in_path -bar Grep  silent! grep! <args> | redraw! | copen
 command! -nargs=+ -complete=file_in_path -bar LGrep silent! lgrep! <args> | redraw! | copen
@@ -281,3 +285,18 @@ endif
 let g:netrw_home = '~/.vim/cache/'
 
 let g:qf_mapping_ack_style = 1
+
+let g:ale_lint_on_text_changed = 'normal'
+let g:ale_lint_on_save = 1
+let g:ale_lint_on_insert_leave = 1
+
+let g:ale_linters = {
+      \ 'cpp': ['gcc'],
+      \ 'c': ['gcc']
+\}
+
+let g:ale_statusline_format = ['✗ %d', '✚ %d', '✓ ok']
+let g:ale_echo_msg_format = '[%linter%] %s [%severity%]'
+
+nmap <silent> <C-k> <Plug>(ale_previous_wrap)
+nmap <silent> <C-j> <Plug>(ale_next_wrap)

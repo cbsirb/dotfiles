@@ -8,25 +8,12 @@ Xft.hintstyle: hintfull
 Xft.lcdfilter: lcddefault
 Xft.rgba: rgba
 
-! URxvt.font: xft:Cousine:pixelsize=15:hinting=True:antialias=True
 URxvt.font: xft:Hack:size=11
 URxvt.boldFont: xft:Hack:size=11:bold
 URxvt.italicFont: xft:Hack:size=11:italic
 URxvt.boldItalicFont: xft:Hack:size=11:bold:italic
-! URxvt.font: xft:Inconsolata:pixelsize=14:hinting=True:antialias=True
-! URxvt.font: xft:Hack:pixelsize=14:hinting=True:antialias=True
-! URxvt.font: xft:Source Code Pro:pixelsize=14:hinting=True:antialias=True
-! URxvt.font: xft:DejaVu Sans Mono:pixelsize=16:hinting=True;antialias=True
-! URxvt.boldFont: xft:Inconsolata:pixelsize=14:bold
-! URxvt.italicFont: xft:Inconsolata:pixelsize=14:italic
-! URxvt.boldItalicFont: xft:Inconsolata:pixelsize=14:bold:italic
 
-
-xterm*faceName: Hack:size=11
-! xterm*faceName: Hack:pixelsize=14:hinting=True:antialias=True
-! xterm*faceName: Source Code Pro:pixelsize=14:hinting=True:antialias=True
-! xterm*faceName: DejaVu Sans Mono:pixelsize=14:hinting=True:antialias=True
-! xterm*faceName: Inconsolata:pixelsize=14:hinting=True:antialias=True
+xterm*faceName: Iosevka Term:size=11
 
 ! No colorscheme (white text, black background)
 ! *background: #000000

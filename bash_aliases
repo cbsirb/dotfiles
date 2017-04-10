@@ -29,7 +29,6 @@ alias wget='wget -c'
 alias df='df -h'
 alias cls='printf "\033c"'
 alias tmux="tmux -2"
-alias sudo="sudo -S"
 
 # And now for new ones
 alias gs='git status'

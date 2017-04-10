@@ -1,1 +1,10 @@
 xrdb -merge ~/.Xresources
+
+# PATH=$PATH:/usr/local/sbin:/usr/sbin:/sbin:~/bin
+PATH=$PATH:~/bin:~/.cargo/bin
+
+# finally, start cron if needed
+# _discarded=$(pgrep cron)
+# if [ ! $? -eq 0 ]; then
+#     sudo service cron start
+# fi
