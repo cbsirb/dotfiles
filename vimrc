@@ -24,9 +24,6 @@ Plug 'romainl/vim-qf'
 Plug 'romainl/vim-qlist'
 Plug 'tommcdo/vim-lion'
 
-" Still thinking about this
-" Plug 'maralla/completor.vim'
-
 Plug 'w0rp/ale'
 
 Plug 'kana/vim-textobj-user'
@@ -156,6 +153,7 @@ if !isdirectory(expand(&undodir))
   call mkdir(expand(&undodir), "p")
 endif
 
+set background=dark
 colorscheme gruvbox
 
 set colorcolumn=+1
@@ -269,12 +267,6 @@ augroup FUGITIVE
   \   nnoremap <buffer> .. :edit %:h<CR> |
   \ endif
 augroup END
-
-if has('win32')
-  let g:completor_clang_binary = 'd:/tools/prog/x64/LLVM/bin/clang.exe'
-else
-  let g:completor_clang_binary = '/usr/bin/clang'
-endif
 
 let g:netrw_home = '~/.vim/cache/'
 
