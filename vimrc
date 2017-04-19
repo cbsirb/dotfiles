@@ -1,6 +1,5 @@
 if has('win32')
   set encoding=utf-8
-  scriptencoding utf-8
   set runtimepath+=~/.vim
   set rop=type:directx
 endif
@@ -26,7 +25,7 @@ Plug 'romainl/vim-qlist'
 Plug 'tommcdo/vim-lion'
 
 " Still thinking about this
-Plug 'maralla/completor.vim'
+" Plug 'maralla/completor.vim'
 
 Plug 'w0rp/ale'
 
@@ -59,9 +58,9 @@ endif
 runtime macros/matchit.vim
 
 if has('win32')
-  set guifont=DejaVu_Sans_Mono:h10.5
+  set guifont=Iosevka:h11
 else
-  set guifont=DejaVu\ Sans\ Mono\ 10.5
+  set guifont=Iosevka\ 11
 endif
 
 if has('gui_running')
@@ -101,7 +100,7 @@ set wildignore+=*/.git/**/*,*/.hg/**/*,*/.svn/**/*
 set wildignore+=tags,cscope.*,TAGS
 set wildignore+=*.tar.*,*.zip,*.rar
 set wildignorecase
-set wildmode=full
+set wildmode=longest:full,full
 set wildcharm=<C-z>
 
 set path=.,**
@@ -110,12 +109,10 @@ set statusline=%*%<\ %n\ %r%m%f
 set statusline+=\ %l:%c\ [%{ALEGetStatusLine()}]
 set statusline+=%=%w%q%y[%{&ff}][%{&enc}]
 
-" Fix slow o/O insert
 set timeout
 set timeoutlen=1000
 set ttimeoutlen=100
 
-" Turn folding off for real, hopefully
 set foldmethod=manual
 set nofoldenable
 
@@ -134,15 +131,13 @@ set tabpagemax=50
 set noswapfile
 set nobackup
 
-" set path=.,**
 set sessionoptions+=resize
 if exists('+breakindent')
   set showbreak=...\ 
 endif
 
-"set listchars=tab:»\ ,extends:.,precedes:.,nbsp:·,trail:·
 let &listchars = "tab:\u00bb\u00b7,trail:\u2022,extends:\u00bb,precedes:\u00ab,nbsp:\u00ba"
-"let &fillchars = "vert:\u2591,fold:\u00b7"
+" let &fillchars = "vert:\u2591,fold:\u00b7"
 set list
 
 set viminfo='33,<200,s100,h
@@ -161,7 +156,6 @@ if !isdirectory(expand(&undodir))
   call mkdir(expand(&undodir), "p")
 endif
 
-set background=dark
 colorscheme gruvbox
 
 set colorcolumn=+1
@@ -295,7 +289,7 @@ let g:ale_linters = {
       \ 'c': ['gcc']
 \}
 
-let g:ale_statusline_format = ['✗ %d', '✚ %d', '✓ ok']
+let g:ale_statusline_format = ["\u2717 %d", "\u271a %d", "\u2713 ok"]
 let g:ale_echo_msg_format = '[%linter%] %s [%severity%]'
 
 nmap <silent> <C-k> <Plug>(ale_previous_wrap)
