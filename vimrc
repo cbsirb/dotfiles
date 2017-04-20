@@ -17,7 +17,6 @@ Plug 'tpope/vim-repeat'
 Plug 'tpope/vim-surround'
 Plug 'tpope/vim-unimpaired'
 Plug 'tpope/vim-fugitive'
-Plug 'tpope/vim-projectionist'
 Plug 'tpope/vim-vinegar'
 
 Plug 'romainl/vim-qf'
@@ -85,6 +84,7 @@ set smarttab
 set ignorecase
 set smartcase
 set hlsearch
+set gdefault
 
 set sidescroll=1
 set number
