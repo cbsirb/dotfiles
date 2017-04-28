@@ -1,7 +1,7 @@
 xrdb -merge ~/.Xresources
 
 # PATH=$PATH:/usr/local/sbin:/usr/sbin:/sbin:~/bin
-PATH=$PATH:~/bin:~/.cargo/bin
+PATH=~/.local/bin:$PATH:~/bin:~/.cargo/bin
 
 # finally, start cron if needed
 # _discarded=$(pgrep cron)

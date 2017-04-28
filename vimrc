@@ -21,12 +21,17 @@ Plug 'tpope/vim-vinegar'
 
 Plug 'romainl/vim-qf'
 Plug 'romainl/vim-qlist'
+Plug 'romainl/vim-cool'
+Plug 'romainl/vim-tinyMRU'
+
 Plug 'tommcdo/vim-lion'
+
+" When I start writing html again
+" Plug 'rstacruz/sparkup'
 
 Plug 'w0rp/ale'
 
 Plug 'kana/vim-textobj-user'
-Plug 'Julian/vim-textobj-brace' " j
 Plug 'kana/vim-textobj-indent' " i
 Plug 'sgur/vim-textobj-parameter' " ,
 
@@ -84,7 +89,6 @@ set smarttab
 set ignorecase
 set smartcase
 set hlsearch
-set gdefault
 
 set sidescroll=1
 set number
@@ -168,9 +172,9 @@ if !has('gui_running')
     endif
 
     " set cursor shapes by mode in tmux
-    " let &t_SI = "\<Esc>[6 q"
-    " let &t_SR = "\<Esc>[4 q"
-    " let &t_EI = "\<Esc>[2 q"
+    let &t_SI = "\<Esc>[6 q"
+    let &t_SR = "\<Esc>[4 q"
+    let &t_EI = "\<Esc>[2 q"
   endif
 else
   set guiheadroom=0
@@ -286,3 +290,5 @@ let g:ale_echo_msg_format = '[%linter%] %s [%severity%]'
 
 nmap <silent> <C-k> <Plug>(ale_previous_wrap)
 nmap <silent> <C-j> <Plug>(ale_next_wrap)
+
+nnoremap <F5> :ME <C-z>
