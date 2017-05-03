@@ -101,54 +101,24 @@ there is only one match."
 (defvar ectags--fn-name nil
   "Holds the current function name (from where the tag search was initiated).")
 
-
-(defun ectags-table-list ()
-  "Return a list of available tag tables."
-  (let (tags-table-list)
-    (dolist (buffer (buffer-list) tags-table-list)
-      (when (assoc 'is-ectag-table (buffer-local-variables buffer))
-        (push buffer tags-table-list)))
-    tags-table-list))
-
-(defun ectags-expand-tag-file-name (file)
-  "Expand the given FILE to full path if needed."
-  (setq file (expand-file-name file))
-  (if (file-directory-p file)
-      (expand-file-name "tags" file)
-    file))
-
-(defun ectags-verify-tags-file (file)
+(defun ectags--verify-tags-file (file)
   "Validate that the FILE is a valid ctags table."
   (string-prefix-p
    "!_TAG_FILE_FORMAT"
    (shell-command-to-string (format "head -n1 %s" file))))
 
-;;;###autoload
-(defun ectags-visit-tags-table ()
-  "Visit an exuberant ctags file and add it to the current list of tags tables."
-  (interactive
-   (list (read-file-name "Visit tags table (default tags): "
-                         default-directory
-                         (expand-file-name "tags"
-                                           default-directory)
-                         t)))
-  (let ((current-dir default-directory)
-        (local-tags-filename (ectags-expand-tag-file-name default-directory))
-        (checked-dirs 5))
-    (while (and (not (file-exists-p local-tags-filename))
-                (not (ectags-verify-tags-file local-tags-filename))
-                (> checked-dirs 0))
-      (setq current-dir (file-name-directory (directory-file-name current-dir)))
-      (setq local-tags-filename (ectags-expand-tag-file-name current-dir))
-      (setq checked-dirs (1- checked-dirs)))
-
-    (if (and (> checked-dirs 0)
-             (ectags-verify-tags-file local-tags-filename))
-        (progn
-          (setq ectags--file-name local-tags-filename)
-          t)
-      (error "Not a valid tags table")
-      nil)))
+(defun ectags-visit-tags-table (&optional force)
+  "Visit an exuberant ctags file and add it to the current list of tags tables.
+If FORCE is not nill, it will force the directory rescan and file checking."
+  (when (or (not ectags--file-name) force)
+    (let* ((tags-file-dir (locate-dominating-file default-directory "tags"))
+           (tags-file-path (expand-file-name "tags" tags-file-dir)))
+      (if (not tags-file-dir)
+          (setq ectags--file-name nil)
+        (if (ectags--verify-tags-file tags-file-path)
+            (setq ectags--file-name tags-file-path)
+          (message "File %s is not a valid tags file!" tags-file-path)
+          (setq ectags--file-name nil))))))
 
 (defun ectags-match-tagname (tag-match)
   "Return the tag name from the TAG-MATCH."
@@ -229,7 +199,6 @@ there is only one match."
 
 (defun ectags-scan-external ()
   "Search the `ectags--file-name' for the `ectags--regexp'.
-
 Calls `ectags-match' for each line that matches."
   ;; vlf-re-search-forward - too slow
   ;; binary search - too slow and the tags file has to be sorted
@@ -496,19 +465,6 @@ variable to decide what to do."
       (setq tagname (find-tag-default)))
     (ectags-find tagname)))
 
-;; (defun c-eldoc-scope ()
-;;   "Try to figure out our scope."
-;;   (save-excursion
-;;     (c-end-of-defun)
-;;     (c-beginning-of-defun-1)
-;;     (forward-line -1)
-;;     (c-syntactic-re-search-forward "::")
-;;     (backward-char 2)
-;;     (when (c-on-identifier)
-;;       (let* ((id-end (point))
-;;              (id-start (progn (backward-char 1) (c-beginning-of-current-token) (point))))
-;;         (buffer-substring-no-properties id-start id-end)))))
-
 (defun ectags-current-symbol (&optional limit)
   "Finds the current function and position in argument list."
   (let* ((literal-limits (c-literal-limits))
@@ -551,37 +507,6 @@ Non scoped verison for more conservative languages."
         (setq tag-info (replace-regexp-in-string "end:[0-9]+" "" tag-info))
         (setq tag-info (replace-regexp-in-string "typeref:typename:" "type:" tag-info))
         tag-info))))
-
-;; scoped version for cpp and the like : tries to find symbol in current scope first
-;; scope format is a format string that concatenates the cureend scope and the symbol with the scope operator
-;; eg "%s::%s" for c++
-;;;###autoload
-;; (defun ectags-eldoc-print-current-scoped-symbol-info ()
-;;   "Try to find the meaning of the symbol in the current scope.  \
-;; Probably only useful for cpp mode."
-;;   (let* ((eldoc-scope (c-eldoc-scope))
-;;          (eldoc-sym (ectags-current-symbol (- (point) 1000))))
-;;     (when eldoc-sym
-;;       (ectags-seek (format "%s::%s" eldoc-scope eldoc-sym))
-;;       (if (> (length ectags--matches) 0)
-;;           (format "%s::%s %s" eldoc-scope eldoc-sym (ectags-match-tag-info (car ectags--matches)))
-;;         (progn
-;;           (ectags-seek eldoc-sym)
-;;           (if (> (length ectags--matches) 0)
-;;               (format "%s %s" eldoc-sym (ectags-match-tag-info (car ectags--matches)))
-;;             (if eldoc-scope
-;;                 (format "Scope %s " eldoc-scope))
-;;             (format "Unknown %s " eldoc-sym)))))))
-
-;;;###autoload
-;; (defun ectags-turn-on-eldoc-mode (&optional scope-format)
-;;   (interactive)
-;;   (if scope-format
-;;       (set (make-local-variable 'eldoc-documentation-function)
-;;            'ectags-eldoc-print-current-scoped-symbol-info)
-;;     (set (make-local-variable 'eldoc-documentation-function)
-;;          'ectags-print-current-symbol-info)
-;;     (eldoc-mode)))
 
 (defvar ectags-mode-map
   (let ((map (make-keymap)))
