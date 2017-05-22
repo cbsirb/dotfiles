@@ -307,8 +307,7 @@ Runs after init is done."
   :config
   (csetq which-key-idle-delay 0.5)
   (csetq which-key-sort-order 'which-key-prefix-then-key-order)
-  (which-key-setup-side-window-bottom))
-  ;;(which-key-setup-side-window-right-bottom))
+  (which-key-setup-side-window-right-bottom))
 
 (use-package jump-char
   :ensure t
@@ -641,21 +640,9 @@ Runs after init is done."
   :ensure t
   :bind (:map user-keys-minor-mode-map
          ("C-c s s" . rg)
-         ("C-c p s r" . projectile-rg))
-  :config
-  (defun projectile-rg (regexp)
-    "Run a rg search with `REGEXP' rooted at the current projectile project root."
-    (interactive
-     (list
-      (read-from-minibuffer "[project] rg search for: " (thing-at-point 'symbol))))
-
-    (let ((rg-command (concat rg-command " "
-                              (mapconcat
-                               (lambda (ign) (concat "--glob !" ign))
-                               (append projectile-globally-ignored-files
-                                       projectile-globally-ignored-directories)
-                               " "))))
-      (rg regexp "everything" (projectile-project-root)))))
+         ("C-c p s r" . rg-project))
+  :init
+  (csetq rg-custom-type-aliases nil))
 
 (use-package company
   :ensure t
@@ -830,6 +817,13 @@ Runs after init is done."
   (set-face-attribute 'which-func nil :foreground "red1")
   (face-foreground 'which-func))
 
+(use-package highlight-symbol
+  :ensure t
+  :diminish highlight-symbol-mode
+  :config
+  (csetq highlight-symbol-idle-delay 0.2)
+  (add-hook 'prog-mode-hook #'highlight-symbol-mode))
+
 (defun user-results-buffer-hook ()
   "Set various settings on results buffers (compilation, grep, etc.)."
   (setq-local scroll-margin 0)
@@ -935,7 +929,7 @@ Taken from http://stackoverflow.com/a/3072831/355252."
     ("q" nil "quit"))
   (csetq flycheck-check-syntax-automatically '(save mode-enabled))
 
-  (global-flycheck-mode)
+  (global-flycheck-mode t)
   (csetq flycheck-standard-error-navigation nil)
   (csetq flycheck-display-errors-function
          #'flycheck-display-error-messages-unless-error-list))
@@ -1075,6 +1069,7 @@ Taken from http://stackoverflow.com/a/3072831/355252."
 (unbind-key "C-z")
 (unbind-key "C-x C-z")
 (unbind-key "C-x f")
+(unbind-key "C-x m")
 
 ;; Last thing
 (user-keys-minor-mode t)
