@@ -51,6 +51,11 @@ ARGS is passed to the ORIG-FUNC."
 
 (advice-add 'pop-to-mark-command :around #'multi-pop-to-mark)
 
+(when user-is-windows
+  (defadvice shell-command (around fix-encoding activate)
+    (let ((coding-system-for-read 'cp1250))
+      ad-do-it)))
+
 (provide 'user-advices)
 
 ;;; user-advices.el ends here

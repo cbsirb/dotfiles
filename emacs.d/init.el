@@ -117,8 +117,8 @@ Called via the `after-load-functions' special hook."
   (midnight-delay-set 'midnight-delay 1)
   (csetq midnight-period (* 15 60))
 
-  ;; 15 minutes for special buffers
-  (csetq clean-buffer-list-delay-special 1800)
+  ;; 10 minutes for special buffers
+  (csetq clean-buffer-list-delay-special 600)
 
   (midnight-mode t)
   :config
@@ -212,9 +212,6 @@ Runs after init is done."
   (global-hl-todo-mode t))
 
 (global-hl-line-mode)
-
-;; (when user-is-linux
-;;   (global-linum-mode t))
 
 (use-package visual-fill-column
   :ensure t
@@ -982,7 +979,6 @@ Taken from http://stackoverflow.com/a/3072831/355252."
   :config
   (csetq json-reformat:indent-width 4)
   (csetq json-reformat:pretty-string? t))
-
 
 (defun user-web-mode-hook ()
   "Hook to run when `web-mode' is active."
