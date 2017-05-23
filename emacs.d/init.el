@@ -72,11 +72,15 @@ Called via the `after-load-functions' special hook."
   ;; Use mingw64 & msys2 first
   (setenv "PATH"
           (concat
+           "c:\\windows\\system32" ";"
+           "c:\\windows\\system32\\wbem" ";"
            "d:\\tools\\prog\\x64\\msys64\\mingw64\\bin" ";"
            "d:\\tools\\prog\\x64\\msys64\\usr\\bin" ";"
            (getenv "PATH")))
 
-  (csetq exec-path (append '("d:/tools/prog/x64/msys64/mingw64/bin"
+  (csetq exec-path (append '("c:/Windows/System32"
+                             "c:/Windows/System32/wbem"
+                             "d:/tools/prog/x64/msys64/mingw64/bin"
                              "d:/tools/prog/x64/msys64/usr/bin")
                            exec-path)))
 
@@ -126,6 +130,7 @@ Called via the `after-load-functions' special hook."
                '("*buffer-selection*"
                  "*Finder*"
                  "*rg*"
+                 "*ripgrep-search*"
                  "*ag search*"
                  "*compilation*"
                  "*Help*"
@@ -517,6 +522,7 @@ Runs after init is done."
                    "*compilation"                  ; Compilation buffers
                    "*Flycheck errors*"             ; Flycheck error list
                    "*rg*"                          ; Ripgrep search results
+                   "*ripgrep-search*"              ; Ripgrep search results
                    "*ag search*"                   ; Ag search results
                    (and (1+ nonl) " output*")      ; AUCTeX command output
                    ))
@@ -636,13 +642,68 @@ Runs after init is done."
   (csetq anzu-cons-mode-line-p nil)
   (global-anzu-mode t))
 
-(use-package rg
+(use-package ripgrep
   :ensure t
   :bind (:map user-keys-minor-mode-map
-         ("C-c s s" . rg)
-         ("C-c p s r" . rg-project))
+         ("C-c s s" . user-ripgrep)
+         ("C-c s r" . ripgrep-regexp))
   :init
-  (csetq rg-custom-type-aliases nil))
+  (use-package projectile-ripgrep
+    :ensure t
+    :bind (:map user-keys-minor-mode-map
+           ("C-c p s s" . user-projectile-ripgrep)
+           ("C-c p s r" . projectile-ripgrep)))
+
+  :config
+  (defvar user-rg-type-aliases (make-hash-table :test 'equal)
+    "Make a hash-table to map `major-mode' to 'rg --type-list' values.")
+
+  (puthash "nasm-mode" "asm" user-rg-type-aliases)
+  (puthash "asm-mode" "asm" user-rg-type-aliases)
+  (puthash "awk-mode" "awk" user-rg-type-aliases)
+  (puthash "c-mode" "c" user-rg-type-aliases)
+  (puthash "c++-mode" "cpp" user-rg-type-aliases)
+  (puthash "cmake-mode" "cmake" user-rg-type-aliases)
+  (puthash "css-mode" "css" user-rg-type-aliases)
+  (puthash "emacs-lisp-mode" "elisp" user-rg-type-aliases)
+  (puthash "go-mode" "go" user-rg-type-aliases)
+  (puthash "html-mode" "html" user-rg-type-aliases)
+  (puthash "java-mode" "java" user-rg-type-aliases)
+  (puthash "js2-mode" "js" user-rg-type-aliases)
+  (puthash "javascript-mode" "js" user-rg-type-aliases)
+  (puthash "json-mode" "json" user-rg-type-aliases)
+  (puthash "lisp-mode" "lisp" user-rg-type-aliases)
+  (puthash "python-mode" "py" user-rg-type-aliases)
+  (puthash "perl-mode" "perl" user-rg-type-aliases)
+  (puthash "makefile-mode" "mk" user-rg-type-aliases)
+  (puthash "org-mode" "org" user-rg-type-aliases)
+  (puthash "ruby-mode" "ruby" user-rg-type-aliases)
+  (puthash "shell-script-mode" "sh" user-rg-type-aliases)
+  (puthash "sql-mode" "sql" user-rg-type-aliases)
+  (puthash "TeX-mode" "tex" user-rg-type-aliases)
+  (puthash "tex-mode" "tex" user-rg-type-aliases)
+  (puthash "LaTeX-mode" "tex" user-rg-type-aliases)
+  (puthash "latex-mode" "tex" user-rg-type-aliases)
+
+  (defun user-call-ripgrep (func)
+    "Call `FUNC' after setting `ripgrep-arguments' to '--type' based on major mode.
+See `user-rg-type-aliases' for more details."
+    (let ((type-rg (gethash (symbol-name major-mode) user-rg-type-aliases)))
+      (if type-rg
+          (let ((ripgrep-arguments '()))
+            (add-to-list 'ripgrep-arguments (concat "--type " type-rg))
+            (call-interactively func))
+        (call-interactively func))))
+
+  (defun user-ripgrep ()
+    "Call `user-call-ripgrep' for `ripgrep-regexp'."
+    (interactive)
+    (user-call-ripgrep #'ripgrep-regexp))
+
+  (defun user-projectile-ripgrep ()
+    "Call `user-call-ripgrep' for `projectile-ripgrep'."
+    (interactive)
+    (user-call-ripgrep #'projectile-ripgrep)))
 
 (use-package company
   :ensure t
@@ -822,7 +883,9 @@ Runs after init is done."
   :diminish highlight-symbol-mode
   :config
   (csetq highlight-symbol-idle-delay 0.2)
-  (add-hook 'prog-mode-hook #'highlight-symbol-mode))
+  (csetq highlight-symbol-highlight-single-occurrence nil)
+  (add-hook 'prog-mode-hook #'highlight-symbol-mode)
+  (add-hook 'prog-mode-hook #'highlight-symbol-nav-mode))
 
 (defun user-results-buffer-hook ()
   "Set various settings on results buffers (compilation, grep, etc.)."
@@ -886,29 +949,29 @@ Taken from http://stackoverflow.com/a/3072831/355252."
   (add-hook 'compilation-filter-hook #'user-colorize-compilation-buffer)
   (add-hook 'compilation-mode-hook #'user-results-buffer-hook))
 
-(use-package multi-term
-  :ensure t
-  :bind (:map user-keys-minor-mode-map
-         ("C-; C-;" . multi-term)
-         ("C-; c" . multi-term)
-         ("C-; d" . multi-term-dedicated-toggle)
-         ("C-; n" . multi-term-next)
-         ("C-; p" . multi-term-prev))
-  :init
-  (csetq multi-term-dedicated-select-after-open-p t)
+(when user-is-linux
+  (use-package multi-term
+    :ensure t
+    :bind (:map user-keys-minor-mode-map
+                ("C-; C-;" . multi-term)
+                ("C-; c" . multi-term)
+                ("C-; d" . multi-term-dedicated-toggle)
+                ("C-; n" . multi-term-next)
+                ("C-; p" . multi-term-prev))
+    :init
+    (csetq multi-term-dedicated-select-after-open-p t)
 
-  (defun user-term-mode ()
-    (company-mode -1)
-    (setq-local scroll-margin 0))
+    (defun user-term-mode ()
+      (company-mode -1)
+      (setq-local scroll-margin 0))
 
-  (add-hook 'term-mode-hook #'user-term-mode))
+    (add-hook 'term-mode-hook #'user-term-mode)))
 
 (use-package eldoc
   :defer t
   :diminish eldoc-mode
   :init
   (add-hook 'eval-expression-minibuffer-setup-hook #'eldoc-mode))
-  ;;(csetq eldoc-documentation-function #'describe-char-eldoc))
 
 ;; Error checking
 (use-package flycheck
