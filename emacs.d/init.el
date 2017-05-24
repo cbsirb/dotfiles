@@ -764,10 +764,11 @@ See `user-rg-type-aliases' for more details."
 (use-package multiple-cursors
   :ensure t
   :bind (:map user-keys-minor-mode-map
-         ("C->" . mc/unmark-next-like-this)
+         ("C-," . mc/unmark-next-like-this)
          ("C-<" . mc/unmark-previous-like-this)
          ("C-." . mc/mark-next-like-this)
-         ("C-," . mc/mark-previous-like-this)
+         ("C->" . mc/mark-previous-like-this)
+         ("C-S-<mouse-1>" . mc/add-cursor-on-click)
          ("C-c m m" . mc/mark-all-dwim)
          ("C-c m d" . mc/mark-all-symbols-like-this-in-defun)
          ("C-c m i" . mc/insert-numbers)
@@ -819,6 +820,8 @@ See `user-rg-type-aliases' for more details."
   :diminish ivy-mode
   :bind (:map user-keys-minor-mode-map
          ("C-c C-r" . ivy-resume)
+         ("C-c v s" . ivy-push-view)
+         ("C-c v p" . ivy-pop-view)
          :map ivy-mode-map
          ([escape] . user-minibuffer-keyboard-quit))
   :init
@@ -1081,6 +1084,7 @@ Taken from http://stackoverflow.com/a/3072831/355252."
   :ensure t
   :defer t)
 
+;; imenu
 (use-package imenu
   :bind (:map user-keys-minor-mode-map
          ("M-i" . imenu))
@@ -1089,6 +1093,11 @@ Taken from http://stackoverflow.com/a/3072831/355252."
   (csetq imenu-auto-rescan-maxout (* 1024 1024))
 
   (add-hook 'imenu-after-jump-hook (lambda () (recenter-top-bottom))))
+
+(use-package imenu-anywhere
+  :ensure t
+  :bind (:map user-keys-minor-mode-map
+         ("M-I" . imenu-anywhere)))
 
 ; Git
 (use-package magit

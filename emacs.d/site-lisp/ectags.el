@@ -411,6 +411,10 @@ INPUT in the `ectags--file-name'."
 
   (if (< (length input) 3)
       (counsel-more-chars 3)
+    ;; escape the start ^ with another ^ (batch is fun)
+    (when (and (eq system-type 'windows-nt)
+               (string-match-p "^\\^[^\\^]" input))
+      (setq input (concat "^" input)))
     (counsel--async-command
      (format "rg -N %s %s" input ectags--file-name))
     '("" "working...")))
