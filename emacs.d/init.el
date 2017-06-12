@@ -157,9 +157,6 @@ Called via the `after-load-functions' special hook."
   :config
   (hydra-add-font-lock))
 
-(setq default-frame-alist '((height . 55)
-                            (width . 125)))
-
 (defun user-gui ()
   "Setups the gui appearance.
 Runs after init is done."
@@ -168,7 +165,7 @@ Runs after init is done."
   (when (fboundp 'scroll-bar-mode) (scroll-bar-mode 0))
 
   (set-face-attribute 'default nil
-                      :family "IosevkaCC" :height 110 :weight 'regular)
+                      :family "Iosevka" :height 110 :weight 'regular)
   (set-face-attribute 'variable-pitch nil
                       :family "Noto Sans" :height 110 :weight 'regular)
 
@@ -186,6 +183,9 @@ Runs after init is done."
     (load-theme 'gruvbox t)))
 
 (add-hook 'after-init-hook #'user-gui)
+
+(setq default-frame-alist '((height . 55)
+                            (width . 125)))
 
 (csetq fast-but-imprecise-scrolling t)
 
@@ -333,8 +333,8 @@ Runs after init is done."
 
 (use-package expand-region
   :ensure t
-  :bind (:map user-keys-minor-mode-map
-         ("M-2" . er/expand-region)
+  :bind (("M-2" . er/expand-region)     ; let it be overwritten in magit
+         :map user-keys-minor-mode-map
          ("M-@" . er/contract-region)
          ("C-c m r" . user-expand-region/body))
   :init
@@ -447,7 +447,7 @@ Runs after init is done."
   (csetq undo-tree-visualizer-timestamps t)
   (csetq undo-tree-auto-save-history t)
   (csetq undo-tree-history-directory-alist `(("." . ,(expand-file-name "undo-tree" user-cache-directory))))
-  :config
+
   (global-undo-tree-mode t)
 
   ;; Keep region when undoing in region
@@ -731,6 +731,12 @@ See `user-rg-type-aliases' for more details."
 (csetq abbrev-file-name (expand-file-name "abbrev_defs" user-cache-directory))
 (add-hook 'find-file-hook (lambda () (abbrev-mode -1)))
 
+(use-package yasnippet
+  :ensure t
+  :config
+  (yas-reload-all)
+  (add-hook 'prog-mode-hook #'yas-minor-mode))
+
 (use-package dired
   :defer t
   :bind (:map dired-mode-map
@@ -775,6 +781,8 @@ See `user-rg-type-aliases' for more details."
          ("C-c m w" . mc/mark-all-words-like-this)
          ("C-c m h" . mc-hide-unmatched-lines-mode)
          ("C-c m l" . mc/edit-lines)
+         ("C-c m n" . mc/skip-to-next-like-this)
+         ("C-c m p" . mc/skip-to-previous-like-this)
          ("C-c m C-a" . mc/edit-beginnings-of-lines)
          ("C-c m C-e" . mc/edit-end-of-lines))
   :init
@@ -1137,6 +1145,28 @@ Taken from http://stackoverflow.com/a/3072831/355252."
 (bind-key [remap just-one-space] #'cycle-spacing user-keys-minor-mode-map)
 (bind-key "M-g" #'goto-line user-keys-minor-mode-map)
 (bind-key "C-o" #'isearch-occur isearch-mode-map)
+
+(use-package key-chord
+  :ensure t
+  :init
+  (csetq key-chord-two-keys-delay 0.1)
+  (csetq key-chord-one-key-delay 0.2)
+
+  (key-chord-mode t)
+
+  (use-package key-seq
+    :ensure t)
+
+  (key-seq-define-global "jc" #'compile)
+  (key-seq-define-global "jj" #'ivy-switch-buffer)
+  (key-seq-define-global "jf" #'counsel-find-file)
+  (key-seq-define-global ";'" #'counsel-M-x))
+
+(use-package keyfreq
+  :ensure t
+  :init
+  (keyfreq-mode t)
+  (keyfreq-autosave-mode t))
 
 (unbind-key "C-z")
 (unbind-key "C-x C-z")
