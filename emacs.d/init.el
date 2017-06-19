@@ -712,6 +712,10 @@ See `user-rg-type-aliases' for more details."
   (csetq company-minimum-prefix-length 3)
   (csetq company-tooltip-align-annotations t)
 
+  (use-package user-completion
+    :bind (:map user-keys-minor-mode-map
+                ("C-c /" . user-complete-line)))
+
   (add-hook 'after-init-hook 'global-company-mode))
 
 ;; (csetq completion-ignore-case t)
