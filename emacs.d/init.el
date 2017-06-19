@@ -21,9 +21,6 @@
 (when (fboundp 'menu-bar-mode) (menu-bar-mode 0))
 (when (fboundp 'scroll-bar-mode) (scroll-bar-mode 0))
 
-(defconst user-cache-directory (expand-file-name ".cache" user-emacs-directory)
-  "Directory to save recent files, etc.")
-
 (defconst user-is-windows (eq system-type 'windows-nt)
   "Set when the OS is windows.")
 
@@ -100,6 +97,35 @@ Called via the `after-load-functions' special hook."
 
 (require 'use-package)
 (csetq use-package-enable-imenu-support t)
+
+(use-package ignoramus
+  :ensure t
+  :config
+  (ignoramus-setup))
+
+(use-package no-littering
+  :ensure t
+  :config
+  (use-package recentf
+    :init
+    (csetq recentf-max-saved-items 500)
+    (csetq recentf-max-menu-items 20)
+    (csetq recentf-exclude (list "/\\.git/.*\\'"        ; Git contents
+                                 "/elpa/.*\\'"          ; Package files
+                                 "PKGBUILD"             ; ArchLinux aur
+                                 "COMMIT_MSG"
+                                 "COMMIT_EDITMSG"
+                                 "crontab.*"
+                                 #'ignoramus-boring-p))
+    ;; disable recentf-cleanup on Emacs start, because it can
+    ;; cause problems with remote files
+    (csetq recentf-auto-cleanup 'never)
+
+    (add-to-list 'recentf-exclude no-littering-var-directory)
+    (add-to-list 'recentf-exclude no-littering-etc-directory)
+
+    :config
+    (recentf-mode t)))
 
 ;; Some special file names
 (add-to-list 'auto-mode-alist '("\\.?bash.*" . shell-script-mode))
@@ -238,22 +264,17 @@ Runs after init is done."
   (csetq uniquify-ignore-buffers-re "^\\*")
   (csetq uniquify-after-kill-buffer-p t))
 
-;; Disable this mode!
-(csetq auto-save-file-name-transforms `((".*" ,(expand-file-name "saves" user-cache-directory) t)))
-(csetq auto-save-list-file-prefix (expand-file-name "auto-save-list/saves-" user-cache-directory))
+;; Disable auto-save-mode (I really hate it)
 (auto-save-mode -1)
 (csetq auto-save-default nil)
 
 (when (>= emacs-major-version 25)
   (use-package saveplace
-    :init
-    (csetq save-place-file (expand-file-name "places" user-cache-directory))
     :config
     (save-place-mode t)))
 
 (use-package savehist
   :init
-  (csetq savehist-file (expand-file-name "history" user-cache-directory))
   (csetq savehist-additional-variables
          '(search-ring
            regexp-search-ring
@@ -263,34 +284,10 @@ Runs after init is done."
   :config
   (savehist-mode t))
 
-(use-package recentf
-  :init
-  (csetq recentf-save-file (expand-file-name "recentf" user-cache-directory))
-  (csetq recentf-max-saved-items 500)
-  (csetq recentf-max-menu-items 20)
-  (csetq recentf-exclude (list "/\\.git/.*\\'"   ; Git contents
-                               "/elpa/.*\\'"      ; Package files
-                               "PKGBUILD"         ; ArchLinux aur
-                               "COMMIT_MSG"
-                               "COMMIT_EDITMSG"
-                               "crontab.*"
-                               #'ignoramus-boring-p))
-  ;; disable recentf-cleanup on Emacs start, because it can
-  ;; cause problems with remote files
-  (csetq recentf-auto-cleanup 'never)
-  :config
-  (recentf-mode t))
-
-(use-package tramp
-  :defer t
-  :init
-  (csetq tramp-persistency-file-name (expand-file-name "tramp" user-cache-directory)))
-
 (use-package bookmark
   :defer t
   :config
-  (csetq bookmark-save-flag 1)
-  (csetq bookmark-default-file (expand-file-name "bookmarks" user-cache-directory)))
+  (csetq bookmark-save-flag 1))
 
 (use-package autorevert
   :diminish auto-revert-mode
@@ -299,11 +296,6 @@ Runs after init is done."
   :config
   (csetq auto-revert-verbose nil)
   (csetq global-auto-revert-non-file-buffers t))
-
-(use-package ignoramus
-  :ensure t
-  :config
-  (ignoramus-setup))
 
 (use-package which-key
   :ensure t
@@ -446,7 +438,6 @@ Runs after init is done."
   (csetq undo-tree-visualizer-diff t)
   (csetq undo-tree-visualizer-timestamps t)
   (csetq undo-tree-auto-save-history t)
-  (csetq undo-tree-history-directory-alist `(("." . ,(expand-file-name "undo-tree" user-cache-directory))))
 
   (global-undo-tree-mode t)
 
@@ -728,11 +719,11 @@ See `user-rg-type-aliases' for more details."
 (require 'dabbrev)
 (csetq dabbrev-case-replace nil)
 (csetq dabbrev-abbrev-skip-leading-regexp "[^ ]*[<>=*$]")
-(csetq abbrev-file-name (expand-file-name "abbrev_defs" user-cache-directory))
 (add-hook 'find-file-hook (lambda () (abbrev-mode -1)))
 
 (use-package yasnippet
   :ensure t
+  :diminish yas-minor-mode
   :config
   (yas-reload-all)
   (add-hook 'prog-mode-hook #'yas-minor-mode))
@@ -784,19 +775,12 @@ See `user-rg-type-aliases' for more details."
          ("C-c m n" . mc/skip-to-next-like-this)
          ("C-c m p" . mc/skip-to-previous-like-this)
          ("C-c m C-a" . mc/edit-beginnings-of-lines)
-         ("C-c m C-e" . mc/edit-end-of-lines))
-  :init
-  (csetq mc/list-file (expand-file-name ".mc-lists.el" user-cache-directory)))
+         ("C-c m C-e" . mc/edit-end-of-lines)))
 
 (use-package projectile
   :ensure t
   :diminish projectile-mode
   :init
-  (csetq projectile-cache-file
-         (expand-file-name "projectile.cache" user-cache-directory))
-  (csetq projectile-known-projects-file
-         (expand-file-name "projectile-bookmarks.eld" user-cache-directory))
-
   (csetq projectile-project-root-files-bottom-up
          '(".projectile" ".git" ".hg"))
 
@@ -818,8 +802,6 @@ See `user-rg-type-aliases' for more details."
 (use-package smex
   :ensure t
   :defer t
-  :init
-  (csetq smex-save-file (expand-file-name "smex-items" user-cache-directory))
   :config
   (smex-initialize))
 
@@ -1094,8 +1076,7 @@ Taken from http://stackoverflow.com/a/3072831/355252."
 
 ;; imenu
 (use-package imenu
-  :bind (:map user-keys-minor-mode-map
-         ("M-i" . imenu))
+  :bind ("M-i" . imenu)         ;; allow ivy to override it
   :init
   (csetq imenu-auto-rescan t)
   (csetq imenu-auto-rescan-maxout (* 1024 1024))

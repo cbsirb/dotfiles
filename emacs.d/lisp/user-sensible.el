@@ -49,7 +49,6 @@ _SWITCH should be 'diff'."
 (set-language-environment "UTF-8")
 
 ;; More sane defaults
-(csetq backup-directory-alist `((".*" . ,(expand-file-name ".backup" user-cache-directory))))
 (csetq backup-by-copying t)
 (csetq delete-old-versions t)
 (csetq echo-keystrokes 0.1)

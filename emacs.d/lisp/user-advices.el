@@ -6,14 +6,11 @@
 
 ;;; Code:
 
-(defvar yank-indent-modes '(LaTeX-mode
-                            TeX-mode)
+(defvar yank-indent-modes '(LaTeX-mode TeX-mode nxml-mode)
   "Modes in which to indent regions that are yanked (or yank-popped).")
-(make-variable-buffer-local 'yank-indent-modes)
 
 (defvar yank-advised-indent-threshold 10000
   "Threshold (# chars) over which indentation does not automatically occur.")
-(make-variable-buffer-local 'yank-advised-indent-threshold)
 
 (defun yank-advised-indent-function (beg end)
   "Do indentation, as long as the region isn't too large.
