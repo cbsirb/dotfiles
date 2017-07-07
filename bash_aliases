@@ -49,3 +49,5 @@ alias ec=$EMACS_CLIENT
 alias ecd='emacs --daemon'
 alias eck='emacsclient -e "(kill-emacs)"'
 alias magit='$EMACS_CLIENT -e "(magit-status \"$(git rev-parse --show-toplevel)\")"'
+
+alias dns='ipconfig.exe /all | grep -Eoz "DNS Servers[^\r\n]+[\r\n]+(?(?=   )\s+[^\r\n]+[\r\n]+|)+" | grep -Eoz "([0-9]{1,3}\.){3}[0-9]{1,3}" | xclip && sudo vim /etc/resolv.conf'

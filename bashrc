@@ -106,7 +106,6 @@ if [ -f ~/.bash_aliases ]; then
   . ~/.bash_aliases
 fi
 
-# Functions definitions
 if [ -f ~/.bash_functions ]; then
   . ~/.bash_functions
 fi

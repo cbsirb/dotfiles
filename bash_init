@@ -1,7 +1,13 @@
 xrdb -merge ~/.Xresources
 
-# PATH=$PATH:/usr/local/sbin:/usr/sbin:/sbin:~/bin
-PATH=~/.local/bin:$PATH:~/bin:~/.cargo/bin
+# Don't pollute path if not needed
+if [[ ! "$PATH" == *"$HOME/.cargo/bin"* ]]; then
+    export PATH="$PATH:$HOME/.cargo/bin"
+fi
+
+if [[ ! "$PATH" == *"$HOME/bin"* ]]; then
+    export PATH="$PATH:$HOME/bin"
+fi
 
 # finally, start cron if needed
 # _discarded=$(pgrep cron)

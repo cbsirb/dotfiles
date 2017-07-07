@@ -36,7 +36,7 @@ Plug 'kana/vim-textobj-indent' " i
 Plug 'sgur/vim-textobj-parameter' " ,
 
 " Allow the distro to take care of it (if it can)
-if !has('win32') && !executable('fzf')
+if !has('win32')
   Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
 endif
 

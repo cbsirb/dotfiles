@@ -27,5 +27,5 @@ export LESS_TERMCAP_us=$'\E[01;32m'
 export EMACS_CLIENT='emacsclient --alternate-editor= -c'
 
 export EDITOR=vim
-export VISUAL=$EMACS_CLIENT
+# export VISUAL=$EMACS_CLIENT
 export BROWSER=firefox
