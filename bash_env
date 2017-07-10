@@ -1,3 +1,5 @@
+#!/bin/bash
+
 if [ -z "$DISPLAY" ]; then
   export DISPLAY=:0.0
 fi
@@ -10,6 +12,8 @@ export FZF_DEFAULT_COMMAND='rg --files --no-ignore --hidden --follow --glob "!.g
 
 # To apply the command to CTRL-T as well
 export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
+
+export FZF_DEFAULT_OPTS='--height 30%'
 
 export LESSOPEN='|/usr/bin/lesspipe.sh %s 2>&-'
 export LESS='-i -w -z-4 -M -X -F -R -P%t?f%f \

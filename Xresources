@@ -59,6 +59,8 @@ xterm*scrollTtyOutput: false
 
 xterm*saveLines: 10000
 xterm*bellIsUrgent: true
+xterm*disallowedWindowOps: 20,21,SetXprop
+
 
 ! URxvt config
 URxvt*depth: 32

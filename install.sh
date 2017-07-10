@@ -61,9 +61,9 @@ install_dotfile "tmux.conf"
 
 install_dotfile "gdbinit"
 
-backup_dir "$HOME/.tmux.d"
-mkdir "$HOME/.tmux.d"
-git clone https://github.com/tmux-plugins/tmux-yank "$HOME/.tmux.d/tmux-yank"
+# backup_dir "$HOME/.tmux.d"
+# mkdir "$HOME/.tmux.d"
+# git clone https://github.com/tmux-plugins/tmux-yank "$HOME/.tmux.d/tmux-yank"
 
 install_dotfile "Xresources"
 
@@ -76,12 +76,12 @@ if [ ! -d "$HOME/.config" ]; then
     mkdir "$HOME/.config"
 fi
 
-install_config_dir "i3"
-install_config_dir "conky"
-install_config_dir "ncmpcpp"
-install_config_dir "mpd"
-if [ ! -d "$HOME/.config/mpd/playlists" ]; then
-    mkdir "$HOME/.config/mpd/playlists"
-fi
+# install_config_dir "i3"
+# install_config_dir "conky"
+# install_config_dir "ncmpcpp"
+# install_config_dir "mpd"
+# if [ ! -d "$HOME/.config/mpd/playlists" ]; then
+#     mkdir "$HOME/.config/mpd/playlists"
+# fi
 
 
