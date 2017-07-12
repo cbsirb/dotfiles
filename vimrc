@@ -43,6 +43,7 @@ if !has('win32')
 endif
 
 " Colorschemes
+Plug 'romainl/apprentice'
 Plug 'morhetz/gruvbox'
 
 call plug#end()
@@ -162,7 +163,7 @@ if !isdirectory(expand(&undodir))
 endif
 
 set background=dark
-colorscheme gruvbox
+colorscheme apprentice
 
 set colorcolumn=+1
 set cursorline
