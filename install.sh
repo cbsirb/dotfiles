@@ -28,22 +28,28 @@ function backup_dir {
     fi
 }
 
+function install_executable {
+    echo Installing file $1
+    backup_file "$HOME/.local/bin/$(basename $1)"
+    ln -s "$(realpath $1)" "$HOME/.local/bin/$(basename $1)"
+}
+
 function install_dotfile {
     echo Installing file $1
-    backup_file "$HOME/.$1"
-    ln -s "$(realpath $1)" "$HOME/.$1"
+    backup_file "$HOME/.$(basename $1)"
+    ln -s "$(realpath $1)" "$HOME/.$(basename $1)"
 }
 
 function install_dotdir {
     echo Installing directory $1
-    backup_dir "$HOME/.$1"
-    ln -s "$(realpath $1)" "$HOME/.$1"
+    backup_dir "$HOME/.$(basename $1)"
+    ln -s "$(realpath $1)" "$HOME/.$(basename $1)"
 }
 
 function install_config_dir {
     echo Installing $1
-    backup_dir "$HOME/.config/$1"
-    ln -s "$(realpath $1)" "$HOME/.config/$1"
+    backup_dir "$HOME/.config/$(basename $1)"
+    ln -s "$(realpath $1)" "$HOME/.config/$(basename $1)"
 }
 
 install_dotfile "bash_aliases"
@@ -61,13 +67,9 @@ install_dotfile "tmux.conf"
 
 install_dotfile "gdbinit"
 
-# backup_dir "$HOME/.tmux.d"
-# mkdir "$HOME/.tmux.d"
-# git clone https://github.com/tmux-plugins/tmux-yank "$HOME/.tmux.d/tmux-yank"
-
 install_dotfile "Xresources"
 
-install_dotdir "vim"
+#install_dotdir "vim"
 install_dotfile "vimrc"
 
 install_dotdir "emacs.d"
@@ -75,6 +77,11 @@ install_dotdir "emacs.d"
 if [ ! -d "$HOME/.config" ]; then
     mkdir "$HOME/.config"
 fi
+
+for xfile in bin/*
+do
+    install_executable $xfile
+done
 
 # install_config_dir "i3"
 # install_config_dir "conky"
