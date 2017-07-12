@@ -13,7 +13,7 @@ URxvt.boldFont: xft:Hack:size=11:bold
 URxvt.italicFont: xft:Hack:size=11:italic
 URxvt.boldItalicFont: xft:Hack:size=11:bold:italic
 
-xterm*faceName: Iosevka Term:size=11
+xterm*faceName: xft:Iosevka:size=11
 
 ! No colorscheme (white text, black background)
 ! *background: #000000

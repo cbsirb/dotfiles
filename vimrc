@@ -75,6 +75,8 @@ else
   endif
 endif
 
+set lazyredraw
+
 set laststatus=2
 set showcmd
 set switchbuf=useopen
@@ -298,3 +300,8 @@ nmap <silent> <C-j> <Plug>(ale_next_wrap)
 nnoremap <F5> :ME <C-z>
 
 let g:clang_library_path = '/usr/lib/llvm-3.8/lib/libclang-3.8.so.1'
+
+let g:ale_linters = {
+\   'python': ['pylint'],
+\}
+let g:ale_python_pylint_executable = 'pylint'
