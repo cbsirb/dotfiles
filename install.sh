@@ -69,8 +69,9 @@ install_dotfile "gdbinit"
 
 install_dotfile "Xresources"
 
-#install_dotdir "vim"
+install_dotdir "vim"
 install_dotfile "vimrc"
+install_dotfile "gvimrc"
 
 install_dotdir "emacs.d"
 

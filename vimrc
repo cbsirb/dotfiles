@@ -61,19 +61,8 @@ endif
 
 runtime macros/matchit.vim
 
-if has('win32')
-  set guifont=Iosevka:h11
-else
-  set guifont=Iosevka\ 11
-endif
-
-if has('gui_running')
-  set guioptions=egc "-TmLr
-  set lines=45 columns=125
-else
-  if has('mouse_sgr')
+if !has('gui_running') && has('mouse_sgr')
     set ttymouse=sgr
-  endif
 endif
 
 set lazyredraw
@@ -183,8 +172,6 @@ if !has('gui_running')
       let &t_EI = "\<Esc>[2 q"
     endif
   endif
-else
-  set guiheadroom=0
 endif
 
 if executable("rg")
@@ -301,6 +288,7 @@ nmap <silent> <C-j> <Plug>(ale_next_wrap)
 nnoremap <F5> :ME <C-z>
 
 let g:clang_library_path = '/usr/lib/llvm-3.8/lib/libclang-3.8.so.1'
+let g:clang_snippets = 1
 
 let g:ale_linters = {
 \   'python': ['pylint'],
