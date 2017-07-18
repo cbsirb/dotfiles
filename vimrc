@@ -30,20 +30,22 @@ Plug 'Rip-Rip/clang_complete'
 
 " When I start writing html again
 " Plug 'rstacruz/sparkup'
+Plug 'elzr/vim-json'
 
 Plug 'w0rp/ale'
+
+Plug 'SirVer/ultisnips'
+Plug 'honza/vim-snippets'
 
 Plug 'kana/vim-textobj-user'
 Plug 'kana/vim-textobj-indent' " i
 Plug 'sgur/vim-textobj-parameter' " ,
 
-" Allow the distro to take care of it (if it can)
 if !has('win32')
   Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
 endif
 
 " Colorschemes
-Plug 'romainl/apprentice'
 Plug 'morhetz/gruvbox'
 
 call plug#end()
@@ -152,7 +154,7 @@ if !isdirectory(expand(&undodir))
 endif
 
 set background=dark
-colorscheme apprentice
+colorscheme gruvbox
 
 set colorcolumn=+1
 set cursorline
@@ -270,9 +272,8 @@ let g:netrw_home = '~/.vim/cache/'
 
 let g:qf_mapping_ack_style = 1
 
-let g:ale_lint_on_text_changed = 'normal'
+let g:ale_lint_on_text_changed = 'never'
 let g:ale_lint_on_save = 1
-let g:ale_lint_on_insert_leave = 1
 
 let g:ale_linters = {
       \ 'cpp': ['gcc'],
@@ -282,15 +283,20 @@ let g:ale_linters = {
 let g:ale_statusline_format = ["\u2717 %d", "\u271a %d", "\u2713 ok"]
 let g:ale_echo_msg_format = '[%linter%] %s [%severity%]'
 
-nmap <silent> <C-k> <Plug>(ale_previous_wrap)
-nmap <silent> <C-j> <Plug>(ale_next_wrap)
+nmap <silent> <space>k <Plug>(ale_previous_wrap)
+nmap <silent> <space>j <Plug>(ale_next_wrap)
 
 nnoremap <F5> :ME <C-z>
 
-let g:clang_library_path = '/usr/lib/llvm-3.8/lib/libclang-3.8.so.1'
-let g:clang_snippets = 1
+let g:clang_library_path = '/usr/lib64/libclang.so.4'
+let g:clang_snippets = 0
 
 let g:ale_linters = {
 \   'python': ['pylint'],
 \}
 let g:ale_python_pylint_executable = 'pylint'
+
+let g:UltiSnipsEditSplit="vertical"
+let g:UltiSnipsSnippetsDir='~/.vim'
+
+let g:vim_json_syntax_conceal = 0

@@ -9,4 +9,7 @@ set bind-tty-special-chars off
 "\eOA": history-search-backward
 "\eOB": history-search-forward
 
+"\eOc": forward-word
+"\eOd": backward-word
+
 "\C-w": backward-kill-word

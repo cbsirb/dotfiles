@@ -8,10 +8,10 @@ Xft.hintstyle: hintfull
 Xft.lcdfilter: lcddefault
 Xft.rgba: rgba
 
-URxvt.font: xft:Hack:size=11
-URxvt.boldFont: xft:Hack:size=11:bold
-URxvt.italicFont: xft:Hack:size=11:italic
-URxvt.boldItalicFont: xft:Hack:size=11:bold:italic
+URxvt.font: xft:Iosevka:size=11
+URxvt.boldFont: xft:Iosevka:size=11:bold
+URxvt.italicFont: xft:Iosevka:size=11:italic
+URxvt.boldItalicFont: xft:Iosevka:size=11:bold:italic
 
 xterm*faceName: xft:Iosevka:size=11
 

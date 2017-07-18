@@ -1,4 +1,5 @@
 set guioptions=egc "-TmLr
+
 set lines=45 columns=125
 
 set guiheadroom=0

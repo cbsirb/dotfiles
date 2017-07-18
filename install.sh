@@ -52,6 +52,14 @@ function install_config_dir {
     ln -s "$(realpath $1)" "$HOME/.config/$(basename $1)"
 }
 
+if [ ! -d "$HOME/.local" ]; then
+    mkdir "$HOME/.local"
+fi
+
+if [ ! -d "$HOME/.local/bin" ]; then
+    mkdir "$HOME/.local/bin"
+fi
+
 install_dotfile "bash_aliases"
 install_dotfile "bash_env"
 install_dotfile "bash_functions"
