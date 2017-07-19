@@ -8,7 +8,7 @@ if [ ! -d ".bak" ]; then
     mkdir .bak
 fi
 
-function backup_file {
+backup_file() {
     if [ ! -h "$1" ] && [ -f "$1" ]; then
         mv "$1" .bak/
     elif [ -h "$1" ]; then
@@ -16,7 +16,7 @@ function backup_file {
     fi
 }
 
-function backup_dir {
+backup_dir() {
     if [ ! -h "$1" ] && [ -d "$1" ]; then
         if [ -d ".bak/$(basename $1)" ]; then
             echo "Warning: removing old backup for $(basename $1)"
@@ -28,25 +28,25 @@ function backup_dir {
     fi
 }
 
-function install_executable {
+install_executable() {
     echo Installing file $1
     backup_file "$HOME/.local/bin/$(basename $1)"
     ln -s "$(realpath $1)" "$HOME/.local/bin/$(basename $1)"
 }
 
-function install_dotfile {
+install_dotfile() {
     echo Installing file $1
     backup_file "$HOME/.$(basename $1)"
     ln -s "$(realpath $1)" "$HOME/.$(basename $1)"
 }
 
-function install_dotdir {
+install_dotdir() {
     echo Installing directory $1
     backup_dir "$HOME/.$(basename $1)"
     ln -s "$(realpath $1)" "$HOME/.$(basename $1)"
 }
 
-function install_config_dir {
+install_config_dir() {
     echo Installing $1
     backup_dir "$HOME/.config/$(basename $1)"
     ln -s "$(realpath $1)" "$HOME/.config/$(basename $1)"
