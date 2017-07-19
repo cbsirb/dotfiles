@@ -10,4 +10,5 @@ setlocal expandtab
 
 setlocal tw=110
 
-inoremap <C-l> ->
+inoremap <buffer> <C-l> ->
+noremap <buffer> <space>c  :silent! exe "make " . expand("%:r") . ".o " \| redraw!<CR>
