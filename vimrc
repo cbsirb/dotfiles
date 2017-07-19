@@ -275,9 +275,12 @@ let g:qf_mapping_ack_style = 1
 let g:ale_lint_on_text_changed = 'never'
 let g:ale_lint_on_save = 1
 
+let g:ale_python_pylint_executable = 'pylint'
+
 let g:ale_linters = {
       \ 'cpp': ['gcc'],
-      \ 'c': ['gcc']
+      \ 'c': ['gcc'],
+      \ 'python': ['pylint']
 \}
 
 let g:ale_statusline_format = ["\u2717 %d", "\u271a %d", "\u2713 ok"]
@@ -290,11 +293,6 @@ nnoremap <F5> :ME <C-z>
 
 let g:clang_library_path = '/usr/lib64/libclang.so.4'
 let g:clang_snippets = 0
-
-let g:ale_linters = {
-\   'python': ['pylint'],
-\}
-let g:ale_python_pylint_executable = 'pylint'
 
 let g:UltiSnipsEditSplit="vertical"
 let g:UltiSnipsSnippetsDir='~/.vim'
