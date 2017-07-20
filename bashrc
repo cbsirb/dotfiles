@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # If not running interactively, don't do anything
-case $- in
+case "$-" in
     *i*) ;;
       *) return;;
 esac
@@ -9,8 +9,6 @@ esac
 # if [ -z "$DISPLAY" ] && [ "$(fgconsole)" -eq 1 ]; then
 #     exec startx
 # fi
-
-# fortune showerthoughts
 
 # don't put duplicate lines or lines starting with space in the history.
 export HISTCONTROL=ignoreboth:erasedups
@@ -20,6 +18,7 @@ shopt -s histappend
 
 # reedit a history substitution line if it failed
 shopt -s histreedit
+
 # edit a recalled history line before executing
 shopt -s histverify
 
@@ -48,12 +47,8 @@ history() {                  #5
 
 # set a fancy prompt (non-color, unless we know we "want" color)
 case "$TERM" in
-    xterm-color) color_prompt=yes;;
-    xterm-256color) color_prompt=yes;;
-    screen-256color*) color_prompt=yes;;
-    tmux-256color*) color_prompt=yes;;
+    *-256*color*) color_prompt=yes;;
     eterm-color) color_prompt=yes;;
-    rxvt-unicode-256color) color_prompt=yes;;
 esac
 
 if [ -n "$force_color_prompt" ]; then
@@ -70,14 +65,21 @@ fi
 export PROMPT_DIRTRIM=3
 PROMPT_COMMAND=_bash_history_sync
 
-if [ -f /usr/share/git/completion/git-prompt.sh ]; then
-    source /usr/share/git/completion/git-prompt.sh
-elif [ -f /usr/share/git/git-prompt.sh ]; then
-    source /usr/share/git/git-prompt.sh
-else
+# if [ -f /usr/share/git/completion/git-prompt.sh ]; then
+#     source /usr/share/git/completion/git-prompt.sh
+# elif [ -f /usr/share/git/git-prompt.sh ]; then
+#     source /usr/share/git/git-prompt.sh
+# fi
+if ! type -t __git_ps1 >/dev/null 2>&1; then
     function __git_ps1 {
         git branch 2> /dev/null | sed -e '/^[^*]/d' -e 's/* \(.*\)/ (\1)/'
     }
+fi
+
+if [ -d /usr/share/cmake/completions ]; then
+    for cmakefile in /usr/share/cmake/completions/*; do
+        source "$cmakefile"
+    done
 fi
 
 export GIT_PS1_SHOWUPSTREAM=verbose
@@ -98,21 +100,10 @@ else
 fi
 unset color_prompt force_color_prompt
 
-if [ -f ~/.bash_env ]; then
-   . ~/.bash_env
-fi
-
-if [ -f ~/.bash_aliases ]; then
-  . ~/.bash_aliases
-fi
-
-if [ -f ~/.bash_functions ]; then
-  . ~/.bash_functions
-fi
-
-if [ -f ~/.bash_init ]; then
-  source ~/.bash_init
-fi
+[[ -f ~/.bash_env ]] && source ~/.bash_env
+[[ -f ~/.bash_aliases ]] && source ~/.bash_aliases
+[[ -f ~/.bash_functions ]] && source ~/.bash_functions
+[[ -f ~/.bash_init ]] && source ~/.bash_init
 
 # enable programmable completion features (you don't need to enable
 # this, if it's already enabled in /etc/bash.bashrc and /etc/profile
@@ -165,8 +156,6 @@ shopt -s complete_fullquote
 # check the window size after each command and, if necessary,
 # update the values of LINES and COLUMNS.
 shopt -s checkwinsize
-
-# PATH=$PATH:/usr/local/sbin:/usr/sbin:/sbin:~/bin
 
 # FZF options
 if  [ -x /usr/bin/fzf ]; then

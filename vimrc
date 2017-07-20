@@ -226,7 +226,10 @@ nnoremap gb :ls<CR>:b<Space>
 command! -nargs=+ -complete=file_in_path -bar Grep  silent! grep! <args> | redraw! | copen
 command! -nargs=+ -complete=file_in_path -bar LGrep silent! lgrep! <args> | redraw! | copen
 
+command! -nargs=+ Silent execute 'silent <args>' | redraw!
+
 nnoremap <space>g :Grep <C-r><C-w>
+noremap <space>c :Silent make -j4<CR>
 
 xnoremap <silent> <space>g :<C-u>let cmd = "Grep " . visual#GetSelection() <bar>
                         \ call histadd("cmd", cmd) <bar>

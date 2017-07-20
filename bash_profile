@@ -1,3 +1,3 @@
 #!/bin/bash
 
-[[ -f ~/.bashrc ]] && . ~/.bashrc
+# [[ -f ~/.bashrc ]] && . ~/.bashrc
