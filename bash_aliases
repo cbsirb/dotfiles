@@ -34,7 +34,7 @@ alias tmux="tmux -2"
 
 # And now for new ones
 alias gs='git status'
-alias gl='pretty_git_log -100'
+alias gl='git l -100'
 alias gh='show_git_head'
 alias gc='git checkout'
 alias gcd='git checkout devel'
