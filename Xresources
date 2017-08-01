@@ -52,7 +52,7 @@ xterm*faceName: xft:Iosevka:size=11
 xterm*termName: xterm-256color
 xterm*locale: true
 xterm*metaSendsEscape: true
-XTerm*eightBitInput: false
+xterm*eightBitInput: false
 
 xterm*scrollTtyKeypress: true
 xterm*scrollTtyOutput: false
@@ -60,7 +60,6 @@ xterm*scrollTtyOutput: false
 xterm*saveLines: 10000
 xterm*bellIsUrgent: true
 xterm*disallowedWindowOps: 20,21,SetXprop
-
 
 ! URxvt config
 URxvt*depth: 32
@@ -93,7 +92,5 @@ URxvt*scrollTtyKeypress: true
 URxvt*secondaryScreen: 1
 URxvt*secondaryScroll: 0
 
-! URxvt.perl-ext-common: default,matcher
-! URxvt.url-launcher: /usr/bin/xdg-open
-! URxvt.matcher.button: 1
-! URxvt.matcher.rend.0: Uline Bold fg5
+URxvt.perl-ext-common:
+URxvt.perl-ext:
