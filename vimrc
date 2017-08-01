@@ -4,11 +4,6 @@ if has('win32')
   set rop=type:directx
 endif
 
-" Force the use of py3
-if exists('py2') && has('python')
-elseif has('python3')
-endif
-
 call plug#begin('~/.vim/plugged')
 Plug 'tpope/vim-commentary'
 Plug 'tpope/vim-endwise'
@@ -26,11 +21,12 @@ Plug 'romainl/vim-tinyMRU'
 
 Plug 'tommcdo/vim-lion'
 
-Plug 'Rip-Rip/clang_complete'
+" Plug 'Rip-Rip/clang_complete'
 
 " When I start writing html again
-" Plug 'rstacruz/sparkup'
+Plug 'rstacruz/sparkup'
 Plug 'elzr/vim-json'
+Plug 'Vimjas/vim-python-pep8-indent'
 
 Plug 'w0rp/ale'
 
@@ -50,10 +46,6 @@ Plug 'morhetz/gruvbox'
 
 call plug#end()
 
-if !exists('g:loaded_fzf') && filereadable('/usr/share/vim/vimfiles/plugin/fzf.vim')
-  source /usr/share/vim/vimfiles/plugin/fzf.vim
-endif
-
 if has("patch2111") || v:version >= 800
   unlet! skip_defaults_vim
   source $VIMRUNTIME/defaults.vim
@@ -70,7 +62,6 @@ endif
 set lazyredraw
 
 set laststatus=2
-set showcmd
 set switchbuf=useopen
 set autoread
 
@@ -100,17 +91,16 @@ set wildignorecase
 set wildmode=longest:full,full
 set wildcharm=<C-z>
 
+" Will append whatever necessary per project (in the local .vimrc)
 set path=.,**
 
 set statusline=%*%<\ %n\ %r%m%f
 set statusline+=\ %l:%c\ [%{ALEGetStatusLine()}]
 set statusline+=%=%w%q%y[%{&ff}][%{&enc}]
 
-set timeout
 set timeoutlen=1000
 set ttimeoutlen=100
 
-set foldmethod=manual
 set nofoldenable
 
 set splitbelow
@@ -137,13 +127,9 @@ let &listchars = "tab:\u00bb\u00b7,trail:\u2022,extends:\u00bb,precedes:\u00ab,n
 " let &fillchars = "vert:\u2591,fold:\u00b7"
 set list
 
-set viminfo='33,<200,s100,h
+" set viminfo='100,<200,s100,h
 set virtualedit=block
 set ttyfast
-
-if !isdirectory(expand(&undodir))
-  call mkdir(expand(&undodir), "p")
-endif
 
 " undo options
 set undodir=~/.vim/cache/undo/
@@ -163,16 +149,17 @@ if !has('gui_running')
   if has('termguicolors')
     if $TERM ==# 'tmux-256color' || $TERM ==# 'xterm-256color' || $TERM ==# 'screen-256color'
       set t_8f=[38;2;%lu;%lu;%lum " Needed in tmux
-      set t_8b=[48;2;%lu;%lu;%lum " Ditto
+      set t_8b=[48;2;%lu;%lu;%lum " Same as above
       set termguicolors
     endif
 
-    if !has('win32')
-      " set cursor shapes by mode in tmux
-      let &t_SI = "\<Esc>[6 q"
-      let &t_SR = "\<Esc>[4 q"
-      let &t_EI = "\<Esc>[2 q"
-    endif
+    " Disable for now (some lag?)
+    " if !has('win32')
+    "   " set cursor shapes by mode in tmux
+    "   let &t_SI = "\<Esc>[6 q"
+    "   let &t_SR = "\<Esc>[4 q"
+    "   let &t_EI = "\<Esc>[2 q"
+    " endif
   endif
 endif
 
@@ -187,19 +174,25 @@ endif
 augroup VIMRC
   autocmd!
 
-  " This is annoying
   autocmd VimEnter,GUIEnter * set visualbell t_vb=
 
-  " Save options
-  autocmd BufLeave * let b:winview = winsaveview()
-  autocmd BufEnter * if exists('b:winview') | call winrestview(b:winview) | endif
+  autocmd BufLeave * if !&diff | let b:winview = winsaveview() | endif
+  autocmd BufEnter * if exists('b:winview') && !&diff | call winrestview(b:winview) | unlet! b:winview | endif
 
-  " No cursorline in inactive buffers
   autocmd VimEnter,WinEnter,BufWinEnter,FocusGained,CmdwinEnter * setlocal cursorline
   autocmd WinLeave,FocusLost,CmdwinLeave * setlocal nocursorline
 augroup END
 
-xnoremap <space>y "+y
+
+command! -nargs=+ -complete=file_in_path -bar Grep  silent! grep! <args> | redraw! | copen
+command! -nargs=+ -complete=file_in_path -bar LGrep silent! lgrep! <args> | redraw! | copen
+
+command! -nargs=+ Silent execute 'silent <args>' | redraw!
+
+command! SC vnew | setlocal nobuflisted buftype=nofile bufhidden=wipe noswapfile
+
+command! -nargs=* -bang ReplaceSymbolInFunction silent call func#replace_symbol_in_function(<f-args>, '<bang>')
+
 nnoremap Y y$
 
 nnoremap <silent> <space>0 :call clearmatches()<cr>
@@ -221,22 +214,45 @@ nnoremap <space>v :vert sfind *
 nnoremap <space>F :find <C-R>=fnameescape(expand('%:p:h')).'/**/*'<CR>
 nnoremap <space>S :sfind <C-R>=fnameescape(expand('%:p:h')).'/**/*'<CR>
 nnoremap <space>V :vert sfind <C-R>=fnameescape(expand('%:p:h')).'/**/*'<CR>
-nnoremap gb :ls<CR>:b<Space>
 
-command! -nargs=+ -complete=file_in_path -bar Grep  silent! grep! <args> | redraw! | copen
-command! -nargs=+ -complete=file_in_path -bar LGrep silent! lgrep! <args> | redraw! | copen
+nnoremap <space>j :tjump /
 
-command! -nargs=+ Silent execute 'silent <args>' | redraw!
-
-nnoremap <space>g :Grep <C-r><C-w>
-noremap <space>c :Silent make -j4<CR>
+nnoremap <space>g :Grep '\b<C-r><C-w>\b' .<CR>
+nnoremap <space>G :execute "Grep '\\b<C-r><C-w>\\b' " . expand('%:p:h')
+nnoremap <space>c :Silent make -j4
 
 xnoremap <silent> <space>g :<C-u>let cmd = "Grep " . visual#GetSelection() <bar>
                         \ call histadd("cmd", cmd) <bar>
                         \ execute cmd<CR>
 
+xnoremap <silent> <space>G :<C-u>let cmd = "Grep " . visual#GetSelection() . " " . expand('%:p:h') <bar>
+                        \ call histadd("cmd", cmd) <bar>
+                        \ execute cmd<CR>
+
 nnoremap <silent> <C-l> :set hlsearch!<CR>
+
 nnoremap <BS> <C-^>
+
+nnoremap <silent> <space>a :call alternate#alternate_file()<CR>
+
+inoremap <silent> <F3> <C-o>:call tags#PreviewTag()<CR>
+inoremap <silent> <F4> <C-o>:pclose<CR>
+
+nnoremap <silent> <F3> :call tags#PreviewTag()<CR>
+nnoremap <silent> <F4> :pclose<CR>
+
+inoremap {<CR> {<CR>}<Esc>O
+inoremap {; {<CR>};<Esc>O
+inoremap {, {<CR>},<Esc>O
+inoremap [<CR> [<CR>]<Esc>O
+inoremap [; [<CR>];<Esc>O
+inoremap [, [<CR>],<Esc>O
+
+cnoremap <expr> <Tab>   getcmdtype() == "/" \|\| getcmdtype() == "?" ? "<CR>/<C-r>/" : "<C-z>"
+cnoremap <expr> <S-Tab> getcmdtype() == "/" \|\| getcmdtype() == "?" ? "<CR>?<C-r>/" : "<S-Tab>"
+
+nnoremap <Space>% :%s/\<<C-r>=expand('<cword>')<CR>\>/
+nnoremap <Space>r :ReplaceSymbolInFunction <C-R><C-W> 
 
 nmap <space>q <Plug>(qf_qf_toggle_stay)
 nmap <space>l <Plug>(qf_loc_toggle_stay)
@@ -259,6 +275,8 @@ nmap <space>l <Plug>(qf_loc_toggle_stay)
 
 " nnoremap <silent> n :call <SID>nice_next('n')<cr>
 " nnoremap <silent> N :call <SID>nice_next('N')<cr>
+
+" Plugin configuration
 
 augroup FUGITIVE
   autocmd!
@@ -289,8 +307,9 @@ let g:ale_linters = {
 let g:ale_statusline_format = ["\u2717 %d", "\u271a %d", "\u2713 ok"]
 let g:ale_echo_msg_format = '[%linter%] %s [%severity%]'
 
-nmap <silent> <space>k <Plug>(ale_previous_wrap)
-nmap <silent> <space>j <Plug>(ale_next_wrap)
+nmap <silent> <space>ek <Plug>(ale_previous_wrap)
+nmap <silent> <space>ej <Plug>(ale_next_wrap)
+nmap <silent> <space>ee <Plug>(ale_lint)
 
 nnoremap <F5> :ME <C-z>
 
@@ -301,3 +320,5 @@ let g:UltiSnipsEditSplit="vertical"
 let g:UltiSnipsSnippetsDir='~/.vim'
 
 let g:vim_json_syntax_conceal = 0
+
+let g:pymode_indent = 0

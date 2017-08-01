@@ -12,4 +12,4 @@ setlocal cinoptions=(0
 " Keep python3 for now
 setlocal omnifunc=python3complete#Complete
 
-setlocal tw=78
+setlocal tw=99

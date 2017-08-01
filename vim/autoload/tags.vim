@@ -1,90 +1,88 @@
-function! s:showInPreview(list)
+function! s:showInPreview(list, tagname)
   if len(a:list) == 0
     return
   endif
 
-  if len(a:list) > 1
-    let l:ulist = filter(copy(a:list), 'index(a:list, v:val, v:key+1)==-1')
-  endif
+  let pbuf = bufnr('[Tag Preview]', 1)
 
-  let l:pbuf = bufnr('*tag-preview*', 1)
-
-  let l:curft = &filetype
-  exec "sbuffer " . l:pbuf
+  let curft = &filetype
+  exec "sbuffer " . pbuf
   exec "%d"
-  exec "resize " . (len(l:ulist) * 2)
-  "exec ":set filetype=" . l:curft
 
-  exec ":setlocal filetype=" . l:curft
+  " make the tag preview filetype the same as the source file
+  exec ":setlocal filetype=" . curft
   setlocal pvw
   setlocal buftype=nofile
-  setlocal bufhidden=hide
+  setlocal bufhidden=wipe
   setlocal noswapfile
   setlocal nonumber
   setlocal showbreak=
+  setlocal nobuflisted
 
-  call append(0, l:ulist)
+  if len(a:list) > 1
+    let ulist = filter(copy(a:list), 'index(a:list, v:val, v:key+1)==-1')
+  else
+    let ulist = a:list
+  endif
+
+  call append(0, ulist)
+
+  exec "resize " . (len(ulist))
   normal gg
+  exec "NoMatchParen"
   exec "wincmd p"
 endfunction
 
 
 function! tags#PreviewTag()
-  execute "normal! mt"
+  let window = winsaveview()
 
-  let l:start_line = line(".")
-  let l:stop_line = line(".") - 7
-  if l:stop_line < 0
-    let l:stop_line = 0
+  let start_line = line(".")
+  let stop_line = line(".") - 10
+  if stop_line < 0
+    let stop_line = 0
   endif
 
-  " if search("(\\|;", "b", l:stop_line) == 0
-  if search(";\\|}\\|=", "b", l:stop_line) == 0
+  " Search backwards for one of: ;{}=
+  " We assume that that's were the current call ends
+  " Should check for comments, but that's beyond my use case
+  if search(";\\|}\\|{\\|=", "b", stop_line) == 0
+    call winrestview(window)
     return
   endif
 
-  if search("(", '', l:start_line) == 0
+  " Search forward for '(' - where the function call starts
+  if search("(", '', start_line) == 0
+    call winrestview(window)
     return
   endif
 
-  if getline(".")[col(".") - 1] == "("
-    execute "normal! b"
+  if getline(".")[col(".") - 1] != "("
+    call winrestview(window)
+    return
+  endif
 
-    let l:curword = expand('<cword>')
-    let l:signatures = []
+  execute "normal! b"
 
-    if index(split(&cinwords, ","), l:curword) >= 0
-      return
+  let curword = expand('<cword>')
+  let signatures = []
+
+  if index(split(&cinwords, ","), curword) >= 0
+    call winrestview(window)
+    return
+  endif
+
+  let tagdict = taglist('^' . curword . '$')
+
+  for line in tagdict
+    if !has_key(line, 'signature')
+      continue
     endif
 
-    let l:tlist = map(split(&tags, ','), 'fnamemodify(v:val, ":p")')
-    let l:tags_files = filter(copy(l:tlist), 'index(l:tlist, v:val, v:key+1)==-1')
+    let signatures = add(signatures, get(line, 'signature'))
+  endfor
 
-    for tf in l:tags_files
-      let l:tpath = findfile(tf)
+  call s:showInPreview(signatures, curword)
 
-      if len(l:tpath) == 0
-        continue
-      endif
-
-      " for line in systemlist('grep -F -w ' . l:curword . ' ' . l:tpath)
-      for line in systemlist('grep -P -w "^' . l:curword . '" ' . l:tpath)
-        let l:sigoff = match(line, 'signature:')
-
-        if l:sigoff != -1
-          let l:sigend = match(line[l:sigoff:], '\t')
-          if l:sigend != -1
-            let l:sigend += l:sigoff - 1
-            let l:signatures = add(l:signatures, line[l:sigoff + 10 : l:sigend])
-          else
-            let l:signatures = add(l:signatures, line[l:sigoff + 10 :])
-          endif
-        endif
-      endfor
-    endfor
-
-    call s:showInPreview(l:signatures)
-  endif
-
-  execute "normal! `t"
+  call winrestview(window)
 endfunction
