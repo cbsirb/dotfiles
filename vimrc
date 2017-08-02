@@ -85,7 +85,7 @@ set wildignore+=*.pyc,*.class,*.sln,*.aps
 set wildignore+=*.vcxproj,*.vcproj,*.sdf,*.filters,*.user
 set wildignore+=*.dll,*.exe,*.pdb,*.lib,*.o,*.db
 set wildignore+=*/.git/**/*,*/.hg/**/*,*/.svn/**/*
-set wildignore+=tags,cscope.*,TAGS
+set wildignore+=cscope.*,TAGS
 set wildignore+=*.tar.*,*.zip,*.rar
 set wildignorecase
 set wildmode=longest:full,full

@@ -3,10 +3,14 @@ function! s:showInPreview(list, tagname)
     return
   endif
 
-  let pbuf = bufnr('[Tag Preview]', 1)
+  let pbuf = bufnr('Tag Preview', 1)
+  echom "pbuf: " . string(pbuf)
 
   let curft = &filetype
+
+  " Switch to preview buffer and clear it
   exec "sbuffer " . pbuf
+  setlocal noreadonly
   exec "%d"
 
   " make the tag preview filetype the same as the source file
@@ -26,6 +30,12 @@ function! s:showInPreview(list, tagname)
   endif
 
   call append(0, ulist)
+
+  setlocal readonly
+
+  if exists("g:loaded_ale") && g:loaded_ale
+    exec "ALEDisable"
+  endif
 
   exec "resize " . (len(ulist))
   normal gg
