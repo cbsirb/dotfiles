@@ -43,6 +43,8 @@ endif
 
 " Colorschemes
 Plug 'morhetz/gruvbox'
+Plug 'romainl/Apprentice'
+
 
 call plug#end()
 
@@ -84,7 +86,9 @@ set wildignore+=*.swp,*.bak
 set wildignore+=*.pyc,*.class,*.sln,*.aps
 set wildignore+=*.vcxproj,*.vcproj,*.sdf,*.filters,*.user
 set wildignore+=*.dll,*.exe,*.pdb,*.lib,*.o,*.db
-set wildignore+=*/.git/**/*,*/.hg/**/*,*/.svn/**/*
+set wildignore+=*/.git/*,*/.hg/*,*/.svn/*
+set wildignore+=.git/*,.hg/*,.svn/*
+set wildignore+=__pycache__/*,*/__pycache__/*
 set wildignore+=cscope.*,TAGS
 set wildignore+=*.tar.*,*.zip,*.rar
 set wildignorecase
@@ -140,26 +144,17 @@ if !isdirectory(expand(&undodir))
 endif
 
 set background=dark
-colorscheme gruvbox
+colorscheme apprentice
 
 set colorcolumn=+1
 set cursorline
 
-if !has('gui_running')
-  if has('termguicolors')
-    if $TERM ==# 'tmux-256color' || $TERM ==# 'xterm-256color' || $TERM ==# 'screen-256color'
-      set t_8f=[38;2;%lu;%lu;%lum " Needed in tmux
-      set t_8b=[48;2;%lu;%lu;%lum " Same as above
-      set termguicolors
-    endif
-
-    " Disable for now (some lag?)
-    " if !has('win32')
-    "   " set cursor shapes by mode in tmux
-    "   let &t_SI = "\<Esc>[6 q"
-    "   let &t_SR = "\<Esc>[4 q"
-    "   let &t_EI = "\<Esc>[2 q"
-    " endif
+if !has('gui_running') && has('termguicolors')
+  if $TERM =~# '-256color' && $TERM !~# 'rxvt'
+    " Needed in tmux
+    let &t_8f = "\<Esc>[38;2;%lu;%lu;%lum"
+    let &t_8b = "\<Esc>[48;2;%lu;%lu;%lum"
+    set termguicolors
   endif
 endif
 
@@ -217,8 +212,8 @@ nnoremap <space>V :vert sfind <C-R>=fnameescape(expand('%:p:h')).'/**/*'<CR>
 
 nnoremap <space>j :tjump /
 
-nnoremap <space>g :Grep '\b<C-r><C-w>\b' .<CR>
-nnoremap <space>G :execute "Grep '\\b<C-r><C-w>\\b' " . expand('%:p:h')
+nnoremap <space>g :Grep -w '<C-r><C-w>' .<CR>
+nnoremap <space>G :execute "Grep -w '<C-r><C-w>' " . expand('%:p:h')<cr>
 nnoremap <space>c :Silent make -j4
 
 xnoremap <silent> <space>g :<C-u>let cmd = "Grep " . visual#GetSelection() <bar>
@@ -296,8 +291,6 @@ let g:qf_mapping_ack_style = 1
 let g:ale_lint_on_text_changed = 'never'
 let g:ale_lint_on_save = 1
 
-let g:ale_python_pylint_executable = 'pylint'
-
 let g:ale_linters = {
       \ 'cpp': ['gcc'],
       \ 'c': ['gcc'],
@@ -319,6 +312,6 @@ let g:clang_snippets = 0
 let g:UltiSnipsEditSplit="vertical"
 let g:UltiSnipsSnippetsDir='~/.vim'
 
-let g:vim_json_syntax_conceal = 0
+let g:vim_json_syntax_conceal = 1
 
 let g:pymode_indent = 0

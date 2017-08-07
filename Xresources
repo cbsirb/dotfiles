@@ -49,6 +49,7 @@ xterm*faceName: xft:Iosevka:size=11
 *color15: #ebdbb2
 
 ! Xterm config
+xterm*utf8: 1
 xterm*termName: xterm-256color
 xterm*locale: true
 xterm*metaSendsEscape: true
@@ -56,10 +57,26 @@ xterm*eightBitInput: false
 
 xterm*scrollTtyKeypress: true
 xterm*scrollTtyOutput: false
+xterm*ScrollBar: false
 
-xterm*saveLines: 10000
+xterm*SaveLines: 10000
 xterm*bellIsUrgent: true
 xterm*disallowedWindowOps: 20,21,SetXprop
+! VT Font Menu: Unreadable
+xterm*faceSize1: 8
+! VT font menu: Tiny
+xterm*faceSize2: 10
+! VT font menu: Medium
+xterm*faceSize3: 12
+! VT font menu: Large
+xterm*faceSize4: 16
+! VT font menu: Huge
+xterm*faceSize5: 22
+
+xterm*VT100.Translations: #override \
+        Ctrl <Key> minus: smaller-vt-font() \n\
+        Ctrl <Key> plus: larger-vt-font() \n\
+        Ctrl <Key> 0: set-vt-font(d)
 
 ! URxvt config
 URxvt*depth: 32
