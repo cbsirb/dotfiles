@@ -5,42 +5,48 @@
 let s:alternate_extensions = {
   \ 'c': ['h'],
   \ 'ch': ['c', 'cpp'],
-  \ 'cpp': ['h', 'hpp', 'hxx']
+  \ 'cpp': ['h', 'hpp', 'hxx', 'h++']
+  \}
+
+let g:alt_ext = {
+  \ 'c': ['h'],
+  \ 'ch': ['c', 'cpp'],
+  \ 'cpp': ['h', 'hpp', 'hxx', 'h++']
   \}
 
 function! alternate#alternate_file()
-  let l:current_file = expand('%:t:r')
-
   if !has_key(s:alternate_extensions, &filetype)
     return
   endif
 
-  let l:alternate_files = []
-  for i in s:alternate_extensions[&filetype]
-    let l:alternate_file = findfile(l:current_file . '.' . i)
-    if len(l:alternate_file)
-      call add(l:alternate_files, l:alternate_file)
+  let current_file = expand('%:t:r')
+  let alternate_files = []
+
+  for ext in s:alternate_extensions[&filetype]
+    let alternate_file = findfile(current_file . '.' . ext)
+    if len(alternate_file)
+      call add(alternate_files, alternate_file)
     endif
   endfor
 
-  if len(l:alternate_files) < 1
+  if len(alternate_files) < 1
     return
-  elseif len(l:alternate_files) == 1
-    exe 'edit ' . l:alternate_files[0]
+  elseif len(alternate_files) == 1
+    exe 'edit ' . alternate_files[0]
     return
   endif
 
-  let l:index = 1
-  for file in l:alternate_files
-    echom "[" . l:index . "] " . file
-    let l:index += 1
+  let index = 1
+  for file in alternate_files
+    echom "[" . index . "] " . file
+    let index += 1
   endfor
 
-  let l:index = input("Which file to open?")
+  let index = input("Which file to open?")
 
-  if l:index < 1 || l:index > len(l:alternate_files)
+  if index < 1 || index > len(alternate_files)
     return
   endif
 
-  exe 'edit ' . l:alternate_files[l:index - 1]
+  exe 'edit ' . alternate_files[index - 1]
 endfunction

@@ -8,10 +8,11 @@ call plug#begin('~/.vim/plugged')
 Plug 'tpope/vim-commentary'
 Plug 'tpope/vim-endwise'
 Plug 'tpope/vim-fugitive'
+" Plug 'tpope/vim-projectionist'
 Plug 'tpope/vim-repeat'
+Plug 'tpope/vim-rsi'
 Plug 'tpope/vim-surround'
 Plug 'tpope/vim-unimpaired'
-Plug 'tpope/vim-fugitive'
 Plug 'tpope/vim-vinegar'
 
 Plug 'romainl/vim-qf'
@@ -21,14 +22,14 @@ Plug 'romainl/vim-tinyMRU'
 
 Plug 'tommcdo/vim-lion'
 
+" Disabled 08.14.2017
 " Plug 'Rip-Rip/clang_complete'
 
 " When I start writing html again
-Plug 'rstacruz/sparkup'
+" Plug 'rstacruz/sparkup'
+
 Plug 'elzr/vim-json'
 Plug 'Vimjas/vim-python-pep8-indent'
-
-Plug 'w0rp/ale'
 
 Plug 'SirVer/ultisnips'
 Plug 'honza/vim-snippets'
@@ -42,9 +43,11 @@ if !has('win32')
 endif
 
 " Colorschemes
-Plug 'morhetz/gruvbox'
-Plug 'romainl/Apprentice'
-
+Plug 'robertmeta/nofrils'
+" Disabled 08.14.2017
+" Plug 'morhetz/gruvbox'
+" Plug 'romainl/Apprentice'
+" Plug 'owickstrom/vim-colors-paramount'
 
 call plug#end()
 
@@ -58,7 +61,7 @@ endif
 runtime macros/matchit.vim
 
 if !has('gui_running') && has('mouse_sgr')
-    set ttymouse=sgr
+    set ttymouse=xterm2
 endif
 
 set lazyredraw
@@ -69,7 +72,6 @@ set autoread
 
 set autoindent
 set smartindent
-set tabstop=4
 set shiftwidth=4
 set softtabstop=4
 set expandtab
@@ -80,7 +82,6 @@ set smartcase
 set hlsearch
 
 set sidescroll=1
-set number
 
 set wildignore+=*.swp,*.bak
 set wildignore+=*.pyc,*.class,*.sln,*.aps
@@ -99,8 +100,8 @@ set wildcharm=<C-z>
 set path=.,**
 
 set statusline=%*%<\ %n\ %r%m%f
-set statusline+=\ %l:%c\ [%{ALEGetStatusLine()}]
-set statusline+=%=%w%q%y[%{&ff}][%{&enc}]
+set statusline+=\ %l:%c
+set statusline+=%=%w%q%{fugitive#statusline()}%y[%{&ff}][%{&enc}]
 
 set timeoutlen=1000
 set ttimeoutlen=100
@@ -116,6 +117,8 @@ set complete-=i
 set completeopt=longest,menuone
 set formatoptions=tcrqnl1j
 
+set shortmess+=c
+
 set history=1000
 set tabpagemax=50
 
@@ -124,14 +127,14 @@ set nobackup
 
 set sessionoptions+=resize
 if exists('+breakindent')
-  set showbreak=...\ 
+set showbreak=...\ 
 endif
 
 let &listchars = "tab:\u00bb\u00b7,trail:\u2022,extends:\u00bb,precedes:\u00ab,nbsp:\u00ba"
 " let &fillchars = "vert:\u2591,fold:\u00b7"
 set list
 
-" set viminfo='100,<200,s100,h
+set viminfo='100,<200,s100,h
 set virtualedit=block
 set ttyfast
 
@@ -140,23 +143,24 @@ set undodir=~/.vim/cache/undo/
 set undofile
 
 if !isdirectory(expand(&undodir))
-  call mkdir(expand(&undodir), "p")
+call mkdir(expand(&undodir), "p")
 endif
 
 set background=dark
-colorscheme apprentice
+colorscheme nofrils-dark
 
 set colorcolumn=+1
 set cursorline
 
-if !has('gui_running') && has('termguicolors')
-  if $TERM =~# '-256color' && $TERM !~# 'rxvt'
-    " Needed in tmux
-    let &t_8f = "\<Esc>[38;2;%lu;%lu;%lum"
-    let &t_8b = "\<Esc>[48;2;%lu;%lu;%lum"
-    set termguicolors
-  endif
-endif
+" Disabled 08.14.2017 (nofrils doesn't need it)
+" if !has('gui_running') && has('termguicolors')
+"   if $TERM =~# '-256color' && $TERM !~# 'rxvt'
+"     " Needed in tmux
+"     let &t_8f = "\<Esc>[38;2;%lu;%lu;%lum"
+"     let &t_8b = "\<Esc>[48;2;%lu;%lu;%lum"
+"     set termguicolors
+"   endif
+" endif
 
 if executable("rg")
   set grepprg=rg\ --no-heading\ --vimgrep\ -g\ '!{.git,node_modules,vendor}/*'\ -g\ '!tags'\ -g\ '!TAGS'
@@ -166,19 +170,20 @@ elseif executable("ag")
   set grepformat=%f:%l:%c:%m,%f:%l:%m
 endif
 
+" Autogroups
 augroup VIMRC
-  autocmd!
+autocmd!
 
-  autocmd VimEnter,GUIEnter * set visualbell t_vb=
+autocmd VimEnter,GUIEnter * set visualbell t_vb=
 
-  autocmd BufLeave * if !&diff | let b:winview = winsaveview() | endif
-  autocmd BufEnter * if exists('b:winview') && !&diff | call winrestview(b:winview) | unlet! b:winview | endif
+autocmd BufLeave * if !&diff | let b:winview = winsaveview() | endif
+autocmd BufEnter * if exists('b:winview') && !&diff | call winrestview(b:winview) | unlet! b:winview | endif
 
-  autocmd VimEnter,WinEnter,BufWinEnter,FocusGained,CmdwinEnter * setlocal cursorline
-  autocmd WinLeave,FocusLost,CmdwinLeave * setlocal nocursorline
+autocmd VimEnter,WinEnter,BufWinEnter,FocusGained,CmdwinEnter * setlocal cursorline
+autocmd WinLeave,FocusLost,CmdwinLeave * setlocal nocursorline
 augroup END
 
-
+"Commands
 command! -nargs=+ -complete=file_in_path -bar Grep  silent! grep! <args> | redraw! | copen
 command! -nargs=+ -complete=file_in_path -bar LGrep silent! lgrep! <args> | redraw! | copen
 
@@ -188,7 +193,11 @@ command! SC vnew | setlocal nobuflisted buftype=nofile bufhidden=wipe noswapfile
 
 command! -nargs=* -bang ReplaceSymbolInFunction silent call func#replace_symbol_in_function(<f-args>, '<bang>')
 
+" Mappings
 nnoremap Y y$
+
+nnoremap <silent> <C-l> :set hlsearch!<CR>
+nnoremap <BS> <C-^>
 
 nnoremap <silent> <space>0 :call clearmatches()<cr>
 nnoremap <silent> <space>1 :call highlight#word(1)<cr>
@@ -224,18 +233,6 @@ xnoremap <silent> <space>G :<C-u>let cmd = "Grep " . visual#GetSelection() . " "
                         \ call histadd("cmd", cmd) <bar>
                         \ execute cmd<CR>
 
-nnoremap <silent> <C-l> :set hlsearch!<CR>
-
-nnoremap <BS> <C-^>
-
-nnoremap <silent> <space>a :call alternate#alternate_file()<CR>
-
-inoremap <silent> <F3> <C-o>:call tags#PreviewTag()<CR>
-inoremap <silent> <F4> <C-o>:pclose<CR>
-
-nnoremap <silent> <F3> :call tags#PreviewTag()<CR>
-nnoremap <silent> <F4> :pclose<CR>
-
 inoremap {<CR> {<CR>}<Esc>O
 inoremap {; {<CR>};<Esc>O
 inoremap {, {<CR>},<Esc>O
@@ -243,36 +240,35 @@ inoremap [<CR> [<CR>]<Esc>O
 inoremap [; [<CR>];<Esc>O
 inoremap [, [<CR>],<Esc>O
 
+for char in [ '_', '.', ':', ';', '<bar>', '/', '<bslash>', '*', '=', '+', '%', '`' ]
+    exe 'xnoremap i' . char . ' :<C-u>normal! T' . char . 'vt' . char . '<cr>'
+    exe 'onoremap i' . char . ' :normal vi' . char . '<cr>'
+    exe 'xnoremap a' . char . ' :<C-u>normal! F' . char . 'vf' . char . '<cr>'
+    exe 'onoremap a' . char . ' :normal va' . char . '<cr>'
+endfor
+
 cnoremap <expr> <Tab>   getcmdtype() == "/" \|\| getcmdtype() == "?" ? "<CR>/<C-r>/" : "<C-z>"
 cnoremap <expr> <S-Tab> getcmdtype() == "/" \|\| getcmdtype() == "?" ? "<CR>?<C-r>/" : "<S-Tab>"
+
+nnoremap <space>a :find <C-R>=fnameescape(expand('%:t:r')).'.'<CR><C-z><C-z>
+nnoremap <space>A :vert sfind <C-R>=fnameescape(expand('%:t:r')).'.'<CR><C-z><C-z>
+
+inoremap <silent> <F3> <C-o>:call tags#PreviewTag()<CR>
+nnoremap <silent> <F3> :call tags#PreviewTag()<CR>
+
+inoremap <silent> <F4> <C-o>:pclose<CR>
+nnoremap <silent> <F4> :pclose<CR>
 
 nnoremap <Space>% :%s/\<<C-r>=expand('<cword>')<CR>\>/
 nnoremap <Space>r :ReplaceSymbolInFunction <C-R><C-W> 
 
+" Plugin mappings
 nmap <space>q <Plug>(qf_qf_toggle_stay)
 nmap <space>l <Plug>(qf_loc_toggle_stay)
 
-" Improved n/N - center line after page scroll
-" Not very usefull for now
-" function! s:nice_next(cmd)
-"   let topline  = line('w0')
-"   let v:errmsg = ""
-"   execute "silent! normal! " . a:cmd
-"   if v:errmsg =~ 'E38[45]:.*'
-"     echohl Error | unsilent echom v:errmsg | echohl None
-"     let v:errmsg = ""
-"     return
-"   endif
-"   if topline != line('w0')
-"     normal! zz
-"   endif
-" endfun
-
-" nnoremap <silent> n :call <SID>nice_next('n')<cr>
-" nnoremap <silent> N :call <SID>nice_next('N')<cr>
+nnoremap <F5> :ME <C-z>
 
 " Plugin configuration
-
 augroup FUGITIVE
   autocmd!
 
@@ -285,26 +281,9 @@ augroup FUGITIVE
 augroup END
 
 let g:netrw_home = '~/.vim/cache/'
+let g:netrw_altfile = 1
 
 let g:qf_mapping_ack_style = 1
-
-let g:ale_lint_on_text_changed = 'never'
-let g:ale_lint_on_save = 1
-
-let g:ale_linters = {
-      \ 'cpp': ['gcc'],
-      \ 'c': ['gcc'],
-      \ 'python': ['pylint']
-\}
-
-let g:ale_statusline_format = ["\u2717 %d", "\u271a %d", "\u2713 ok"]
-let g:ale_echo_msg_format = '[%linter%] %s [%severity%]'
-
-nmap <silent> <space>ek <Plug>(ale_previous_wrap)
-nmap <silent> <space>ej <Plug>(ale_next_wrap)
-nmap <silent> <space>ee <Plug>(ale_lint)
-
-nnoremap <F5> :ME <C-z>
 
 let g:clang_library_path = '/usr/lib64/libclang.so.4'
 let g:clang_snippets = 0

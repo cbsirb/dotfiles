@@ -74,7 +74,7 @@ xterm*faceSize4: 16
 xterm*faceSize5: 22
 
 xterm*VT100.Translations: #override \
-        Ctrl <Key> minus: smaller-vt-font() \n\
+        Ctrl <Key> 9: smaller-vt-font() \n\
         Ctrl <Key> plus: larger-vt-font() \n\
         Ctrl <Key> 0: set-vt-font(d)
 

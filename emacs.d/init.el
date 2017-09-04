@@ -148,7 +148,7 @@ Called via the `after-load-functions' special hook."
   (csetq midnight-period (* 15 60))
 
   ;; 10 minutes for special buffers
-  (csetq clean-buffer-list-delay-special 600)
+  (csetq clean-buffer-list-delay-special (* 10 60))
 
   (midnight-mode t)
   :config
@@ -203,10 +203,7 @@ Runs after init is done."
   (column-number-mode t)
   (csetq visible-cursor nil)
 
-  (use-package gruvbox-theme
-    :ensure t
-    :config
-    (load-theme 'gruvbox t)))
+  (load-theme 'leuven t))
 
 (add-hook 'after-init-hook #'user-gui)
 
@@ -215,27 +212,11 @@ Runs after init is done."
 
 (csetq fast-but-imprecise-scrolling t)
 
-(use-package spaceline-config
-  :ensure spaceline
-  :config
-  (spaceline-compile
-   'user
-   ;; Left side of the mode line (all the important stuff)
-   '(((buffer-modified buffer-size input-method) :face highlight-face)
-     anzu
-     '(buffer-id remote-host buffer-encoding-abbrev)
-     ((point-position line-column buffer-position selection-info)
-      :separator " | ")
-     major-mode
-     process
-     (flycheck-error flycheck-warning flycheck-info)
-     (python-pyvenv :fallback python-pyenv)
-     ((which-function projectile-root) :separator " @ ")
-     ((minor-modes :separator spaceline-minor-modes-separator) :when active))
-   ;; Right segment (the unimportant stuff)
-   '((version-control :when active)))
-  (csetq powerline-default-separator 'utf-8)
-  (csetq mode-line-format '("%e" (:eval (spaceline-ml-user)))))
+;; (csetq whitespace-line-column nil)
+;; (set-face-background 'whitespace-line (face-background 'default))
+(csetq whitespace-style '(face tab-mark))
+(csetq whitespace-display-mappings '((tab-mark ?\t [187 183 183 183 183 183 183 183])))
+(add-hook 'prog-mode-hook #'whitespace-mode)
 
 (use-package hl-todo
   :ensure t
@@ -840,8 +821,6 @@ See `user-rg-type-aliases' for more details."
   :ensure t
   :diminish counsel-mode
   :bind (:map user-keys-minor-mode-map
-         ("C-c g l" . counsel-git-log)
-         ("C-c g g" . counsel-git-grep)
          ("C-c f r" . counsel-recentf)
          ("C-c f f" . counsel-find-file)
          ("C-c s c" . counsel-rg))
@@ -1092,7 +1071,7 @@ Taken from http://stackoverflow.com/a/3072831/355252."
   :bind (:map user-keys-minor-mode-map
          ("M-I" . imenu-anywhere)))
 
-; Git
+;; Git
 (use-package magit
   :ensure t
   :bind (:map user-keys-minor-mode-map
@@ -1107,23 +1086,6 @@ Taken from http://stackoverflow.com/a/3072831/355252."
     :defer t
     :init
     (add-hook 'magit-mode-hook 'turn-on-magit-gitflow)))
-
-(use-package git-timemachine
-  :ensure t)
-
-(use-package git-gutter
-  :ensure t
-  :diminish git-gutter-mode
-  :bind (:map user-keys-minor-mode-map
-         ("C-c g n" . git-gutter:next-hunk)
-         ("C-c g p" . git-gutter:previous-hunk))
-  :init
-  (csetq git-gutter:disabled-modes '(dired-mode
-                                     image-mode shell-mode eshell-mode
-                                     compilation-mode grep-mode
-                                     ag-mode magit-mode))
-  :config
-  (global-git-gutter-mode t))
 
 ;; Keybindings
 (bind-key "C-c t d" #'toggle-debug-on-error user-keys-minor-mode-map)

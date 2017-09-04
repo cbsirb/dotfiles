@@ -23,7 +23,7 @@ alias alert='notify-send --urgency=low -i "$([ $? = 0 ] && echo terminal || echo
 
 # standard ones
 alias mv='mv -v'
-alias cp='cp -rfv'
+alias cp='cp -r'
 alias du='du -h'
 alias path='echo -e ${PATH//:/\\n}'
 alias mounts='mount | column -t'

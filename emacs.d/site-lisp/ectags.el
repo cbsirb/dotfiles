@@ -101,6 +101,7 @@ there is only one match."
 (defvar ectags--fn-name nil
   "Holds the current function name (from where the tag search was initiated).")
 
+
 (defun ectags--verify-tags-file (file)
   "Validate that the FILE is a valid ctags table."
   (string-prefix-p
@@ -110,7 +111,9 @@ there is only one match."
 (defun ectags-visit-tags-table (&optional force)
   "Visit an exuberant ctags file and add it to the current list of tags tables.
 If FORCE is not nill, it will force the directory rescan and file checking."
-  (when (or (not ectags--file-name) force)
+  (when (or (not ectags--file-name)
+            (not (file-readable-p ectags--file-name))
+            force)
     (let* ((tags-file-dir (locate-dominating-file default-directory "tags"))
            (tags-file-path (expand-file-name "tags" tags-file-dir)))
       (if (not tags-file-dir)
