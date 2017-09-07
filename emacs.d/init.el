@@ -95,8 +95,8 @@ Called via the `after-load-functions' special hook."
   (package-refresh-contents)
   (package-install 'use-package))
 
-(require 'use-package)
 (csetq use-package-enable-imenu-support t)
+(require 'use-package)
 
 (use-package ignoramus
   :ensure t
@@ -184,8 +184,7 @@ Called via the `after-load-functions' special hook."
   (hydra-add-font-lock))
 
 (defun user-gui ()
-  "Setups the gui appearance.
-Runs after init is done."
+  "Setups the gui appearance. Runs after init is done."
   (when (fboundp 'tool-bar-mode) (tool-bar-mode 0))
   (when (fboundp 'menu-bar-mode) (menu-bar-mode 0))
   (when (fboundp 'scroll-bar-mode) (scroll-bar-mode 0))
@@ -201,22 +200,52 @@ Runs after init is done."
   (size-indication-mode -1)
   (line-number-mode t)
   (column-number-mode t)
-  (csetq visible-cursor nil)
+  (csetq visible-cursor nil))
 
-  (load-theme 'leuven t))
+;; (when (fboundp #'global-display-line-numbers-mode)
+;;   (global-display-line-numbers-mode t))
 
-(add-hook 'after-init-hook #'user-gui)
+;; (add-hook 'after-init-hook #'user-gui)
+(user-gui)
+(add-hook 'after-init-hook (lambda () (load-theme 'leuven t)))
 
-(setq default-frame-alist '((height . 55)
-                            (width . 125)))
+(csetq mode-line-position
+       '((line-number-mode ("%l" (column-number-mode ":%2c")))))
+
+(csetq mode-line-format
+       '("%e"
+         mode-line-front-space
+         (anzu-mode
+          (:eval
+           (anzu--update-mode-line)))
+         mode-line-client
+         mode-line-modified
+         mode-line-mule-info
+         " "
+         mode-line-position
+         " (%p/%I) "
+         mode-line-buffer-identification
+         " "
+         mode-line-modes
+         (vc-mode vc-mode)
+         " "
+         (org-agenda-mode
+          (:eval (format "%s" org-agenda-filter)))
+         mode-line-misc-info
+         mode-line-end-spaces))
+
+;; For now there is a bug when forwarding X over ssh and emacs goes crazy
+;; (setq default-frame-alist '((height . 55)
+;;                             (width . 125)))
 
 (csetq fast-but-imprecise-scrolling t)
 
-;; (csetq whitespace-line-column nil)
-;; (set-face-background 'whitespace-line (face-background 'default))
-(csetq whitespace-style '(face tab-mark))
-(csetq whitespace-display-mappings '((tab-mark ?\t [187 183 183 183 183 183 183 183])))
-(add-hook 'prog-mode-hook #'whitespace-mode)
+(use-package whitespace
+  :diminish whitespace-mode
+  :init
+  (csetq whitespace-style '(face tab-mark))
+  (csetq whitespace-display-mappings '((tab-mark ?\t [187 183 183 183 183 183 183 183])))
+  (add-hook 'prog-mode-hook #'whitespace-mode))
 
 (use-package hl-todo
   :ensure t
@@ -307,12 +336,14 @@ Runs after init is done."
 (use-package expand-region
   :ensure t
   :bind (("M-2" . er/expand-region)     ; let it be overwritten in magit
+         ("M-1" . er/contract-region)
          :map user-keys-minor-mode-map
          ("M-@" . er/contract-region)
          ("C-c m r" . user-expand-region/body))
   :init
   (csetq expand-region-fast-keys-enabled nil)
-  (csetq er--show-expansion-message t)
+  (csetq expand-region-autocopy-register "e")
+
   (defhydra user-expand-region (:exit t)
     "Mark region"
     ("c" er/contract-region "contract" :exit nil)
@@ -564,6 +595,28 @@ Runs after init is done."
 (bind-key "C-c f v l" #'add-file-local-variable user-keys-minor-mode-map)
 (bind-key "C-c f v p" #'add-file-local-variable-prop-line user-keys-minor-mode-map)
 
+(use-package projectile
+  :ensure t
+  :diminish projectile-mode
+  :init
+  (csetq projectile-project-root-files-bottom-up
+         '(".projectile" ".git" ".hg"))
+
+  (csetq projectile-completion-system 'ivy)
+  (csetq projectile-indexing-method 'alien)
+  (csetq projectile-enable-caching t)
+  (csetq projectile-verbose t)
+  (csetq projectile-use-git-grep t)
+
+  (projectile-mode t)
+
+  :config
+  (add-to-list 'projectile-globally-ignored-directories ".vscode")
+
+  (csetq projectile-switch-project-action
+         (lambda ()
+           (dired (projectile-project-root)))))
+
 ;; Searching
 (use-package grep
   :defer t
@@ -626,6 +679,12 @@ Runs after init is done."
            ("C-c p s s" . user-projectile-ripgrep)
            ("C-c p s r" . projectile-ripgrep)))
 
+  (use-package wgrep-ack
+    :ensure t
+    :defer t
+    :init
+    (add-hook 'ripgrep-search-mode-hook #'wgrep-ack-and-a-half-setup))
+
   :config
   (defvar user-rg-type-aliases (make-hash-table :test 'equal)
     "Make a hash-table to map `major-mode' to 'rg --type-list' values.")
@@ -681,7 +740,9 @@ See `user-rg-type-aliases' for more details."
   :ensure t
   :diminish company-mode
   :bind (:map company-active-map
-         ("ESC" . company-abort))
+         ("ESC" . company-abort)
+         ("C-l" . company-show-location)
+         ("C-w" . nil))
   :init
   (csetq company-dabbrev-downcase nil)
   (csetq company-dabbrev-ignore-case t)
@@ -689,7 +750,7 @@ See `user-rg-type-aliases' for more details."
   (csetq company-dabbrev-code-ignore-case t)
 
   (csetq company-transformers '(company-sort-by-occurrence))
-  (csetq company-idle-delay 0)
+  (csetq company-idle-delay 0.1)
   (csetq company-minimum-prefix-length 3)
   (csetq company-tooltip-align-annotations t)
 
@@ -706,12 +767,12 @@ See `user-rg-type-aliases' for more details."
 (csetq dabbrev-abbrev-skip-leading-regexp "[^ ]*[<>=*$]")
 (add-hook 'find-file-hook (lambda () (abbrev-mode -1)))
 
-(use-package yasnippet
-  :ensure t
-  :diminish yas-minor-mode
-  :config
-  (yas-reload-all)
-  (add-hook 'prog-mode-hook #'yas-minor-mode))
+;; (use-package yasnippet
+;;   :ensure t
+;;   :diminish yas-minor-mode
+;;   :config
+;;   (yas-reload-all)
+;;   (add-hook 'prog-mode-hook #'yas-minor-mode))
 
 (use-package dired
   :defer t
@@ -741,7 +802,12 @@ See `user-rg-type-aliases' for more details."
     :demand t
     :config
     (csetq diredp-dwim-any-frame-flag t)
-    (diredp-toggle-find-file-reuse-dir t)))
+    (diredp-toggle-find-file-reuse-dir t))
+
+  (use-package dired-narrow
+    :ensure t
+    :bind (:map dired-mode-map
+                ("/" . dired-narrow))))
 
 (use-package multiple-cursors
   :ensure t
@@ -761,28 +827,6 @@ See `user-rg-type-aliases' for more details."
          ("C-c m p" . mc/skip-to-previous-like-this)
          ("C-c m C-a" . mc/edit-beginnings-of-lines)
          ("C-c m C-e" . mc/edit-end-of-lines)))
-
-(use-package projectile
-  :ensure t
-  :diminish projectile-mode
-  :init
-  (csetq projectile-project-root-files-bottom-up
-         '(".projectile" ".git" ".hg"))
-
-  (csetq projectile-completion-system 'ivy)
-  (csetq projectile-indexing-method 'alien)
-  (csetq projectile-enable-caching t)
-  (csetq projectile-verbose t)
-  (csetq projectile-use-git-grep t)
-
-  (projectile-mode t)
-
-  :config
-  (add-to-list 'projectile-globally-ignored-directories ".vscode")
-
-  (csetq projectile-switch-project-action
-         (lambda ()
-           (dired (projectile-project-root)))))
 
 (use-package smex
   :ensure t
@@ -980,6 +1024,11 @@ Taken from http://stackoverflow.com/a/3072831/355252."
   :ensure t
   :defer t)
 
+;; cmake
+(use-package cmake-mode
+  :ensure t
+  :defer t)
+
 ;; Debugging
 (use-package gud
   :defer t
@@ -991,6 +1040,12 @@ Taken from http://stackoverflow.com/a/3072831/355252."
     (company-mode -1))
 
   (add-hook 'gud-mode-hook #'user-gud))
+
+(use-package realgud
+  :commands (realgud:bashdb realgud:gdb realgud:gub realgud:ipdb
+             realgud:jdb realgud:kshdb realgud:nodejs realgud:pdb
+             realgud:perldb realgud:zshdb)
+  :ensure t)
 
 ;; Web stuff
 (use-package js2-mode
@@ -1075,11 +1130,12 @@ Taken from http://stackoverflow.com/a/3072831/355252."
 (use-package magit
   :ensure t
   :bind (:map user-keys-minor-mode-map
-         ("<f9>" . magit-status))
+         ("C-x g" . magit-status))
   :init
   (csetq magit-display-buffer-function
          #'magit-display-buffer-fullframe-status-v1)
   (csetq magit-completing-read-function #'magit-builtin-completing-read)
+
   :config
   (use-package magit-gitflow
     :ensure t
