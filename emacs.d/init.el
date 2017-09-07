@@ -155,6 +155,7 @@ Called via the `after-load-functions' special hook."
   (add-to-list 'clean-buffer-list-kill-buffer-names
                '("*buffer-selection*"
                  "*Finder*"
+                 "*Occur*"
                  "*rg*"
                  "*ripgrep-search*"
                  "*ag search*"
@@ -170,8 +171,8 @@ Called via the `after-load-functions' special hook."
                '("\\`\\*Customize .*\\*\\'"
                  "\\`\\*magit: .*\\*\\'"
                  "\\`\\*magit-.*\\*\\'"
+                 "\\`\\*ivy-occur.*\\*\\'"
                  "\\`\\*\\(Wo\\)?Man .*\\*\\'")))
-
 ;; (autoload 'rabin-mode "rabin-mode.el" "" t nil)
 
 (use-package bug-hunter
@@ -883,7 +884,8 @@ See `user-rg-type-aliases' for more details."
   :init
   (csetq comint-process-echoes t)
   (csetq comint-prompt-read-only t)
-  (csetq comint-history-isearch t))
+  (csetq comint-history-isearch t)
+  (csetq comint-ignore-dups t))
 
 (defun user-programming-setup ()
   "Settings for all programming modes."
