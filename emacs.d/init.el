@@ -33,23 +33,6 @@
 (defconst user-custom-file (expand-file-name "custom.el" user-emacs-directory)
   "File used to store settings from Customization UI.")
 
-(defvar user-keys-minor-mode-map
-  (make-sparse-keymap)
-  "Keymap for `user-keys-minor-mode'.")
-
-(defun user-keys-have-priority (_file)
-  "Try to ensure that my keybindings retain priority over other minor modes.
-
-Called via the `after-load-functions' special hook."
-  (unless (eq (caar minor-mode-map-alist) 'user-keys-minor-mode)
-    (let ((user-keys (assq 'user-keys-minor-mode minor-mode-map-alist)))
-      (assq-delete-all 'user-keys-minor-mode minor-mode-map-alist)
-      (add-to-list 'minor-mode-map-alist user-keys))))
-
-(define-minor-mode user-keys-minor-mode
-  "A minor mode so that my key settings override annoying major modes."
-  :init-value t)
-
 (if user-is-cygwin
     (csetq source-directory "/cygdrive/d/tools/prog/src/emacs/")
   (csetq source-directory "D:/tools/prog/src/emacs/"))
@@ -206,9 +189,10 @@ Called via the `after-load-functions' special hook."
 ;; (when (fboundp #'global-display-line-numbers-mode)
 ;;   (global-display-line-numbers-mode t))
 
-;; (add-hook 'after-init-hook #'user-gui)
 (user-gui)
-(add-hook 'after-init-hook (lambda () (load-theme 'leuven t)))
+
+(when (display-graphic-p)
+  (add-hook 'after-init-hook (lambda () (load-theme 'leuven t))))
 
 (csetq mode-line-position
        '((line-number-mode ("%l" (column-number-mode ":%2c")))))
@@ -224,7 +208,7 @@ Called via the `after-load-functions' special hook."
          mode-line-mule-info
          " "
          mode-line-position
-         " (%p/%I) "
+         " (%o/%I) "
          mode-line-buffer-identification
          " "
          mode-line-modes
@@ -319,8 +303,7 @@ Called via the `after-load-functions' special hook."
 
 (use-package jump-char
   :ensure t
-  :bind (:map user-keys-minor-mode-map
-         ("M-m" . jump-char-forward)
+  :bind (("M-m" . jump-char-forward)
          ("M-M" . jump-char-backward)))
 
 (use-package avy
@@ -338,7 +321,6 @@ Called via the `after-load-functions' special hook."
   :ensure t
   :bind (("M-2" . er/expand-region)     ; let it be overwritten in magit
          ("M-1" . er/contract-region)
-         :map user-keys-minor-mode-map
          ("M-@" . er/contract-region)
          ("C-c m r" . user-expand-region/body))
   :init
@@ -374,8 +356,7 @@ Called via the `after-load-functions' special hook."
 (use-package drag-stuff
   :diminish drag-stuff-mode
   :ensure t
-  :bind (:map user-keys-minor-mode-map
-         ("<M-up>" . drag-stuff-up)
+  :bind (("<M-up>" . drag-stuff-up)
          ("<M-down>" . drag-stuff-down)
          ("<M-left>" . drag-stuff-left)
          ("<M-right>" . drag-stuff-right))
@@ -385,8 +366,7 @@ Called via the `after-load-functions' special hook."
 (use-package smartparens
   :diminish smartparens-mode
   :demand t
-  :bind (:map user-keys-minor-mode-map
-         ("C-M-k" . sp-kill-sexp)
+  :bind (("C-M-k" . sp-kill-sexp)
          ("C-M-n" . sp-next-sexp)
          ("C-M-p" . sp-previous-sexp)
          ("C-M-f" . sp-forward-sexp)
@@ -467,15 +447,13 @@ Called via the `after-load-functions' special hook."
       ad-do-it)))
 
 (use-package misc
-  :bind (:map user-keys-minor-mode-map
-         ("M-z" . zap-up-to-char)
+  :bind (("M-z" . zap-up-to-char)
          ("<C-right>" . forward-to-word)))
 
 (use-package mouse-copy)
 
 (use-package ibuffer
-  :bind (:map user-keys-minor-mode-map
-         ("C-x C-b" . ibuffer))
+  :bind (("C-x C-b" . ibuffer))
   :config
   (csetq ibuffer-saved-filter-groups
          '(("default"
@@ -541,8 +519,7 @@ Called via the `after-load-functions' special hook."
          ("." nil (reusable-frames . nil))))
 
 (use-package user-utils
-  :bind (:map user-keys-minor-mode-map
-         ("<C-return>" . user-open-line-above)
+  :bind (("<C-return>" . user-open-line-above)
          ("C-a" . user-smarter-move-beginning-of-line)
          ("C-w" . user-smarter-kill-word-or-region)
          ([remap backward-kill-word] . user-smarter-backward-kill-word)
@@ -565,36 +542,33 @@ Called via the `after-load-functions' special hook."
          ("<escape>" . user-minibuffer-keyboard-quit)))
 
 (use-package user-window
-  :bind (:map user-keys-minor-mode-map
-         ("C-c w d" . user-toggle-current-window-dedication)
+  :bind (("C-c w d" . user-toggle-current-window-dedication)
          ("C-c w q" . user-quit-all-side-windows)
          ("C-c w b" . user-switch-to-minibuffer))
   :init
-  (bind-key "C-c w w" #'other-window user-keys-minor-mode-map)
-  (bind-key "C-c w =" #'balance-windows user-keys-minor-mode-map)
-  (bind-key "C-c w k" #'delete-window user-keys-minor-mode-map)
-  (bind-key "C-c w /" #'split-window-right user-keys-minor-mode-map)
-  (bind-key "C-c w \\" #'split-window-right user-keys-minor-mode-map)
-  (bind-key "C-c w -" #'split-window-below user-keys-minor-mode-map)
-  (bind-key "C-c w m" #'delete-other-windows user-keys-minor-mode-map)
-  (bind-key "C-c w f" #'toggle-frame-fullscreen user-keys-minor-mode-map)
-  (bind-key "C-c w 1" #'delete-other-windows user-keys-minor-mode-map))
+  (bind-key "C-c w w" #'other-window)
+  (bind-key "C-c w =" #'balance-windows)
+  (bind-key "C-c w k" #'delete-window)
+  (bind-key "C-c w /" #'split-window-right)
+  (bind-key "C-c w \\" #'split-window-right)
+  (bind-key "C-c w -" #'split-window-below)
+  (bind-key "C-c w m" #'delete-other-windows)
+  (bind-key "C-c w f" #'toggle-frame-fullscreen)
+  (bind-key "C-c w 1" #'delete-other-windows))
 
 (use-package windmove
-  :bind (:map user-keys-minor-mode-map
-         ("C-c w <left>"  . windmove-left)
+  :bind (("C-c w <left>"  . windmove-left)
          ("C-c w <right>" . windmove-right)
          ("C-c w <up>"    . windmove-up)
          ("C-c w <down>" . windmove-down)))
 
 (use-package user-files
-  :bind (:map user-keys-minor-mode-map
-         ("C-c f D" . user-delete-file-and-buffer)
+  :bind (("C-c f D" . user-delete-file-and-buffer)
          ("C-c f r" . user-rename-file-and-buffer)))
 
-(bind-key "C-c f v d" #'add-dir-local-variable user-keys-minor-mode-map)
-(bind-key "C-c f v l" #'add-file-local-variable user-keys-minor-mode-map)
-(bind-key "C-c f v p" #'add-file-local-variable-prop-line user-keys-minor-mode-map)
+(bind-key "C-c f v d" #'add-dir-local-variable)
+(bind-key "C-c f v l" #'add-file-local-variable)
+(bind-key "C-c f v p" #'add-file-local-variable-prop-line)
 
 (use-package projectile
   :ensure t
@@ -626,8 +600,7 @@ Called via the `after-load-functions' special hook."
 
 (use-package ag
   :ensure t
-  :bind (:map user-keys-minor-mode-map
-         ("C-c s a" . ag))
+  :bind (("C-c s a" . ag))
   :init
   (csetq ag-reuse-buffers t)
   (csetq ag-reuse-window t)
@@ -653,8 +626,7 @@ Called via the `after-load-functions' special hook."
 
 (use-package anzu
   :ensure t
-  :bind (:map user-keys-minor-mode-map
-         ([remap query-replace] . anzu-query-replace)
+  :bind (([remap query-replace] . anzu-query-replace)
          ([remap query-replace-regexp] . anzu-query-replace-regexp)
          ("C-c r" . anzu-query-replace-at-cursor-thing)
          :map isearch-mode-map
@@ -670,14 +642,12 @@ Called via the `after-load-functions' special hook."
 
 (use-package ripgrep
   :ensure t
-  :bind (:map user-keys-minor-mode-map
-         ("C-c s s" . user-ripgrep)
+  :bind (("C-c s s" . user-ripgrep)
          ("C-c s r" . ripgrep-regexp))
   :init
   (use-package projectile-ripgrep
     :ensure t
-    :bind (:map user-keys-minor-mode-map
-           ("C-c p s s" . user-projectile-ripgrep)
+    :bind (("C-c p s s" . user-projectile-ripgrep)
            ("C-c p s r" . projectile-ripgrep)))
 
   (use-package wgrep-ack
@@ -756,8 +726,7 @@ See `user-rg-type-aliases' for more details."
   (csetq company-tooltip-align-annotations t)
 
   (use-package user-completion
-    :bind (:map user-keys-minor-mode-map
-                ("C-c /" . user-complete-line)))
+    :bind (("C-c /" . user-complete-line)))
 
   (add-hook 'after-init-hook 'global-company-mode))
 
@@ -812,8 +781,7 @@ See `user-rg-type-aliases' for more details."
 
 (use-package multiple-cursors
   :ensure t
-  :bind (:map user-keys-minor-mode-map
-         ("C-," . mc/unmark-next-like-this)
+  :bind (("C-," . mc/unmark-next-like-this)
          ("C-<" . mc/unmark-previous-like-this)
          ("C-." . mc/mark-next-like-this)
          ("C->" . mc/mark-previous-like-this)
@@ -838,8 +806,7 @@ See `user-rg-type-aliases' for more details."
 (use-package ivy
   :ensure t
   :diminish ivy-mode
-  :bind (:map user-keys-minor-mode-map
-         ("C-c C-r" . ivy-resume)
+  :bind (("C-c C-r" . ivy-resume)
          ("C-c v s" . ivy-push-view)
          ("C-c v p" . ivy-pop-view)
          :map ivy-mode-map
@@ -865,8 +832,7 @@ See `user-rg-type-aliases' for more details."
 (use-package counsel
   :ensure t
   :diminish counsel-mode
-  :bind (:map user-keys-minor-mode-map
-         ("C-c f r" . counsel-recentf)
+  :bind (("C-c f r" . counsel-recentf)
          ("C-c f f" . counsel-find-file)
          ("C-c s c" . counsel-rg))
   :init
@@ -917,8 +883,7 @@ See `user-rg-type-aliases' for more details."
 
 (use-package compile
   :diminish compilation-in-progress
-  :bind (:map user-keys-minor-mode-map
-         ("C-c c" . compile))
+  :bind (("C-c c" . compile))
   :config
   (csetq compilation-scroll-output 'first-error)
   (csetq compilation-always-kill t)
@@ -974,12 +939,11 @@ Taken from http://stackoverflow.com/a/3072831/355252."
 (when user-is-linux
   (use-package multi-term
     :ensure t
-    :bind (:map user-keys-minor-mode-map
-                ("C-; C-;" . multi-term)
-                ("C-; c" . multi-term)
-                ("C-; d" . multi-term-dedicated-toggle)
-                ("C-; n" . multi-term-next)
-                ("C-; p" . multi-term-prev))
+    :bind (("C-; C-;" . multi-term)
+           ("C-; c" . multi-term)
+           ("C-; d" . multi-term-dedicated-toggle)
+           ("C-; n" . multi-term-next)
+           ("C-; p" . multi-term-prev))
     :init
     (csetq multi-term-dedicated-select-after-open-p t)
 
@@ -999,8 +963,7 @@ Taken from http://stackoverflow.com/a/3072831/355252."
 (use-package flycheck
   :ensure t
   :defer t
-  :bind (:map user-keys-minor-mode-map
-         ("C-c e" . user-flycheck-errors/body)
+  :bind (("C-c e" . user-flycheck-errors/body)
          ("C-c t f" . flycheck-mode))
   :config
   (defhydra user-flycheck-errors ()
@@ -1125,14 +1088,12 @@ Taken from http://stackoverflow.com/a/3072831/355252."
 
 (use-package imenu-anywhere
   :ensure t
-  :bind (:map user-keys-minor-mode-map
-         ("M-I" . imenu-anywhere)))
+  :bind (("M-I" . imenu-anywhere)))
 
 ;; Git
 (use-package magit
   :ensure t
-  :bind (:map user-keys-minor-mode-map
-         ("C-x g" . magit-status))
+  :bind (("C-x g" . magit-status))
   :init
   (csetq magit-display-buffer-function
          #'magit-display-buffer-fullframe-status-v1)
@@ -1146,9 +1107,9 @@ Taken from http://stackoverflow.com/a/3072831/355252."
     (add-hook 'magit-mode-hook 'turn-on-magit-gitflow)))
 
 ;; Keybindings
-(bind-key "C-c t d" #'toggle-debug-on-error user-keys-minor-mode-map)
-(bind-key [remap just-one-space] #'cycle-spacing user-keys-minor-mode-map)
-(bind-key "M-g" #'goto-line user-keys-minor-mode-map)
+(bind-key "C-c t d" #'toggle-debug-on-error)
+(bind-key [remap just-one-space] #'cycle-spacing)
+(bind-key "M-g" #'goto-line)
 (bind-key "C-o" #'isearch-occur isearch-mode-map)
 
 (use-package key-chord
@@ -1177,10 +1138,6 @@ Taken from http://stackoverflow.com/a/3072831/355252."
 (unbind-key "C-x C-z")
 (unbind-key "C-x f")
 (unbind-key "C-x m")
-
-;; Last thing
-(user-keys-minor-mode t)
-(add-hook 'after-load-functions 'user-keys-have-priority)
 
 (provide 'init)
 

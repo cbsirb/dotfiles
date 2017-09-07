@@ -45,11 +45,11 @@
 
 (defcustom ectags-search-command
   "rg --no-heading --no-line-number \"^%s\\b\" %s"
-  "The command used to search the tags file.  \
-The first '%s' is for the tag name, the second '%s' for the tag filename.  \
-It will use ripgrep by default, but you can change this to grep like \
+  "The command used to search the tags file.
+The first '%s' is for the tag name, the second '%s' for the tag filename.
+It will use ripgrep by default, but you can change this to grep like
 by setting this to \"grep \"^%s\\b\" %s\"
-Will use the following priority (times based on linux kernel's tag \
+Will use the following priority (times based on linux kernel's tag
 file of 489 MB):
 - rg   0.756s
 - grep 1.192s"
@@ -286,6 +286,7 @@ Calls `ectags-match' for each line that matches."
   (ectags-seek tagname)
 
   ;; Delete 'local variables' that aren't from the current function
+  ;; TODO: refactor this into a new function and move it to `ectags-insert-matches'
   (dolist (match ectags--matches)
     (when (string-equal
            "local variable"
@@ -472,8 +473,8 @@ variable to decide what to do."
       (setq tagname (find-tag-default)))
     (ectags-find tagname)))
 
-(defun ectags-current-symbol (&optional limit)
-  "Finds the current function and position in argument list."
+(defun ectags-current-symbol (&optional _limit)
+  "Find the current function and position in argument list."
   (let* ((literal-limits (c-literal-limits))
          (literal-type (c-literal-type literal-limits)))
     (save-excursion
