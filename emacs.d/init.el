@@ -168,7 +168,7 @@
   (hydra-add-font-lock))
 
 (defun user-gui ()
-  "Setups the gui appearance. Runs after init is done."
+  "Setup the gui appearance. Run after init is done."
   (when (fboundp 'tool-bar-mode) (tool-bar-mode 0))
   (when (fboundp 'menu-bar-mode) (menu-bar-mode 0))
   (when (fboundp 'scroll-bar-mode) (scroll-bar-mode 0))
@@ -713,6 +713,8 @@ See `user-rg-type-aliases' for more details."
   :bind (:map company-active-map
          ("ESC" . company-abort)
          ("C-l" . company-show-location)
+         ("C-n" . company-select-next)
+         ("C-p" . company-select-previous)
          ("C-w" . nil))
   :init
   (csetq company-dabbrev-downcase nil)
@@ -724,6 +726,7 @@ See `user-rg-type-aliases' for more details."
   (csetq company-idle-delay 0.1)
   (csetq company-minimum-prefix-length 3)
   (csetq company-tooltip-align-annotations t)
+  (csetq company-selection-wrap-around t)
 
   (use-package user-completion
     :bind (("C-c /" . user-complete-line)))

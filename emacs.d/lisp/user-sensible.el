@@ -77,6 +77,8 @@ _SWITCH should be 'diff'."
 
 (remove-hook 'post-self-insert-hook 'blink-paren-post-self-insert-function)
 
+(csetq disabled-command-function nil)
+
 ;; No need for these
 (csetq initial-scratch-message "")
 (csetq inhibit-splash-screen t)
@@ -128,6 +130,10 @@ _SWITCH should be 'diff'."
 (csetq scroll-preserve-screen-position t)
 (csetq isearch-allow-scroll t)
 (csetq scroll-margin 7)
+
+;; Disable auto-save-mode (I really hate it)
+(auto-save-mode -1)
+(csetq auto-save-default nil)
 
 (defun user-minibuffer-setup-hook ()
   "Hook to run when entering the minibuffer."
