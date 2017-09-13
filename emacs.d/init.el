@@ -304,7 +304,11 @@
 (use-package jump-char
   :ensure t
   :bind (("M-m" . jump-char-forward)
-         ("M-M" . jump-char-backward)))
+         ("M-M" . jump-char-backward))
+  :init
+  (unless (boundp 'lazy-highlight-face)
+    (defvar lazy-highlight-face 'lazy-highlight
+      "Was removed from emacs 26, so redefine it until jump-char fixes it.")))
 
 (use-package avy
   :ensure t
