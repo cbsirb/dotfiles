@@ -167,32 +167,32 @@
   :config
   (hydra-add-font-lock))
 
-(defun user-gui ()
-  "Setup the gui appearance. Run after init is done."
-  (when (fboundp 'tool-bar-mode) (tool-bar-mode 0))
-  (when (fboundp 'menu-bar-mode) (menu-bar-mode 0))
-  (when (fboundp 'scroll-bar-mode) (scroll-bar-mode 0))
+;; Setup the gui appearance
+(when (fboundp 'tool-bar-mode) (tool-bar-mode 0))
+(when (fboundp 'menu-bar-mode) (menu-bar-mode 0))
+(when (fboundp 'scroll-bar-mode) (scroll-bar-mode 0))
 
-  (set-face-attribute 'default nil
-                      :family "Iosevka" :height 110 :weight 'regular)
-  (set-face-attribute 'variable-pitch nil
-                      :family "Noto Sans" :height 110 :weight 'regular)
+(set-face-attribute 'default nil
+                    :family "Iosevka" :height 110 :weight 'regular)
+(set-face-attribute 'variable-pitch nil
+                    :family "Noto Sans" :height 110 :weight 'regular)
 
-  (when (member "Symbola" (font-family-list))
-    (set-fontset-font t 'unicode "Symbola" nil 'prepend))
+(when (member "Symbola" (font-family-list))
+  (set-fontset-font t 'unicode "Symbola" nil 'prepend))
 
-  (size-indication-mode -1)
-  (line-number-mode t)
-  (column-number-mode t)
-  (csetq visible-cursor nil))
+(size-indication-mode -1)
+(line-number-mode t)
+(column-number-mode t)
+(csetq visible-cursor nil)
 
 ;; (when (fboundp #'global-display-line-numbers-mode)
 ;;   (global-display-line-numbers-mode t))
 
-(user-gui)
+(use-package flatui-theme
+  :ensure t)
 
 (when (display-graphic-p)
-  (add-hook 'after-init-hook (lambda () (load-theme 'leuven t))))
+  (add-hook 'after-init-hook (lambda () (load-theme 'flatui t))))
 
 (csetq mode-line-position
        '((line-number-mode ("%l" (column-number-mode ":%2c")))))
@@ -868,10 +868,10 @@ See `user-rg-type-aliases' for more details."
 
 (use-package which-func
   :init
-  (which-function-mode t)
-  :config
-  (set-face-attribute 'which-func nil :foreground "red1")
-  (face-foreground 'which-func))
+  (which-function-mode t))
+  ;; :config
+  ;; (set-face-attribute 'which-func nil :foreground "red1")
+  ;; (face-foreground 'which-func))
 
 (use-package highlight-symbol
   :ensure t
@@ -956,6 +956,7 @@ Taken from http://stackoverflow.com/a/3072831/355252."
 
     (defun user-term-mode ()
       (company-mode -1)
+      (hl-line-mode -1)
       (setq-local scroll-margin 0))
 
     (add-hook 'term-mode-hook #'user-term-mode)))

@@ -1,4 +1,4 @@
-function! func#replace_symbol_in_function(symbol, replacement, confirm)
+function! func#replace_symbol_in_function(symbol, replacement, confirm) abort
     let window = winsaveview()
 
     if &ft == 'python'

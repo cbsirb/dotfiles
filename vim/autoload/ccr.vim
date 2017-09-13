@@ -1,5 +1,5 @@
 " make list-like commands more intuitive
-function! ccr#CCR()
+function! ccr#CCR() abort
   let cmdline = getcmdline()
   if cmdline =~ '\C^ls'
     " like :ls but prompts for a buffer command

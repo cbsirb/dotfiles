@@ -14,7 +14,7 @@ let g:alt_ext = {
   \ 'cpp': ['h', 'hpp', 'hxx', 'h++']
   \}
 
-function! alternate#alternate_file()
+function! alternate#alternate_file() abort
   if !has_key(s:alternate_extensions, &filetype)
     return
   endif

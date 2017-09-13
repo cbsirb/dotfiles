@@ -61,7 +61,7 @@ endif
 runtime macros/matchit.vim
 
 if !has('gui_running') && has('mouse_sgr')
-    set ttymouse=xterm2
+  set ttymouse=xterm2
 endif
 
 set lazyredraw
@@ -127,7 +127,7 @@ set nobackup
 
 set sessionoptions+=resize
 if exists('+breakindent')
-set showbreak=...\ 
+  set showbreak=...\ 
 endif
 
 let &listchars = "tab:\u00bb\u00b7,trail:\u2022,extends:\u00bb,precedes:\u00ab,nbsp:\u00ba"
@@ -143,11 +143,11 @@ set undodir=~/.vim/cache/undo/
 set undofile
 
 if !isdirectory(expand(&undodir))
-call mkdir(expand(&undodir), "p")
+  call mkdir(expand(&undodir), "p")
 endif
 
 set background=dark
-colorscheme nofrils-dark
+autocmd VimEnter * colorscheme nofrils-dark
 
 set colorcolumn=+1
 set cursorline
@@ -172,15 +172,15 @@ endif
 
 " Autogroups
 augroup VIMRC
-autocmd!
+  autocmd!
 
-autocmd VimEnter,GUIEnter * set visualbell t_vb=
+  autocmd VimEnter,GUIEnter * set visualbell t_vb=
 
-autocmd BufLeave * if !&diff | let b:winview = winsaveview() | endif
-autocmd BufEnter * if exists('b:winview') && !&diff | call winrestview(b:winview) | unlet! b:winview | endif
+  autocmd BufLeave * if !&diff | let b:winview = winsaveview() | endif
+  autocmd BufEnter * if exists('b:winview') && !&diff | call winrestview(b:winview) | unlet! b:winview | endif
 
-autocmd VimEnter,WinEnter,BufWinEnter,FocusGained,CmdwinEnter * setlocal cursorline
-autocmd WinLeave,FocusLost,CmdwinLeave * setlocal nocursorline
+  autocmd VimEnter,WinEnter,BufWinEnter,FocusGained,CmdwinEnter * setlocal cursorline
+  autocmd WinLeave,FocusLost,CmdwinLeave * setlocal nocursorline
 augroup END
 
 "Commands
@@ -226,12 +226,12 @@ nnoremap <space>G :execute "Grep -w '<C-r><C-w>' " . expand('%:p:h')<cr>
 nnoremap <space>c :Silent make -j4
 
 xnoremap <silent> <space>g :<C-u>let cmd = "Grep " . visual#GetSelection() <bar>
-                        \ call histadd("cmd", cmd) <bar>
-                        \ execute cmd<CR>
+      \ call histadd("cmd", cmd) <bar>
+      \ execute cmd<CR>
 
 xnoremap <silent> <space>G :<C-u>let cmd = "Grep " . visual#GetSelection() . " " . expand('%:p:h') <bar>
-                        \ call histadd("cmd", cmd) <bar>
-                        \ execute cmd<CR>
+      \ call histadd("cmd", cmd) <bar>
+      \ execute cmd<CR>
 
 inoremap {<CR> {<CR>}<Esc>O
 inoremap {; {<CR>};<Esc>O
@@ -241,10 +241,10 @@ inoremap [; [<CR>];<Esc>O
 inoremap [, [<CR>],<Esc>O
 
 for char in [ '_', '.', ':', ';', '<bar>', '/', '<bslash>', '*', '=', '+', '%', '`' ]
-    exe 'xnoremap i' . char . ' :<C-u>normal! T' . char . 'vt' . char . '<cr>'
-    exe 'onoremap i' . char . ' :normal vi' . char . '<cr>'
-    exe 'xnoremap a' . char . ' :<C-u>normal! F' . char . 'vf' . char . '<cr>'
-    exe 'onoremap a' . char . ' :normal va' . char . '<cr>'
+  exe 'xnoremap i' . char . ' :<C-u>normal! T' . char . 'vt' . char . '<cr>'
+  exe 'onoremap i' . char . ' :normal vi' . char . '<cr>'
+  exe 'xnoremap a' . char . ' :<C-u>normal! F' . char . 'vf' . char . '<cr>'
+  exe 'onoremap a' . char . ' :normal va' . char . '<cr>'
 endfor
 
 cnoremap <expr> <Tab>   getcmdtype() == "/" \|\| getcmdtype() == "?" ? "<CR>/<C-r>/" : "<C-z>"
@@ -275,9 +275,9 @@ augroup FUGITIVE
   autocmd BufReadPost fugitive://* set bufhidden=delete
 
   autocmd User fugitive
-  \ if fugitive#buffer().type() =~# '^\%(tree\|blob\)$' |
-  \   nnoremap <buffer> .. :edit %:h<CR> |
-  \ endif
+        \ if fugitive#buffer().type() =~# '^\%(tree\|blob\)$' |
+        \   nnoremap <buffer> .. :edit %:h<CR> |
+        \ endif
 augroup END
 
 let g:netrw_home = '~/.vim/cache/'

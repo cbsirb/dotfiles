@@ -1,4 +1,4 @@
-function! s:showInPreview(list, tagname)
+function! s:showInPreview(list, tagname) abort
   if len(a:list) == 0
     return
   endif
@@ -44,7 +44,7 @@ function! s:showInPreview(list, tagname)
 endfunction
 
 
-function! tags#PreviewTag()
+function! tags#PreviewTag() abort
   let window = winsaveview()
 
   let start_line = line(".")

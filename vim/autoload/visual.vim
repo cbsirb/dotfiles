@@ -1,6 +1,6 @@
 " return a representation of the selected text
 " suitable for use as a search pattern
-function! visual#GetSelection()
+function! visual#GetSelection() abort
   let old_reg = getreg("v")
   normal! gv"vy
   let raw_search = getreg("v")
