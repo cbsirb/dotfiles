@@ -156,6 +156,7 @@
                  "\\`\\*magit-.*\\*\\'"
                  "\\`\\*ivy-occur.*\\*\\'"
                  "\\`\\*\\(Wo\\)?Man .*\\*\\'")))
+
 ;; (autoload 'rabin-mode "rabin-mode.el" "" t nil)
 
 (use-package bug-hunter
@@ -310,16 +311,16 @@
     (defvar lazy-highlight-face 'lazy-highlight
       "Was removed from emacs 26, so redefine it until jump-char fixes it.")))
 
-(use-package avy
-  :ensure t
-  :bind (("C-'" . avy-goto-char-in-line)
-         ("C-\"" . avy-goto-char-timer))
-  :init
-  (csetq avy-background t)
-  (csetq avy-all-windows nil)
-  (csetq avy-all-windows-alt 'all-frames)
-  :config
-  (avy-setup-default))
+;; (use-package avy
+;;   :ensure t
+;;   :bind (("C-'" . avy-goto-char-in-line)
+;;          ("C-\"" . avy-goto-char-timer))
+;;   :init
+;;   (csetq avy-background t)
+;;   (csetq avy-all-windows nil)
+;;   (csetq avy-all-windows-alt 'all-frames)
+;;   :config
+;;   (avy-setup-default))
 
 (use-package expand-region
   :ensure t
@@ -532,6 +533,9 @@
          ([remap forward-paragraph] . user-forward-paragraph)
          ([remap backward-paragraph] . user-backward-paragraph)
          ("M-j" . user-join-line)
+         ("M-`" . user-open-terminal)
+         ("C-'" . user-next-block)
+         ("C-\"" . user-previous-block)
          :map isearch-mode-map
          ("<backspace>" . user-isearch-delete)
          :map minibuffer-local-map
@@ -757,7 +761,7 @@ See `user-rg-type-aliases' for more details."
          ("C-c C-w" . wdired-change-to-wdired-mode))
   :init
   (defun user-dired-hook ()
-    (dired-hide-details-mode -1)
+    ;; (dired-hide-details-mode -1)
     (toggle-truncate-lines))
 
   (add-hook 'dired-mode-hook #'user-dired-hook)
@@ -869,9 +873,6 @@ See `user-rg-type-aliases' for more details."
 (use-package which-func
   :init
   (which-function-mode t))
-  ;; :config
-  ;; (set-face-attribute 'which-func nil :foreground "red1")
-  ;; (face-foreground 'which-func))
 
 (use-package highlight-symbol
   :ensure t
@@ -1041,14 +1042,14 @@ Taken from http://stackoverflow.com/a/3072831/355252."
   (csetq json-reformat:indent-width 4)
   (csetq json-reformat:pretty-string? t))
 
-(defun user-web-mode-hook ()
-  "Hook to run when `web-mode' is active."
-  (smartparens-mode -1))
-
 (use-package web-mode
   :ensure t
   :defer t
   :init
+  (defun user-web-mode-hook ()
+    "Hook to run when `web-mode' is active."
+    (smartparens-mode -1))
+
   (add-to-list 'auto-mode-alist '("\\.phtml\\'" . web-mode))
   (add-to-list 'auto-mode-alist '("\\.tpl\\.php\\'" . web-mode))
   (add-to-list 'auto-mode-alist '("\\.[agj]sp\\'" . web-mode))

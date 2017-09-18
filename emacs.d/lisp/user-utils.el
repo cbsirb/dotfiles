@@ -236,6 +236,75 @@ Saves the position before.  You can skip typos you don't want to fix with
   (interactive)
   (join-line -1))
 
+;;;###autoload
+(defun user-open-terminal ()
+  "Opens a uxterm or xterm in the current directory."
+  (interactive)
+  (cond
+   ((eq system-type 'gnu/linux)
+    (let ((terminal (cond
+                     ((executable-find "uxterm"))
+                     ((executable-find "xterm"))
+                     (t nil))))
+      (when terminal
+        (call-process terminal nil 0))))
+   ((eq system-type 'windows-nt)
+    (message "Not supported for now!"))))
+
+(defun user-get-indentation-chars ()
+  "Helper function to return the number of spaces at the begining of line."
+  (save-mark-and-excursion
+    (back-to-indentation)
+    (- (point) (line-beginning-position))))
+
+(defun user-next-c-block ()
+  "Go to the next C block (the next line after a '{')."
+  (re-search-forward "{\n" (point-max) t)
+  (back-to-indentation))
+
+(defun user-previous-c-block ()
+  "Go to the previous C block (the next line after a '{')."
+  (let ((current-line (line-number-at-pos)))
+    (when (re-search-backward "{\n")
+      (forward-line)
+      ;; We were already on the first line of the block and we found
+      ;; the begining. Skip that and go to the previous
+      (when (= current-line (line-number-at-pos))
+        (forward-line -1)
+        (if (re-search-backward "{\n")
+            (forward-line)))
+      (back-to-indentation))))
+
+(defun user-next-indentation (&optional previous)
+  "Go to the next line that has a different indentation that the current one, \
+and it's not empty.
+If PREVIOUS is t, then go to the previous block."
+  (interactive)
+  (let ((curr-indent (user-get-indentation-chars))
+        (n (if previous -1 1)))
+    (forward-line n)
+    (while (or (looking-at-p "^\n")
+               (and (= curr-indent (user-get-indentation-chars))
+                    (/= (point) (point-max))))
+      (forward-line n)))
+  (back-to-indentation))
+
+;;;###autoload
+(defun user-next-block ()
+  "Go to the next block, based on the current major mode."
+  (interactive)
+  (cond
+   ((derived-mode-p 'java-mode 'c-mode 'c++-mode 'objc-mode) (user-next-c-block))
+   (t (user-next-indentation))))
+
+;;;###autoload
+(defun user-previous-block ()
+  "Go to the previous block, based on the current major mode."
+  (interactive)
+  (cond
+   ((derived-mode-p 'java-mode 'c-mode 'c++-mode 'objc-mode) (user-previous-c-block))
+   (t (user-next-indentation t))))
+
 (provide 'user-utils)
 
 ;;; user-utils.el ends here
