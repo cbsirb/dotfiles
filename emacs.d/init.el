@@ -532,10 +532,10 @@
          ("M-[" . user-prev-error)
          ([remap forward-paragraph] . user-forward-paragraph)
          ([remap backward-paragraph] . user-backward-paragraph)
+         ("M-'" . user-forward-block)
+         ("M-\"" . user-backward-block)
          ("M-j" . user-join-line)
          ("M-`" . user-open-terminal)
-         ("C-'" . user-next-block)
-         ("C-\"" . user-previous-block)
          :map isearch-mode-map
          ("<backspace>" . user-isearch-delete)
          :map minibuffer-local-map

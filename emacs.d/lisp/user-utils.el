@@ -257,12 +257,14 @@ Saves the position before.  You can skip typos you don't want to fix with
     (back-to-indentation)
     (- (point) (line-beginning-position))))
 
-(defun user-next-c-block ()
+;; maybe skip comments: (nth 4 (syntax-ppss))
+
+(defun user-forward-c-block ()
   "Go to the next C block (the next line after a '{')."
   (re-search-forward "{\n" (point-max) t)
   (back-to-indentation))
 
-(defun user-previous-c-block ()
+(defun user-backward-c-block ()
   "Go to the previous C block (the next line after a '{')."
   (let ((current-line (line-number-at-pos)))
     (when (re-search-backward "{\n")
@@ -275,13 +277,13 @@ Saves the position before.  You can skip typos you don't want to fix with
             (forward-line)))
       (back-to-indentation))))
 
-(defun user-next-indentation (&optional previous)
+(defun user-forward-indentation (&optional n)
   "Go to the next line that has a different indentation that the current one, \
 and it's not empty.
-If PREVIOUS is t, then go to the previous block."
+If N is negative, then go to the previous block."
   (interactive)
-  (let ((curr-indent (user-get-indentation-chars))
-        (n (if previous -1 1)))
+  (unless n (setq n 1))
+  (let ((curr-indent (user-get-indentation-chars)))
     (forward-line n)
     (while (or (looking-at-p "^\n")
                (and (= curr-indent (user-get-indentation-chars))
@@ -290,20 +292,20 @@ If PREVIOUS is t, then go to the previous block."
   (back-to-indentation))
 
 ;;;###autoload
-(defun user-next-block ()
+(defun user-forward-block ()
   "Go to the next block, based on the current major mode."
   (interactive)
   (cond
-   ((derived-mode-p 'java-mode 'c-mode 'c++-mode 'objc-mode) (user-next-c-block))
-   (t (user-next-indentation))))
+   ((derived-mode-p 'java-mode 'c-mode 'c++-mode 'objc-mode) (user-forward-c-block))
+   (t (user-forward-indentation))))
 
 ;;;###autoload
-(defun user-previous-block ()
+(defun user-backward-block ()
   "Go to the previous block, based on the current major mode."
   (interactive)
   (cond
-   ((derived-mode-p 'java-mode 'c-mode 'c++-mode 'objc-mode) (user-previous-c-block))
-   (t (user-next-indentation t))))
+   ((derived-mode-p 'java-mode 'c-mode 'c++-mode 'objc-mode) (user-backward-c-block))
+   (t (user-forward-indentation -1))))
 
 (provide 'user-utils)
 
