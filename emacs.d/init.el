@@ -427,10 +427,6 @@
 
 (use-package undo-tree
   :ensure t
-  ;; See https://xkcd.com/1806/ for bindings
-  :bind (:map undo-tree-map
-         ("<C-mouse-5>" . undo-tree-redo)
-         ("<C-mouse-4>" . undo-tree-undo))
   :diminish undo-tree-mode
   :init
   (csetq undo-tree-visualizer-diff t)

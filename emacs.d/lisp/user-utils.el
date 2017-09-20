@@ -307,6 +307,13 @@ If N is negative, then go to the previous block."
    ((derived-mode-p 'java-mode 'c-mode 'c++-mode 'objc-mode) (user-backward-c-block))
    (t (user-forward-indentation -1))))
 
+;;;###autoload
+(defun user-clean-windows-whitespace ()
+  "Clean strays ^M (windows end-lines) and trailing whitepsace."
+  (interactive)
+  (while (re-search-forward "[[:space:]\|?\r]+" nil t)
+    (replace-match " " nil nil)))
+
 (provide 'user-utils)
 
 ;;; user-utils.el ends here
