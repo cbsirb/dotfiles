@@ -12,4 +12,7 @@ set bind-tty-special-chars off
 "\eOc": forward-word
 "\eOd": backward-word
 
+"\e[1;5C": forward-word
+"\e[1;5D": backward-word
+
 "\C-w": backward-kill-word
