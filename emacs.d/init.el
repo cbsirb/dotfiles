@@ -546,7 +546,9 @@
          ("<escape>" . user-minibuffer-keyboard-quit)))
 
 (use-package user-window
-  :bind (("C-c w d" . user-toggle-current-window-dedication)
+  :bind (([remap scroll-up-command] . user-scroll-half-page-up)
+         ([remap scroll-down-command] . user-scroll-half-page-down)
+         ("C-c w d" . user-toggle-current-window-dedication)
          ("C-c w q" . user-quit-all-side-windows)
          ("C-c w b" . user-switch-to-minibuffer))
   :init
@@ -1143,6 +1145,7 @@ Taken from http://stackoverflow.com/a/3072831/355252."
 (unbind-key "C-x C-z")
 (unbind-key "C-x f")
 (unbind-key "C-x m")
+(unbind-key "<insert>")
 
 (provide 'init)
 
