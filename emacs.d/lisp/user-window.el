@@ -48,7 +48,7 @@ Taken from http://dfan.org/blog/2009/02/19/emacs-dedicated-windows"
              (buffer-name))))
 
 (defun user-scroll-half-page (direction)
-  "Scrolls half page up if `direction' is non-nil, otherwise will scroll half page down."
+  "Scrolls half page down if `direction' is non-nil, otherwise will scroll half page up."
   (let ((opos (cdr (nth 6 (posn-at-point)))))
     ;; opos = original position line relative to window
     (move-to-window-line nil)  ;; Move cursor to middle line
@@ -61,13 +61,13 @@ Taken from http://dfan.org/blog/2009/02/19/emacs-dedicated-windows"
 (defun user-scroll-half-page-down ()
   "Scrolls exactly half page down keeping cursor/point position."
   (interactive)
-  (user-scroll-half-page nil))
+  (user-scroll-half-page t))
 
 ;;;###autoload
 (defun user-scroll-half-page-up ()
   "Scrolls exactly half page up keeping cursor/point position."
   (interactive)
-  (user-scroll-half-page t))
+  (user-scroll-half-page nil))
 
 (provide 'user-window)
 

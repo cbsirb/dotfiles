@@ -311,17 +311,6 @@
     (defvar lazy-highlight-face 'lazy-highlight
       "Was removed from emacs 26, so redefine it until jump-char fixes it.")))
 
-;; (use-package avy
-;;   :ensure t
-;;   :bind (("C-'" . avy-goto-char-in-line)
-;;          ("C-\"" . avy-goto-char-timer))
-;;   :init
-;;   (csetq avy-background t)
-;;   (csetq avy-all-windows nil)
-;;   (csetq avy-all-windows-alt 'all-frames)
-;;   :config
-;;   (avy-setup-default))
-
 (use-package expand-region
   :ensure t
   :bind (("M-2" . er/expand-region)     ; let it be overwritten in magit
@@ -804,7 +793,17 @@ See `user-rg-type-aliases' for more details."
          ("C-c m n" . mc/skip-to-next-like-this)
          ("C-c m p" . mc/skip-to-previous-like-this)
          ("C-c m C-a" . mc/edit-beginnings-of-lines)
-         ("C-c m C-e" . mc/edit-end-of-lines)))
+         ("C-c m C-e" . mc/edit-end-of-lines))
+  :config
+  (defun mc-prompt-once-advice (fn &rest args)
+    (setq mc--this-command (lambda () (interactive) (apply fn args)))
+    (apply fn args))
+
+  (defun mc-prompt-once (&rest fns)
+    (dolist (fn fns)
+      (advice-add fn :around #'mc-prompt-once-advice)))
+
+  (mc-prompt-once #'zap-up-to-char #'sp-rewrap-sexp))
 
 (use-package smex
   :ensure t
@@ -1118,6 +1117,7 @@ Taken from http://stackoverflow.com/a/3072831/355252."
 (bind-key [remap just-one-space] #'cycle-spacing)
 (bind-key "M-g" #'goto-line)
 (bind-key "C-o" #'isearch-occur isearch-mode-map)
+(bind-key "C-8" #'repeat-complex-command)
 
 (use-package key-chord
   :ensure t
