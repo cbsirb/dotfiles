@@ -952,12 +952,21 @@ Taken from http://stackoverflow.com/a/3072831/355252."
     :init
     (csetq multi-term-dedicated-select-after-open-p t)
 
-    (defun user-term-mode ()
+    (defun user-term-mode-hook ()
       (company-mode -1)
       (hl-line-mode -1)
       (setq-local scroll-margin 0))
 
-    (add-hook 'term-mode-hook #'user-term-mode)))
+    (add-hook 'term-mode-hook #'user-term-mode-hook)))
+
+(use-package eshell
+  :defer t
+  :config
+  (defun user-eshell-hook ()
+    (company-mode -1)
+    (setq-local scroll-margin 0))
+
+  (add-hook 'eshell-mode-hook #'user-eshell-hook))
 
 (use-package eldoc
   :defer t
