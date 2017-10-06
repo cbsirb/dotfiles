@@ -94,10 +94,10 @@ done
 
 # install_config_dir "i3"
 # install_config_dir "conky"
-# install_config_dir "ncmpcpp"
-# install_config_dir "mpd"
-# if [ ! -d "$HOME/.config/mpd/playlists" ]; then
-#     mkdir "$HOME/.config/mpd/playlists"
-# fi
+install_config_dir "ncmpcpp"
+install_config_dir "mpd"
+if [ ! -d "$HOME/.config/mpd/playlists" ]; then
+    mkdir "$HOME/.config/mpd/playlists"
+fi
 
 

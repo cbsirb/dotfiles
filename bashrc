@@ -89,7 +89,14 @@ export GIT_PS1_SHOWCOLORHINTS=1
 if [ "$color_prompt" = yes ]; then
     case "$TERM" in
         xterm*|rxvt*|tmux*|screen*|eterm*)
-            export PS1="\[\033[38;5;1m\]\u\[$(tput sgr0)\] @ \[$(tput sgr0)\]\[\033[38;5;12m\]\w\[$(tput sgr0)\]\[\033[38;5;15m\]\[$(tput sgr0)\]\$(__git_ps1 ' (%s)')\[\033[38;5;1m\] >\[$(tput sgr0)\]\[\033[38;5;15m\] \[$(tput sgr0)\]"
+            if [ "$USERNAME" = root ]; then
+                export PS1="\[\033[38;5;1m\]\u\[$(tput sgr0)\] @ \[$(tput sgr0)\]"
+            else
+                export PS1=
+            fi
+
+            export PS1=$PS1"\[\033[38;5;12m\]\w\[$(tput sgr0)\]\[\033[38;5;15m\]\[$(tput sgr0)\]\$(__git_ps1 ' (%s)')\[\033[38;5;1m\] >\[$(tput sgr0)\]\[\033[38;5;15m\] \[$(tput sgr0)\]"
+
             ;;
         *)
             PS1='\u@\h:\w\$ '

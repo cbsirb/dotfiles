@@ -47,6 +47,8 @@ xterm*faceName: xft:Iosevka:size=11
 *color7:  #a89984
 *color15: #ebdbb2
 
+*saveLines: 10000
+
 ! Xterm config
 xterm*utf8: 1
 xterm*termName: xterm-256color
@@ -58,7 +60,6 @@ xterm*scrollTtyKeypress: true
 xterm*scrollTtyOutput: false
 xterm*ScrollBar: false
 
-xterm*SaveLines: 10000
 xterm*bellIsUrgent: true
 xterm*disallowedWindowOps: 20,21,SetXprop
 ! VT Font Menu: Unreadable

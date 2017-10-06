@@ -7,6 +7,6 @@ set guiheadroom=0
 if has('win32')
   set guifont=Iosevka:h11
 else
-  set guifont=Iosevka\ 11
+  set guifont=Iosevka\ 11.5
 endif
 

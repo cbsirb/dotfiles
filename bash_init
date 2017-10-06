@@ -6,9 +6,9 @@ if [[ ! "$PATH" == *"/sbin"* ]]; then
     export PATH="/sbin:$PATH"
 fi
 
-if [[ ! "$PATH" == *"/usr/sbin"* ]]; then
-    export PATH="/usr/sbin:$PATH"
-fi
+# if [[ ! "$PATH" == *"/usr/sbin"* ]]; then
+#     export PATH="/usr/sbin:$PATH"
+# fi
 
 # Don't pollute path if not needed
 if [[ ! "$PATH" == *"$HOME/.cargo/bin"* ]]; then
