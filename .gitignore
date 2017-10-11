@@ -1,9 +1,7 @@
 /emacs.d/elpa/
 /emacs.d/var/
 /emacs.d/etc/
-/emacs.d/.cache/
-/emacs.d/irony/
-/emacs.d/bookmarks
+/emacs.d/.cask/
 /vim/plugged/
 /vim/cache/
 /vim/plug-local/
