@@ -21,21 +21,8 @@
 (when (fboundp 'menu-bar-mode) (menu-bar-mode 0))
 (when (fboundp 'scroll-bar-mode) (scroll-bar-mode 0))
 
-(defconst user-is-windows (eq system-type 'windows-nt)
-  "Set when the OS is windows.")
-
-(defconst user-is-cygwin (eq system-type 'cygwin)
-  "Set when the OS is cygwin.")
-
-(defconst user-is-linux (eq system-type 'gnu/linux)
-  "Set when the OS is linux.")
-
 (defconst user-custom-file (expand-file-name "custom.el" user-emacs-directory)
   "File used to store settings from Customization UI.")
-
-(if user-is-cygwin
-    (csetq source-directory "/cygdrive/d/tools/prog/src/emacs/")
-  (csetq source-directory "D:/tools/prog/src/emacs/"))
 
 (add-hook 'after-init-hook
           (lambda ()
@@ -48,7 +35,7 @@
 (csetq package-enable-at-startup nil)
 (csetq load-prefer-newer t)
 
-(when user-is-windows
+(when (eq system-type 'windows-nt)
   ;; Use mingw64 & msys2 first
   (setenv "PATH"
           (concat
@@ -941,7 +928,7 @@ Taken from http://stackoverflow.com/a/3072831/355252."
   (add-hook 'compilation-filter-hook #'user-colorize-compilation-buffer)
   (add-hook 'compilation-mode-hook #'user-results-buffer-hook))
 
-(when user-is-linux
+(when (eq system-type 'gnu/linux)
   (use-package multi-term
     :ensure t
     :bind (("C-; C-;" . multi-term)

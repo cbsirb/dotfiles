@@ -67,12 +67,13 @@ _SWITCH should be 'diff'."
 (csetq next-screen-context-lines 5)
 (csetq read-quoted-char-radix 16)
 (csetq truncate-lines t)
+(csetq select-active-regions nil)
 
 ;; very elisp-specific
 (csetq eval-expression-print-length nil)
 (csetq eval-expression-print-level nil)
 
-(when user-is-linux
+(when (eq system-type 'gnu/linux)
   (csetq x-selection-timeout 100))
 
 (remove-hook 'post-self-insert-hook 'blink-paren-post-self-insert-function)
@@ -149,7 +150,7 @@ _SWITCH should be 'diff'."
 (add-hook 'minibuffer-exit-hook #'user-minibuffer-exit-hook)
 
 ;; Needed for some company backends
-(when user-is-windows
+(when (eq system-type 'windows-nt)
   (csetq w32-pipe-read-delay 0))
 
 (provide 'user-sensible)
