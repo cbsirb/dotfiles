@@ -141,6 +141,9 @@
                '("\\`\\*Customize .*\\*\\'"
                  "\\`\\*magit: .*\\*\\'"
                  "\\`\\*magit-.*\\*\\'"
+                 "\\`\\*Outline .*\\*\\'"
+                 "\\`\\*.* annots\\*\\'"
+                 "\\`\\*Contents*\\*\\'"
                  "\\`\\*ivy-occur.*\\*\\'"
                  "\\`\\*\\(Wo\\)?Man .*\\*\\'")))
 
@@ -211,7 +214,7 @@
 ;; (setq default-frame-alist '((height . 55)
 ;;                             (width . 125)))
 
-(csetq fast-but-imprecise-scrolling t)
+;; (csetq fast-but-imprecise-scrolling t)
 
 (use-package whitespace
   :diminish whitespace-mode
@@ -1136,6 +1139,10 @@ Taken from http://stackoverflow.com/a/3072831/355252."
   :init
   (keyfreq-mode t)
   (keyfreq-autosave-mode t))
+
+(use-package pdf-tools
+  :init
+  (pdf-tools-install t t t))
 
 (unbind-key "C-z")
 (unbind-key "C-x C-z")
