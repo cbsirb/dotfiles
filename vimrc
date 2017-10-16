@@ -8,12 +8,13 @@ call plug#begin('~/.vim/plugged')
 Plug 'tpope/vim-commentary'
 Plug 'tpope/vim-endwise'
 Plug 'tpope/vim-fugitive'
-" Plug 'tpope/vim-projectionist'
 Plug 'tpope/vim-repeat'
 Plug 'tpope/vim-rsi'
 Plug 'tpope/vim-surround'
 Plug 'tpope/vim-unimpaired'
 Plug 'tpope/vim-vinegar'
+
+Plug 'w0rp/ale'
 
 Plug 'romainl/vim-qf'
 Plug 'romainl/vim-qlist'
@@ -44,10 +45,7 @@ endif
 
 " Colorschemes
 Plug 'robertmeta/nofrils'
-" Disabled 08.14.2017
-" Plug 'morhetz/gruvbox'
-" Plug 'romainl/Apprentice'
-" Plug 'owickstrom/vim-colors-paramount'
+Plug 'romainl/Apprentice'
 
 call plug#end()
 
@@ -99,8 +97,8 @@ set wildcharm=<C-z>
 " Will append whatever necessary per project (in the local .vimrc)
 set path=.,**
 
-set statusline=%*%<\ %n\ %r%m%f
-set statusline+=\ %l:%c
+set statusline=%*%<%r%m[%{ALEGetStatusLine()}]
+set statusline+=\ %5l:%-3c\ %f
 set statusline+=%=%w%q%{fugitive#statusline()}%y[%{&ff}][%{&enc}]
 
 set timeoutlen=1000
@@ -125,6 +123,8 @@ set tabpagemax=50
 set noswapfile
 set nobackup
 
+set clipboard^=unnamedplus
+
 set sessionoptions+=resize
 if exists('+breakindent')
   set showbreak=...\ 
@@ -147,7 +147,7 @@ if !isdirectory(expand(&undodir))
 endif
 
 set background=dark
-autocmd VimEnter * colorscheme nofrils-dark
+autocmd VimEnter * colorscheme apprentice
 
 set colorcolumn=+1
 set cursorline
@@ -294,3 +294,18 @@ let g:UltiSnipsSnippetsDir='~/.vim'
 let g:vim_json_syntax_conceal = 1
 
 let g:pymode_indent = 0
+
+let g:ale_lint_on_text_changed="never"
+let g:ale_lint_on_insert_leave=0
+let g:ale_lint_on_save=1
+
+let g:ale_statusline_format = ["\u2717 %d", "\u271a %d", "\u2713 ok"]
+let g:ale_echo_msg_format = '[%linter%] %s [%severity%]'
+
+let g:ale_python_pylint_executable = 'pylint'
+
+let g:ale_linters = {
+      \ 'cpp': ['gcc'],
+      \ 'c': ['gcc'],
+      \ 'python': ['pylint']
+      \}
