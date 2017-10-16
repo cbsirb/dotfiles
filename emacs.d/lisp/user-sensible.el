@@ -153,6 +153,10 @@ _SWITCH should be 'diff'."
 (when (eq system-type 'windows-nt)
   (csetq w32-pipe-read-delay 0))
 
+;; On my system it handles 50MB files pretty well
+(when (eq system-type 'gnu/linux)
+  (csetq large-file-warning-threshold 50000000))
+
 (provide 'user-sensible)
 
 ;;; user-sensible.el ends here

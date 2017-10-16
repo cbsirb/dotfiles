@@ -60,6 +60,12 @@
 
 (package-initialize)
 
+(use-package tramp
+  :init
+  ;; Work-around for tramp which apparently doesn't knwo 'default
+  (when (eq tramp-syntax 'default)
+    (setq tramp-syntax 'ftp)))
+
 ;; Install use-package if needed
 (unless (package-installed-p 'use-package)
   (package-refresh-contents)
@@ -214,12 +220,12 @@
 ;; (setq default-frame-alist '((height . 55)
 ;;                             (width . 125)))
 
-;; (csetq fast-but-imprecise-scrolling t)
+(csetq fast-but-imprecise-scrolling t)
 
 (use-package whitespace
   :diminish whitespace-mode
   :init
-  (csetq whitespace-style '(face tab-mark))
+  (csetq whitespace-style '(face tab-mark trailing))
   (csetq whitespace-display-mappings '((tab-mark ?\t [187 183 183 183 183 183 183 183])))
   (add-hook 'prog-mode-hook #'whitespace-mode))
 
@@ -241,7 +247,8 @@
 (use-package vlf
   :ensure t
   :config
-  (require 'vlf-setup))
+  (require 'vlf-setup)
+  (add-to-list 'vlf-forbidden-modes-list 'pdf-view-mode))
 
 (use-package uniquify
   :init
