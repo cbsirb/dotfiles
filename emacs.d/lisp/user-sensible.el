@@ -74,7 +74,8 @@ _SWITCH should be 'diff'."
 (csetq eval-expression-print-level nil)
 
 (when (eq system-type 'gnu/linux)
-  (csetq x-selection-timeout 100))
+  (add-hook 'after-make-frame-functions (lambda (_frame)
+                                            (setq-default x-selection-timeout 100))))
 
 (remove-hook 'post-self-insert-hook 'blink-paren-post-self-insert-function)
 
