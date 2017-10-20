@@ -10,9 +10,11 @@ Plug 'tpope/vim-endwise'
 Plug 'tpope/vim-fugitive'
 Plug 'tpope/vim-repeat'
 Plug 'tpope/vim-rsi'
-Plug 'tpope/vim-surround'
 Plug 'tpope/vim-unimpaired'
 Plug 'tpope/vim-vinegar'
+"Plug 'tpope/vim-surround'
+
+Plug 'machakann/vim-sandwich'
 
 Plug 'w0rp/ale'
 
