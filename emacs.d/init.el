@@ -12,7 +12,7 @@
   `(funcall (or (get ',variable 'custom-set) 'set-default) ',variable ,value))
 
 ;; Will reset at the end of loading
-(defconst user-original-gc-cons (* 5 gc-cons-threshold)
+(defconst user-original-gc-cons (* 7 gc-cons-threshold)
   "The original/default value of `gc-cons-threshold'.")
 
 (csetq gc-cons-threshold (* 128 1024 1024))
@@ -60,12 +60,6 @@
 
 (package-initialize)
 
-(use-package tramp
-  :init
-  ;; Work-around for tramp which apparently doesn't knwo 'default
-  (when (eq tramp-syntax 'default)
-    (setq tramp-syntax 'ftp)))
-
 ;; Install use-package if needed
 (unless (package-installed-p 'use-package)
   (package-refresh-contents)
@@ -78,6 +72,12 @@
   :ensure t
   :config
   (ignoramus-setup))
+
+(use-package tramp
+  :init
+  ;; Work-around for tramp which apparently doesn't knwo 'default
+  (when (eq tramp-syntax 'default)
+    (setq tramp-syntax 'ftp)))
 
 (use-package no-littering
   :ensure t
@@ -152,8 +152,6 @@
                  "\\`\\*Contents*\\*\\'"
                  "\\`\\*ivy-occur.*\\*\\'"
                  "\\`\\*\\(Wo\\)?Man .*\\*\\'")))
-
-;; (autoload 'rabin-mode "rabin-mode.el" "" t nil)
 
 (use-package bug-hunter
   :ensure t
@@ -334,16 +332,6 @@
     ("\"" er/mark-outside-quotes "outside quotes")
     ("q" nil "quit")))
 
-(use-package volatile-highlights
-  :ensure t
-  :diminish volatile-highlights-mode
-  :config
-  (volatile-highlights-mode t)
-  (csetq Vhl/highlight-zero-width-ranges t)
-
-  (vhl/define-extension 'vhl-undo-tree #'undo-tree-move #'undo-tree-undo #'undo-tree-redo)
-  (vhl/install-extension 'vhl-undo-tree))
-
 (use-package drag-stuff
   :diminish drag-stuff-mode
   :ensure t
@@ -406,7 +394,8 @@
   (sp-local-pair 'c++-mode "{" nil :post-handlers '(:add user-open-block-c-mode))
 
   (show-smartparens-global-mode t)
-  (add-hook 'prog-mode-hook #'smartparens-mode))
+  (add-hook 'prog-mode-hook #'smartparens-mode)
+  (add-hook 'minibuffer-setup-hook 'turn-on-smartparens-strict-mode))
 
   ;; (add-hook 'emacs-lisp-mode-hook #'smartparens-strict-mode)
   ;; (add-hook 'lisp-interaction-mode-hook #'smartparens-strict-mode))
@@ -417,7 +406,7 @@
   :init
   (csetq undo-tree-visualizer-diff t)
   (csetq undo-tree-visualizer-timestamps t)
-  (csetq undo-tree-auto-save-history t)
+  (csetq undo-tree-auto-save-history nil)
 
   (global-undo-tree-mode t)
 
@@ -432,6 +421,17 @@
           (set-marker p nil)
           (set-marker m nil))
       ad-do-it)))
+
+(use-package volatile-highlights
+  :ensure t
+  :diminish volatile-highlights-mode
+  :config
+  (volatile-highlights-mode t)
+  (csetq Vhl/highlight-zero-width-ranges t)
+
+  (with-eval-after-load "undo-tree"
+    (vhl/define-extension 'vhl-undo-tree #'undo-tree-move #'undo-tree-undo #'undo-tree-redo)
+    (vhl/install-extension 'vhl-undo-tree)))
 
 (use-package misc
   :bind (("M-z" . zap-up-to-char)
@@ -715,7 +715,7 @@ See `user-rg-type-aliases' for more details."
   (csetq company-dabbrev-code-ignore-case t)
 
   (csetq company-transformers '(company-sort-by-occurrence))
-  (csetq company-idle-delay 0.1)
+  (csetq company-idle-delay 0)
   (csetq company-minimum-prefix-length 3)
   (csetq company-tooltip-align-annotations t)
   (csetq company-selection-wrap-around t)
@@ -941,7 +941,7 @@ Taken from http://stackoverflow.com/a/3072831/355252."
 (when (eq system-type 'gnu/linux)
   (use-package multi-term
     :ensure t
-    :bind (("C-; C-;" . multi-term)
+    :bind (("C-; C-;" . multi-term-next)
            ("C-; c" . multi-term)
            ("C-; d" . multi-term-dedicated-toggle)
            ("C-; n" . multi-term-next)
