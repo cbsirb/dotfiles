@@ -168,9 +168,11 @@ shopt -s checkwinsize
 if  [ -x /usr/bin/fzf ]; then
   export FZF_TMUX=1
 
-  if [ -f /usr/share/doc/fzf/key-bindings.bash ]; then
-    . /usr/share/doc/fzf/key-bindings.bash
+  if [ -f /usr/share/fzf/key-bindings.bash ]; then
+    . /usr/share/fzf/key-bindings.bash
   fi
-else
-  [ -f ~/.fzf.bash ] && source ~/.fzf.bash
+
+  if [ -f /usr/share/fzf/completion.bash ]; then
+    . /usr/share/fzf/completion.bash
+  fi
 fi
