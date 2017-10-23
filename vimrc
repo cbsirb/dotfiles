@@ -4,61 +4,10 @@ if has('win32')
   set rop=type:directx
 endif
 
-call plug#begin('~/.vim/plugged')
-Plug 'tpope/vim-commentary'
-Plug 'tpope/vim-endwise'
-Plug 'tpope/vim-fugitive'
-Plug 'tpope/vim-repeat'
-Plug 'tpope/vim-rsi'
-Plug 'tpope/vim-unimpaired'
-Plug 'tpope/vim-vinegar'
-"Plug 'tpope/vim-surround'
+source ~/.vim/packages.vim
 
-Plug 'machakann/vim-sandwich'
-
-Plug 'w0rp/ale'
-
-Plug 'romainl/vim-qf'
-Plug 'romainl/vim-qlist'
-Plug 'romainl/vim-cool'
-Plug 'romainl/vim-tinyMRU'
-
-Plug 'tommcdo/vim-lion'
-
-" Disabled 08.14.2017
-" Plug 'Rip-Rip/clang_complete'
-
-" When I start writing html again
-" Plug 'rstacruz/sparkup'
-
-Plug 'elzr/vim-json'
-Plug 'Vimjas/vim-python-pep8-indent'
-
-Plug 'SirVer/ultisnips'
-Plug 'honza/vim-snippets'
-
-Plug 'kana/vim-textobj-user'
-Plug 'kana/vim-textobj-indent' " i
-Plug 'sgur/vim-textobj-parameter' " ,
-
-if !has('win32')
-  Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
-endif
-
-" Colorschemes
-Plug 'robertmeta/nofrils'
-Plug 'romainl/Apprentice'
-
-call plug#end()
-
-if has("patch2111") || v:version >= 800
-  unlet! skip_defaults_vim
-  source $VIMRUNTIME/defaults.vim
-else
-  source ~/.vim/defaults.vim
-endif
-
-runtime macros/matchit.vim
+source $VIMRUNTIME/defaults.vim
+packadd matchit
 
 if !has('gui_running') && has('mouse_sgr')
   set ttymouse=xterm2
@@ -99,9 +48,12 @@ set wildcharm=<C-z>
 " Will append whatever necessary per project (in the local .vimrc)
 set path=.,**
 
-set statusline=%*%<%r%m[%{ALEGetStatusLine()}]
+set statusline=%*%<%r%m
+set statusline+=[%{ALEGetStatusLine()}]
 set statusline+=\ %5l:%-3c\ %f
-set statusline+=%=%w%q%{fugitive#statusline()}%y[%{&ff}][%{&enc}]
+set statusline+=%=%w%q
+set statusline+=%{fugitive#statusline()}
+set statusline+=%y[%{&ff}][%{&enc}]
 
 set timeoutlen=1000
 set ttimeoutlen=100
@@ -148,8 +100,8 @@ if !isdirectory(expand(&undodir))
   call mkdir(expand(&undodir), "p")
 endif
 
-set background=dark
-autocmd VimEnter * colorscheme apprentice
+set background=light
+autocmd VimEnter * colorscheme solarized
 
 set colorcolumn=+1
 set cursorline
@@ -287,7 +239,7 @@ let g:netrw_altfile = 1
 
 let g:qf_mapping_ack_style = 1
 
-let g:clang_library_path = '/usr/lib64/libclang.so.4'
+let g:clang_library_path = '/usr/lib64/libclang.so'
 let g:clang_snippets = 0
 
 let g:UltiSnipsEditSplit="vertical"
