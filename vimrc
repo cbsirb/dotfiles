@@ -6,8 +6,10 @@ endif
 
 source ~/.vim/packages.vim
 
-source $VIMRUNTIME/defaults.vim
-packadd matchit
+if !has('nvim')
+  source $VIMRUNTIME/defaults.vim
+  packadd matchit
+endif
 
 if !has('gui_running') && has('mouse_sgr')
   set ttymouse=xterm2
@@ -48,12 +50,17 @@ set wildcharm=<C-z>
 " Will append whatever necessary per project (in the local .vimrc)
 set path=.,**
 
-set statusline=%*%<%r%m
-set statusline+=[%{ALEGetStatusLine()}]
-set statusline+=\ %5l:%-3c\ %f
-set statusline+=%=%w%q
-set statusline+=%{fugitive#statusline()}
-set statusline+=%y[%{&ff}][%{&enc}]
+set statusline=%<\ %f\ %y%w%r%m
+set statusline+=%=
+set statusline+=[%{ALEGetStatusLine()}]\ 
+set statusline+=%l\/%-6L\ %3c\ 
+
+" set statusline=%*%<%r%m
+" set statusline+=[%{ALEGetStatusLine()}]
+" set statusline+=\ %5l:%-3c\ %f
+" set statusline+=%=%w%q
+" set statusline+=%{fugitive#statusline()}
+" set statusline+=%y[%{&ff}][%{&enc}]
 
 set timeoutlen=1000
 set ttimeoutlen=100
@@ -101,7 +108,7 @@ if !isdirectory(expand(&undodir))
 endif
 
 set background=light
-autocmd VimEnter * colorscheme solarized
+autocmd VimEnter * colorscheme solarized8_light
 
 set colorcolumn=+1
 set cursorline
@@ -194,6 +201,8 @@ inoremap [<CR> [<CR>]<Esc>O
 inoremap [; [<CR>];<Esc>O
 inoremap [, [<CR>],<Esc>O
 
+inoremap <C-j> <C-x><C-p>
+
 for char in [ '_', '.', ':', ';', '<bar>', '/', '<bslash>', '*', '=', '+', '%', '`' ]
   exe 'xnoremap i' . char . ' :<C-u>normal! T' . char . 'vt' . char . '<cr>'
   exe 'onoremap i' . char . ' :normal vi' . char . '<cr>'
@@ -263,3 +272,5 @@ let g:ale_linters = {
       \ 'c': ['gcc'],
       \ 'python': ['pylint']
       \}
+
+let g:fzf_layout = { 'down': '~20%' }

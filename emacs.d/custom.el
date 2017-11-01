@@ -5,7 +5,7 @@
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
    (quote
-    (pdf-tools key-chord flatui-theme dired-narrow magit-gitflow wgrep-ack which-key wgrep-ag web-mode volatile-highlights vlf visual-fill-column use-package undo-tree smex smartparens realgud projectile-ripgrep no-littering nasm-mode multiple-cursors multi-term magit keyfreq key-seq jump-char json-mode js2-mode ivy-hydra irony-eldoc imenu-anywhere ignoramus hl-todo highlight-symbol flycheck-irony expand-region drag-stuff dired+ cython-mode counsel company-irony-c-headers company-irony cmake-mode bug-hunter avy anzu ag)))
+    (flycheck company pdf-tools key-chord flatui-theme dired-narrow magit-gitflow wgrep-ack which-key wgrep-ag web-mode volatile-highlights vlf visual-fill-column use-package undo-tree smex smartparens realgud projectile-ripgrep no-littering nasm-mode multiple-cursors multi-term magit keyfreq key-seq jump-char json-mode js2-mode ivy-hydra irony-eldoc imenu-anywhere ignoramus hl-todo highlight-symbol flycheck-irony expand-region drag-stuff dired+ cython-mode counsel company-irony-c-headers company-irony cmake-mode bug-hunter avy anzu ag)))
  '(tramp-syntax (quote default)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.

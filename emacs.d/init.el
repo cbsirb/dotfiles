@@ -868,6 +868,10 @@ See `user-rg-type-aliases' for more details."
   :init
   (which-function-mode t))
 
+(use-package hexl
+  :init
+  (csetq hexl-bits 8))
+
 (use-package highlight-symbol
   :ensure t
   :diminish highlight-symbol-mode

@@ -24,7 +24,7 @@ call minpac#add('w0rp/ale')
 
 call minpac#add('romainl/vim-qf')
 call minpac#add('romainl/vim-qlist')
-call minpac#add('romainl/vim-cool')
+" call minpac#add('romainl/vim-cool')
 call minpac#add('romainl/vim-tinyMRU')
 
 call minpac#add('tommcdo/vim-lion')
@@ -50,3 +50,4 @@ call minpac#add('junegunn/fzf')
 call minpac#add('robertmeta/nofrils', {'type':'opt'})
 call minpac#add('romainl/Apprentice', {'type':'opt'})
 call minpac#add('altercation/vim-colors-solarized', {'type':'opt'})
+call minpac#add('lifepillar/vim-solarized8', {'type':'opt'})
