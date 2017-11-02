@@ -702,7 +702,8 @@ See `user-rg-type-aliases' for more details."
 (use-package company
   :ensure t
   :diminish company-mode
-  :bind (:map company-active-map
+  :bind (("C-j" . company-complete)
+         :map company-active-map
          ("ESC" . company-abort)
          ("C-l" . company-show-location)
          ("C-n" . company-select-next)
@@ -721,9 +722,27 @@ See `user-rg-type-aliases' for more details."
   (csetq company-selection-wrap-around t)
 
   (use-package user-completion
-    :bind (("C-c /" . user-complete-line)))
+    :bind (("C-x C-l" . user-complete-line)))
 
   (add-hook 'after-init-hook 'global-company-mode))
+
+(use-package ycmd
+  :ensure t
+  :defer t
+  :init
+  (set-variable 'ycmd-server-command `("python2" ,(file-truename "~/src/ycmd/ycmd/")))
+  (csetq ycmd-force-semantic-completion t)
+  (csetq ycmd-tag-files 'auto)
+
+  (use-package company-ycmd
+    :ensure t
+    :defer t
+    :init
+    (csetq company-ycmd-enable-fuzzy-matching nil))
+
+  :config
+  (require 'ycmd-eldoc)
+  (add-hook 'ycmd-mode-hook 'ycmd-eldoc-setup))
 
 ;; (csetq completion-ignore-case t)
 

@@ -89,7 +89,11 @@ For anything else there is ctags."
     ;; (irony-mode t)
     ;; (irony-cdb-autosetup-compile-options)
     ;; (setq-local company-backends '(company-irony-c-headers company-irony company-dabbrev-code company-files))
-    (setq-local company-backends '(company-dabbrev-code company-files))
+
+    (ycmd-mode t)
+    (company-ycmd-setup)
+
+    (setq-local company-backends '(company-ycmd company-files))
 
     (flycheck-mode t))
 
