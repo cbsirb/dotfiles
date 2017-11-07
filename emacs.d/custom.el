@@ -5,8 +5,7 @@
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
    (quote
-    (company-ycmd emacs-ycmd flycheck company pdf-tools key-chord flatui-theme dired-narrow magit-gitflow wgrep-ack which-key wgrep-ag web-mode volatile-highlights vlf visual-fill-column use-package undo-tree smex smartparens realgud projectile-ripgrep no-littering nasm-mode multiple-cursors multi-term magit keyfreq key-seq jump-char json-mode js2-mode ivy-hydra irony-eldoc imenu-anywhere ignoramus hl-todo highlight-symbol flycheck-irony expand-region drag-stuff dired+ cython-mode counsel company-irony-c-headers company-irony cmake-mode bug-hunter avy anzu ag)))
- '(tramp-syntax (quote default)))
+    (solarized-theme wgrep-helm helm-smex helm evil-matchit which-key wgrep-ag wgrep-ack web-mode volatile-highlights vlf visual-fill-column use-package smex smartparens realgud projectile-ripgrep pdf-tools no-littering nasm-mode multiple-cursors multi-term magit-gitflow keyfreq key-seq jump-char json-mode js2-mode ivy-hydra imenu-anywhere ignoramus hl-todo highlight-symbol flycheck flatui-theme expand-region evil-visualstar evil-surround evil-rsi evil-magit evil-lion evil-leader evil-commentary evil-args evil-anzu drag-stuff dired-narrow dired+ cython-mode counsel company-ycmd cmake-mode bug-hunter ag))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.

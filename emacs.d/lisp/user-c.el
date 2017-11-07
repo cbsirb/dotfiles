@@ -54,10 +54,8 @@
 (use-package cc-mode
   :defer t
   :bind (:map c-mode-map
-         ("M-." . ectags-find-tag-at-point)
          ("M-o" . counsel-ectags)
          :map c++-mode-map
-         ("M-." . ectags-find-tag-at-point)
          ("M-o" . counsel-ectags))
   :init
   (defun user-c-goto-def ()
@@ -100,38 +98,7 @@ For anything else there is ctags."
   (add-hook 'c-mode-common-hook #'user-cc-mode-setup)
 
   :config
-  (require 'ectags)
-
-  ;; (use-package irony
-  ;;   :ensure t
-  ;;   :defer t
-  ;;   :diminish irony-mode
-
-  ;;   :init
-  ;;   (setq irony-server-w32-pipe-buffer-size (* 64 1024))
-
-  ;;   :config
-  ;;   (use-package company-irony
-  ;;     :ensure t
-  ;;     :defer t
-  ;;     :init
-  ;;     (csetq company-irony-ignore-case t))
-
-  ;;   (use-package irony-eldoc
-  ;;     :ensure t
-  ;;     :init
-  ;;     (add-hook 'irony-mode-hook #'irony-eldoc))
-
-  ;;   (use-package company-irony-c-headers
-  ;;     :ensure t
-  ;;     :defer t)
-
-  ;;   (use-package flycheck-irony
-  ;;     :ensure t
-  ;;     :defer t
-  ;;     :init
-  ;;     (add-hook 'flycheck-mode-hook #'flycheck-irony-setup)))
-  )
+  (require 'ectags))
 
 (provide 'user-c)
 

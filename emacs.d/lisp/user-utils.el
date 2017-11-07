@@ -238,11 +238,12 @@ Saves the position before.  You can skip typos you don't want to fix with
 
 ;;;###autoload
 (defun user-open-terminal ()
-  "Opens a uxterm or xterm in the current directory."
+  "Opens a urxvt/uxterm/xterm in the current directory."
   (interactive)
   (cond
    ((eq system-type 'gnu/linux)
     (let ((terminal (cond
+                     ((executable-find "urxvt"))
                      ((executable-find "uxterm"))
                      ((executable-find "xterm"))
                      (t nil))))

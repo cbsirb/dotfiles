@@ -113,6 +113,8 @@ autocmd VimEnter * colorscheme solarized8_light
 set colorcolumn=+1
 set cursorline
 
+let g:ch_syntax_for_h = 1
+
 " Disabled 08.14.2017 (nofrils doesn't need it)
 " if !has('gui_running') && has('termguicolors')
 "   if $TERM =~# '-256color' && $TERM !~# 'rxvt'
@@ -142,6 +144,10 @@ augroup VIMRC
 
   autocmd VimEnter,WinEnter,BufWinEnter,FocusGained,CmdwinEnter * setlocal cursorline
   autocmd WinLeave,FocusLost,CmdwinLeave * setlocal nocursorline
+
+  if !has('nvim')
+    autocmd CmdlineEnter /,\? :set hlsearch
+  endif
 augroup END
 
 "Commands
