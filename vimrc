@@ -1,9 +1,3 @@
-if has('win32')
-  set encoding=utf-8
-  set runtimepath+=~/.vim
-  set rop=type:directx
-endif
-
 source ~/.vim/packages.vim
 
 if !has('nvim')
@@ -11,18 +5,25 @@ if !has('nvim')
   packadd matchit
 endif
 
-if !has('gui_running') && has('mouse_sgr')
-  set ttymouse=xterm2
-endif
-
 set lazyredraw
-
 set laststatus=2
-set switchbuf=useopen
+set switchbuf=useopen,usetab
 set autoread
+set report=0
+set sidescroll=1
+set hidden
+set virtualedit=block
+set shortmess+=c
+set noswapfile
+set nobackup
+set nofoldenable
+
+" Dangerous but usefull
+set exrc
 
 set autoindent
 set smartindent
+set shiftround
 set shiftwidth=4
 set softtabstop=4
 set expandtab
@@ -31,8 +32,6 @@ set smarttab
 set ignorecase
 set smartcase
 set hlsearch
-
-set sidescroll=1
 
 set wildignore+=*.swp,*.bak
 set wildignore+=*.pyc,*.class,*.sln,*.aps
@@ -55,49 +54,32 @@ set statusline+=%=
 set statusline+=[%{ALEGetStatusLine()}]\ 
 set statusline+=%l\/%-6L\ %3c\ 
 
-" set statusline=%*%<%r%m
-" set statusline+=[%{ALEGetStatusLine()}]
-" set statusline+=\ %5l:%-3c\ %f
-" set statusline+=%=%w%q
-" set statusline+=%{fugitive#statusline()}
-" set statusline+=%y[%{&ff}][%{&enc}]
-
 set timeoutlen=1000
 set ttimeoutlen=100
+set ttyfast
 
-set nofoldenable
-
+" Split related
 set splitbelow
 set splitright
 
-set exrc
-set hidden
+" Complete and format related
 set complete-=i
 set completeopt=longest,menuone
 set formatoptions=tcrqnl1j
 
-set shortmess+=c
-
 set history=1000
 set tabpagemax=50
 
-set noswapfile
-set nobackup
-
 set clipboard^=unnamedplus
 
-set sessionoptions+=resize
-if exists('+breakindent')
-  set showbreak=...\ 
-endif
-
-let &listchars = "tab:\u00bb\u00b7,trail:\u2022,extends:\u00bb,precedes:\u00ab,nbsp:\u00ba"
-" let &fillchars = "vert:\u2591,fold:\u00b7"
+set linebreak
+set breakindent
+set showbreak=...\ 
+let &listchars = "tab:\u00bb\ ,trail:\u2022,extends:\u203a,precedes:\u2039,nbsp:\u00ba"
 set list
 
 set viminfo='100,<200,s100,h
-set virtualedit=block
-set ttyfast
+set sessionoptions+=resize
 
 " undo options
 set undodir=~/.vim/cache/undo/
@@ -108,14 +90,10 @@ if !isdirectory(expand(&undodir))
 endif
 
 set background=light
-autocmd VimEnter * colorscheme solarized8_light
-
 set colorcolumn=+1
 set cursorline
 
-let g:ch_syntax_for_h = 1
-
-" Disabled 08.14.2017 (nofrils doesn't need it)
+" Disabled 08.14.2017
 " if !has('gui_running') && has('termguicolors')
 "   if $TERM =~# '-256color' && $TERM !~# 'rxvt'
 "     " Needed in tmux
@@ -137,6 +115,7 @@ endif
 augroup VIMRC
   autocmd!
 
+  autocmd VimEnter * colorscheme solarized8_light
   autocmd VimEnter,GUIEnter * set visualbell t_vb=
 
   autocmd BufLeave * if !&diff | let b:winview = winsaveview() | endif
@@ -150,7 +129,7 @@ augroup VIMRC
   endif
 augroup END
 
-"Commands
+" Commands
 command! -nargs=+ -complete=file_in_path -bar Grep  silent! grep! <args> | redraw! | copen
 command! -nargs=+ -complete=file_in_path -bar LGrep silent! lgrep! <args> | redraw! | copen
 
@@ -158,10 +137,22 @@ command! -nargs=+ Silent execute 'silent <args>' | redraw!
 
 command! SC vnew | setlocal nobuflisted buftype=nofile bufhidden=wipe noswapfile
 
+command! SS echo map(synstack(line('.'), col('.')), 'synIDattr(v:val, "name")')
+
 command! -nargs=* -bang ReplaceSymbolInFunction silent call func#replace_symbol_in_function(<f-args>, '<bang>')
 
 " Mappings
 nnoremap Y y$
+
+nnoremap \\d "_d
+xnoremap \\d "_d
+
+nnoremap \\p "_dP
+
+nnoremap <expr> k      v:count == 0 ? 'gk' : 'k'
+nnoremap <expr> j      v:count == 0 ? 'gj' : 'j'
+nnoremap <expr> <Up>   v:count == 0 ? 'gk' : 'k'
+nnoremap <expr> <Down> v:count == 0 ? 'gj' : 'j'
 
 nnoremap <silent> <C-l> :set hlsearch!<CR>
 nnoremap <BS> <C-^>
@@ -178,13 +169,8 @@ nnoremap <silent> <space>6 :call highlight#word(6)<cr>
 nnoremap <silent> * :let @/='\<<C-R>=expand("<cword>")<CR>\>'<CR>:set hls<CR>
 nnoremap <silent> # :let @/='\<<C-R>=expand("<cword>")<CR>\>'<CR>:set hls<CR>:let v:searchforward=0<CR>
 
-" -romainl-
-nnoremap <space>f :find *
-nnoremap <space>s :sfind *
-nnoremap <space>v :vert sfind *
-nnoremap <space>F :find <C-R>=fnameescape(expand('%:p:h')).'/**/*'<CR>
-nnoremap <space>S :sfind <C-R>=fnameescape(expand('%:p:h')).'/**/*'<CR>
-nnoremap <space>V :vert sfind <C-R>=fnameescape(expand('%:p:h')).'/**/*'<CR>
+nnoremap <space>f :FZF<cr>
+nnoremap <space>F :FZF <C-R>=fnameescape(expand('%:p:h'))<CR><CR>
 
 nnoremap <space>j :tjump /
 
@@ -209,15 +195,23 @@ inoremap [, [<CR>],<Esc>O
 
 inoremap <C-j> <C-x><C-p>
 
-for char in [ '_', '.', ':', ';', '<bar>', '/', '<bslash>', '*', '=', '+', '%', '`' ]
+for char in [ '_', '.', ':', ';', '<bar>', '/', '<bslash>', '*', '=', '+', '%', '`', '#', '-' ]
   exe 'xnoremap i' . char . ' :<C-u>normal! T' . char . 'vt' . char . '<cr>'
   exe 'onoremap i' . char . ' :normal vi' . char . '<cr>'
   exe 'xnoremap a' . char . ' :<C-u>normal! F' . char . 'vf' . char . '<cr>'
   exe 'onoremap a' . char . ' :normal va' . char . '<cr>'
 endfor
 
-cnoremap <expr> <Tab>   getcmdtype() == "/" \|\| getcmdtype() == "?" ? "<CR>/<C-r>/" : "<C-z>"
-cnoremap <expr> <S-Tab> getcmdtype() == "/" \|\| getcmdtype() == "?" ? "<CR>?<C-r>/" : "<S-Tab>"
+xnoremap il g_o^
+onoremap il :normal vil<CR>
+xnoremap al $o0
+onoremap al :normal val<CR>
+
+cnoremap <expr> <Tab>   getcmdtype() =~ '[\/?]' ? "<C-g>" : "<C-z>"
+cnoremap <expr> <S-Tab> getcmdtype() =~ '[\/?]' ? "<C-t>" : "<S-Tab>"
+
+cnoremap %% <C-r>=fnameescape(expand('%'))<cr>
+cnoremap <C-r><C-l> <C-r>=getline('.')<CR>
 
 nnoremap <space>a :find <C-R>=fnameescape(expand('%:t:r')).'.'<CR><C-z><C-z>
 nnoremap <space>A :vert sfind <C-R>=fnameescape(expand('%:t:r')).'.'<CR><C-z><C-z>
@@ -231,13 +225,14 @@ nnoremap <silent> <F4> :pclose<CR>
 nnoremap <Space>% :%s/\<<C-r>=expand('<cword>')<CR>\>/
 nnoremap <Space>r :ReplaceSymbolInFunction <C-R><C-W> 
 
-" Plugin mappings
-nmap <space>q <Plug>(qf_qf_toggle_stay)
-nmap <space>l <Plug>(qf_loc_toggle_stay)
+nmap <space>q <Plug>qf_qf_stay_toggle
+nmap <space>l <Plug>qf_loc_stay_toggle
 
 nnoremap <F5> :ME <C-z>
 
-" Plugin configuration
+""""""""""""""""""""""""
+" Plugin configuration "
+""""""""""""""""""""""""
 augroup FUGITIVE
   autocmd!
 
@@ -249,27 +244,35 @@ augroup FUGITIVE
         \ endif
 augroup END
 
-let g:netrw_home = '~/.vim/cache/'
-let g:netrw_altfile = 1
+let g:netrw_home      = '~/.vim/cache/'
+let g:netrw_altfile   = 1
+let g:netrw_liststyle = 1
+let g:netrw_sizestyle = 'H'
+let g:netrw_winsize   = '30'
+
+let g:ch_syntax_for_h = 1
 
 let g:qf_mapping_ack_style = 1
+let g:qf_statusline        = {}
+let g:qf_statusline.before = '%<\ '
+let g:qf_statusline.after  = '\ %f%=%l\/%-6L\ %3c\ '
 
 let g:clang_library_path = '/usr/lib64/libclang.so'
-let g:clang_snippets = 0
+let g:clang_snippets     = 0
 
-let g:UltiSnipsEditSplit="vertical"
-let g:UltiSnipsSnippetsDir='~/.vim'
+let g:UltiSnipsEditSplit   = "vertical"
+let g:UltiSnipsSnippetsDir = '~/.vim'
 
 let g:vim_json_syntax_conceal = 1
 
 let g:pymode_indent = 0
 
-let g:ale_lint_on_text_changed="never"
-let g:ale_lint_on_insert_leave=0
-let g:ale_lint_on_save=1
+let g:ale_lint_on_text_changed = "never"
+let g:ale_lint_on_insert_leave = 0
+let g:ale_lint_on_save         = 1
 
 let g:ale_statusline_format = ["\u2717 %d", "\u271a %d", "\u2713 ok"]
-let g:ale_echo_msg_format = '[%linter%] %s [%severity%]'
+let g:ale_echo_msg_format   = '[%linter%] %s [%severity%]'
 
 let g:ale_python_pylint_executable = 'pylint'
 

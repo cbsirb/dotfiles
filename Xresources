@@ -12,8 +12,6 @@ URxvt.boldFont:         xft:Iosevka:size=11:bold
 URxvt.italicFont:       xft:Iosevka:size=11:italic
 URxvt.boldItalicFont:   xft:Iosevka:size=11:bold:italic
 
-xterm*faceName: xft:Iosevka:size=11
-
 ! No colorscheme (white text, black background)
 ! *background: #000000
 ! *foreground: #ffffff
@@ -56,6 +54,7 @@ xterm*termName: xterm-256color
 xterm*locale: true
 xterm*metaSendsEscape: true
 xterm*eightBitInput: false
+xterm*faceName: xft:Iosevka:size=11
 
 xterm*scrollTtyKeypress: true
 xterm*scrollTtyOutput: false
