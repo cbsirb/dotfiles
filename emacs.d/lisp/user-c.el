@@ -54,8 +54,10 @@
 (use-package cc-mode
   :defer t
   :bind (:map c-mode-map
+         ("M-." . ectags-find-tag-at-point)
          ("M-o" . counsel-ectags)
          :map c++-mode-map
+         ("M-." . ectags-find-tag-at-point)
          ("M-o" . counsel-ectags))
   :init
   (defun user-c-goto-def ()
@@ -84,21 +86,51 @@ For anything else there is ctags."
     (c-toggle-electric-state t)
     (c-toggle-syntactic-indentation t)
 
-    ;; (irony-mode t)
-    ;; (irony-cdb-autosetup-compile-options)
-    ;; (setq-local company-backends '(company-irony-c-headers company-irony company-dabbrev-code company-files))
+    (irony-mode t)
+    (flycheck-mode t)
 
-    (ycmd-mode t)
-    (company-ycmd-setup)
-
-    (setq-local company-backends '(company-ycmd company-files))
-
-    (flycheck-mode t))
+    (with-eval-after-load "company"
+      (setq-local company-backends '(company-irony-c-headers company-irony company-dabbrev-code company-files))))
 
   (add-hook 'c-mode-common-hook #'user-cc-mode-setup)
 
   :config
-  (require 'ectags))
+  (require 'ectags)
+
+  (use-package irony
+    :ensure t
+    :defer t
+    :diminish irony-mode
+
+    :init
+    (setq irony-server-w32-pipe-buffer-size (* 64 1024))
+
+    :config
+    (add-hook 'irony-mode-hook 'irony-cdb-autosetup-compile-options)
+
+    (use-package company-irony
+      :ensure t
+      :defer t
+      :after company
+      :init
+      (csetq company-irony-ignore-case t))
+
+    (use-package irony-eldoc
+      :ensure t
+      :init
+      (add-hook 'irony-mode-hook #'irony-eldoc))
+
+    (use-package company-irony-c-headers
+      :ensure t
+      :defer t)
+
+    ;; (use-package flycheck-irony
+    ;;   :ensure t
+    ;;   :defer t
+    ;;   :init
+    ;;   (add-hook 'flycheck-mode-hook #'flycheck-irony-setup))
+    )
+  )
 
 (provide 'user-c)
 

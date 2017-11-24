@@ -115,7 +115,8 @@ endif
 augroup VIMRC
   autocmd!
 
-  autocmd VimEnter * colorscheme solarized8_light
+  autocmd VimEnter * colorscheme solarized
+
   autocmd VimEnter,GUIEnter * set visualbell t_vb=
 
   autocmd BufLeave * if !&diff | let b:winview = winsaveview() | endif
@@ -195,6 +196,9 @@ inoremap [, [<CR>],<Esc>O
 
 inoremap <C-j> <C-x><C-p>
 
+nmap <silent> <C-k> <Plug>(ale_previous_wrap)
+nmap <silent> <C-j> <Plug>(ale_next_wrap)
+
 for char in [ '_', '.', ':', ';', '<bar>', '/', '<bslash>', '*', '=', '+', '%', '`', '#', '-' ]
   exe 'xnoremap i' . char . ' :<C-u>normal! T' . char . 'vt' . char . '<cr>'
   exe 'onoremap i' . char . ' :normal vi' . char . '<cr>'
@@ -227,6 +231,9 @@ nnoremap <Space>r :ReplaceSymbolInFunction <C-R><C-W>
 
 nmap <space>q <Plug>qf_qf_stay_toggle
 nmap <space>l <Plug>qf_loc_stay_toggle
+
+nmap s <Nop>
+xmap s <Nop>
 
 nnoremap <F5> :ME <C-z>
 

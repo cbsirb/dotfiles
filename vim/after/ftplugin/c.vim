@@ -12,7 +12,6 @@ setlocal tw=110
 inoremap <buffer> <C-l> ->
 noremap <buffer> <space><space> :Silent exe "make " . expand("%:r") . ".o " \| redraw!<CR>
 
-
 let b:sandwich_recipes = deepcopy(g:sandwich#default_recipes)
 let b:sandwich_recipes += [
       \   {

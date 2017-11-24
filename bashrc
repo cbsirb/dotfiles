@@ -88,7 +88,7 @@ export GIT_PS1_SHOWCOLORHINTS=1
 
 if [ "$color_prompt" = yes ]; then
     case "$TERM" in
-        xterm*|rxvt*|tmux*|screen*|eterm*)
+        xterm*|rxvt*|tmux*|screen*|eterm*|st*)
             if [ "$USERNAME" = root ]; then
                 export PS1="\[\033[38;5;1m\]\u\[$(tput sgr0)\] @ \[$(tput sgr0)\]"
             else
