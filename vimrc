@@ -196,8 +196,11 @@ inoremap [, [<CR>],<Esc>O
 
 inoremap <C-j> <C-x><C-p>
 
-nmap <silent> <C-k> <Plug>(ale_previous_wrap)
-nmap <silent> <C-j> <Plug>(ale_next_wrap)
+" Keep unimpaired convention
+nmap <silent> [W <Plug>(ale_first)
+nmap <silent> [w <Plug>(ale_previous)
+nmap <silent> ]w <Plug>(ale_next)
+nmap <silent> ]W <Plug>(ale_last)
 
 for char in [ '_', '.', ':', ';', '<bar>', '/', '<bslash>', '*', '=', '+', '%', '`', '#', '-' ]
   exe 'xnoremap i' . char . ' :<C-u>normal! T' . char . 'vt' . char . '<cr>'
