@@ -13,11 +13,11 @@ set $ws6 6
 set $ws7 7
 set $ws8 8
 set $ws9 9: non-work
-set $ws10 10
+set $ws10 10: mail
 
 # This font is widely installed, provides lots of unicode glyphs, right-to-left
 # text rendering and scalability on retina/hidpi displays (thanks to pango).
-font pango:DejaVu Sans Mono, Icons, Symbola 10
+font pango:Iosevka, Icons, Symbola 10
 # font pango:Cousine 10
 
 # Use Mouse+$mod to drag floating windows to their wanted position
@@ -25,11 +25,11 @@ floating_modifier $mod
 
 # start a terminal
 # bindsym $mod+Return exec i3-sensible-terminal
-bindsym $mod+Return exec urxvtc
+bindsym $mod+Return exec urxvt
 
 # emacs
-bindsym $mod+e exec emacsclient -c --alternate-editor=
-bindsym $mod+m exec emacsclient -c --alternate-editor= -e '(notmuch-hello)'
+# bindsym $mod+e exec emacsclient -c --alternate-editor=
+# bindsym $mod+m exec emacsclient -c --alternate-editor= -e '(notmuch-hello)'
 
 # kill focused window
 bindsym $mod+Shift+q kill
@@ -151,7 +151,7 @@ bindsym $mod+r mode "resize"
 
 bar {
         # status_command i3status
-        status_command $HOME/bin/conky-i3bar.sh
+        # status_command $HOME/bin/conky-i3bar.sh
         tray_output primary
         separator_symbol ":|:"
         tray_padding 0
@@ -168,6 +168,7 @@ focus_on_window_activation smart
 show_marks yes
 
 assign [class="^Firefox$"] → $ws2
+assign [class="^Evolution$"] → $ws10
 
 # Special windows
 for_window [window_role="pop-up"] floating enable
@@ -187,8 +188,11 @@ bindsym $mod+minus scratchpad show
 bindsym $mod+Ctrl+n exec mpc next
 bindsym $mod+Ctrl+b exec mpc prev
 bindsym $mod+Ctrl+m exec mpc toggle
-bindsym $mod+Shift+m exec xterm -geometry 140x36 -e ncmpcpp
+bindsym $mod+Shift+m exec urxvt -geometry 140x36 -e ncmpcpp
 
+# Execute gnome stuff
+exec --no-startup-id /usr/lib/gnome-settings-daemon/gsd-xsettings
+exec_always --no-startup-id gnome-power-manager
 
-# Execute the /etc/xdg/autostart desktop entries
-exec dex -ae i3
+# Display
+exec --no-startup-id xrandr --output DP2 --right-of eDP1

@@ -86,6 +86,9 @@ For anything else there is ctags."
     (c-toggle-electric-state t)
     (c-toggle-syntactic-indentation t)
 
+    ;; Use this as a default, it's pretty sane (compared to gnu)
+    (c-set-style "linux")
+
     (irony-mode t)
     (flycheck-mode t)
 
