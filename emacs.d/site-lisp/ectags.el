@@ -365,7 +365,10 @@ an ectags select mode window."
                  t)
                 ;; search the actual tag
                 (re-search-backward (concat "\\<" tag "\\>") (line-beginning-position) t)
-              (goto-line lnno))))
+
+              ;; Pattern not found, use the line number & hope for the best
+              (goto-char (point-min))
+              (forward-line (1- patline))))
         (run-hooks 'ectags-after-jump-hook)))))
 
 (defun ectags-next-tag ()
@@ -640,7 +643,8 @@ NUMBER is the tag number to jump to."
         (with-slots (file line column) (xref-item-location (xref--item-at-point))
           (delete-window (get-buffer-window xref-buffer-name))
           (find-file file)
-          (goto-line line)
+          (goto-char (point-min))
+          (forward-line (1- line))
           (forward-char column)
           (run-hooks 'ectags-after-jump-hook))))))
 
