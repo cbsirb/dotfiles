@@ -52,9 +52,9 @@
 [pull]
     rebase = true
 
-[transfer]
-    fsckobjects = true
-[fetch]
-    fsckobjects = true
-[receive]
-    fsckObjects = true
+; [transfer]
+;     fsckobjects = true
+; [fetch]
+;     fsckobjects = true
+; [receive]
+;     fsckObjects = true

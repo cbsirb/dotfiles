@@ -553,11 +553,7 @@
   (projectile-mode t)
 
   :config
-  (add-to-list 'projectile-globally-ignored-directories ".vscode")
-
-  (csetq projectile-switch-project-action
-         (lambda ()
-           (dired (projectile-project-root)))))
+  (add-to-list 'projectile-globally-ignored-directories ".vscode"))
 
 ;; Searching
 (defun user-results-buffer-hook ()
@@ -921,15 +917,18 @@ See `user-rg-type-aliases' for more details."
   (csetq comint-history-isearch t)
   (csetq comint-ignore-dups t))
 
+(use-package comment-dwim-2
+  :bind (("M-;" . 'comment-dwim-2)))
+
 (defun user-programming-setup ()
   "Settings for all programming modes."
   (setq-local show-trailing-whitespace t))
 
 (add-hook 'prog-mode-hook #'user-programming-setup)
 
-(use-package dtrt-indent
-  :config
-  (add-hook 'prog-mode-hook #'dtrt-indent-mode))
+;; (use-package dtrt-indent
+;;   :config
+;;   (add-hook 'prog-mode-hook #'dtrt-indent-mode))
 
 (use-package editorconfig
   :diminish
@@ -1146,6 +1145,25 @@ Taken from http://stackoverflow.com/a/3072831/355252."
 ;; Python
 (use-package cython-mode :defer t)
 
+(use-package jedi-core
+  :defer t
+  :init
+  (csetq jedi:use-shortcuts t)
+  ;; (csetq jedi:tooltip-method nil)
+  (add-hook 'python-mode-hook #'jedi:setup))
+
+(use-package company-jedi
+  :after company
+  :init
+  (add-hook 'python-mode-hook (lambda () (add-to-list 'company-backends 'company-jedi))))
+
+(use-package virtualenvwrapper
+  :init
+  (csetq projectile-switch-project-action
+         (lambda ()
+           (venv-projectile-auto-workon)
+           (projectile-find-file))))
+
 ;; imenu
 (use-package imenu
   :bind ("M-i" . imenu)         ;; allow ivy to override it
@@ -1153,13 +1171,16 @@ Taken from http://stackoverflow.com/a/3072831/355252."
   (csetq imenu-auto-rescan t)
   (csetq imenu-auto-rescan-maxout (* 1024 1024))
 
-  (add-hook 'imenu-after-jump-hook (lambda () (recenter-top-bottom))))
+  (add-hook 'imenu-after-jump-hook #'recenter-top-bottom))
 
 (use-package imenu-anywhere
   :bind (("M-I" . imenu-anywhere)))
 
-;; TAGS
-(use-package ectags :ensure nil :defer t)
+(use-package ectags
+  :ensure nil
+  :defer t
+  :config
+  (add-hook 'ectags-after-jump-hook #'recenter-top-bottom))
 
 ;; Git
 (use-package magit
@@ -1199,6 +1220,11 @@ Taken from http://stackoverflow.com/a/3072831/355252."
   :init
   (keyfreq-mode t)
   (keyfreq-autosave-mode t))
+
+;; I need some time to play with this
+;; (use-package paced
+;;   :init
+;;   (setq paced-global-dict-enable-alist '((c-mode . "cmode"))))
 
 (use-package pdf-tools
   :init

@@ -4,9 +4,9 @@
 
 set $mod Mod4
 
-set $ws1 1: default
+set $ws1 1: work
 set $ws2 2: www
-set $ws3 3
+set $ws3 3: files
 set $ws4 4
 set $ws5 5
 set $ws6 6
@@ -122,14 +122,46 @@ bindsym $mod+Shift+8 move container to workspace $ws8
 bindsym $mod+Shift+9 move container to workspace $ws9
 bindsym $mod+Shift+0 move container to workspace $ws10
 
+# move containers to monitor
+bindsym $mod+Shift+greater move container to output left
+bindsym $mod+Shift+less move container to output right
+
+# workspace monitors
+workspace "$ws1" output eDP1
+workspace "$ws2" output DP2
+workspace "$ws10" output DP2
+
 # reload the configuration file
 bindsym $mod+Shift+c reload
 # restart i3 inplace (preserves your layout/session, can be used to upgrade i3)
 bindsym $mod+Shift+r restart
 # exit i3 (logs you out of your X session)
 bindsym $mod+Shift+e exec "i3-nagbar -t warning -m 'You pressed the exit shortcut. Do you really want to exit i3? This will end your X session.' -b 'Yes, exit i3' 'i3-msg exit'"
-# rename workspace
-# bindsym $mod+Shift+Return exec i3-input -F 'rename workspace to "%s"' -P 'New name: '
+
+bindsym $mod+i [class="Emacs"] focus
+bindsym $mod+Shift+i [class="Firefox"] focus
+bindsym $mod+u [urgent=latest] focus
+bindsym $mod+slash [class="URxvt"] focus
+bindsym $mod+Shift+minus move scratchpad
+bindsym $mod+minus scratchpad show
+
+bindsym $mod+l exec --no-startup-id i3lock-fancy -p
+
+# In case I use a keyboard without
+bindsym $mod+Ctrl+n exec mpc next
+bindsym $mod+Ctrl+b exec mpc prev
+bindsym $mod+Ctrl+m exec mpc toggle
+bindsym XF86AudioNext exec mpc next
+bindsym XF86AudioPrev exec mpc prev
+bindsym XF86AudioPlay exec mpc toggle
+bindsym $mod+comma exec urxvt -title 'ncmpcpp-comma' -geometry 140x36 -e ncmpcpp
+
+bindsym XF86AudioRaiseVolume exec --no-startup-id pactl set-sink-volume 0 +5%
+bindsym XF86AudioLowerVolume exec --no-startup-id pactl set-sink-volume 0 -5%
+bindsym XF86MonBrightnessUp exec xbacklight -inc 10
+bindsym XF86MonBrightnessDown exec xbacklight -dec 10
+
+bindsym $mod+j exec emacsclient --alternate-editor= -c
 
 mode "resize" {
         bindsym h resize shrink width 10 px or 10 ppt
@@ -151,7 +183,7 @@ bindsym $mod+r mode "resize"
 
 bar {
         # status_command i3status
-        # status_command $HOME/bin/conky-i3bar.sh
+        status_command $HOME/dotfiles/manual_bin/conky-i3bar.sh
         tray_output primary
         separator_symbol ":|:"
         tray_padding 0
@@ -160,7 +192,7 @@ bar {
 # Appearance config
 new_window pixel 3
 hide_edge_borders smart
-popup_during_fullscreen smart
+popup_during_fullscreen leave_fullscreen
 force_focus_wrapping yes
 workspace_auto_back_and_forth yes
 force_display_urgency_hint 500 ms
@@ -168,31 +200,31 @@ focus_on_window_activation smart
 show_marks yes
 
 assign [class="^Firefox$"] → $ws2
+assign [class="^FirefoxNightly$"] → $ws2
+assign [class="^Doublecmd$"] → $ws3
 assign [class="^Evolution$"] → $ws10
 
 # Special windows
 for_window [window_role="pop-up"] floating enable
 for_window [window_role="About"] floating enable
 for_window [window_role="task_dialog"] floating enable
-for_window [class="Wicd-client.py"] floating enable
 #for_window [class="XTerm"] floating enable
 for_window [class="Pavucontrol"] floating enable
-for_window [class="Lxappearance"] floating enable
-
-bindsym $mod+i [class="Emacs"] focus
-bindsym $mod+Shift+i [class="Firefox"] focus
-bindsym $mod+u [urgent=latest] focus
-bindsym $mod+slash [class="URxvt"] focus
-bindsym $mod+Shift+minus move scratchpad
-bindsym $mod+minus scratchpad show
-bindsym $mod+Ctrl+n exec mpc next
-bindsym $mod+Ctrl+b exec mpc prev
-bindsym $mod+Ctrl+m exec mpc toggle
-bindsym $mod+Shift+m exec urxvt -geometry 140x36 -e ncmpcpp
+for_window [title="^ncmpcpp-comma$"] floating enable
+for_window [class="^Doublecmd" title="^[0-9]+% (Copying|Moving)"] floating enable
+for_window [class="^Doublecmd" title="Options"] floating enable
+for_window [class="mpv"] floating enable
 
 # Execute gnome stuff
 exec --no-startup-id /usr/lib/gnome-settings-daemon/gsd-xsettings
 exec_always --no-startup-id gnome-power-manager
 
+# Some information
+exec --no-startup-id nm-applet&
+exec --no-startup-id xrdb $HOME/.Xresources
+
 # Display
-exec --no-startup-id xrandr --output DP2 --right-of eDP1
+exec --no-startup-id xrandr --output DP2 --left-of eDP1 --rotate left
+
+# Wallpapers
+exec --no-startup-id feh --bg-scale ~/Pictures/Wallpapers/paid_to_think.png --bg-scale ~/Pictures/Wallpapers/paid_to_think_vert.png

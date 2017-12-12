@@ -73,7 +73,12 @@ there is only one match."
   :type 'boolean)
 
 (defcustom ectags-mode-hook nil
-  "*List of functions to call on entry to ectags-mode mode."
+  "List of functions to call on entry to ectags-mode mode."
+  :group 'ectags
+  :type 'hook)
+
+(defcustom ectags-after-jump-hook nil
+  "*List of functions to call after a jump is made."
   :group 'ectags
   :type 'hook)
 
@@ -361,7 +366,7 @@ an ectags select mode window."
                 ;; search the actual tag
                 (re-search-backward (concat "\\<" tag "\\>") (line-beginning-position) t)
               (goto-line lnno))))
-        (recenter)))))
+        (run-hooks 'ectags-after-jump-hook)))))
 
 (defun ectags-next-tag ()
   "Move to next tag in buffer."
@@ -436,7 +441,7 @@ TAG-LINE is the line that the user selected."
       (find-file (file-relative-name (ectags-match-filename (car ectags--matches))))
       (goto-char (point-min))
       (forward-line (1- (ectags-match-linenumber (car ectags--matches))))
-      (recenter-top-bottom)
+      (run-hooks 'ectags-after-jump-hook)
       (unless (eq ivy-exit 'done)
         (swiper--cleanup)
         (swiper--add-overlays (ivy--regex ivy-text))))))
@@ -637,7 +642,7 @@ NUMBER is the tag number to jump to."
           (find-file file)
           (goto-line line)
           (forward-char column)
-          (recenter))))))
+          (run-hooks 'ectags-after-jump-hook))))))
 
 ;;;###autoload
 (defun ectags-xref-setup (&optional window-behaviour)
