@@ -369,7 +369,7 @@ an ectags select mode window."
               ;; Pattern not found, use the line number & hope for the best
               (goto-char (point-min))
               (forward-line (1- patline))))
-        (run-hooks 'ectags-after-jump-hook)))))
+          (run-hooks 'ectags-after-jump-hook))))))
 
 (defun ectags-next-tag ()
   "Move to next tag in buffer."

@@ -96,7 +96,6 @@ _SWITCH should be 'diff'."
 (csetq make-backup-files nil)
 
 ;; Some emacs modes that should be default
-(blink-cursor-mode -1)
 (global-auto-revert-mode t)
 (diminish 'auto-revert-mode)
 (transient-mark-mode t)
