@@ -1,7 +1,13 @@
 $include /etc/inputrc
 
+set input-meta on
+set output-meta on
+set convert-meta off
+
 # Allow rebinding of C-w and other keys
 set bind-tty-special-chars off
+
+set completion-ignore-case
 
 "\e[A": history-search-backward
 "\e[B": history-search-forward
@@ -16,3 +22,11 @@ set bind-tty-special-chars off
 "\e[1;5D": backward-word
 
 "\C-w": backward-kill-word
+
+"θ":""\C-b""
+"ω":"'\C-b'"
+"\e\C-l":"\C-e | less\C-m"
+"υ":">\C-b<"
+"σ":"}\C-b{"
+"φ":")\C-b("
+"ρ":"]\C-b["

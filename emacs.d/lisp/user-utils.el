@@ -123,7 +123,9 @@ point reaches the beginning or end of the buffer, stop there."
   "Same thing as vim 'O' command.  With ARG opens that many lines."
   (interactive "p")
 
-  (beginning-of-line)
+  (unless (bolp)
+    (beginning-of-line))
+
   (open-line arg)
   (indent-according-to-mode))
 
@@ -137,7 +139,7 @@ point reaches the beginning or end of the buffer, stop there."
 5. If it's a word at point, delete it."
   (interactive)
 
-  (if (= (point) (line-beginning-position))
+  (if (bolp)
       ;; 1
       (delete-char -1)
 
@@ -170,6 +172,16 @@ Basically simulates `C-w' in bash or vim when no region is active."
   (if (use-region-p)
       (kill-region (region-beginning) (region-end))
     (user-smarter-backward-kill-word)))
+
+;;;###autoload
+(defun user-smarter-copy-line-or-region ()
+  "If the region is active, will call `kill-ring-save'.
+Else it will call `kill-ring-save' on the current line."
+  (interactive)
+  (if (use-region-p)
+      (kill-ring-save (region-beginning) (region-end))
+
+    (kill-ring-save (line-beginning-position) (1+ (line-end-position)))))
 
 ;;;###autoload
 (defun user-comment-dwim (arg)

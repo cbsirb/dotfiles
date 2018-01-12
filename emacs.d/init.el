@@ -478,6 +478,7 @@
   :bind (("<C-return>" . #'user-open-line-above)
          ("C-a" . #'user-smarter-move-beginning-of-line)
          ("C-w" . #'user-smarter-kill-word-or-region)
+         ([remap kill-ring-save] . #'user-smarter-copy-line-or-region)
          ([remap backward-kill-word] . #'user-smarter-backward-kill-word)
          ("M-]" . #'user-next-error)
          ("M-[" . #'user-prev-error)
@@ -950,22 +951,22 @@ Taken from http://stackoverflow.com/a/3072831/355252."
   (add-hook 'compilation-filter-hook #'user-colorize-compilation-buffer)
   (add-hook 'compilation-mode-hook #'user-results-buffer-hook))
 
-(when (eq system-type 'gnu/linux)
-  (use-package multi-term :ensure t
-    :bind (("C-; C-;" . multi-term-next)
-           ("C-; c" . multi-term)
-           ("C-; d" . multi-term-dedicated-toggle)
-           ("C-; n" . multi-term-next)
-           ("C-; p" . multi-term-prev))
-    :init
-    (csetq multi-term-dedicated-select-after-open-p t)
+(use-package multi-term :ensure t
+  :if (eq system-type 'gnu/linux)
+  :bind (("C-; C-;" . multi-term-next)
+         ("C-; c" . multi-term)
+         ("C-; d" . multi-term-dedicated-toggle)
+         ("C-; n" . multi-term-next)
+         ("C-; p" . multi-term-prev))
+  :init
+  (csetq multi-term-dedicated-select-after-open-p t)
 
-    (defun user-term-mode-hook ()
-      (company-mode -1)
-      (hl-line-mode -1)
-      (setq-local scroll-margin 0))
+  (defun user-term-mode-hook ()
+    (company-mode -1)
+    (hl-line-mode -1)
+    (setq-local scroll-margin 0))
 
-    (add-hook 'term-mode-hook #'user-term-mode-hook)))
+  (add-hook 'term-mode-hook #'user-term-mode-hook))
 
 (use-package eshell
   :defer t
@@ -1010,7 +1011,8 @@ Taken from http://stackoverflow.com/a/3072831/355252."
 (use-package nasm-mode :ensure t :defer t)
 
 ;; cmake
-(use-package cmake-mode :ensure t :defer t)
+(use-package cmake-mode :ensure t :defer t
+  :mode "CMakeLists\\.txt\\'")
 
 ;; Debugging
 (use-package gud
@@ -1088,6 +1090,12 @@ Taken from http://stackoverflow.com/a/3072831/355252."
 
 ;; Python
 (use-package cython-mode :ensure t :defer t)
+
+(use-package python :ensure nil
+  :init
+  (add-hook 'python-mode-hook
+            (lambda ()
+              (flycheck-select-checker 'python-pylint))))
 
 (use-package jedi-core :ensure t
   :defer t
@@ -1182,6 +1190,10 @@ Taken from http://stackoverflow.com/a/3072831/355252."
 (unbind-key "C-x m")
 (unbind-key "<insert>")
 (unbind-key "M-o")
+(unbind-key "C-x >")
+(unbind-key "C-x <")
+(unbind-key "<C-next>")
+(unbind-key "<C-prior>")
 
 ;; (unbind-key "<left>")
 ;; (unbind-key "<right>")
