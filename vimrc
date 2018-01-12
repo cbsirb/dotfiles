@@ -173,7 +173,7 @@ nnoremap <space>j :tjump /
 
 nnoremap <space>g :Grep -w '<C-r><C-w>' .<CR>
 nnoremap <space>G :execute "Grep -w '<C-r><C-w>' " . expand('%:p:h')<cr>
-nnoremap <space>c :Silent make -j4
+nnoremap <space>c :Silent make
 
 xnoremap <silent> <space>g :<C-u>let cmd = "Grep " . visual#GetSelection() <bar>
       \ call histadd("cmd", cmd) <bar>
