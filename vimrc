@@ -54,10 +54,6 @@ set statusline+=%=
 set statusline+=[%{ALEGetStatusLine()}]\ 
 set statusline+=%l\/%-6L\ %3c\ 
 
-set timeoutlen=1000
-set ttimeoutlen=100
-set ttyfast
-
 set splitbelow
 set splitright
 
@@ -66,7 +62,6 @@ set completeopt=longest,menuone
 set formatoptions=tcrqnl1j
 
 set history=1000
-set tabpagemax=50
 
 set clipboard^=unnamedplus
 
