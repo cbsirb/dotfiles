@@ -58,11 +58,9 @@ set timeoutlen=1000
 set ttimeoutlen=100
 set ttyfast
 
-" Split related
 set splitbelow
 set splitright
 
-" Complete and format related
 set complete-=i
 set completeopt=longest,menuone
 set formatoptions=tcrqnl1j
@@ -81,7 +79,6 @@ set list
 set viminfo='100,<200,s100,h
 set sessionoptions+=resize
 
-" undo options
 set undodir=~/.vim/cache/undo/
 set undofile
 
@@ -111,7 +108,6 @@ elseif executable("ag")
   set grepformat=%f:%l:%c:%m,%f:%l:%m
 endif
 
-" Autogroups
 augroup VIMRC
   autocmd!
 
@@ -130,7 +126,9 @@ augroup VIMRC
   endif
 augroup END
 
-" Commands
+""""""""""""
+" Commands "
+""""""""""""
 command! -nargs=+ -complete=file_in_path -bar Grep  silent! grep! <args> | redraw! | copen
 command! -nargs=+ -complete=file_in_path -bar LGrep silent! lgrep! <args> | redraw! | copen
 
@@ -142,7 +140,9 @@ command! SS echo map(synstack(line('.'), col('.')), 'synIDattr(v:val, "name")')
 
 command! -nargs=* -bang ReplaceSymbolInFunction silent call func#replace_symbol_in_function(<f-args>, '<bang>')
 
-" Mappings
+""""""""""""
+" Mappings "
+""""""""""""
 nnoremap Y y$
 
 nnoremap \\d "_d
@@ -166,12 +166,8 @@ nnoremap <silent> <space>4 :call highlight#word(4)<cr>
 nnoremap <silent> <space>5 :call highlight#word(5)<cr>
 nnoremap <silent> <space>6 :call highlight#word(6)<cr>
 
-" Don't move the cursor after * and #
 nnoremap <silent> * :let @/='\<<C-R>=expand("<cword>")<CR>\>'<CR>:set hls<CR>
 nnoremap <silent> # :let @/='\<<C-R>=expand("<cword>")<CR>\>'<CR>:set hls<CR>:let v:searchforward=0<CR>
-
-nnoremap <space>f :FZF<cr>
-nnoremap <space>F :FZF <C-R>=fnameescape(expand('%:p:h'))<CR><CR>
 
 nnoremap <space>j :tjump /
 
@@ -187,6 +183,7 @@ xnoremap <silent> <space>G :<C-u>let cmd = "Grep " . visual#GetSelection() . " "
       \ call histadd("cmd", cmd) <bar>
       \ execute cmd<CR>
 
+" Poor man's pair insert
 inoremap {<CR> {<CR>}<Esc>O
 inoremap {; {<CR>};<Esc>O
 inoremap {, {<CR>},<Esc>O
@@ -196,12 +193,7 @@ inoremap [, [<CR>],<Esc>O
 
 inoremap <C-j> <C-x><C-p>
 
-" Keep unimpaired convention
-nmap <silent> [W <Plug>(ale_first)
-nmap <silent> [w <Plug>(ale_previous)
-nmap <silent> ]w <Plug>(ale_next)
-nmap <silent> ]W <Plug>(ale_last)
-
+" Poor man's change/select inside/around characters
 for char in [ '_', '.', ':', ';', '<bar>', '/', '<bslash>', '*', '=', '+', '%', '`', '#', '-' ]
   exe 'xnoremap i' . char . ' :<C-u>normal! T' . char . 'vt' . char . '<cr>'
   exe 'onoremap i' . char . ' :normal vi' . char . '<cr>'
@@ -209,17 +201,20 @@ for char in [ '_', '.', ':', ';', '<bar>', '/', '<bslash>', '*', '=', '+', '%', 
   exe 'onoremap a' . char . ' :normal va' . char . '<cr>'
 endfor
 
+" Poor man's change/select inside/around line
 xnoremap il g_o^
 onoremap il :normal vil<CR>
 xnoremap al $o0
 onoremap al :normal val<CR>
 
+" Move with <S-/Tab> forward and backward when searching
 cnoremap <expr> <Tab>   getcmdtype() =~ '[\/?]' ? "<C-g>" : "<C-z>"
 cnoremap <expr> <S-Tab> getcmdtype() =~ '[\/?]' ? "<C-t>" : "<S-Tab>"
 
 cnoremap %% <C-r>=fnameescape(expand('%'))<cr>
 cnoremap <C-r><C-l> <C-r>=getline('.')<CR>
 
+" Poor man's alternate file
 nnoremap <space>a :find <C-R>=fnameescape(expand('%:t:r')).'.'<CR><C-z><C-z>
 nnoremap <space>A :vert sfind <C-R>=fnameescape(expand('%:t:r')).'.'<CR><C-z><C-z>
 
@@ -232,17 +227,40 @@ nnoremap <silent> <F4> :pclose<CR>
 nnoremap <Space>% :%s/\<<C-r>=expand('<cword>')<CR>\>/
 nnoremap <Space>r :ReplaceSymbolInFunction <C-R><C-W> 
 
+"""""""""""""""""""
+" Plugin mappings "
+"""""""""""""""""""
+" I'm not using this enough :sigh:
+nnoremap <space>f :FZF<cr>
+nnoremap <space>F :FZF <C-R>=fnameescape(expand('%:p:h'))<CR><CR>
+
 nmap <space>q <Plug>qf_qf_stay_toggle
 nmap <space>l <Plug>qf_loc_stay_toggle
 
+" Keep unimpaired convention
+nmap <silent> [W <Plug>(ale_first)
+nmap <silent> [w <Plug>(ale_previous)
+nmap <silent> ]w <Plug>(ale_next)
+nmap <silent> ]W <Plug>(ale_last)
+
+" Needed for vim-sandwich
 nmap s <Nop>
 xmap s <Nop>
 
-nnoremap <F5> :ME <C-z>
+""""""""""""""""""""""""""""""""""
+" Built-in plugins configuration "
+""""""""""""""""""""""""""""""""""
+let g:netrw_home      = '~/.vim/cache/'
+let g:netrw_altfile   = 1
+let g:netrw_liststyle = 1
+let g:netrw_sizestyle = 'H'
+let g:netrw_winsize   = '30'
 
-""""""""""""""""""""""""
-" Plugin configuration "
-""""""""""""""""""""""""
+let g:ch_syntax_for_h = 1
+
+"""""""""""""""""""""""""""""""""""
+" 3rd party plugins configuration "
+"""""""""""""""""""""""""""""""""""
 augroup FUGITIVE
   autocmd!
 
@@ -253,14 +271,6 @@ augroup FUGITIVE
         \   nnoremap <buffer> .. :edit %:h<CR> |
         \ endif
 augroup END
-
-let g:netrw_home      = '~/.vim/cache/'
-let g:netrw_altfile   = 1
-let g:netrw_liststyle = 1
-let g:netrw_sizestyle = 'H'
-let g:netrw_winsize   = '30'
-
-let g:ch_syntax_for_h = 1
 
 let g:qf_mapping_ack_style = 1
 let g:qf_statusline        = {}

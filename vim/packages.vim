@@ -16,7 +16,6 @@ call minpac#add('tpope/vim-repeat')
 call minpac#add('tpope/vim-rsi')
 call minpac#add('tpope/vim-unimpaired')
 call minpac#add('tpope/vim-vinegar')
-"Plug 'tpope/vim-surround'
 
 call minpac#add('machakann/vim-sandwich')
 
@@ -24,7 +23,6 @@ call minpac#add('w0rp/ale')
 
 call minpac#add('romainl/vim-qf')
 call minpac#add('romainl/vim-qlist')
-" call minpac#add('romainl/vim-cool')
 call minpac#add('romainl/vim-tinyMRU')
 
 call minpac#add('tommcdo/vim-lion')

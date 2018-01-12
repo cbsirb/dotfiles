@@ -3,19 +3,21 @@ function! s:showInPreview(list, tagname) abort
     return
   endif
 
-  let pbuf = bufnr('Tag Preview', 1)
-  echom "pbuf: " . string(pbuf)
-
-  let curft = &filetype
+  let last_buf = bufwinnr(bufname('%'))
 
   " Switch to preview buffer and clear it
-  exec "sbuffer " . pbuf
+  let pwin = bufwinnr('Tag Preview')
+  if pwin != -1
+    exec pwin . "wincmd w"
+  else
+    exec "sbuffer " . bufnr('Tag Preview', 1)
+  endif
+
   setlocal noreadonly
   exec "%d"
 
   " make the tag preview filetype the same as the source file
-  exec ":setlocal filetype=" . curft
-  setlocal pvw
+  setlocal previewwindow
   setlocal buftype=nofile
   setlocal bufhidden=wipe
   setlocal noswapfile
@@ -33,14 +35,10 @@ function! s:showInPreview(list, tagname) abort
 
   setlocal readonly
 
-  if exists("g:loaded_ale") && g:loaded_ale
-    exec "ALEDisable"
-  endif
-
   exec "resize " . (len(ulist))
   normal gg
   exec "NoMatchParen"
-  exec "wincmd p"
+  exec last_buf . "wincmd w"
 endfunction
 
 
