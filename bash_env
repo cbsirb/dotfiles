@@ -4,8 +4,9 @@ if [ -z "$DISPLAY" ]; then
   export DISPLAY=:0.0
 fi
 
-export LIBGL_ALWAYS_INDIRECT=1
-export DEB_BUILD_HARDENING=1
+# Winodws only
+# export LIBGL_ALWAYS_INDIRECT=1
+# export DEB_BUILD_HARDENING=1
 
 # Setting ag as the default source for fzf
 export FZF_DEFAULT_COMMAND='rg --files --no-ignore --hidden --follow --glob "!.git/*"'

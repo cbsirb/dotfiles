@@ -65,7 +65,7 @@
     (when (eq tramp-syntax 'default)
       (setq tramp-syntax 'ftp))))
 
-(use-package no-littering
+(use-package no-littering :ensure t
   :config
   (use-package recentf
     :init
@@ -713,7 +713,7 @@ See `user-rg-type-aliases' for more details."
   (csetq dired-recursive-copies 'always)
 
   :config
-  (use-package dired+ :ensure t
+  (use-package dired+
     :bind (:map dired-mode-map
            ("SPC" . dired-mark)
            ("<M-right>" . diredp-find-file-reuse-dir-buffer)
@@ -772,7 +772,7 @@ See `user-rg-type-aliases' for more details."
 
   (mc-prompt-once #'zap-up-to-char #'sp-rewrap-sexp))
 
-(use-package smex
+(use-package smex :ensure t
   :defer t
   :config
   (smex-initialize))
@@ -904,6 +904,7 @@ See `user-rg-type-aliases' for more details."
   (csetq compilation-always-kill t)
   (csetq compilation-disable-input t)
   (csetq compilation-context-lines 3)
+  (csetq compilation-auto-jump-to-first-error nil)
 
   (defvar user-compile-process nil
     "The current compilation process or nil if none.")
@@ -914,27 +915,29 @@ See `user-rg-type-aliases' for more details."
       (delete-window window)))
 
   (defun user-compile-start (proc)
-    (setq user-compile-process proc))
+    (when (string-equal (buffer-name (current-buffer)) "*compilation*")
+      (setq user-compile-process proc)))
 
   (defun user-compile-done (buffer _msg)
-    (let ((exit-status (process-exit-status user-compile-process))
-          (has-errors)
-          (window (get-buffer-window buffer)))
+    (when (string-equal "*compilation*" (buffer-name buffer))
+      (let ((exit-status (process-exit-status user-compile-process))
+            (has-errors)
+            (window (get-buffer-window buffer)))
 
-      (setq has-errors
-            (if (= 0 exit-status)
-                (save-mark-and-excursion
-                 (condition-case nil
-                     (progn
-                       (first-error)
-                       t)
-                   (error nil)))
-              t))
+        (setq has-errors
+              (if (= 0 exit-status)
+                  (save-mark-and-excursion
+                    (condition-case nil
+                        (progn
+                          (first-error)
+                          t)
+                      (error nil)))
+                t))
 
-      (when (and window (not has-errors))
-        (run-with-timer 1 nil #'user-delete-window window)))
+        (when (and window (not has-errors))
+          (run-with-timer 1 nil #'user-delete-window window)))
 
-    (setq user-compile-process nil))
+      (setq user-compile-process nil)))
 
   (add-hook 'compilation-start-hook #'user-compile-start)
   (add-to-list 'compilation-finish-functions #'user-compile-done)
@@ -985,9 +988,10 @@ Taken from http://stackoverflow.com/a/3072831/355252."
 
 ;; Error checking
 (use-package flycheck :ensure t
-  :defer t
   :bind (("C-c e" . user-flycheck-errors/body)
          ("C-c t f" . flycheck-mode))
+  :init
+  (global-flycheck-mode t)
   :config
   (defhydra user-flycheck-errors ()
     "Flycheck errors"
@@ -999,8 +1003,6 @@ Taken from http://stackoverflow.com/a/3072831/355252."
     ("w" flycheck-copy-errors-as-kill "copy message")
     ("q" nil "quit"))
   (csetq flycheck-check-syntax-automatically '(save mode-enabled))
-
-  (global-flycheck-mode t)
   (csetq flycheck-standard-error-navigation nil)
   (csetq flycheck-display-errors-function
          #'flycheck-display-error-messages-unless-error-list))
@@ -1104,10 +1106,28 @@ Taken from http://stackoverflow.com/a/3072831/355252."
   ;; (csetq jedi:tooltip-method nil)
   (add-hook 'python-mode-hook #'jedi:setup))
 
-(use-package company-jedi :ensure t
-  :after company
+(use-package ycmd :ensure t
   :init
-  (add-hook 'python-mode-hook (lambda () (add-to-list 'company-backends 'company-jedi))))
+  (csetq ycmd-min-num-chars-for-completion company-minimum-prefix-length)
+  (csetq ycmd-force-semantic-completion t)
+
+  (set-variable 'ycmd-extra-conf-whitelist '("~/data/work/*"))
+  (set-variable 'ycmd-server-command `("python" ,(file-truename "~/src/ycmd/ycmd/")))
+
+  (add-hook 'ycmd-mode-hook 'ycmd-eldoc-setup)
+  (add-hook 'python-mode-hook #'ycmd-mode)
+  :config
+
+  (use-package company-ycmd :ensure t
+    :init
+    (csetq company-ycmd-enable-fuzzy-matching nil)
+    (csetq company-ycmd-request-sync-timeout 0)
+    (company-ycmd-setup)))
+
+;; (use-package company-jedi :ensure t
+;;   :after company
+;;   :init
+;;   (add-hook 'python-mode-hook (lambda () (add-to-list 'company-backends 'company-jedi))))
 
 (use-package virtualenvwrapper :ensure t
   :init
@@ -1180,9 +1200,10 @@ Taken from http://stackoverflow.com/a/3072831/355252."
 ;;   :init
 ;;   (setq paced-global-dict-enable-alist '((c-mode . "cmode"))))
 
-(use-package pdf-tools
-  :init
-  (pdf-tools-install t t t))
+;; I don't really use it for now
+;; (use-package pdf-tools
+;;   :init
+;;   (pdf-tools-install t t t))
 
 (unbind-key "C-z")
 (unbind-key "C-x C-z")

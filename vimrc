@@ -49,10 +49,7 @@ set wildcharm=<C-z>
 " Will append whatever necessary per project (in the local .vimrc)
 set path=.,**
 
-set statusline=%<\ %f\ %y%w%r%m
-set statusline+=%=
-set statusline+=[%{ALEGetStatusLine()}]\ 
-set statusline+=%l\/%-6L\ %3c\ 
+set statusline=%<%f\ %r%y%w%m\ (%F)%=%-19(%3l,%02c%03V%)
 
 set splitbelow
 set splitright

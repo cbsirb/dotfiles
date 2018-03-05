@@ -52,13 +52,6 @@
 (c-add-style "allman" user-allman-style)
 
 (use-package cc-mode
-  :defer t
-  :bind (:map c-mode-map
-         ("M-." . ectags-find-tag-at-point)
-         ("M-o" . counsel-ectags)
-         :map c++-mode-map
-         ("M-." . ectags-find-tag-at-point)
-         ("M-o" . counsel-ectags))
   :init
   (defun user-c-goto-def ()
     "Go to the first occurence of the variable/parameter inside the function.  \
@@ -89,50 +82,20 @@ For anything else there is ctags."
     ;; Use this as a default, it's pretty sane (compared to gnu)
     (c-set-style "linux")
 
-    (irony-mode t)
-    (flycheck-mode t)
-
-    (with-eval-after-load "company"
-      (setq-local company-backends '(company-irony-c-headers company-irony company-dabbrev-code company-files))))
+    (ycmd-mode t)
+    (lsp-cquery-enable))
 
   (add-hook 'c-mode-common-hook #'user-cc-mode-setup)
 
   :config
-  (require 'ectags)
-
-  (use-package irony
-    :ensure t
-    :defer t
-    :diminish irony-mode
-
+  (use-package lsp-mode :ensure t
     :init
-    (setq irony-server-w32-pipe-buffer-size (* 64 1024))
+    (csetq lsp-highlight-symbol-at-point nil))
 
-    :config
-    (add-hook 'irony-mode-hook 'irony-cdb-autosetup-compile-options)
-
-    (use-package company-irony
-      :ensure t
-      :defer t
-      :after company
-      :init
-      (csetq company-irony-ignore-case t))
-
-    (use-package irony-eldoc
-      :ensure t
-      :init
-      (add-hook 'irony-mode-hook #'irony-eldoc))
-
-    (use-package company-irony-c-headers
-      :ensure t
-      :defer t)
-
-    ;; (use-package flycheck-irony
-    ;;   :ensure t
-    ;;   :defer t
-    ;;   :init
-    ;;   (add-hook 'flycheck-mode-hook #'flycheck-irony-setup))
-    )
+  (use-package cquery :ensure t
+    :init
+    (csetq cquery-project-roots '("compile_commands.json"))
+    (csetq cquery-executable "~/src/cquery/build/release/bin/cquery"))
   )
 
 (provide 'user-c)

@@ -38,6 +38,8 @@ _SWITCH should be 'diff'."
   :config
   (csetq imenu-auto-rescan t))
 
+(csetq auto-window-vscroll nil)
+
 (csetq enable-recursive-minibuffers t)
 
 ;; Use UTF-8 as default

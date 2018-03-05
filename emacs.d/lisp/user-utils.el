@@ -260,7 +260,7 @@ Saves the position before.  You can skip typos you don't want to fix with
                      ((executable-find "xterm"))
                      (t nil))))
       (when terminal
-        (call-process terminal nil 0))))
+        (start-process terminal nil terminal "-geometry" "115x32"))))
    ((eq system-type 'windows-nt)
     (message "Not supported for now!"))))
 

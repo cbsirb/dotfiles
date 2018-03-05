@@ -26,7 +26,7 @@ xterm*termName: xterm-256color
 xterm*locale: true
 xterm*metaSendsEscape: true
 xterm*eightBitInput: false
-xterm*faceName: xft:Iosevka:size=11
+xterm*faceName: xft:Iosevka Term:style=Regular:size=11
 
 xterm*scrollTtyKeypress: true
 xterm*scrollTtyOutput: false
