@@ -88,10 +88,6 @@ For anything else there is ctags."
   (add-hook 'c-mode-common-hook #'user-cc-mode-setup)
 
   :config
-  (use-package lsp-mode :ensure t
-    :init
-    (csetq lsp-highlight-symbol-at-point nil))
-
   (use-package cquery :ensure t
     :init
     (csetq cquery-project-roots '("compile_commands.json"))

@@ -112,6 +112,8 @@ unset color_prompt force_color_prompt
 [[ -f ~/.bash_functions ]] && source ~/.bash_functions
 [[ -f ~/.bash_init ]] && source ~/.bash_init
 
+[[ -f ~/.bash_priv ]] && source ~/.bash_priv
+
 # enable programmable completion features (you don't need to enable
 # this, if it's already enabled in /etc/bash.bashrc and /etc/profile
 # sources /etc/bash.bashrc).

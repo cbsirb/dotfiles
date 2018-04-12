@@ -83,14 +83,14 @@ set colorcolumn=+1
 set cursorline
 
 " Disabled 08.14.2017
-" if !has('gui_running') && has('termguicolors')
-"   if $TERM =~# '-256color' && $TERM !~# 'rxvt'
-"     " Needed in tmux
-"     let &t_8f = "\<Esc>[38;2;%lu;%lu;%lum"
-"     let &t_8b = "\<Esc>[48;2;%lu;%lu;%lum"
-"     set termguicolors
-"   endif
-" endif
+if !has('gui_running') && has('termguicolors')
+  if $TERM =~# '-256color' && $TERM !~# 'rxvt'
+    " Needed in tmux
+    let &t_8f = "\<Esc>[38;2;%lu;%lu;%lum"
+    let &t_8b = "\<Esc>[48;2;%lu;%lu;%lum"
+    set termguicolors
+  endif
+endif
 
 if executable("rg")
   set grepprg=rg\ --no-heading\ --vimgrep\ -g\ '!{.git,node_modules,vendor}/*'\ -g\ '!tags'\ -g\ '!TAGS'

@@ -42,7 +42,7 @@
     cmd = meld --auto-merge --output $MERGED $LOCAL $BASE $REMOTE --diff $BASE $LOCAL --diff $BASE $REMOTE
 
 [merge]
-    conflictstyle = diff3
+    # conflictstyle = diff3
     tool = vimdiff
 
 [core]

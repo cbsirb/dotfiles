@@ -70,6 +70,8 @@ _SWITCH should be 'diff'."
 (csetq read-quoted-char-radix 16)
 (csetq truncate-lines t)
 (csetq select-active-regions nil)
+(csetq display-raw-bytes-as-hex t)
+(csetq column-number-indicator-zero-based nil)
 
 ;; very elisp-specific
 (csetq eval-expression-print-length nil)
@@ -134,6 +136,8 @@ _SWITCH should be 'diff'."
 (csetq scroll-preserve-screen-position t)
 (csetq isearch-allow-scroll t)
 (csetq scroll-margin 7)
+
+(csetq fast-but-imprecise-scrolling t)
 
 ;; Disable auto-save-mode (I really hate it)
 (auto-save-mode -1)

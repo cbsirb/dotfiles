@@ -49,13 +49,13 @@
   (package-install 'use-package))
 
 (csetq use-package-enable-imenu-support t)
-;; (csetq use-package-expand-minimally t)
+(csetq use-package-expand-minimally t)
 (require 'use-package)
 
 (use-package diminish :ensure t)
 
 (use-package ignoramus :ensure t
-  :config
+  :init
   (ignoramus-setup))
 
 (when (= 25 emacs-major-version)
@@ -108,8 +108,8 @@
   (midnight-delay-set 'midnight-delay 1)
   (csetq midnight-period (* 15 60))
 
-  ;; 10 minutes for special buffers
-  (csetq clean-buffer-list-delay-special (* 10 60))
+  ;; 5 minutes for special buffers
+  (csetq clean-buffer-list-delay-special (* 5 60))
 
   (midnight-mode t)
   :config
@@ -162,10 +162,11 @@
 (column-number-mode t)
 (csetq visible-cursor nil)
 
-;; (when (fboundp #'global-display-line-numbers-mode)
-;;   (global-display-line-numbers-mode t))
-
-(load-theme 'leuven t)
+(use-package leuven-theme :ensure t
+  :init
+  (csetq leuven-scale-outline-headlines nil)
+  (csetq leuven-scale-org-agenda-structure nil)
+  (load-theme 'leuven t))
 
 (csetq mode-line-position
        '((line-number-mode ("%l" (column-number-mode ":%2c")))))
@@ -186,19 +187,11 @@
          mode-line-modes
          (vc-mode vc-mode)
          " "
-         (org-agenda-mode
-          (:eval (format "%s" org-agenda-filter)))
          mode-line-misc-info
          mode-line-end-spaces))
 
-;; (setq default-frame-alist '((height . 55)
-;;                             (width . 125)))
-
-(csetq fast-but-imprecise-scrolling t)
-
 (show-paren-mode t)
-(blink-cursor-mode t)
-;; (global-hl-line-mode)
+;; (blink-cursor-mode t)
 
 (use-package whitespace
   :diminish
@@ -267,8 +260,7 @@
   :init (which-key-mode t)
   :config
   (csetq which-key-idle-delay 0.5)
-  (csetq which-key-sort-order 'which-key-prefix-then-key-order)
-  (which-key-setup-side-window-right-bottom))
+  (csetq which-key-sort-order 'which-key-prefix-then-key-order))
 
 (use-package jump-char :ensure t
   :bind (("M-m" . #'jump-char-forward)
@@ -301,15 +293,6 @@
     ("'" er/mark-inside-quotes "inside quotes")
     ("\"" er/mark-outside-quotes "outside quotes")
     ("q" nil "quit")))
-
-(use-package drag-stuff :ensure t
-  :diminish
-  :bind (("<M-up>" . #'drag-stuff-up)
-         ("<M-down>" . #'drag-stuff-down)
-         ("<M-left>" . #'drag-stuff-left)
-         ("<M-right>" . #'drag-stuff-right))
-  :init
-  (drag-stuff-global-mode t))
 
 (use-package smartparens :ensure t
   :diminish
@@ -522,26 +505,23 @@
          ("C-c w <up>"    . windmove-up)
          ("C-c w <down>" . windmove-down)))
 
-(use-package user-files
-  :bind (("C-c f D" . user-delete-file-and-buffer)
-         ("C-c f r" . user-rename-file-and-buffer)))
+;; (use-package user-files
+;;   :bind (("C-c f D" . user-delete-file-and-buffer)
+;;          ("C-c f r" . user-rename-file-and-buffer)))
 
 (use-package projectile :ensure t
   :diminish
   :init
-  (csetq projectile-project-root-files-bottom-up
-         '(".projectile" ".git" ".hg"))
-
   (csetq projectile-completion-system 'ivy)
   (csetq projectile-indexing-method 'alien)
   (csetq projectile-enable-caching t)
-  (csetq projectile-verbose t)
   (csetq projectile-use-git-grep t)
 
   (projectile-mode t)
 
   :config
-  (add-to-list 'projectile-globally-ignored-directories ".vscode"))
+  (add-to-list 'projectile-globally-ignored-directories ".vscode")
+  (add-to-list 'projectile-globally-ignored-directories ".cquery_cached_index"))
 
 ;; Searching
 (defun user-results-buffer-hook ()
@@ -570,10 +550,7 @@
 (use-package wgrep :ensure t
   :defer t
   :init
-  (csetq wgrep-auto-save-buffer t)
-  (defun user-enable-wgrep-for-map (map)
-    "Enables the wgrep standard key (C-c C-p) for the given MAP."
-    (bind-key "C-c C-p" #'wgrep-change-to-wgrep-mode map)))
+  (csetq wgrep-auto-save-buffer t))
 
 (use-package wgrep-ag :ensure t :defer t)
 
@@ -627,7 +604,6 @@
   (puthash "python-mode" "py" user-rg-type-aliases)
   (puthash "perl-mode" "perl" user-rg-type-aliases)
   (puthash "makefile-mode" "mk" user-rg-type-aliases)
-  (puthash "org-mode" "org" user-rg-type-aliases)
   (puthash "ruby-mode" "ruby" user-rg-type-aliases)
   (puthash "shell-script-mode" "sh" user-rg-type-aliases)
   (puthash "sql-mode" "sql" user-rg-type-aliases)
@@ -689,7 +665,7 @@ See `user-rg-type-aliases' for more details."
 (csetq dabbrev-abbrev-skip-leading-regexp "[^ ]*[<>=*$]")
 (add-hook 'find-file-hook (lambda () (abbrev-mode -1)))
 
-;; (use-package yasnippet
+;; (use-package yasnippet :ensure t
 ;;   :diminish yas-minor-mode
 ;;   :config
 ;;   (yas-reload-all)
@@ -701,7 +677,6 @@ See `user-rg-type-aliases' for more details."
          ("C-c C-w" . wdired-change-to-wdired-mode))
   :init
   (defun user-dired-hook ()
-    ;; (dired-hide-details-mode -1)
     (toggle-truncate-lines))
 
   (add-hook 'dired-mode-hook #'user-dired-hook)
@@ -777,46 +752,6 @@ See `user-rg-type-aliases' for more details."
   :config
   (smex-initialize))
 
-(use-package org
-  :bind (("C-c l" . org-store-link)
-         ("<f12>" . org-capture)
-         ("C-c a" . org-agenda))
-  :init
-  (csetq org-pretty-entities t)
-  (csetq org-hide-emphasis-markers t)
-  (csetq org-return-follows-link t)
-  (csetq org-support-shift-select t)
-  (csetq org-special-ctrl-a/e t)
-  (csetq org-startup-indented t)
-  (csetq org-cycle-separator-lines 0)
-  (csetq org-src-fontify-natively t)
-  (csetq org-src-preserve-indentation t)
-  (csetq org-list-allow-alphabetical t)
-  (csetq org-use-speed-commands t)
-  (csetq org-display-inline-images t)
-  (csetq org-use-sub-superscripts nil)
-
-  (csetq org-footnote-section nil)
-  (csetq org-footnote-auto-adjust nil)
-
-  (csetq org-link-abbrev-alist
-         '(("JIRA" . "https://jira.bitdefender.biz/browse/%s")
-           ("WP" . "https://en.wikipedia.org/wiki/%s")))
-
-  (csetq org-agenda-files '("~/data/org"))
-
-  (csetq org-capture-templates
-         '(
-           ("w" "Work todo"     entry (file+headline "~/data/org/work.org" "Tasks")         "* TODO %?\n %u")
-           ("d" "Work diary"    entry (file+datetree "~/data/org/work-diary.org" "Tasks")   "** %?\n %u\n %a")
-           ("n" "Note"          entry (file+datetree "~/data/org/capture.org")              "* %?\nEntered on %U\n  %i")
-           ("s" "Tips & tricks" entry (file+headline "~/data/org/tips.org" "Tips & tricks") "* %? ")
-           ))
-
-  :config
-  (add-hook 'org-babel-after-execute-hook 'org-redisplay-inline-images)
-  (org-clock-persistence-insinuate))
-
 (use-package ivy :ensure t
   :diminish
   :bind (("C-c C-r" . ivy-resume)
@@ -842,8 +777,6 @@ See `user-rg-type-aliases' for more details."
          ("C-c f f" . counsel-find-file)
          ("C-c s c" . counsel-rg))
   :init
-  ;; (csetq counsel-async-filter-update-time 10000)
-  ;; on windows it doesn't work without the '--vimgrep' part
   (csetq counsel-ag-base-command "ag --ignore tags --ignore TAGS --ignore elpa --vimgrep %s")
   (counsel-mode t))
 
@@ -871,10 +804,6 @@ See `user-rg-type-aliases' for more details."
 
 (add-hook 'prog-mode-hook #'user-programming-setup)
 
-;; (use-package dtrt-indent
-;;   :config
-;;   (add-hook 'prog-mode-hook #'dtrt-indent-mode))
-
 (use-package editorconfig :ensure t
   :diminish
   :config
@@ -890,11 +819,12 @@ See `user-rg-type-aliases' for more details."
 
 (use-package highlight-symbol :ensure t
   :diminish
-  :config
+  :init
   (csetq highlight-symbol-idle-delay 0.2)
   (csetq highlight-symbol-highlight-single-occurrence nil)
-  (add-hook 'prog-mode-hook #'highlight-symbol-mode)
-  (add-hook 'prog-mode-hook #'highlight-symbol-nav-mode))
+  :config
+  (add-hook 'find-file-hook #'highlight-symbol-mode)
+  (add-hook 'find-file-hook #'highlight-symbol-nav-mode))
 
 (use-package compile
   :diminish compilation-in-progress
@@ -966,7 +896,6 @@ Taken from http://stackoverflow.com/a/3072831/355252."
 
   (defun user-term-mode-hook ()
     (company-mode -1)
-    (hl-line-mode -1)
     (setq-local scroll-margin 0))
 
   (add-hook 'term-mode-hook #'user-term-mode-hook))
@@ -979,12 +908,6 @@ Taken from http://stackoverflow.com/a/3072831/355252."
     (setq-local scroll-margin 0))
 
   (add-hook 'eshell-mode-hook #'user-eshell-hook))
-
-(use-package eldoc
-  :defer t
-  :diminish
-  :init
-  (add-hook 'eval-expression-minibuffer-setup-hook #'eldoc-mode))
 
 ;; Error checking
 (use-package flycheck :ensure t
@@ -1091,21 +1014,25 @@ Taken from http://stackoverflow.com/a/3072831/355252."
   (add-hook 'web-mode-hook #'user-web-mode-hook))
 
 ;; Python
-(use-package cython-mode :ensure t :defer t)
+(add-hook 'python-mode-hook (lambda ()
+                              (flycheck-select-checker 'python-pylint)))
 
-(use-package python :ensure nil
-  :init
-  (add-hook 'python-mode-hook
-            (lambda ()
-              (flycheck-select-checker 'python-pylint))))
+(use-package cython-mode :ensure t :defer t)
 
 (use-package jedi-core :ensure t
   :defer t
   :init
   (csetq jedi:use-shortcuts t)
-  ;; (csetq jedi:tooltip-method nil)
   (add-hook 'python-mode-hook #'jedi:setup))
 
+(use-package virtualenvwrapper :ensure t
+  :init
+  (csetq projectile-switch-project-action
+         (lambda ()
+           (venv-projectile-auto-workon)
+           (projectile-find-file))))
+
+;; generic programming
 (use-package ycmd :ensure t
   :init
   (csetq ycmd-min-num-chars-for-completion company-minimum-prefix-length)
@@ -1124,21 +1051,13 @@ Taken from http://stackoverflow.com/a/3072831/355252."
     (csetq company-ycmd-request-sync-timeout 0)
     (company-ycmd-setup)))
 
-;; (use-package company-jedi :ensure t
-;;   :after company
-;;   :init
-;;   (add-hook 'python-mode-hook (lambda () (add-to-list 'company-backends 'company-jedi))))
-
-(use-package virtualenvwrapper :ensure t
+(use-package lsp-mode :ensure t
   :init
-  (csetq projectile-switch-project-action
-         (lambda ()
-           (venv-projectile-auto-workon)
-           (projectile-find-file))))
+  (csetq lsp-highlight-symbol-at-point nil))
 
 ;; imenu
 (use-package imenu
-  :bind ("M-i" . imenu)         ;; allow ivy to override it
+  :bind ("M-i" . imenu)
   :init
   (csetq imenu-auto-rescan t)
   (csetq imenu-auto-rescan-maxout (* 1024 1024))
@@ -1147,11 +1066,6 @@ Taken from http://stackoverflow.com/a/3072831/355252."
 
 (use-package imenu-anywhere :ensure t
   :bind (("M-I" . imenu-anywhere)))
-
-(use-package ectags
-  :defer t
-  :config
-  (add-hook 'ectags-after-jump-hook #'recenter-top-bottom))
 
 ;; Git
 (use-package magit :ensure t
@@ -1169,6 +1083,7 @@ Taken from http://stackoverflow.com/a/3072831/355252."
 
 ;; Keybindings
 (bind-key "C-c t d" #'toggle-debug-on-error)
+(bind-key "C-c t q" #'toggle-debug-on-quit)
 (bind-key [remap just-one-space] #'cycle-spacing)
 (bind-key "M-g" #'goto-line)
 (bind-key "C-8" #'repeat-complex-command)
@@ -1190,21 +1105,6 @@ Taken from http://stackoverflow.com/a/3072831/355252."
   (key-seq-define-global "jj" #'ivy-switch-buffer)
   (key-seq-define-global "jf" #'counsel-find-file))
 
-(use-package keyfreq :ensure t
-  :init
-  (keyfreq-mode t)
-  (keyfreq-autosave-mode t))
-
-;; I need some time to play with this
-;; (use-package paced
-;;   :init
-;;   (setq paced-global-dict-enable-alist '((c-mode . "cmode"))))
-
-;; I don't really use it for now
-;; (use-package pdf-tools
-;;   :init
-;;   (pdf-tools-install t t t))
-
 (unbind-key "C-z")
 (unbind-key "C-x C-z")
 (unbind-key "C-x f")
@@ -1215,16 +1115,6 @@ Taken from http://stackoverflow.com/a/3072831/355252."
 (unbind-key "C-x <")
 (unbind-key "<C-next>")
 (unbind-key "<C-prior>")
-
-;; (unbind-key "<left>")
-;; (unbind-key "<right>")
-;; (unbind-key "<up>")
-;; (unbind-key "<down>")
-
-;; (unbind-key "<C-down>")
-;; (unbind-key "<C-up>")
-;; (unbind-key "<C-left>")
-;; (unbind-key "<C-right>")
 
 (provide 'init)
 
