@@ -18,7 +18,7 @@ URxvt.boldItalicFont:   xft:Iosevka:size=11:bold:italic
 
 #include ".Xresources.solarized"
 
-*saveLines: 10000
+xterm*saveLines: 100000
 
 ! Xterm config
 xterm*utf8: 1
@@ -28,25 +28,29 @@ xterm*metaSendsEscape: true
 xterm*eightBitInput: false
 xterm*faceName: xft:Iosevka Term:style=Regular:size=11
 
+xterm*multiScroll: true
+xterm*jumpScroll: true
+xterm*fastScroll: true
+xterm*scrollKey: true
+
 xterm*scrollTtyKeypress: true
 xterm*scrollTtyOutput: false
 xterm*ScrollBar: false
 
 xterm*bellIsUrgent: true
 xterm*disallowedWindowOps: 20,21,SetXprop
-! VT Font Menu: Unreadable
+
+xterm*selectToClipboard: true
+xterm*trimSelection: true
+
 xterm*faceSize1: 8
-! VT font menu: Tiny
 xterm*faceSize2: 10
-! VT font menu: Medium
 xterm*faceSize3: 12
-! VT font menu: Large
 xterm*faceSize4: 16
-! VT font menu: Huge
 xterm*faceSize5: 22
 
 xterm*VT100.Translations: #override \
-        Ctrl <Key> 9: smaller-vt-font() \n\
+        Ctrl <Key> minus: smaller-vt-font() \n\
         Ctrl <Key> plus: larger-vt-font() \n\
         Ctrl <Key> 0: set-vt-font(d)
 
@@ -80,6 +84,3 @@ URxvt*scrollTtyKeypress: true
 ! This is how it is suposed to be
 URxvt*secondaryScreen: 1
 URxvt*secondaryScroll: 0
-
-URxvt.perl-ext-common:
-URxvt.perl-ext:

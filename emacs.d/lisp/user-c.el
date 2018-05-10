@@ -82,17 +82,25 @@ For anything else there is ctags."
     ;; Use this as a default, it's pretty sane (compared to gnu)
     (c-set-style "linux")
 
-    (ycmd-mode t)
+    (setq-local lsp-ui-doc-enable nil)
+    (setq-local lsp-enable-indentation nil)
     (lsp-cquery-enable))
 
   (add-hook 'c-mode-common-hook #'user-cc-mode-setup)
 
   :config
   (use-package cquery :ensure t
+    :bind (:map c-mode-base-map
+           ("M-o" . #'user-cquery-show/body))
     :init
     (csetq cquery-project-roots '("compile_commands.json"))
-    (csetq cquery-executable "~/src/cquery/build/release/bin/cquery"))
-  )
+    (csetq cquery-executable "~/src/cquery/build/release/bin/cquery")
+
+    (defhydra user-cquery-show (:exit t)
+      ("b" (cquery-xref-find-custom "$cquery/base") "base")
+      ("c" (cquery-xref-find-custom "$cquery/callers") "callers")
+      ("d" (cquery-xref-find-custom "$cquery/derived") "derived")
+      ("v" (cquery-xref-find-custom "$cquery/vars") "vars"))))
 
 (provide 'user-c)
 

@@ -11,11 +11,15 @@
   "Set the VARIABLE to VALUE, but use `set-default' if needed."
   `(funcall (or (get ',variable 'custom-set) 'set-default) ',variable ,value))
 
-;; Will reset at the end of loading
-(defconst user-original-gc-cons (* 7 gc-cons-threshold)
-  "The original/default value of `gc-cons-threshold'.")
+;; Apparently, when using default values, the input lag and hangs disappears
+;; (csetq gc-cons-threshold (* 384 1024 1024))
 
-(csetq gc-cons-threshold (* 128 1024 1024))
+;; (defconst user-original-gc-cons (* 7 gc-cons-threshold)
+;;   "My default value of `gc-cons-threshold'.")
+
+;; (add-hook 'after-init-hook
+;;           (lambda ()
+;;             (csetq gc-cons-threshold user-original-gc-cons)))
 
 (when (fboundp 'tool-bar-mode) (tool-bar-mode 0))
 (when (fboundp 'menu-bar-mode) (menu-bar-mode 0))
@@ -23,10 +27,6 @@
 
 (defconst user-custom-file (expand-file-name "custom.el" user-emacs-directory)
   "File used to store settings from Customization UI.")
-
-(add-hook 'after-init-hook
-          (lambda ()
-            (csetq gc-cons-threshold user-original-gc-cons)))
 
 (csetq package-archives '(("melpa" . "http://melpa.org/packages/")
                          ("org" . "http://orgmode.org/elpa/")
@@ -162,11 +162,16 @@
 (column-number-mode t)
 (csetq visible-cursor nil)
 
-(use-package leuven-theme :ensure t
+(use-package spacemacs-theme :ensure t
+  :defer t
   :init
-  (csetq leuven-scale-outline-headlines nil)
-  (csetq leuven-scale-org-agenda-structure nil)
-  (load-theme 'leuven t))
+  (load-theme 'spacemacs-light t))
+
+;; (use-package leuven-theme :ensure t
+;;   :init
+;;   (csetq leuven-scale-outline-headlines nil)
+;;   (csetq leuven-scale-org-agenda-structure nil)
+;;   (load-theme 'leuven t))
 
 (csetq mode-line-position
        '((line-number-mode ("%l" (column-number-mode ":%2c")))))
@@ -665,11 +670,11 @@ See `user-rg-type-aliases' for more details."
 (csetq dabbrev-abbrev-skip-leading-regexp "[^ ]*[<>=*$]")
 (add-hook 'find-file-hook (lambda () (abbrev-mode -1)))
 
-;; (use-package yasnippet :ensure t
-;;   :diminish yas-minor-mode
-;;   :config
-;;   (yas-reload-all)
-;;   (add-hook 'prog-mode-hook #'yas-minor-mode))
+(use-package yasnippet :ensure t
+  :diminish yas-minor-mode
+  :config
+  (yas-reload-all)
+  (add-hook 'prog-mode-hook #'yas-minor-mode))
 
 (use-package dired
   :defer t
@@ -930,6 +935,30 @@ Taken from http://stackoverflow.com/a/3072831/355252."
   (csetq flycheck-display-errors-function
          #'flycheck-display-error-messages-unless-error-list))
 
+;; generic programming
+(use-package lsp-mode :ensure t
+  :init
+  (csetq lsp-highlight-symbol-at-point nil)
+
+  :config
+  (use-package company-lsp :ensure t
+    :init
+    (csetq company-lsp-async t)
+    (csetq company-lsp-cache-candidates nil)
+    (add-hook 'lsp-mode-hook (lambda () (add-to-list 'company-backends 'company-lsp))))
+
+  (use-package lsp-ui :ensure t
+    :init
+    ;; Disable type information shown in sideline (enable it per mode if needed)
+    ;; Allow it to display linting errors only.
+    (csetq lsp-ui-sideline-show-hover nil)
+    (csetq lsp-ui-sideline-show-symbol nil)
+    (add-hook 'lsp-mode-hook #'lsp-ui-mode)))
+
+(use-package xref
+  :init
+  (add-to-list 'xref-prompt-for-identifier 'xref-find-references t))
+
 ;; C/C++
 (use-package user-c)
 
@@ -961,12 +990,7 @@ Taken from http://stackoverflow.com/a/3072831/355252."
   :defer t
   :init
   (add-to-list 'auto-mode-alist '("\\.js\\'" . js2-mode))
-  :config
-  (setf js2-skip-preprocessor-directives t)
-  (setq-default js2-additional-externs
-                '("$" "unsafeWindow" "localStorage" "jQuery"
-                  "setTimeout" "setInterval" "location" "skewer"
-                  "console" "phantom")))
+  (csetq js2-skip-preprocessor-directives t))
 
 (use-package json-mode :ensure t
   :bind (:map json-mode-map
@@ -977,19 +1001,20 @@ Taken from http://stackoverflow.com/a/3072831/355252."
 
 (use-package web-mode :ensure t
   :defer t
+  :mode
+  (("\\.phtml\\'" . web-mode)
+   ("\\.tpl\\.php\\'" . web-mode)
+   ("\\.[agj]sp\\'" . web-mode)
+   ("\\.as[cp]x\\'" . web-mode)
+   ("\\.erb\\'" . web-mode)
+   ("\\.mustache\\'" . web-mode)
+   ("\\.djhtml\\'" . web-mode)
+   ("\\.html?\\'" . web-mode)
+   ("\\.jsx$\\'" . web-mode))
   :init
   (defun user-web-mode-hook ()
     "Hook to run when `web-mode' is active."
     (smartparens-mode -1))
-
-  (add-to-list 'auto-mode-alist '("\\.phtml\\'" . web-mode))
-  (add-to-list 'auto-mode-alist '("\\.tpl\\.php\\'" . web-mode))
-  (add-to-list 'auto-mode-alist '("\\.[agj]sp\\'" . web-mode))
-  (add-to-list 'auto-mode-alist '("\\.as[cp]x\\'" . web-mode))
-  (add-to-list 'auto-mode-alist '("\\.erb\\'" . web-mode))
-  (add-to-list 'auto-mode-alist '("\\.mustache\\'" . web-mode))
-  (add-to-list 'auto-mode-alist '("\\.djhtml\\'" . web-mode))
-  (add-to-list 'auto-mode-alist '("\\.html?\\'" . web-mode))
 
   (csetq web-mode-code-indent-offset 4)
   (csetq web-mode-markup-indent-offset 2)
@@ -1014,46 +1039,15 @@ Taken from http://stackoverflow.com/a/3072831/355252."
   (add-hook 'web-mode-hook #'user-web-mode-hook))
 
 ;; Python
-(add-hook 'python-mode-hook (lambda ()
-                              (flycheck-select-checker 'python-pylint)))
-
 (use-package cython-mode :ensure t :defer t)
 
-(use-package jedi-core :ensure t
-  :defer t
+(use-package lsp-python :ensure t
   :init
-  (csetq jedi:use-shortcuts t)
-  (add-hook 'python-mode-hook #'jedi:setup))
+  (add-hook 'python-mode-hook #'lsp-python-enable))
 
 (use-package virtualenvwrapper :ensure t
   :init
-  (csetq projectile-switch-project-action
-         (lambda ()
-           (venv-projectile-auto-workon)
-           (projectile-find-file))))
-
-;; generic programming
-(use-package ycmd :ensure t
-  :init
-  (csetq ycmd-min-num-chars-for-completion company-minimum-prefix-length)
-  (csetq ycmd-force-semantic-completion t)
-
-  (set-variable 'ycmd-extra-conf-whitelist '("~/data/work/*"))
-  (set-variable 'ycmd-server-command `("python" ,(file-truename "~/src/ycmd/ycmd/")))
-
-  (add-hook 'ycmd-mode-hook 'ycmd-eldoc-setup)
-  (add-hook 'python-mode-hook #'ycmd-mode)
-  :config
-
-  (use-package company-ycmd :ensure t
-    :init
-    (csetq company-ycmd-enable-fuzzy-matching nil)
-    (csetq company-ycmd-request-sync-timeout 0)
-    (company-ycmd-setup)))
-
-(use-package lsp-mode :ensure t
-  :init
-  (csetq lsp-highlight-symbol-at-point nil))
+  (add-hook 'python-mode-hook #'venv-projectile-auto-workon))
 
 ;; imenu
 (use-package imenu

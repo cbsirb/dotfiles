@@ -143,18 +143,21 @@ _SWITCH should be 'diff'."
 (auto-save-mode -1)
 (csetq auto-save-default nil)
 
-(defun user-minibuffer-setup-hook ()
-  "Hook to run when entering the minibuffer."
-  (csetq gc-cons-threshold most-positive-fixnum)
-  (setq-local show-trailing-whitespace nil))
+;; (defvar user-original-gc-cons gc-cons-threshold)
 
-(defun user-minibuffer-exit-hook ()
-  "Hook to run when exiting the minibuffer."
-  (csetq gc-cons-threshold user-original-gc-cons))
+;; (defun user-minibuffer-setup-hook ()
+;;   "Hook to run when entering the minibuffer."
+;;   (csetq user-original-gc-cons gc-cons-threshold)
+;;   (csetq gc-cons-threshold most-positive-fixnum)
+;;   (setq-local show-trailing-whitespace nil))
 
-;; Increase the memory while in the minibuffer
-(add-hook 'minibuffer-setup-hook #'user-minibuffer-setup-hook)
-(add-hook 'minibuffer-exit-hook #'user-minibuffer-exit-hook)
+;; (defun user-minibuffer-exit-hook ()
+;;   "Hook to run when exiting the minibuffer."
+;;   (csetq gc-cons-threshold user-original-gc-cons))
+
+;; ;; Increase the memory while in the minibuffer
+;; (add-hook 'minibuffer-setup-hook #'user-minibuffer-setup-hook)
+;; (add-hook 'minibuffer-exit-hook #'user-minibuffer-exit-hook)
 
 ;; Needed for some company backends
 (when (eq system-type 'windows-nt)
