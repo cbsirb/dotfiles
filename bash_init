@@ -3,7 +3,7 @@
 xrdb -merge ~/.Xresources
 
 if [[ ! "$PATH" == *"/sbin"* ]]; then
-    export PATH="/sbin:$PATH"
+  export PATH="/sbin:$PATH"
 fi
 
 # if [[ ! "$PATH" == *"/usr/sbin"* ]]; then
@@ -12,15 +12,15 @@ fi
 
 # Don't pollute path if not needed
 if [[ ! "$PATH" == *"$HOME/.cargo/bin"* ]]; then
-    export PATH="$PATH:$HOME/.cargo/bin"
+  export PATH="$PATH:$HOME/.cargo/bin"
 fi
 
 if [[ ! "$PATH" == *"$HOME/bin"* ]]; then
-    export PATH="$PATH:$HOME/bin"
+  export PATH="$PATH:$HOME/bin"
 fi
 
 if [[ ! "$PATH" == *"$HOME/.local/bin"* ]]; then
-    export PATH="$HOME/.local/bin:$PATH"
+  export PATH="$HOME/.local/bin:$PATH"
 fi
 
 # Use the ~/.local dir wherever possible
@@ -31,7 +31,7 @@ export PKG_CONFIG_PATH=$HOME/.local/lib/pkgconfig
 export LD_LIBRARY_PATH=$HOME/.local/lib
 
 if [[ ! "$(manpath -q)" == *"$HOME/.local/share/man"* ]]; then
-    export MANPATH=$HOME/.local/share/man:$(manpath -q)
+  export MANPATH=$HOME/.local/share/man:$(manpath -q)
 fi
 
 # finally, start cron if needed

@@ -2,8 +2,8 @@
 
 # If not running interactively, don't do anything
 case "$-" in
-    *i*) ;;
-      *) return;;
+  *i*) ;;
+  *) return;;
 esac
 
 # if [ -z "$DISPLAY" ] && [ "$(fgconsole)" -eq 1 ]; then
@@ -30,39 +30,39 @@ HISTFILESIZE=20000
 export HISTIGNORE=$'[ \t]*:&:[fb]g:exit:ls:cd'
 
 _bash_history_sync() {
-    # Append the command just entered to history file
-    builtin history -a
-    # Truncate file if needed
-    HISTFILESIZE=$HISTSIZE
-    # Clear the history of the running session
-    builtin history -c
-    # Reload the history
-    builtin history -r
+  # Append the command just entered to history file
+  builtin history -a
+  # Truncate file if needed
+  HISTFILESIZE=$HISTSIZE
+  # Clear the history of the running session
+  builtin history -c
+  # Reload the history
+  builtin history -r
 }
 
-history() {                  #5
+history() {
   _bash_history_sync
   builtin history "$@"
 }
 
 # set a fancy prompt (non-color, unless we know we "want" color)
 case "$TERM" in
-    *-256*color*) color_prompt=yes;;
-    eterm-color) color_prompt=yes;;
+  *-256*color*) color_prompt=yes;;
+  eterm-color) color_prompt=yes;;
 esac
 
 if [ -n "$force_color_prompt" ]; then
-    if [ -x /usr/bin/tput ] && tput setaf 1 >&/dev/null; then
-        # We have color support; assume it's compliant with Ecma-48
-        # (ISO/IEC-6429). (Lack of such support is extremely rare, and such
-        # a case would tend to support setf rather than setaf.)
-        color_prompt=yes
-    else
-        color_prompt=
-    fi
+  if [ -x /usr/bin/tput ] && tput setaf 1 >&/dev/null; then
+    # We have color support; assume it's compliant with Ecma-48
+    # (ISO/IEC-6429). (Lack of such support is extremely rare, and such
+    # a case would tend to support setf rather than setaf.)
+    color_prompt=yes
+  else
+    color_prompt=
+  fi
 fi
 
-export PROMPT_DIRTRIM=3
+export PROMPT_DIRTRIM=4
 PROMPT_COMMAND=_bash_history_sync
 
 # if [ -f /usr/share/git/completion/git-prompt.sh ]; then
@@ -71,15 +71,15 @@ PROMPT_COMMAND=_bash_history_sync
 #     source /usr/share/git/git-prompt.sh
 # fi
 if ! type -t __git_ps1 >/dev/null 2>&1; then
-    function __git_ps1 {
-        git branch 2> /dev/null | sed -e '/^[^*]/d' -e 's/* \(.*\)/ (\1)/'
-    }
+  function __git_ps1 {
+    git branch 2> /dev/null | sed -e '/^[^*]/d' -e 's/* \(.*\)/ (\1)/'
+  }
 fi
 
 if [ -d /usr/share/cmake/completions ]; then
-    for cmakefile in /usr/share/cmake/completions/*; do
-        source "$cmakefile"
-    done
+  for cmakefile in /usr/share/cmake/completions/*; do
+    source "$cmakefile"
+  done
 fi
 
 export GIT_PS1_SHOWUPSTREAM=verbose
@@ -87,23 +87,23 @@ export GIT_PS1_SHOWDIRTYSTATE=1
 export GIT_PS1_SHOWCOLORHINTS=1
 
 if [ "$color_prompt" = yes ]; then
-    case "$TERM" in
-        xterm*|rxvt*|tmux*|screen*|eterm*|st*)
-            if [ "$USERNAME" = root ]; then
-                export PS1="\[\033[38;5;1m\]\u\[$(tput sgr0)\] @ \[$(tput sgr0)\]"
-            else
-                export PS1=
-            fi
+  case "$TERM" in
+    xterm*|rxvt*|tmux*|screen*|eterm*|st*)
+      if [ "$USERNAME" = root ]; then
+        export PS1="\[\033[38;5;1m\]\u\[$(tput sgr0)\] @ \[$(tput sgr0)\]"
+      else
+        export PS1=
+      fi
 
-            export PS1=$PS1"\[\033[38;5;12m\]\w\[$(tput sgr0)\]\[\033[38;5;15m\]\[$(tput sgr0)\]\$(__git_ps1 ' (%s)')\[\033[38;5;1m\] >\[$(tput sgr0)\]\[\033[38;5;15m\] \[$(tput sgr0)\]"
+      export PS1=$PS1"\[\033[38;5;12m\]\w\[$(tput sgr0)\]\[\033[38;5;15m\]\[$(tput sgr0)\]\$(__git_ps1 ' (%s)')\[\033[38;5;1m\] >\[$(tput sgr0)\]\[\033[38;5;15m\] \[$(tput sgr0)\]"
 
-            ;;
-        *)
-            PS1='\u@\h:\w\$ '
-            ;;
-    esac
+      ;;
+    *)
+      PS1='\u@\h:\w\$ '
+      ;;
+  esac
 else
-    PS1='\u@\h:\w\$ '
+  PS1='\u@\h:\w\$ '
 fi
 unset color_prompt force_color_prompt
 
