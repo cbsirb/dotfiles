@@ -162,10 +162,10 @@
 (column-number-mode t)
 (csetq visible-cursor nil)
 
-(use-package spacemacs-theme :ensure t
+(use-package habamax-theme :ensure t
   :defer t
   :init
-  (load-theme 'spacemacs-light t))
+  (load-theme 'habamax t))
 
 ;; (use-package leuven-theme :ensure t
 ;;   :init
@@ -701,6 +701,7 @@ See `user-rg-type-aliases' for more details."
            ("<C-prior>"  . diredp-up-directory-reuse-dir-buffer))
     :demand t
     :config
+    (csetq diredp-hide-details-initially-flag nil)
     (csetq diredp-dwim-any-frame-flag t)
     (diredp-toggle-find-file-reuse-dir t))
 
@@ -940,11 +941,14 @@ Taken from http://stackoverflow.com/a/3072831/355252."
   :init
   (csetq lsp-highlight-symbol-at-point nil)
 
+  (add-hook 'lsp-after-open-hook 'lsp-enable-imenu)
+
   :config
   (use-package company-lsp :ensure t
     :init
     (csetq company-lsp-async t)
     (csetq company-lsp-cache-candidates nil)
+    (csetq company-lsp-enable-recompletion t)
     (add-hook 'lsp-mode-hook (lambda () (add-to-list 'company-backends 'company-lsp))))
 
   (use-package lsp-ui :ensure t
@@ -953,11 +957,26 @@ Taken from http://stackoverflow.com/a/3072831/355252."
     ;; Allow it to display linting errors only.
     (csetq lsp-ui-sideline-show-hover nil)
     (csetq lsp-ui-sideline-show-symbol nil)
+
+    (csetq lsp-ui-flycheck-live-reporting nil)
+
     (add-hook 'lsp-mode-hook #'lsp-ui-mode)))
 
 (use-package xref
   :init
   (add-to-list 'xref-prompt-for-identifier 'xref-find-references t))
+
+(use-package origami :ensure t
+  :bind (("C-x n n" . origami-forward-toggle-node)
+         ("C-x n t" . origami-recursively-toggle-node)
+         ("C-x n a" . origami-toggle-all-nodes)
+         ("C-x n o" . origami-open-node)
+         ("C-x n c" . origami-close-node)
+         ("C-x n u" . origami-undo)
+         ("C-x n _" . origami-redo)
+         ("C-x n r" . origami-reset))
+  :init
+  (add-hook 'prog-mode-hook #'origami-mode))
 
 ;; C/C++
 (use-package user-c)
@@ -1045,9 +1064,18 @@ Taken from http://stackoverflow.com/a/3072831/355252."
   :init
   (add-hook 'python-mode-hook #'lsp-python-enable))
 
-(use-package virtualenvwrapper :ensure t
+(use-package pyvenv :ensure t
   :init
-  (add-hook 'python-mode-hook #'venv-projectile-auto-workon))
+  (defun user-auto-virtualenv ()
+    (pyvenv-mode t)
+
+    ;; A dolist would be appropriate, but I only use venv as virtualenv name
+    ;; This also works with lsp-mode since it will use the python inside
+    (let ((root (locate-dominating-file default-directory "venv")))
+      (if (and root (file-exists-p root))
+          (pyvenv-activate (expand-file-name "venv" root)))))
+
+  (add-hook 'python-mode-hook #'user-auto-virtualenv))
 
 ;; imenu
 (use-package imenu

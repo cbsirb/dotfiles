@@ -9,6 +9,9 @@
 (defvar yank-indent-modes '(LaTeX-mode TeX-mode nxml-mode)
   "Modes in which to indent regions that are yanked (or yank-popped).")
 
+(defvar yank-indent-excluded-modes '(python-mode)
+  "Modes in which to not indent regions that are yanked (or yank-popped).")
+
 (defvar yank-advised-indent-threshold 10000
   "Threshold (# chars) over which indentation does not automatically occur.")
 
@@ -23,7 +26,8 @@ BEG is the beginning of region, END is the end."
   "Indent yanked text (with prefix arg don't indent).
 If current mode is one of `yank-indent-modes' or derived from `prog-mode'."
   (if (and (not (ad-get-arg 0))
-           (or (derived-mode-p 'prog-mode)
+           (or (and (derived-mode-p 'prog-mode)
+                    (not (member major-mode yank-indent-excluded-modes)))
                (member major-mode yank-indent-modes)))
       (let ((transient-mark-mode nil))
         (yank-advised-indent-function (region-beginning) (region-end)))))
@@ -32,7 +36,8 @@ If current mode is one of `yank-indent-modes' or derived from `prog-mode'."
   "Indent yanked text (with prefix arg don't indent).
 If current mode is one of `yank-indent-modes' or derived from `prog-mode'."
   (if (and (not (ad-get-arg 0))
-           (or (derived-mode-p 'prog-mode)
+           (or (and (derived-mode-p 'prog-mode)
+                    (not (member major-mode yank-indent-excluded-modes)))
                (member major-mode yank-indent-modes)))
     (let ((transient-mark-mode nil))
       (yank-advised-indent-function (region-beginning) (region-end)))))

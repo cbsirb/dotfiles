@@ -255,9 +255,9 @@ Saves the position before.  You can skip typos you don't want to fix with
   (cond
    ((eq system-type 'gnu/linux)
     (let ((terminal (cond
-                     ((executable-find "urxvt"))
                      ((executable-find "uxterm"))
                      ((executable-find "xterm"))
+                     ((executable-find "urxvt"))
                      (t nil))))
       (when terminal
         (start-process terminal nil terminal "-geometry" "115x32"))))
