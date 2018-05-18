@@ -200,10 +200,10 @@
 
 (use-package whitespace
   :diminish
+  :hook (prog-mode . whitespace-mode)
   :init
   (csetq whitespace-style '(face tab-mark trailing))
-  (csetq whitespace-display-mappings '((tab-mark ?\t [187 32 32 32 32 32 32 32])))
-  (add-hook 'prog-mode-hook #'whitespace-mode))
+  (csetq whitespace-display-mappings '((tab-mark ?\t [187 32 32 32 32 32 32 32]))))
 
 (use-package hl-todo :ensure t
   :config
@@ -307,6 +307,8 @@
          ("C-M-p" . #'sp-previous-sexp)
          ("C-M-f" . #'sp-forward-sexp)
          ("C-M-b" . #'sp-backward-sexp))
+  :hook ((prog-mode . smartparens-mode)
+         (minibuffer-setup . turn-on-smartparens-strict-mode))
   :config
   (defun user-open-block-c-mode (_id action _context)
     (case action
@@ -349,9 +351,7 @@
   (sp-local-pair 'c-mode "{" nil :post-handlers '(:add user-open-block-c-mode))
   (sp-local-pair 'c++-mode "{" nil :post-handlers '(:add user-open-block-c-mode))
 
-  (show-smartparens-global-mode t)
-  (add-hook 'prog-mode-hook #'smartparens-mode)
-  (add-hook 'minibuffer-setup-hook 'turn-on-smartparens-strict-mode))
+  (show-smartparens-global-mode t))
 
   ;; (add-hook 'emacs-lisp-mode-hook #'smartparens-strict-mode)
   ;; (add-hook 'lisp-interaction-mode-hook #'smartparens-strict-mode))
@@ -538,7 +538,7 @@
 (use-package grep
   :defer t
   :config
-  (add-hook 'grep-mode-hook #'user-results-buffer-hook))
+  :hook (grep-mode . user-results-buffer-hook))
 
 (use-package ag :ensure t
   :bind (("C-c s a" . ag))
@@ -585,7 +585,7 @@
   (use-package wgrep-ack :ensure t
     :defer t
     :init
-    (add-hook 'ripgrep-search-mode-hook #'wgrep-ack-and-a-half-setup))
+    :hook (ripgrep-search-mode . wgrep-ack-and-a-half-setup))
 
   :config
   (defvar user-rg-type-aliases (make-hash-table :test 'equal)
@@ -646,6 +646,7 @@ See `user-rg-type-aliases' for more details."
          ("C-n" . company-select-next)
          ("C-p" . company-select-previous)
          ("C-w" . nil))
+  :hook (after-init . global-company-mode)
   :init
   (csetq company-dabbrev-downcase nil)
   (csetq company-dabbrev-ignore-case t)
@@ -659,9 +660,7 @@ See `user-rg-type-aliases' for more details."
   (csetq company-selection-wrap-around t)
 
   (use-package user-completion
-    :bind (("C-c /" . user-complete-line)))
-
-  (add-hook 'after-init-hook 'global-company-mode))
+    :bind (("C-c /" . user-complete-line))))
 
 ;; (csetq completion-ignore-case t)
 
@@ -673,18 +672,17 @@ See `user-rg-type-aliases' for more details."
 (use-package yasnippet :ensure t
   :diminish yas-minor-mode
   :config
-  (yas-reload-all)
-  (add-hook 'prog-mode-hook #'yas-minor-mode))
+  :hook (prog-mode . yas-minor-mode)
+  (yas-reload-all))
 
 (use-package dired
   :defer t
   :bind (:map dired-mode-map
          ("C-c C-w" . wdired-change-to-wdired-mode))
+  :hook (dired-mode . user-dired-hook)
   :init
   (defun user-dired-hook ()
     (toggle-truncate-lines))
-
-  (add-hook 'dired-mode-hook #'user-dired-hook)
 
   (csetq dired-listing-switches "-laGh1v --group-directories-first")
   (csetq dired-dwim-target t)
@@ -797,7 +795,9 @@ See `user-rg-type-aliases' for more details."
   (csetq comint-process-echoes t)
   (csetq comint-prompt-read-only t)
   (csetq comint-history-isearch t)
-  (csetq comint-ignore-dups t))
+  (csetq comint-ignore-dups t)
+
+  (add-hook 'comint-output-filter-functions 'comint-strip-ctrl-m))
 
 (use-package comment-dwim-2 :ensure t
   :bind (("M-;" . #'comment-dwim-2)
@@ -813,7 +813,7 @@ See `user-rg-type-aliases' for more details."
 (use-package editorconfig :ensure t
   :diminish
   :config
-  (add-hook 'prog-mode-hook #'editorconfig-mode))
+  :hook (prog-mode . editorconfig-mode))
 
 (use-package which-func
   :init
@@ -825,16 +825,18 @@ See `user-rg-type-aliases' for more details."
 
 (use-package highlight-symbol :ensure t
   :diminish
+  :hook ((find-file . highlight-symbol-mode)
+         (find-file . highlight-symbol-nav-mode))
   :init
   (csetq highlight-symbol-idle-delay 0.2)
-  (csetq highlight-symbol-highlight-single-occurrence nil)
-  :config
-  (add-hook 'find-file-hook #'highlight-symbol-mode)
-  (add-hook 'find-file-hook #'highlight-symbol-nav-mode))
+  (csetq highlight-symbol-highlight-single-occurrence nil))
 
 (use-package compile
   :diminish compilation-in-progress
   :bind (("C-c c" . compile))
+  :hook ((compilation-start . user-compile-start)
+         (compilation-filter . user-colorize-compilation-buffer)
+         (compilation-mode . user-results-buffer-hook))
   :config
   (csetq compilation-scroll-output 'first-error)
   (csetq compilation-always-kill t)
@@ -875,8 +877,7 @@ See `user-rg-type-aliases' for more details."
 
       (setq user-compile-process nil)))
 
-  (add-hook 'compilation-start-hook #'user-compile-start)
-  (add-to-list 'compilation-finish-functions #'user-compile-done)
+  (add-hook 'compilation-finish-functions #'user-compile-done)
 
   (require 'ansi-color)
 
@@ -885,10 +886,7 @@ See `user-rg-type-aliases' for more details."
 Taken from http://stackoverflow.com/a/3072831/355252."
     (interactive)
     (let ((inhibit-read-only t))
-      (ansi-color-apply-on-region compilation-filter-start (point-max))))
-
-  (add-hook 'compilation-filter-hook #'user-colorize-compilation-buffer)
-  (add-hook 'compilation-mode-hook #'user-results-buffer-hook))
+      (ansi-color-apply-on-region compilation-filter-start (point-max)))))
 
 (use-package multi-term :ensure t
   :if (eq system-type 'gnu/linux)
@@ -897,23 +895,21 @@ Taken from http://stackoverflow.com/a/3072831/355252."
          ("C-; d" . multi-term-dedicated-toggle)
          ("C-; n" . multi-term-next)
          ("C-; p" . multi-term-prev))
+  :hook (term-mode . user-term-mode-hook)
   :init
   (csetq multi-term-dedicated-select-after-open-p t)
 
   (defun user-term-mode-hook ()
     (company-mode -1)
-    (setq-local scroll-margin 0))
-
-  (add-hook 'term-mode-hook #'user-term-mode-hook))
+    (setq-local scroll-margin 0)))
 
 (use-package eshell
   :defer t
+  :hook (eshell-mode . user-eshell-hook)
   :config
   (defun user-eshell-hook ()
     (company-mode -1)
-    (setq-local scroll-margin 0))
-
-  (add-hook 'eshell-mode-hook #'user-eshell-hook))
+    (setq-local scroll-margin 0)))
 
 ;; Error checking
 (use-package flycheck :ensure t
@@ -938,35 +934,36 @@ Taken from http://stackoverflow.com/a/3072831/355252."
 
 ;; generic programming
 (use-package lsp-mode :ensure t
+  :hook (ls-after-open . lsp-enable-imenu)
   :init
   (csetq lsp-highlight-symbol-at-point nil)
 
-  (add-hook 'lsp-after-open-hook 'lsp-enable-imenu)
-
   :config
   (use-package company-lsp :ensure t
+    :hook (lsp-mode . user-lsp-mode-hook)
     :init
     (csetq company-lsp-async t)
     (csetq company-lsp-cache-candidates nil)
     (csetq company-lsp-enable-recompletion t)
-    (add-hook 'lsp-mode-hook (lambda () (add-to-list 'company-backends 'company-lsp))))
+    (defun user-lsp-mode-hook ()
+      (add-to-list 'company-backends 'company-lsp)))
 
   (use-package lsp-ui :ensure t
+    :hook (lsp-mode . lsp-ui-mode)
     :init
     ;; Disable type information shown in sideline (enable it per mode if needed)
     ;; Allow it to display linting errors only.
     (csetq lsp-ui-sideline-show-hover nil)
     (csetq lsp-ui-sideline-show-symbol nil)
 
-    (csetq lsp-ui-flycheck-live-reporting nil)
-
-    (add-hook 'lsp-mode-hook #'lsp-ui-mode)))
+    (csetq lsp-ui-flycheck-live-reporting nil)))
 
 (use-package xref
   :init
   (add-to-list 'xref-prompt-for-identifier 'xref-find-references t))
 
 (use-package origami :ensure t
+  :hook (prog-mode . origami-mode)
   :bind (("C-x n n" . origami-forward-toggle-node)
          ("C-x n t" . origami-recursively-toggle-node)
          ("C-x n a" . origami-toggle-all-nodes)
@@ -974,9 +971,7 @@ Taken from http://stackoverflow.com/a/3072831/355252."
          ("C-x n c" . origami-close-node)
          ("C-x n u" . origami-undo)
          ("C-x n _" . origami-redo)
-         ("C-x n r" . origami-reset))
-  :init
-  (add-hook 'prog-mode-hook #'origami-mode))
+         ("C-x n r" . origami-reset)))
 
 ;; C/C++
 (use-package user-c)
@@ -990,14 +985,13 @@ Taken from http://stackoverflow.com/a/3072831/355252."
 ;; Debugging
 (use-package gud
   :defer t
+  :hook (gud-mode . user-gud)
   :config
   (csetq gdb-many-windows t)
 
   (defun user-gud ()
     "Hook to run when GUD mode is activated."
-    (company-mode -1))
-
-  (add-hook 'gud-mode-hook #'user-gud))
+    (company-mode -1)))
 
 (use-package realgud :ensure t
   :commands (realgud:bashdb realgud:gdb realgud:gub realgud:ipdb
@@ -1020,6 +1014,7 @@ Taken from http://stackoverflow.com/a/3072831/355252."
 
 (use-package web-mode :ensure t
   :defer t
+  :hook (web-mode . user-web-mode-hook)
   :mode
   (("\\.phtml\\'" . web-mode)
    ("\\.tpl\\.php\\'" . web-mode)
@@ -1053,18 +1048,21 @@ Taken from http://stackoverflow.com/a/3072831/355252."
   (csetq web-mode-enable-part-face t)
 
   (csetq web-mode-engines-alist
-         '(("django" . "\\.html\\'")))
+         '(("django" . "\\.html\\'"))))
 
-  (add-hook 'web-mode-hook #'user-web-mode-hook))
+;; Shell
+(use-package sh-script
+  :init
+  (csetq sh-basic-offset 2))
 
 ;; Python
 (use-package cython-mode :ensure t :defer t)
 
 (use-package lsp-python :ensure t
-  :init
-  (add-hook 'python-mode-hook #'lsp-python-enable))
+  :hook (python-mode . lsp-python-enable))
 
 (use-package pyvenv :ensure t
+  :hook (python-mode . user-auto-virtualenv)
   :init
   (defun user-auto-virtualenv ()
     (pyvenv-mode t)
@@ -1073,18 +1071,15 @@ Taken from http://stackoverflow.com/a/3072831/355252."
     ;; This also works with lsp-mode since it will use the python inside
     (let ((root (locate-dominating-file default-directory "venv")))
       (if (and root (file-exists-p root))
-          (pyvenv-activate (expand-file-name "venv" root)))))
-
-  (add-hook 'python-mode-hook #'user-auto-virtualenv))
+          (pyvenv-activate (expand-file-name "venv" root))))))
 
 ;; imenu
 (use-package imenu
   :bind ("M-i" . imenu)
+  :hook (imenu-after-jump . recenter-top-bottom)
   :init
   (csetq imenu-auto-rescan t)
-  (csetq imenu-auto-rescan-maxout (* 1024 1024))
-
-  (add-hook 'imenu-after-jump-hook #'recenter-top-bottom))
+  (csetq imenu-auto-rescan-maxout (* 1024 1024)))
 
 (use-package imenu-anywhere :ensure t
   :bind (("M-I" . imenu-anywhere)))
@@ -1100,8 +1095,7 @@ Taken from http://stackoverflow.com/a/3072831/355252."
   :config
   (use-package magit-gitflow :ensure t
     :defer t
-    :init
-    (add-hook 'magit-mode-hook 'turn-on-magit-gitflow)))
+    :hook (magit-mode . turn-on-magit-gitflow)))
 
 ;; Keybindings
 (bind-key "C-c t d" #'toggle-debug-on-error)
