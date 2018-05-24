@@ -57,18 +57,6 @@ Taken from http://dfan.org/blog/2009/02/19/emacs-dedicated-windows"
       (recenter-top-bottom 0))  ;; Current line becomes first
     (move-to-window-line opos)))  ;; Restore cursor/point position
 
-;;;###autoload
-(defun user-scroll-half-page-down ()
-  "Scrolls exactly half page down keeping cursor/point position."
-  (interactive)
-  (user-scroll-half-page t))
-
-;;;###autoload
-(defun user-scroll-half-page-up ()
-  "Scrolls exactly half page up keeping cursor/point position."
-  (interactive)
-  (user-scroll-half-page nil))
-
 (provide 'user-window)
 
 ;;; user-window.el ends here

@@ -110,7 +110,6 @@ unset color_prompt force_color_prompt
 [[ -f ~/.bash_env ]] && source ~/.bash_env
 [[ -f ~/.bash_aliases ]] && source ~/.bash_aliases
 [[ -f ~/.bash_functions ]] && source ~/.bash_functions
-[[ -f ~/.bash_init ]] && source ~/.bash_init
 
 [[ -f ~/.bash_priv ]] && source ~/.bash_priv
 

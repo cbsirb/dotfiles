@@ -1,3 +1,7 @@
 #!/bin/bash
 
-[[ -f ~/.bashrc ]] && . ~/.bashrc
+[[ -f ~/.profile ]] && . ~/.profile
+
+if [[ $- == *i* ]]; then
+  [[ -f ~/.bashrc ]] && . ~/.bashrc
+fi

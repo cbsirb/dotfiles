@@ -63,7 +63,6 @@ fi
 install_dotfile "bash_aliases"
 install_dotfile "bash_env"
 install_dotfile "bash_functions"
-install_dotfile "bash_init"
 install_dotfile "bash_logout"
 install_dotfile "bash_profile"
 install_dotfile "bashrc"

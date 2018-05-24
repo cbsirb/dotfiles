@@ -327,6 +327,18 @@ If N is negative, then go to the previous block."
   (while (re-search-forward "[[:space:]\|?\r]+" nil t)
     (replace-match " " nil nil)))
 
+;;;###autoload
+(defun user-scroll-half-page-down ()
+  "Scrolls exactly half page down keeping cursor/point position."
+  (interactive)
+  (user-scroll-half-page t))
+
+;;;###autoload
+(defun user-scroll-half-page-up ()
+  "Scrolls exactly half page up keeping cursor/point position."
+  (interactive)
+  (user-scroll-half-page nil))
+
 (provide 'user-utils)
 
 ;;; user-utils.el ends here

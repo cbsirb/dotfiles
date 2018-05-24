@@ -4,10 +4,6 @@ if [ -z "$DISPLAY" ]; then
   export DISPLAY=:0.0
 fi
 
-# Winodws only
-# export LIBGL_ALWAYS_INDIRECT=1
-# export DEB_BUILD_HARDENING=1
-
 # Setting ag as the default source for fzf
 export FZF_DEFAULT_COMMAND='rg --files --no-ignore --hidden --follow --glob "!.git/*"'
 
@@ -33,4 +29,4 @@ export EMACS_CLIENT='emacsclient --alternate-editor= -c'
 
 export EDITOR=vim
 # export VISUAL=$EMACS_CLIENT
-export BROWSER=firefox
+export BROWSER=firefox-nightly
