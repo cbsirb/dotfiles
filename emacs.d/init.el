@@ -11,6 +11,8 @@
   "Set the VARIABLE to VALUE, but use `set-default' if needed."
   `(funcall (or (get ',variable 'custom-set) 'set-default) ',variable ,value))
 
+(csetq gc-cons-threshold (* 7 gc-cons-threshold))
+
 ;; Apparently, when using default values, the input lag and hangs disappears
 ;; (csetq gc-cons-threshold (* 384 1024 1024))
 
@@ -268,7 +270,7 @@
   (setq-local show-trailing-whitespace nil))
 
 ;;; Keybindings
-(bind-key [?\C-m] [C-m] input-decode-map)
+(define-key input-decode-map [?\C-m] [C-m])
 (bind-key "C-c t d" #'toggle-debug-on-error)
 (bind-key "C-c t q" #'toggle-debug-on-quit)
 (bind-key [remap just-one-space] #'cycle-spacing)
@@ -345,7 +347,7 @@
 (use-package bug-hunter :defer t)
 
 (use-package cc-mode
-  :hook (c-mode-common . user-cc-mode-hook)
+  :hook (c-mode-common . user-c-mode-common-hook)
   :preface
   (defconst user-allman-style
     '((c-electric-pound-behavior     . (alignleft))
@@ -411,14 +413,16 @@ For anything else there is ctags."
             (goto-char found-point)
             (backward-word)))))
 
-  (defun user-cc-mode-hook ()
+  (defun user-c-mode-common-hook ()
     "Hook for C/C++ mode."
     (c-toggle-electric-state t)
     (c-toggle-syntactic-indentation t)
 
-    (setq-local lsp-ui-doc-enable nil)
+    ;; (setq-local lsp-ui-doc-enable nil)
     (setq-local lsp-enable-indentation nil)
-    (lsp-cquery-enable))
+    (lsp-cquery-enable)
+
+    (flycheck-select-checker 'c/c++-gcc))
 
   :config
   (c-add-style "allman" user-allman-style)
@@ -545,6 +549,7 @@ Taken from http://stackoverflow.com/a/3072831/355252."
 
 (use-package cquery
   :after cc-mode
+  :commands (lsp-cquery-enable)
   :bind (:map c-mode-base-map
               ("M-o" . #'user-cquery-show/body))
   :preface
@@ -554,6 +559,7 @@ Taken from http://stackoverflow.com/a/3072831/355252."
     ("d" (cquery-xref-find-custom "$cquery/derived") "derived")
     ("v" (cquery-xref-find-custom "$cquery/vars") "vars"))
   :init
+  (csetq cquery-extra-init-params '(:diagnostics (:frequencyMs -1)))
   (csetq cquery-project-roots '("compile_commands.json"))
   (csetq cquery-executable "~/src/cquery/build/release/bin/cquery"))
 
@@ -594,9 +600,12 @@ Taken from http://stackoverflow.com/a/3072831/355252."
 (use-package diff-mode
   :hook ((diff-mode . diff-delete-empty-files)
          (diff-mode . diff-make-unified)
-         (diff-mode . smerge-mode)))
+         (diff-mode . smerge-mode))
+  :init
+  (csetq diff-switches '("-u" "-p" "-w")))
 
 (use-package diff-hl
+  :disabled t
   :hook ((magit-post-refresh . diff-hl-magit-post-refresh)
          (find-file . diff-hl-mode)))
 
@@ -660,6 +669,7 @@ _SWITCH should be 'diff'."
   (csetq ediff-window-setup-function #'ediff-setup-windows-plain))
 
 (use-package editorconfig
+  :disabled t
   :diminish
   :hook (prog-mode . editorconfig-mode))
 
@@ -683,11 +693,11 @@ _SWITCH should be 'diff'."
   (csetq eshell-ls-dired-initial-args (quote ("-h")))
   (csetq eshell-ls-exclude-regexp "~\\'")
   (csetq eshell-ls-initial-args "-h")
-  (csetq eshell-prompt-function (lambda ()
-                                  (concat
-                                   (abbreviate-file-name
-                                    (eshell/pwd))
-                                   (if (= (user-uid) 0) " # " " $ "))))
+  ;; (csetq eshell-prompt-function (lambda ()
+  ;;                                 (concat
+  ;;                                  (abbreviate-file-name
+  ;;                                   (eshell/pwd))
+  ;;                                  (if (= (user-uid) 0) " # " " $ "))))
   ;; (csetq eshell-rebind-keys-alist
   ;;   (quote
   ;;    (([(control 97)]
@@ -737,6 +747,7 @@ _SWITCH should be 'diff'."
 
 (use-package flycheck
   :commands (flycheck-mode
+             flycheck-select-checker
              flycheck-next-error
              flycheck-previous-error)
   :bind (("C-c e" . user-flycheck-errors/body)
@@ -929,7 +940,8 @@ _SWITCH should be 'diff'."
   (csetq lsp-highlight-symbol-at-point nil))
 
 (use-package lsp-ui
-  :hook (lsp-mode . lsp-ui-mode)
+  :disabled t
+  ;; :hook (lsp-mode . lsp-ui-mode)
   :after lsp-mode
   :init
   ;; Disable type information shown in sideline (enable it per mode if needed)
@@ -937,6 +949,8 @@ _SWITCH should be 'diff'."
   (csetq lsp-ui-sideline-show-hover nil)
   (csetq lsp-ui-sideline-show-symbol nil)
 
+  ;; Too slow for now (and error reporting is one step back)
+  (csetq lsp-ui-flycheck-enable nil)
   (csetq lsp-ui-flycheck-live-reporting nil))
 
 (use-package lsp-python
@@ -948,7 +962,9 @@ _SWITCH should be 'diff'."
   (csetq magit-completing-read-function #'magit-builtin-completing-read)
   (csetq magit-display-buffer-function
          #'magit-display-buffer-fullframe-status-v1)
-  (csetq magit-process-popup-time 15))
+  (csetq magit-process-popup-time 15)
+  (csetq magit-diff-arguments
+         '("--ignore-space-change" "--ignore-all-space" "--no-ext-diff" "--stat" "--diff-algorithm=histogram")))
 
 (use-package magit-gitflow
   :after magit
@@ -1347,13 +1363,12 @@ _SWITCH should be 'diff'."
 
 (use-package vc
   :init
-  (csetq vc-follow-symlinks t)
-  (csetq vc-command-messages t))
+  (csetq vc-follow-symlinks t))
 
 (use-package vc-git
   :ensure nil
   :init
-  (csetq vc-git-diff-switches '("-w" "--histogram")))
+  (csetq vc-git-diff-switches '("--ignore-space-change" "--ignore-all-space" "--no-ext-diff" "--stat" "--diff-algorithm=histogram")))
 
 (use-package visual-fill-column
   :commands (visual-fill-column-mode global-visual-fill-column-mode))
@@ -1430,7 +1445,8 @@ _SWITCH should be 'diff'."
 (use-package which-key
   :diminish
   :init
-  (csetq which-key-idle-delay 0.5)
+  (csetq which-key-side-window-location 'right)
+  (csetq which-key-idle-delay 1)
   (csetq which-key-sort-order 'which-key-prefix-then-key-order)
 
   (which-key-mode t))
