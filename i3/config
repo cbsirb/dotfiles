@@ -4,7 +4,7 @@
 
 set $mod Mod4
 
-set $ws1 1: work
+set $ws1 1: dev
 set $ws2 2: www
 set $ws3 3: files
 set $ws4 4
@@ -25,7 +25,7 @@ floating_modifier $mod
 
 # start a terminal
 # bindsym $mod+Return exec i3-sensible-terminal
-bindsym $mod+Return exec urxvt
+bindsym $mod+Return exec uxterm
 
 # emacs
 # bindsym $mod+e exec emacsclient -c --alternate-editor=
@@ -145,7 +145,7 @@ bindsym $mod+slash [class="URxvt"] focus
 bindsym $mod+Shift+minus move scratchpad
 bindsym $mod+minus scratchpad show
 
-bindsym $mod+l exec --no-startup-id i3lock-fancy -p
+# bindsym $mod+l exec --no-startup-id i3lock-fancy -p
 
 # In case I use a keyboard without
 bindsym $mod+Ctrl+n exec mpc next
@@ -201,8 +201,6 @@ show_marks yes
 
 assign [class="^Firefox$"] → $ws2
 assign [class="^FirefoxNightly$"] → $ws2
-assign [class="^Doublecmd$"] → $ws3
-assign [class="^Evolution$"] → $ws10
 
 # Special windows
 for_window [window_role="pop-up"] floating enable
@@ -211,20 +209,14 @@ for_window [window_role="task_dialog"] floating enable
 #for_window [class="XTerm"] floating enable
 for_window [class="Pavucontrol"] floating enable
 for_window [title="^ncmpcpp-comma$"] floating enable
-for_window [class="^Doublecmd" title="^[0-9]+% (Copying|Moving)"] floating enable
-for_window [class="^Doublecmd" title="Options"] floating enable
 for_window [class="mpv"] floating enable
 
-# Execute gnome stuff
-exec --no-startup-id /usr/lib/gnome-settings-daemon/gsd-xsettings
-exec_always --no-startup-id gnome-power-manager
-
 # Some information
-exec --no-startup-id nm-applet&
-exec --no-startup-id xrdb $HOME/.Xresources
+# exec --no-startup-id nm-applet&
+exec --no-startup-id xrdb -merge $HOME/.Xresources
 
 # Display
-exec --no-startup-id xrandr --output DP2 --left-of eDP1 --rotate left
+# exec --no-startup-id xrandr --output DP2 --left-of eDP1 --rotate left
 
 # Wallpapers
-exec --no-startup-id feh --bg-scale ~/Pictures/Wallpapers/paid_to_think.png --bg-scale ~/Pictures/Wallpapers/paid_to_think_vert.png
+# exec --no-startup-id feh --bg-scale ~/Pictures/Wallpapers/paid_to_think.png --bg-scale ~/Pictures/Wallpapers/paid_to_think_vert.png

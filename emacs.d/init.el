@@ -959,7 +959,6 @@ _SWITCH should be 'diff'."
 (use-package magit
   :bind (("C-x g" . magit-status))
   :init
-  (csetq magit-completing-read-function #'magit-builtin-completing-read)
   (csetq magit-display-buffer-function
          #'magit-display-buffer-fullframe-status-v1)
   (csetq magit-process-popup-time 15)
