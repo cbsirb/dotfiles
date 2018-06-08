@@ -51,11 +51,33 @@ Taken from http://dfan.org/blog/2009/02/19/emacs-dedicated-windows"
   "Scrolls half page down if `direction' is non-nil, otherwise will scroll half page up."
   (let ((opos (cdr (nth 6 (posn-at-point)))))
     ;; opos = original position line relative to window
-    (move-to-window-line nil)  ;; Move cursor to middle line
+    (move-to-window-line nil)     ;; Move cursor to middle line
     (if direction
         (recenter-top-bottom -1)  ;; Current line becomes last
-      (recenter-top-bottom 0))  ;; Current line becomes first
+      (recenter-top-bottom 0))    ;; Current line becomes first
     (move-to-window-line opos)))  ;; Restore cursor/point position
+
+;;;###autoload
+(defun push-mark-no-activate ()
+  "Pushes `point' to `mark-ring' and does not activate the region.
+Equivalent to \\[set-mark-command] when \\[transient-mark-mode] is disabled."
+  (interactive)
+  (push-mark (point) t nil)
+  (message "Pushed mark to ring"))
+
+;;;###autoload
+(defun jump-to-mark ()
+  "Jumps to the local mark, respecting the `mark-ring' order.
+This is the same as using \\[set-mark-command] with the prefix argument."
+  (interactive)
+  (set-mark-command 1))
+
+;;;###autoload
+(defun exchange-point-and-mark-no-activate ()
+  "Identical to \\[exchange-point-and-mark] but will not activate the region."
+  (interactive)
+  (exchange-point-and-mark)
+  (deactivate-mark nil))
 
 (provide 'user-window)
 

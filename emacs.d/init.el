@@ -87,11 +87,19 @@
   :config
   (ignoramus-setup))
 
-(use-package diminish :demand t)
+(use-package diminish
+  :demand t
+  :config
+  (with-eval-after-load "eldoc"
+    (diminish 'eldoc-mode)))
 
 (use-package exec-path-from-shell
   :config
   (exec-path-from-shell-initialize))
+
+(use-package hydra
+  :config
+  (hydra-add-font-lock))
 
 ;;; Some default settings that I like
 (defalias 'yes-or-no-p 'y-or-n-p)
@@ -131,6 +139,7 @@
 (csetq select-active-regions nil)
 (csetq display-raw-bytes-as-hex t)
 (csetq ring-bell-function 'ignore)
+(csetq reb-re-syntax 'string)
 
 (csetq mark-ring-max 128)
 (csetq global-mark-ring-max 256)
@@ -172,7 +181,6 @@
 (delete-selection-mode t)
 (winner-mode t)
 (minibuffer-depth-indicate-mode t)
-(show-paren-mode t)
 (blink-cursor-mode -1)
 (auto-save-mode -1)
 
@@ -207,9 +215,14 @@
 (when (fboundp 'scroll-bar-mode) (scroll-bar-mode 0))
 
 (set-face-attribute 'default nil
-                    :family "Iosevka" :height 105 :weight 'regular)
+                    :family "Iosevka"
+                    :height 105
+                    :weight 'regular)
+
 (set-face-attribute 'variable-pitch nil
-                    :family "Noto Sans" :height 105 :weight 'regular)
+                    :family "Fira Sans"
+                    :height 110
+                    :weight 'regular)
 
 (when (member "Symbola" (font-family-list))
   (set-fontset-font t 'unicode "Symbola" nil 'prepend))
@@ -219,49 +232,29 @@
 (column-number-mode t)
 (csetq visible-cursor nil)
 
-(csetq mode-line-position
-       '((line-number-mode ("%l" (column-number-mode ":%2c")))))
-
-(csetq mode-line-format
-       '("%e"
-         mode-line-front-space
-         (anzu-mode
-          (:eval
-           (anzu--update-mode-line)))
-         mode-line-client
-         mode-line-modified
-         mode-line-mule-info
-         " "
-         mode-line-position
-         " (%o/%I) "
-         mode-line-buffer-identification
-         mode-line-modes
-         (vc-mode vc-mode)
-         " "
-         mode-line-misc-info
-         mode-line-end-spaces))
-
 (csetq display-buffer-alist
        `((,(rx bos
                (or "*Compile-Log*"
                    "*Warnings*"
                    "*compilation"
-                   "*Flycheck errors*"
                    "*rg*"
+                   "*grep*"
                    "*ag search*"
                    "*Occur*"
                    "*xref*"
-                   (and (1+ nonl) " output*")      ; AUCTeX command output
+                   "*Flycheck errors*"
                    ))
           (display-buffer-reuse-window
            display-buffer-in-side-window)
           (side            . bottom)
           (reusable-frames . nil)
           (window-height   . 0.25))
+
          ;; Let `display-buffer' reuse visible frames for all buffers. This must be
          ;; the last entry in `display-buffer-alist', because it overrides any later
          ;; entry with more specific actions.
-         ("." nil (reusable-frames . nil))))
+         ("." nil (reusable-frames . nil))
+         ))
 
 ;;; Global functions
 (defun user-results-buffer-hook ()
@@ -316,16 +309,15 @@
 
 (use-package anzu
   :demand t
-  :bind (([remap query-replace] . anzu-query-replace)
-         ([remap query-replace-regexp] . anzu-query-replace-regexp)
-         ("C-c r" . anzu-query-replace-at-cursor-thing)
+  :bind (([remap query-replace] . #'anzu-query-replace)
+         ([remap query-replace-regexp] . #'anzu-query-replace-regexp)
+         ("C-c r" . #'anzu-query-replace-at-cursor-thing)
          :map isearch-mode-map
-         ([remap isearch-query-replace] . anzu-isearch-query-replace)
-         ([remap isearch-query-replace-regexp] . anzu-isearch-query-replace-regexp))
+         ([remap isearch-query-replace] . #'anzu-isearch-query-replace)
+         ([remap isearch-query-replace-regexp] . #'anzu-isearch-query-replace-regexp))
   :diminish
   :init
   (csetq anzu-replace-to-string-separator " => ")
-  (csetq anzu-cons-mode-line-p nil)
 
   :config
   (global-anzu-mode t))
@@ -443,29 +435,29 @@ For anything else there is ctags."
 
 (use-package company
   :diminish
-  :bind (("C-j" . company-complete)
+  :bind (("C-j" . #'company-complete)
          :map company-active-map
-         ("ESC" . company-abort)
-         ("C-l" . company-show-location)
-         ("C-n" . company-select-next)
-         ("C-p" . company-select-previous)
+         ("ESC" . #'company-abort)
+         ("C-l" . #'company-show-location)
+         ("C-n" . #'company-select-next)
+         ("C-p" . #'company-select-previous)
          ("C-w" . nil))
   :hook (after-init . global-company-mode)
   :init
+  (csetq company-dabbrev-code-ignore-case t)
   (csetq company-dabbrev-downcase nil)
   (csetq company-dabbrev-ignore-case t)
-
-  (csetq company-dabbrev-code-ignore-case t)
-
-  (csetq company-transformers '(company-sort-by-occurrence))
   (csetq company-idle-delay 0)
   (csetq company-minimum-prefix-length 3)
-  (csetq company-tooltip-align-annotations t)
+  (csetq company-require-match nil)
   (csetq company-selection-wrap-around t)
+  (csetq company-tooltip-align-annotations t)
+  (csetq company-tooltip-flip-when-above t)
+  (csetq company-transformers '(company-sort-by-occurrence))
 
   (use-package user-completion
     :load-path "lisp"
-    :bind (("C-c /" . user-complete-line))))
+    :bind (("C-c /" . #'user-complete-line))))
 
 (use-package company-lsp
   :after (company lsp-mode)
@@ -476,19 +468,26 @@ For anything else there is ctags."
   :init
   (csetq company-lsp-async t)
   (csetq company-lsp-cache-candidates nil)
-  (csetq company-lsp-enable-recompletion t))
+  (csetq company-lsp-enable-recompletion t)
+  (csetq company-lsp-enable-snippet t))
 
 (use-package compile
   :diminish compilation-in-progress
-  :bind (("C-c c" . compile))
+  :bind (("C-c c" . #'compile))
   :preface
   (defvar user-compile-process nil
     "The current compilation process or nil if none.")
 
-  (defun user-delete-window (window)
-    "Kill the WINDOW, ignoring errors."
+  (defun user-bury-buffer (window buffer)
+    "Bury the BUFFER and switch to the previous buffer in WINDOW, ignoring
+errors.
+
+If the previous buffer cannot be found for the WINDOW, then it will simply
+delete the WINDOW."
     (ignore-errors
-      (delete-window window)))
+      (unless (switch-to-prev-buffer window)
+        (delete-window window))
+      (bury-buffer buffer)))
 
   (defun user-compile-start (proc)
     (when (string-equal (buffer-name (current-buffer)) "*compilation*")
@@ -496,22 +495,19 @@ For anything else there is ctags."
 
   (defun user-compile-done (buffer _msg)
     (when (string-equal "*compilation*" (buffer-name buffer))
-      (let ((exit-status (process-exit-status user-compile-process))
-            (has-errors)
-            (window (get-buffer-window buffer)))
-
-        (setq has-errors
-              (if (= 0 exit-status)
-                  (save-mark-and-excursion
-                    (condition-case nil
-                        (progn
-                          (first-error)
-                          t)
-                      (error nil)))
-                t))
+      (let* ((exit-status (process-exit-status user-compile-process))
+             (has-errors (if (= 0 exit-status)
+                             (save-mark-and-excursion
+                               (condition-case nil
+                                   (progn
+                                     (first-error)
+                                     t)
+                                 (error nil)))
+                           t))
+             (window (get-buffer-window buffer)))
 
         (when (and window (not has-errors))
-          (run-with-timer 1 nil #'user-delete-window window)))
+          (run-at-time "1 sec" nil #'user-bury-buffer window buffer)))
 
       (setq user-compile-process nil)))
 
@@ -544,6 +540,7 @@ Taken from http://stackoverflow.com/a/3072831/355252."
   :diminish
   :init
   (csetq counsel-describe-function-preselect 'ivy-function-called-at-point)
+  (csetq counsel-grep-post-action-hook '(recenter))
   :config
   (counsel-mode t))
 
@@ -566,11 +563,11 @@ Taken from http://stackoverflow.com/a/3072831/355252."
 (use-package comint
   :ensure nil
   :bind (:map comint-mode-map
-              ("<down>" . comint-next-input)
-              ("<up>" . comint-previous-input)
-              ("C-n" . comint-next-input)
-              ("C-p" . comint-previous-input)
-              ("C-r" . comint-history-isearch-backward))
+              ("<down>" . #'comint-next-input)
+              ("<up>"   . #'comint-previous-input)
+              ("C-n"    . #'comint-next-input)
+              ("C-p"    . #'comint-previous-input)
+              ("C-r"    . #'comint-history-isearch-backward))
   :init
   (csetq comint-process-echoes t)
   (csetq comint-prompt-read-only t)
@@ -612,27 +609,43 @@ Taken from http://stackoverflow.com/a/3072831/355252."
 (use-package dired
   :ensure nil
   :bind (:map dired-mode-map
-              ("SPC" . dired-mark)
-              ("C-c C-w" . wdired-change-to-wdired-mode)
-              ("<tab>" . dired-next-window))
+              ("SPC" . #'dired-mark)
+              ("C-c C-w" . #'wdired-change-to-wdired-mode)
+              ("<C-return>" . #'user-open-in-external-app)
+              ("<tab>" . #'dired-next-window))
   :preface
+  (defun user-open-in-external-app ()
+    "Open the file(s) at point with an external application."
+    (interactive)
+    (let* ((file-list (dired-get-marked-files)))
+      (mapc
+       (lambda (file-path)
+         (let ((process-connection-type nil))
+           (start-process "" nil "xdg-open" file-path)))
+       file-list)))
 
   :init
   (csetq dired-auto-revert-buffer t)
   (csetq dired-dwim-target t)
   (csetq dired-hide-details-hide-information-lines nil)
   (csetq dired-hide-details-hide-symlink-targets nil)
-  (csetq dired-listing-switches "-laGh1v --group-directories-first")
+  (csetq dired-listing-switches "-lFaGh1v --group-directories-first")
   (csetq dired-ls-F-marks-symlinks t)
   (csetq dired-recursive-copies 'always))
+
+(use-package dired-du
+  :after dired
+  :config
+  (csetq dired-du-size-format t)
+  (csetq dired-du-update-headers t))
 
 (use-package dired-narrow
   :after dired
   :bind (:map dired-mode-map
-              ("/" . dired-narrow)))
+              ("/" . #'dired-narrow)))
 
 (use-package dired-toggle
-  :bind ("<f5>" . dired-toggle)
+  :bind ("<f5>" . #'dired-toggle)
   :preface
   (defun user-dired-toggle-mode-hook ()
     (dired-hide-details-mode t)
@@ -645,7 +658,9 @@ Taken from http://stackoverflow.com/a/3072831/355252."
 
 (use-package dired-x
   :ensure nil
-  :after dired)
+  :after dired
+  :init
+  (csetq dired-omit-verbose nil))
 
 (use-package ediff
   :defer t
@@ -720,28 +735,38 @@ _SWITCH should be 'diff'."
 (use-package expand-region
   :bind (("M-2" . #'er/expand-region)
          ("M-1" . #'er/contract-region)
-         ("M-@" . #'er/contract-region)
-         ("M-e" . #'user-expand-region/body))
+         ("M-@" . #'er/contract-region))
   :preface
-  (defhydra user-expand-region (:exit t)
-    "Mark region"
-    ("c" er/contract-region "contract" :exit nil)
-    ("e" er/expand-region "expand" :exit nil)
-    ("u" er/mark-url "url")
-    ("w" er/mark-word "word")
-    ("." er/mark-symbol "symbol")
-    (";" er/mark-comment "comment")
-    ("d" er/mark-defun "defun")
-    ("p" er/mark-inside-pairs "inside pairs")
-    ("P" er/mark-outside-pairs "outside pairs")
-    ("'" er/mark-inside-quotes "inside quotes")
-    ("\"" er/mark-outside-quotes "outside quotes")
-    ("q" nil "quit"))
   :init
   (csetq expand-region-fast-keys-enabled nil)
   (csetq expand-region-autocopy-register "e"))
 
 (use-package eyebrowse
+  :bind ("C-c e" . #'user-eyebrowse-hydra/body)
+  :preface
+  (defhydra user-eyebrowse-hydra (:color blue)
+    "
+^
+^Eyebrowse^         ^Do^                ^Switch^
+^─────────^─────────^──^────────────────^──────^────────────
+_q_ quit            _c_ create          _p_ previous
+^^                  _k_ kill            _n_ next
+^^                  _r_ rename          _e_ last
+^^                  ^^                  _s_ switch
+^^                  ^^                  ^^
+"
+    ("q" nil)
+    ("p" eyebrowse-prev-window-config :color red)
+    ("n" eyebrowse-next-window-config :color red)
+    ("c" eyebrowse-create-window-config)
+    ("e" eyebrowse-last-window-config)
+    ("k" eyebrowse-close-window-config :color red)
+    ("r" eyebrowse-rename-window-config)
+    ("s" eyebrowse-switch-to-window-config))
+  :init
+  (csetq eyebrowse-new-workspace t)
+  (csetq eyebrowse-switch-back-and-forth t)
+  (csetq eyebrowse-wrap-around t)
   :config
   (eyebrowse-mode t))
 
@@ -750,7 +775,7 @@ _SWITCH should be 'diff'."
              flycheck-select-checker
              flycheck-next-error
              flycheck-previous-error)
-  :bind (("C-c e" . user-flycheck-errors/body)
+  :bind (("C-c f" . user-flycheck-hydra/body)
          ("C-c t f" . flycheck-mode))
   :init
   (csetq flycheck-display-errors-delay 0.0)
@@ -760,15 +785,29 @@ _SWITCH should be 'diff'."
          #'flycheck-display-error-messages-unless-error-list)
 
   :config
-  (defhydra user-flycheck-errors ()
-    "Flycheck errors"
-    ("c" flycheck-buffer "check" :exit t)
-    ("n" flycheck-next-error "next")
-    ("p" flycheck-previous-error "previous")
-    ("f" flycheck-first-error "first")
-    ("l" flycheck-list-errors "list" :exit t)
-    ("w" flycheck-copy-errors-as-kill "copy message")
-    ("q" nil "quit"))
+  (defhydra user-flycheck-hydra (:color pink)
+    "
+^
+^Flycheck^          ^Errors^            ^Checker^
+^────────^──────────^──────^────────────^───────^───────────
+_q_ quit            _p_ previous        _?_ describe
+_v_ verify setup    _n_ next            _d_ disable
+^^                  _f_ check           _s_ select
+^^                  _l_ list            ^^
+^^                  _w_ copy            ^^
+^^                  ^^                  ^^
+"
+    ("q" nil)
+    ("p" flycheck-previous-error)
+    ("n" flycheck-next-error)
+    ("?" flycheck-describe-checker :color blue)
+    ("d" flycheck-disable-checker :color blue)
+    ("f" flycheck-buffer)
+    ("l" flycheck-list-errors :color blue)
+    ("m" flycheck-manual :color blue)
+    ("s" flycheck-select-checker :color blue)
+    ("v" flycheck-verify-setup :color blue)
+    ("w" flycheck-copy-errors-as-kill :color blue))
 
   (global-flycheck-mode t))
 
@@ -804,11 +843,6 @@ _SWITCH should be 'diff'."
 (use-package hl-todo
   :config
   (global-hl-todo-mode t))
-
-(use-package hydra
-  :defer t
-  :config
-  (hydra-add-font-lock))
 
 (use-package ibuffer
   :bind (("C-x C-b" . #'ibuffer))
@@ -887,11 +921,12 @@ _SWITCH should be 'diff'."
   :init
   (csetq ivy-count-format "(%d/%d) ")
   (csetq ivy-display-style 'fancy)
-  (csetq ivy-dynamic-exhibit-delay-ms 200)
-  (csetq ivy-height 11)
+  (csetq ivy-dynamic-exhibit-delay-ms 150)
+  (csetq ivy-height 7)
   (csetq ivy-on-del-error-function nil)
   (csetq ivy-use-selectable-prompt t)
   (csetq ivy-use-virtual-buffers t)
+  (csetq ivy-virtual-abbreviate 'full)
   (csetq ivy-wrap t)
 
   :config
@@ -937,6 +972,7 @@ _SWITCH should be 'diff'."
 (use-package lsp-mode
   :hook (ls-after-open . lsp-enable-imenu)
   :init
+  (csetq lsp-enable-eldoc t)
   (csetq lsp-highlight-symbol-at-point nil))
 
 (use-package lsp-ui
@@ -958,12 +994,15 @@ _SWITCH should be 'diff'."
 
 (use-package magit
   :bind (("C-x g" . magit-status))
+  :hook (git-commit-mode . git-commit-turn-on-flyspell)
   :init
+  (csetq magit-diff-arguments
+         '("--ignore-space-change" "--ignore-all-space" "--no-ext-diff" "--stat" "--diff-algorithm=histogram"))
+  (csetq magit-diff-refine-hunk t)
   (csetq magit-display-buffer-function
          #'magit-display-buffer-fullframe-status-v1)
   (csetq magit-process-popup-time 15)
-  (csetq magit-diff-arguments
-         '("--ignore-space-change" "--ignore-all-space" "--no-ext-diff" "--stat" "--diff-algorithm=histogram")))
+  (csetq magit-refs-show-commit-count 'all))
 
 (use-package magit-gitflow
   :after magit
@@ -1114,10 +1153,9 @@ _SWITCH should be 'diff'."
   :hook (prog-mode . user-prog-mode-hook))
 
 (use-package projectile
-  :diminish
-  ;; :preface
-  ;; (defun user-projectile-invalidate-cache (&rest _args)
-  ;;   (projectile-invalidate-cache nil))
+  :preface
+  (defun user-projectile-invalidate-cache (&rest _args)
+    (projectile-invalidate-cache nil))
   :init
   (csetq projectile-completion-system 'ivy)
   (csetq projectile-enable-caching t)
@@ -1134,9 +1172,23 @@ _SWITCH should be 'diff'."
   (eval-after-load 'magit-branch
     '(progn
        (advice-add 'magit-checkout
-                   :after #'projectile-invalidate-cache)
+                   :after #'user-projectile-invalidate-cache)
        (advice-add 'magit-branch-and-checkout
-                   :after #'projectile-invalidate-cache))))
+                   :after #'user-projectile-invalidate-cache))))
+
+(use-package python
+  :init
+  (when (executable-find "ipython")
+    (csetq python-shell-interpreter "ipython")
+    (csetq python-shell-interpreter-args "--colors=Linux --profile=default --simple-prompt")
+    (csetq python-shell-prompt-output-regexp "Out \\[[0-9]+\\]: ")
+    (csetq python-shell-prompt-input-regexp "In \\[[0-9]+\\]: ")
+    (csetq python-shell-completion-setup-code
+    "from IPython.core.completerlib import module_completion")
+    (csetq python-shell-completion-module-string-code
+    "';'.join(module_completion('''%s'''))\n")
+    (csetq python-shell-completion-string-code
+    "';'.join(get_ipython().Completer.all_completions('''%s'''))\n")))
 
 (use-package pyvenv
   :hook (python-mode . user-auto-virtualenv)
@@ -1158,18 +1210,17 @@ _SWITCH should be 'diff'."
 (use-package recentf
   :after ignoramus
   :init
+  (csetq recentf-auto-cleanup 'never)
+  (csetq recentf-exclude (list
+                          "/\\.git/.*\\'"        ; Git contents
+                          "/elpa/.*\\'"          ; Package files
+                          "PKGBUILD"             ; ArchLinux aur
+                          "COMMIT_MSG"
+                          "COMMIT_EDITMSG"
+                          "crontab.*"
+                          #'ignoramus-boring-p))
   (csetq recentf-max-saved-items 500)
   (csetq recentf-max-menu-items 20)
-  (csetq recentf-exclude (list "/\\.git/.*\\'"        ; Git contents
-                               "/elpa/.*\\'"          ; Package files
-                               "PKGBUILD"             ; ArchLinux aur
-                               "COMMIT_MSG"
-                               "COMMIT_EDITMSG"
-                               "crontab.*"
-                               #'ignoramus-boring-p))
-  ;; disable recentf-cleanup on Emacs start, because it can
-  ;; cause problems with remote files
-  (csetq recentf-auto-cleanup 'never)
 
   :config
   (use-package no-littering
@@ -1212,6 +1263,21 @@ _SWITCH should be 'diff'."
   :config
   (selected-global-mode t))
 
+(use-package shackle
+  :disabled
+  :init
+  (csetq shackle-select-reused-windows t)
+  (csetq hackle-inhibit-window-quit-on-same-windows t)
+  (csetq shackle-default-alignment 'right)
+  (csetq shackle-rules '((help-mode :align t :select t)
+                         ((compilation-mode flycheck-error-list-mode rg-mode grep-mode occur-mode xref--xref-buffer-mode)
+                          :noselect t :align below :size 0.25)
+                         ("\\`\\*magit.*?\\*\\'" :regexp t :ignore t)
+                         ))
+  (csetq shackle-default-rule '(:select t))
+  :config
+  (shackle-mode t))
+
 (use-package sh-script
   :init
   (csetq sh-basic-offset 2))
@@ -1220,10 +1286,22 @@ _SWITCH should be 'diff'."
   :demand t
   :diminish
   :bind (("C-M-k" . #'sp-kill-sexp)
+
          ("C-M-n" . #'sp-next-sexp)
          ("C-M-p" . #'sp-previous-sexp)
+
          ("C-M-f" . #'sp-forward-sexp)
-         ("C-M-b" . #'sp-backward-sexp))
+         ("C-M-b" . #'sp-backward-sexp)
+
+         ("C-M-u" . #'sp-backward-up-sexp)
+         ("C-M-d" . #'sp-down-sexp)
+
+         ("C-(" . #'sp-wrap-round)
+         ("C-{" . #'sp-wrap-curly)
+
+         ("C-M-<right>"   . #'sp-forward-slurp-sexp)
+         ("C-M-<left>"    . #'sp-forward-barf-sexp)
+         )
 
   :preface
   (defun user-open-block-c-mode (_id action _context)
@@ -1271,6 +1349,9 @@ _SWITCH should be 'diff'."
   (sp-local-pair 'c-mode "{" nil :post-handlers '(:add user-open-block-c-mode))
   (sp-local-pair 'c++-mode "{" nil :post-handlers '(:add user-open-block-c-mode))
 
+  (sp-local-pair 'emacs-lisp-mode "`" nil :actions nil)
+  (sp-local-pair 'emacs-lisp-mode "'" nil :actions nil)
+
   (show-smartparens-global-mode t))
 
 (use-package smex
@@ -1279,11 +1360,8 @@ _SWITCH should be 'diff'."
   (smex-initialize))
 
 (use-package tramp
-  :if (= 25 emacs-major-version)
-  :config
-  ;; Work-around for tramp which apparently doesn't know 'default
-  (when (eq tramp-syntax 'default)
-    (setq tramp-syntax 'ftp)))
+  :init
+  (csetq tramp-default-method "ssh"))
 
 (use-package undo-tree
   :diminish
@@ -1329,9 +1407,12 @@ _SWITCH should be 'diff'."
          ([remap forward-paragraph] . #'user-forward-paragraph)
          ([remap backward-paragraph] . #'user-backward-paragraph)
          ("M-j" . #'user-join-line)
-         ("M-'" . #'user-open-terminal)
+         ("C-`" . #'user-open-terminal)
          ([remap scroll-up-command] . #'user-scroll-half-page-up)
          ([remap scroll-down-command] . #'user-scroll-half-page-down)
+         ("C-'" . #'push-mark-no-activate)
+         ("M-'" . #'jump-to-mark)
+         ([remap exchange-point-and-mark] . #'exchange-point-and-mark-no-activate)
          :map isearch-mode-map
          ("<backspace>" . #'user-isearch-delete)
          :map minibuffer-local-map
@@ -1347,18 +1428,38 @@ _SWITCH should be 'diff'."
 
 (use-package user-window
   :load-path "lisp"
-  :bind (("C-c w d" . #'user-toggle-current-window-dedication)
-         ("C-c w q" . #'user-quit-all-side-windows)
-         ("C-c w b" . #'user-switch-to-minibuffer)
-         ("C-c w w" . #'other-window)
-         ("C-c w =" . #'balance-windows)
-         ("C-c w k" . #'delete-window)
-         ("C-c w /" . #'split-window-right)
-         ("C-c w \\" . #'split-window-right)
-         ("C-c w -" . #'split-window-below)
-         ("C-c w m" . #'delete-other-windows)
-         ("C-c w f" . #'toggle-frame-fullscreen)
-         ("C-c w 1" . #'delete-other-windows)))
+  :bind ("C-c w" . #'user-windows-hydra/body)
+  :preface
+  (defhydra user-windows-hydra (:color pink)
+    "
+^
+^Movement^           ^Window^            ^Zoom^
+^────────^───────────^──────^───────────^────^──────────────
+_q_ quit             _b_ balance        _-_ out
+_3_ split right      _i_ heighten       _+_ in
+_2_ split below      _j_ narrow         _=_ reset
+_1_ delete others    _k_ lower          ^^
+_d_ dedicated        _l_ widen          ^^
+_m_ minibuffer       _f_ fullscreen     ^^
+_o_ other            ^^                 ^^
+^^                   ^^                 ^^
+"
+    ("q" nil)
+    ("b" balance-windows :color blue)
+    ("d" user-toggle-current-window-dedication :color blue)
+    ("f" toggle-frame-fullscreen :color blue)
+    ("i" enlarge-window)
+    ("j" shrink-window-horizontally)
+    ("k" shrink-window)
+    ("l" enlarge-window-horizontally)
+    ("o" other-window)
+    ("m" user-switch-to-minibuffer :color blue)
+    ("1" delete-other-windows :color blue)
+    ("2" split-window-right :color blue)
+    ("3" split-window-below :color blue)
+    ("-" text-scale-decrease)
+    ("+" text-scale-increase)
+    ("=" (text-scale-increase 0))))
 
 (use-package vc
   :init
@@ -1367,7 +1468,8 @@ _SWITCH should be 'diff'."
 (use-package vc-git
   :ensure nil
   :init
-  (csetq vc-git-diff-switches '("--ignore-space-change" "--ignore-all-space" "--no-ext-diff" "--stat" "--diff-algorithm=histogram")))
+  (csetq vc-git-diff-switches '("--ignore-space-change" "--ignore-all-space" "--no-ext-diff" "--stat" "--diff-algorithm=histogram"))
+  (csetq vc-git-print-log-follow t))
 
 (use-package visual-fill-column
   :commands (visual-fill-column-mode global-visual-fill-column-mode))
@@ -1472,14 +1574,9 @@ _SWITCH should be 'diff'."
   :hook (prog-mode . whitespace-mode)
 
   :init
-  (csetq whitespace-style '(face tab-mark trailing))
-  (csetq whitespace-display-mappings '((tab-mark ?\t [187 32 32 32 32 32 32 32]))))
-
-(use-package windmove
-  :bind (("C-c w <left>"  . windmove-left)
-         ("C-c w <right>" . windmove-right)
-         ("C-c w <up>"    . windmove-up)
-         ("C-c w <down>"  . windmove-down)))
+  (csetq whitespace-display-mappings
+         '((tab-mark ?\t [187 32 32 32 32 32 32 32])))
+  (csetq whitespace-style '(face tab-mark trailing)))
 
 (use-package xref
   :init
@@ -1487,12 +1584,12 @@ _SWITCH should be 'diff'."
 
 (use-package yasnippet
   :diminish yas-minor-mode
-  :hook (prog-mode . yas-minor-mode)
   :init
   (csetq yas-verbosity 1)
   (csetq yas-triggers-in-field t)
   (csetq yas-wrap-around-region t)
   :config
+  (yas-global-mode t)
   (yas-reload-all))
 
 (provide 'init)

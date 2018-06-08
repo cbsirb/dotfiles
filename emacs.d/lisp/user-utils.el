@@ -230,14 +230,14 @@ Saves the position before.  You can skip typos you don't want to fix with
 
 ;;;###autoload
 (defun user-next-error ()
-  "Go to the next compilation error/search item (ignoring any elisp errors)."
+  "Go to the next compilation error/search item (ignoring any errors)."
   (interactive)
   (ignore-errors
     (next-error)))
 
 ;;;###autoload
 (defun user-prev-error ()
-  "Go to the previous compilation error/search item (ignoring any elisp errors)."
+  "Go to the previous compilation error/search item (ignoring any errors)."
   (interactive)
   (ignore-errors
     (previous-error)))
