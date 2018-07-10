@@ -11,7 +11,7 @@
   "Set the VARIABLE to VALUE, but use `set-default' if needed."
   `(funcall (or (get ',variable 'custom-set) 'set-default) ',variable ,value))
 
-(csetq gc-cons-threshold (* 7 gc-cons-threshold))
+(csetq gc-cons-threshold (* 5 gc-cons-threshold))
 
 ;; Apparently, when using default values, the input lag and hangs disappears
 ;; (csetq gc-cons-threshold (* 384 1024 1024))
@@ -47,12 +47,14 @@
 (defconst user-custom-file (expand-file-name "custom.el" user-emacs-directory)
   "File used to store settings from Customization UI.")
 
-(csetq package-archives '(("melpa" . "http://melpa.org/packages/")
-                         ("org" . "http://orgmode.org/elpa/")
-                         ("gnu" . "http://elpa.gnu.org/packages/")))
+(when (file-exists-p user-custom-file)
+  (load-file user-custom-file))
 
-(csetq package-enable-at-startup nil)
 (csetq load-prefer-newer t)
+
+(when (< emacs-major-version 27)
+  (load-file (expand-file-name "early-init" user-emacs-directory))
+  (package-initialize))
 
 (add-to-list 'load-path (expand-file-name "lisp" user-emacs-directory))
 (add-to-list 'load-path (expand-file-name "site-lisp" user-emacs-directory))
@@ -62,11 +64,6 @@
             (message "Time to load init file: %s"
                      (emacs-init-time))
             (garbage-collect)))
-
-(when (file-exists-p user-custom-file)
-  (load-file user-custom-file))
-
-(package-initialize)
 
 ;; Install use-package if needed
 (unless (package-installed-p 'use-package)
@@ -140,6 +137,7 @@
 (csetq display-raw-bytes-as-hex t)
 (csetq ring-bell-function 'ignore)
 (csetq reb-re-syntax 'string)
+(csetq save-silently t)
 
 (csetq mark-ring-max 128)
 (csetq global-mark-ring-max 256)
@@ -172,10 +170,14 @@
 
 (when (eq system-type 'gnu/linux)
   (csetq x-underline-at-descent-line t)
-  (csetq x-stretch-cursor t))
+  (csetq x-stretch-cursor t)
+  (csetq x-wait-for-event-timeout nil))
 
 (when (eq system-type 'windows-nt)
   (csetq w32-pipe-read-delay 0))
+
+(when (>= emacs-major-version 27)
+  (csetq tooltip-resize-echo-area t))
 
 (transient-mark-mode t)
 (delete-selection-mode t)
@@ -243,6 +245,8 @@
                    "*Occur*"
                    "*xref*"
                    "*Flycheck errors*"
+                   "*ivy-"
+                   "*hgrep*"
                    ))
           (display-buffer-reuse-window
            display-buffer-in-side-window)
@@ -264,6 +268,8 @@
 
 ;;; Keybindings
 (define-key input-decode-map [?\C-m] [C-m])
+(define-key input-decode-map [?\C-\M-m] [C-M-m])
+
 (bind-key "C-c t d" #'toggle-debug-on-error)
 (bind-key "C-c t q" #'toggle-debug-on-quit)
 (bind-key [remap just-one-space] #'cycle-spacing)
@@ -323,6 +329,7 @@
   (global-anzu-mode t))
 
 (use-package autorevert
+  :ensure nil
   :diminish auto-revert-mode
   :init
   (csetq auto-revert-verbose nil)
@@ -332,6 +339,7 @@
   (global-auto-revert-mode))
 
 (use-package bookmark
+  :ensure nil
   :defer t
   :init
   (csetq bookmark-save-flag 1))
@@ -339,6 +347,7 @@
 (use-package bug-hunter :defer t)
 
 (use-package cc-mode
+  :ensure nil
   :hook (c-mode-common . user-c-mode-common-hook)
   :preface
   (defconst user-allman-style
@@ -435,8 +444,7 @@ For anything else there is ctags."
 
 (use-package company
   :diminish
-  :bind (("C-j" . #'company-complete)
-         :map company-active-map
+  :bind (:map company-active-map
          ("ESC" . #'company-abort)
          ("C-l" . #'company-show-location)
          ("C-n" . #'company-select-next)
@@ -472,6 +480,7 @@ For anything else there is ctags."
   (csetq company-lsp-enable-snippet t))
 
 (use-package compile
+  :ensure nil
   :diminish compilation-in-progress
   :bind (("C-c c" . #'compile))
   :preface
@@ -496,14 +505,7 @@ delete the WINDOW."
   (defun user-compile-done (buffer _msg)
     (when (string-equal "*compilation*" (buffer-name buffer))
       (let* ((exit-status (process-exit-status user-compile-process))
-             (has-errors (if (= 0 exit-status)
-                             (save-mark-and-excursion
-                               (condition-case nil
-                                   (progn
-                                     (first-error)
-                                     t)
-                                 (error nil)))
-                           t))
+             (has-errors  (/= 0 exit-status))
              (window (get-buffer-window buffer)))
 
         (when (and window (not has-errors))
@@ -558,7 +560,7 @@ Taken from http://stackoverflow.com/a/3072831/355252."
   :init
   (csetq cquery-extra-init-params '(:diagnostics (:frequencyMs -1)))
   (csetq cquery-project-roots '("compile_commands.json"))
-  (csetq cquery-executable "~/src/cquery/build/release/bin/cquery"))
+  (csetq cquery-executable "~/src/cquery/build/cquery"))
 
 (use-package comint
   :ensure nil
@@ -595,6 +597,7 @@ Taken from http://stackoverflow.com/a/3072831/355252."
   (csetq dabbrev-abbrev-skip-leading-regexp "[^ ]*[<>=*$]"))
 
 (use-package diff-mode
+  :ensure nil
   :hook ((diff-mode . diff-delete-empty-files)
          (diff-mode . diff-make-unified)
          (diff-mode . smerge-mode))
@@ -663,6 +666,7 @@ Taken from http://stackoverflow.com/a/3072831/355252."
   (csetq dired-omit-verbose nil))
 
 (use-package ediff
+  :ensure nil
   :defer t
   :preface
   (defun user-command-line-diff (_switch)
@@ -689,6 +693,7 @@ _SWITCH should be 'diff'."
   :hook (prog-mode . editorconfig-mode))
 
 (use-package eshell
+  :ensure nil
   :defer t
   :hook ((eshell-mode . user-eshell-mode-hook)
          (eshell-first-time-mode . user-eshell-first-time-mode-hook))
@@ -812,10 +817,12 @@ _v_ verify setup    _n_ next            _d_ disable
   (global-flycheck-mode t))
 
 (use-package grep
+  :ensure nil
   :defer t
   :hook (grep-mode . user-results-buffer-hook))
 
 (use-package gud
+  :ensure nil
   :defer t
   :hook (gud-mode . user-gud-mode-hook)
   :preface
@@ -825,7 +832,56 @@ _v_ verify setup    _n_ next            _d_ disable
   :init
   (csetq gdb-many-windows t))
 
+;; (use-package helm
+;;   :diminish
+;;   :demand
+;;   :bind (([remap execute-extended-command] . #'helm-M-x)
+;;          ([remap find-file] . #'helm-find-files)
+;;          ([remap imenu] . #'helm-imenu)
+;;          ([remap switch-to-buffer] . #'helm-mini)
+;;          ([remap yank-pop] . #'helm-show-kill-ring)
+;;          ("C-c h" . #'helm-command-prefix)
+;;          ("C-h SPC" . #'helm-all-mark-rings)
+;;          :map minibuffer-local-map
+;;          ("C-c C-l" . #'helm-minibuffer-history)
+;;          :map helm-map
+;;          ("<tab>" . #'helm-execute-persistent-action)
+;;          ("C-i" . #'helm-execute-persistent-action)
+;;          ("C-z" . #'helm-select-action))
+;;   :hook (helm-minibuffer-set-up . helm-hide-minibuffer-maybe)
+;;   :init
+;;   (require 'helm-config)
+
+;;   ;; Display in own frame
+;;   ;; (csetq helm-display-function 'helm-display-buffer-in-own-frame)
+;;   ;; (csetq helm-display-buffer-reuse-frame t)
+;;   ;; (csetq helm-use-undecorated-frame-option t)
+
+;;   (setq helm-autoresize-max-height 20)
+;;   (setq helm-autoresize-min-height 20)
+
+;;   (csetq helm-echo-input-in-header-line t)
+;;   (csetq helm-ff-file-name-history-use-recentf t)
+;;   (csetq helm-net-prefer-curl t)
+;;   (csetq helm-split-window-inside-p t)
+
+;;   :config
+;;   (helm-mode t)
+;;   (helm-autoresize-mode t))
+
+;; (use-package helm-projectile
+;;   :after helm
+;;   :config
+;;   (helm-projectile-on))
+
+;; (use-package helm-descbinds
+;;   :after helm
+;;   :config
+;;   (helm-descbinds-mode t))
+
 (use-package hexl
+  :if (< emacs-major-version 27)
+  :ensure nil
   :init
   (csetq hexl-bits 8))
 
@@ -845,6 +901,7 @@ _v_ verify setup    _n_ next            _d_ disable
   (global-hl-todo-mode t))
 
 (use-package ibuffer
+  :ensure nil
   :bind (("C-x C-b" . #'ibuffer))
   :init
   (csetq ibuffer-saved-filter-groups
@@ -896,6 +953,7 @@ _v_ verify setup    _n_ next            _d_ disable
                (ibuffer-switch-to-saved-filter-groups "default"))))
 
 (use-package imenu
+  :ensure nil
   :bind ("M-i" . imenu)
   :hook (imenu-after-jump . recenter-top-bottom)
   :init
@@ -922,7 +980,7 @@ _v_ verify setup    _n_ next            _d_ disable
   (csetq ivy-count-format "(%d/%d) ")
   (csetq ivy-display-style 'fancy)
   (csetq ivy-dynamic-exhibit-delay-ms 150)
-  (csetq ivy-height 7)
+  (csetq ivy-height 9)
   (csetq ivy-on-del-error-function nil)
   (csetq ivy-use-selectable-prompt t)
   (csetq ivy-use-virtual-buffers t)
@@ -931,6 +989,14 @@ _v_ verify setup    _n_ next            _d_ disable
 
   :config
   (ivy-mode t))
+
+(use-package ivy-rich
+  :after ivy
+  :init
+  (csetq ivy-rich-switch-buffer-align-virtual-buffer t)
+  (csetq ivy-rich-path-style 'abbrev)
+  :config
+  (ivy-rich-mode t))
 
 (use-package js2-mode
   :defer t
@@ -966,6 +1032,8 @@ _v_ verify setup    _n_ next            _d_ disable
   :config
   (key-seq-define-global "jv" eyebrowse-mode-map)
   (key-seq-define-global "jc" #'compile)
+  ;; (key-seq-define-global "jj" #'helm-mini)
+  ;; (key-seq-define-global "jf" #'helm-find-files))
   (key-seq-define-global "jj" #'ivy-switch-buffer)
   (key-seq-define-global "jf" #'counsel-find-file))
 
@@ -982,6 +1050,7 @@ _v_ verify setup    _n_ next            _d_ disable
   :init
   ;; Disable type information shown in sideline (enable it per mode if needed)
   ;; Allow it to display linting errors only.
+  (csetq lsp-ui-sideline-ignore-duplicate t)
   (csetq lsp-ui-sideline-show-hover nil)
   (csetq lsp-ui-sideline-show-symbol nil)
 
@@ -1009,6 +1078,7 @@ _v_ verify setup    _n_ next            _d_ disable
   :hook (magit-mode . turn-on-magit-gitflow))
 
 (use-package midnight
+  :ensure nil
   :init
   ;; 5 minutes for special buffers
   (csetq clean-buffer-list-delay-special (* 5 60))
@@ -1048,7 +1118,8 @@ _v_ verify setup    _n_ next            _d_ disable
   :bind (("M-z" . #'zap-up-to-char)
          ("<C-right>" . #'forward-to-word)))
 
-(use-package mouse-copy)
+(use-package mouse-copy
+  :ensure nil)
 
 (use-package multi-term
   :if (eq system-type 'gnu/linux)
@@ -1177,18 +1248,18 @@ _v_ verify setup    _n_ next            _d_ disable
                    :after #'user-projectile-invalidate-cache))))
 
 (use-package python
+  :ensure nil
   :init
   (when (executable-find "ipython")
     (csetq python-shell-interpreter "ipython")
-    (csetq python-shell-interpreter-args "--colors=Linux --profile=default --simple-prompt")
+    (csetq python-shell-interpreter-args
+           "--colors=Linux --profile=default --simple-prompt")
     (csetq python-shell-prompt-output-regexp "Out \\[[0-9]+\\]: ")
     (csetq python-shell-prompt-input-regexp "In \\[[0-9]+\\]: ")
     (csetq python-shell-completion-setup-code
-    "from IPython.core.completerlib import module_completion")
-    (csetq python-shell-completion-module-string-code
-    "';'.join(module_completion('''%s'''))\n")
+           "from IPython.core.completerlib import module_completion")
     (csetq python-shell-completion-string-code
-    "';'.join(get_ipython().Completer.all_completions('''%s'''))\n")))
+           "';'.join(get_ipython().Completer.all_completions('''%s'''), module_completion('''%s'''))\n")))
 
 (use-package pyvenv
   :hook (python-mode . user-auto-virtualenv)
@@ -1208,6 +1279,7 @@ _v_ verify setup    _n_ next            _d_ disable
                             realgud:perldb realgud:zshdb))
 
 (use-package recentf
+  :ensure nil
   :after ignoramus
   :init
   (csetq recentf-auto-cleanup 'never)
@@ -1241,6 +1313,7 @@ _v_ verify setup    _n_ next            _d_ disable
   (rg-enable-default-bindings))
 
 (use-package savehist
+  :ensure nil
   :init
   (csetq savehist-additional-variables
          '(search-ring
@@ -1253,6 +1326,7 @@ _v_ verify setup    _n_ next            _d_ disable
   (savehist-mode t))
 
 (use-package saveplace
+  :ensure nil
   :if (>= emacs-major-version 25)
   :config
   (save-place-mode t))
@@ -1279,6 +1353,7 @@ _v_ verify setup    _n_ next            _d_ disable
   (shackle-mode t))
 
 (use-package sh-script
+  :ensure nil
   :init
   (csetq sh-basic-offset 2))
 
@@ -1360,6 +1435,7 @@ _v_ verify setup    _n_ next            _d_ disable
   (smex-initialize))
 
 (use-package tramp
+  :ensure nil
   :init
   (csetq tramp-default-method "ssh"))
 
@@ -1462,6 +1538,7 @@ _o_ other            ^^                 ^^
     ("=" (text-scale-increase 0))))
 
 (use-package vc
+  :ensure nil
   :init
   (csetq vc-follow-symlinks t))
 
@@ -1540,6 +1617,7 @@ _o_ other            ^^                 ^^
   :after wgrep)
 
 (use-package which-func
+  :ensure nil
   :config
   (which-function-mode t))
 
@@ -1553,6 +1631,7 @@ _o_ other            ^^                 ^^
   (which-key-mode t))
 
 (use-package whitespace
+  :ensure nil
   :diminish
   :preface
   (defun normalize-file ()
@@ -1579,6 +1658,7 @@ _o_ other            ^^                 ^^
   (csetq whitespace-style '(face tab-mark trailing)))
 
 (use-package xref
+  :ensure nil
   :init
   (add-to-list 'xref-prompt-for-identifier 'xref-find-references t))
 

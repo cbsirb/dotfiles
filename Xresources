@@ -50,7 +50,9 @@ xterm*VT100.Translations: #override \
         Ctrl <Key> ]:       larger-vt-font() \n\
         Ctrl <Key> 0:       set-vt-font(d) \n\
         Ctrl Shift <Key> V: insert-selection(CLIPBOARD) \n\
-        Ctrl Shift <Key> C: copy-selection(CLIPBOARD)
+        Ctrl Shift <Key> C: copy-selection(CLIPBOARD) \n\
+        Shift <Key>Home: scroll-back(99999) \n\
+        Shift <Key>End: scroll-forw(99999)
 
 ! URxvt config
 URxvt*depth: 32
