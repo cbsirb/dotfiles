@@ -47,4 +47,5 @@ call minpac#add('junegunn/fzf')
 " Colorschemes
 call minpac#add('robertmeta/nofrils', {'type':'opt'})
 call minpac#add('romainl/Apprentice', {'type':'opt'})
-call minpac#add('altercation/vim-colors-solarized', {'type':'opt'})
+" call minpac#add('altercation/vim-colors-solarized', {'type':'opt'})
+call minpac#add('romainl/flattened', {'type':'opt'})

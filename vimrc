@@ -78,7 +78,6 @@ if !isdirectory(expand(&undodir))
   call mkdir(expand(&undodir), "p")
 endif
 
-set background=light
 set colorcolumn=+1
 set cursorline
 
@@ -103,7 +102,7 @@ endif
 augroup VIMRC
   autocmd!
 
-  autocmd VimEnter * colorscheme solarized
+  autocmd VimEnter * colorscheme flattened_light
 
   autocmd VimEnter,GUIEnter * set visualbell t_vb=
 

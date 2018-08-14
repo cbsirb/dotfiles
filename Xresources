@@ -7,10 +7,10 @@ Xft.hintstyle:  hintfull
 Xft.lcdfilter:  lcddefault
 Xft.rgba:       rgb
 
-URxvt.font:             xft:Iosevka:size=11
-URxvt.boldFont:         xft:Iosevka:size=11:bold
-URxvt.italicFont:       xft:Iosevka:size=11:italic
-URxvt.boldItalicFont:   xft:Iosevka:size=11:bold:italic
+URxvt.font:             xft:Iosevka SS09:size=11
+URxvt.boldFont:         xft:Iosevka SS09:size=11:bold
+URxvt.italicFont:       xft:Iosevka SS09:size=11:italic
+URxvt.boldItalicFont:   xft:Iosevka SS09:size=11:bold:italic
 
 ! #include "/home/csirb/.Xresources.solarized"
 
@@ -22,7 +22,7 @@ xterm*termName: xterm-256color
 xterm*locale: true
 xterm*metaSendsEscape: true
 xterm*eightBitInput: false
-xterm*faceName: xft:Iosevka Term:style=Regular:size=11
+xterm*faceName: xft:Iosevka Term SS09:style=Regular:size=11
 
 xterm*multiScroll: true
 xterm*jumpScroll: true
@@ -150,4 +150,3 @@ xterm*foreground:       S_base00
 !! white dark/light
 *color7:                S_base2
 *color15:               S_base3
-

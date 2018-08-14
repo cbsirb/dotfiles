@@ -217,7 +217,7 @@
 (when (fboundp 'scroll-bar-mode) (scroll-bar-mode 0))
 
 (set-face-attribute 'default nil
-                    :family "Iosevka"
+                    :family "Iosevka SS09"
                     :height 105
                     :weight 'regular)
 
@@ -1233,6 +1233,7 @@ _v_ verify setup    _n_ next            _d_ disable
   (csetq projectile-indexing-method 'alien)
   (csetq projectile-sort-order 'recentf)
   (csetq projectile-use-git-grep t)
+  (csetq projectile-keymap-prefix (kbd "C-c p"))
 
   :config
   (projectile-mode t)
