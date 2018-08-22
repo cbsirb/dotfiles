@@ -5,6 +5,8 @@ if !has('nvim')
   packadd matchit
 endif
 
+set showmatch
+
 set lazyredraw
 set laststatus=2
 set switchbuf=useopen,usetab
@@ -164,7 +166,7 @@ nnoremap <space>j :tjump /
 
 nnoremap <space>g :Grep -w '<C-r><C-w>' .<CR>
 nnoremap <space>G :execute "Grep -w '<C-r><C-w>' " . expand('%:p:h')<cr>
-nnoremap <space>c :Silent make
+nnoremap <space>m :Silent make
 
 xnoremap <silent> <space>g :<C-u>let cmd = "Grep " . visual#GetSelection() <bar>
       \ call histadd("cmd", cmd) <bar>
@@ -206,8 +208,8 @@ cnoremap %% <C-r>=fnameescape(expand('%'))<cr>
 cnoremap <C-r><C-l> <C-r>=getline('.')<CR>
 
 " Poor man's alternate file
-nnoremap <space>a :find <C-R>=fnameescape(expand('%:t:r')).'.'<CR><C-z><C-z>
-nnoremap <space>A :vert sfind <C-R>=fnameescape(expand('%:t:r')).'.'<CR><C-z><C-z>
+nnoremap <space>o :find <C-R>=fnameescape(expand('%:t:r')).'.'<CR><C-z><C-z>
+nnoremap <space>O :vert sfind <C-R>=fnameescape(expand('%:t:r')).'.'<CR><C-z><C-z>
 
 inoremap <silent> <F3> <C-o>:call tags#PreviewTag()<CR>
 nnoremap <silent> <F3> :call tags#PreviewTag()<CR>
@@ -225,18 +227,14 @@ nnoremap <Space>r :ReplaceSymbolInFunction <C-R><C-W>
 nnoremap <space>f :FZF<cr>
 nnoremap <space>F :FZF <C-R>=fnameescape(expand('%:p:h'))<CR><CR>
 
-nmap <space>q <Plug>qf_qf_stay_toggle
-nmap <space>l <Plug>qf_loc_stay_toggle
+nmap <space>q <Plug>(qf_qf_toggle)
+nmap <space>l <Plug>(qf_loc_toggle)
 
 " Keep unimpaired convention
 nmap <silent> [W <Plug>(ale_first)
 nmap <silent> [w <Plug>(ale_previous)
 nmap <silent> ]w <Plug>(ale_next)
 nmap <silent> ]W <Plug>(ale_last)
-
-" Needed for vim-sandwich
-nmap s <Nop>
-xmap s <Nop>
 
 """"""""""""""""""""""""""""""""""
 " Built-in plugins configuration "

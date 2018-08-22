@@ -16,8 +16,7 @@ call minpac#add('tpope/vim-repeat')
 call minpac#add('tpope/vim-rsi')
 call minpac#add('tpope/vim-unimpaired')
 call minpac#add('tpope/vim-vinegar')
-
-call minpac#add('machakann/vim-sandwich')
+call minpac#add('tpope/vim-surround')
 
 call minpac#add('w0rp/ale')
 
