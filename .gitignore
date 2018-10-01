@@ -2,9 +2,14 @@
 /emacs.d/var/
 /emacs.d/etc/
 /emacs.d/.cask/
-/vim/plugged/
+/emacs.d/projectile-bookmarks.eld
+/emacs.d/.python-environments/
+/emacs.d/package-quickstart.el
+/vim/vimrc.locals
 /vim/cache/
+/vim/pack/
 /vim/plug-local/
+/vim/sessions/
 /vim/defaults.vim
 /.bak
 /mpd/state
