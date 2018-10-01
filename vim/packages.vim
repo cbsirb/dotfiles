@@ -9,9 +9,12 @@ call minpac#init()
 
 call minpac#add('k-takata/minpac', {'type':'opt'})
 
+call minpac#add('tpope/vim-apathy')
 call minpac#add('tpope/vim-commentary')
 call minpac#add('tpope/vim-endwise')
 call minpac#add('tpope/vim-fugitive')
+call minpac#add('tpope/vim-git')
+call minpac#add('tpope/vim-ragtag')
 call minpac#add('tpope/vim-repeat')
 call minpac#add('tpope/vim-rsi')
 call minpac#add('tpope/vim-unimpaired')

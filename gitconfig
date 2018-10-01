@@ -45,6 +45,9 @@
     # conflictstyle = diff3
     tool = vimdiff
 
+[difftool.kitdiff]
+    cmd = kitty +kitten diff $LOCAL $REMOTE
+
 [core]
     # ignore executable bit
     fileMode = false

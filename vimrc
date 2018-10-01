@@ -1,11 +1,15 @@
 source ~/.vim/packages.vim
 
 if !has('nvim')
+  unlet! skip_defaults_vim
   source $VIMRUNTIME/defaults.vim
   packadd matchit
 endif
 
 set showmatch
+
+set notimeout
+set ttimeout
 
 set lazyredraw
 set laststatus=2
@@ -57,12 +61,14 @@ set splitbelow
 set splitright
 
 set complete-=i
-set completeopt=longest,menuone
+set completeopt=menuone
 set formatoptions=tcrqnl1j
 
 set history=1000
+set tabpagemax=50
 
 set clipboard^=unnamedplus
+
 
 set linebreak
 set breakindent
@@ -70,15 +76,17 @@ set showbreak=...\
 let &listchars = "tab:\u00bb\ ,trail:\u2022,extends:\u203a,precedes:\u2039,nbsp:\u00ba"
 set list
 
-set viminfo='100,<200,s100,h
+set viminfo=!,'100,<200,s100,h
 set sessionoptions+=resize
+set sessionoptions-=options
 
-set undodir=~/.vim/cache/undo/
 set undofile
 
-if !isdirectory(expand(&undodir))
-  call mkdir(expand(&undodir), "p")
-endif
+set undodir=~/.vim/cache/undo
+set viminfo+=n~/.vim/cache/viminfo
+set backupdir=~/.vim/cache/backup
+set dir=~/.vim/cache/swap
+set viewdir=~/.vim/cache/view
 
 set colorcolumn=+1
 set cursorline
@@ -94,7 +102,7 @@ set cursorline
 " endif
 
 if executable("rg")
-  set grepprg=rg\ --no-heading\ --vimgrep\ -g\ '!{.git,node_modules,vendor}/*'\ -g\ '!tags'\ -g\ '!TAGS'
+  set grepprg=rg\ -H\ --no-heading\ --vimgrep\ -g\ '!{.git,node_modules,vendor}/*'\ -g\ '!tags'\ -g\ '!TAGS'
   set grepformat=%f:%l:%c:%m,%f:%l:%m
 elseif executable("ag")
   set grepprg=ag\ --ignore\ tags\ --ignore\ TAGS\ --vimgrep
@@ -107,6 +115,8 @@ augroup VIMRC
   autocmd VimEnter * colorscheme flattened_light
 
   autocmd VimEnter,GUIEnter * set visualbell t_vb=
+
+  autocmd BufWritePre /tmp/* setlocal noundofile
 
   autocmd BufLeave * if !&diff | let b:winview = winsaveview() | endif
   autocmd BufEnter * if exists('b:winview') && !&diff | call winrestview(b:winview) | unlet! b:winview | endif
@@ -123,7 +133,7 @@ augroup END
 " Commands "
 """"""""""""
 command! -nargs=+ -complete=file_in_path -bar Grep  silent! grep! <args> | redraw! | copen
-command! -nargs=+ -complete=file_in_path -bar LGrep silent! lgrep! <args> | redraw! | copen
+command! -nargs=+ -complete=file_in_path -bar LGrep silent! lgrep! <args> | redraw! | lopen
 
 command! -nargs=+ Silent execute 'silent <args>' | redraw!
 

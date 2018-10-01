@@ -39,7 +39,6 @@
 ;; (add-hook 'minibuffer-setup-hook #'user-minibuffer-setup-hook)
 ;; (add-hook 'minibuffer-exit-hook #'user-minibuffer-exit-hook)
 
-
 (when (fboundp 'tool-bar-mode) (tool-bar-mode 0))
 (when (fboundp 'menu-bar-mode) (menu-bar-mode 0))
 (when (fboundp 'scroll-bar-mode) (scroll-bar-mode 0))
@@ -139,6 +138,9 @@
 (csetq reb-re-syntax 'string)
 (csetq save-silently t)
 
+(csetq undo-limit (* 10 undo-limit))
+(csetq undo-strong-limit (* 10 undo-strong-limit))
+
 (csetq mark-ring-max 128)
 (csetq global-mark-ring-max 256)
 (csetq save-interprogram-paste-before-kill t)
@@ -193,7 +195,7 @@
                     (abbreviate-file-name (buffer-file-name))
                   "%b")))
 
-;;; Enable these functions
+;; Enable these functions
 (mapc (lambda (x) (put x 'disabled nil))
       '(upcase-region
         downcase-region
@@ -244,7 +246,7 @@
                    "*ag search*"
                    "*Occur*"
                    "*xref*"
-                   "*Flycheck errors*"
+                   "*Flymake diagnostics"
                    "*ivy-"
                    "*hgrep*"
                    ))
@@ -417,13 +419,7 @@ For anything else there is ctags."
   (defun user-c-mode-common-hook ()
     "Hook for C/C++ mode."
     (c-toggle-electric-state t)
-    (c-toggle-syntactic-indentation t)
-
-    ;; (setq-local lsp-ui-doc-enable nil)
-    (setq-local lsp-enable-indentation nil)
-    (lsp-cquery-enable)
-
-    (flycheck-select-checker 'c/c++-gcc))
+    (c-toggle-syntactic-indentation t))
 
   :config
   (c-add-style "allman" user-allman-style)
@@ -465,19 +461,9 @@ For anything else there is ctags."
 
   (use-package user-completion
     :load-path "lisp"
-    :bind (("C-c /" . #'user-complete-line))))
-
-(use-package company-lsp
-  :after (company lsp-mode)
-  :hook (lsp-mode . user-lsp-mode-hook)
-  :preface
-  (defun user-lsp-mode-hook ()
-    (add-to-list 'company-backends 'company-lsp))
-  :init
-  (csetq company-lsp-async t)
-  (csetq company-lsp-cache-candidates nil)
-  (csetq company-lsp-enable-recompletion t)
-  (csetq company-lsp-enable-snippet t))
+    :bind (("C-c /" . #'user-complete-line)))
+  :config
+  (csetq company-backends (append '(company-capf) (delete 'company-capf company-backends))))
 
 (use-package compile
   :ensure nil
@@ -548,7 +534,7 @@ Taken from http://stackoverflow.com/a/3072831/355252."
 
 (use-package cquery
   :after cc-mode
-  :commands (lsp-cquery-enable)
+  ;; :commands (lsp-cquery-enable)
   :bind (:map c-mode-base-map
               ("M-o" . #'user-cquery-show/body))
   :preface
@@ -559,8 +545,7 @@ Taken from http://stackoverflow.com/a/3072831/355252."
     ("v" (cquery-xref-find-custom "$cquery/vars") "vars"))
   :init
   (csetq cquery-extra-init-params '(:diagnostics (:frequencyMs -1)))
-  (csetq cquery-project-roots '("compile_commands.json"))
-  (csetq cquery-executable "~/src/cquery/build/cquery"))
+  (csetq cquery-project-roots '("compile_commands.json")))
 
 (use-package comint
   :ensure nil
@@ -692,6 +677,14 @@ _SWITCH should be 'diff'."
   :diminish
   :hook (prog-mode . editorconfig-mode))
 
+(use-package eglot
+  :hook ((c-mode-common . eglot-ensure)
+         (python-mode . eglot-ensure))
+  :init
+  (csetq eglot-events-buffer-size 0)
+  :config
+  (add-to-list 'eglot-server-programs '((c++-mode c-mode) . (eglot-cquery "cquery"))))
+
 (use-package eshell
   :ensure nil
   :defer t
@@ -775,46 +768,13 @@ _q_ quit            _c_ create          _p_ previous
   :config
   (eyebrowse-mode t))
 
-(use-package flycheck
-  :commands (flycheck-mode
-             flycheck-select-checker
-             flycheck-next-error
-             flycheck-previous-error)
-  :bind (("C-c f" . user-flycheck-hydra/body)
-         ("C-c t f" . flycheck-mode))
+(use-package flymake
+  :ensure nil
+  :bind (("C-c f n" . #'flymake-goto-next-error)
+         ("C-c f p" . #'flymake-goto-prev-error))
   :init
-  (csetq flycheck-display-errors-delay 0.0)
-  (csetq flycheck-check-syntax-automatically '(save mode-enabled))
-  (csetq flycheck-standard-error-navigation nil)
-  (csetq flycheck-display-errors-function
-         #'flycheck-display-error-messages-unless-error-list)
-
-  :config
-  (defhydra user-flycheck-hydra (:color pink)
-    "
-^
-^Flycheck^          ^Errors^            ^Checker^
-^────────^──────────^──────^────────────^───────^───────────
-_q_ quit            _p_ previous        _?_ describe
-_v_ verify setup    _n_ next            _d_ disable
-^^                  _f_ check           _s_ select
-^^                  _l_ list            ^^
-^^                  _w_ copy            ^^
-^^                  ^^                  ^^
-"
-    ("q" nil)
-    ("p" flycheck-previous-error)
-    ("n" flycheck-next-error)
-    ("?" flycheck-describe-checker :color blue)
-    ("d" flycheck-disable-checker :color blue)
-    ("f" flycheck-buffer)
-    ("l" flycheck-list-errors :color blue)
-    ("m" flycheck-manual :color blue)
-    ("s" flycheck-select-checker :color blue)
-    ("v" flycheck-verify-setup :color blue)
-    ("w" flycheck-copy-errors-as-kill :color blue))
-
-  (global-flycheck-mode t))
+  (csetq flymake-no-changes-timeout nil)
+  (csetq flymake-start-syntax-check-on-newline nil))
 
 (use-package grep
   :ensure nil
@@ -884,6 +844,13 @@ _v_ verify setup    _n_ next            _d_ disable
   :ensure nil
   :init
   (csetq hexl-bits 8))
+
+(use-package highlight-indent-guides
+  :diminish
+  :hook (prog-mode . highlight-indent-guides-mode)
+  :init
+  (csetq highlight-indent-guides-method 'character)
+  (csetq highlight-indent-guides-character ?\|))
 
 (use-package highlight-symbol
   :diminish
@@ -1037,30 +1004,6 @@ _v_ verify setup    _n_ next            _d_ disable
   (key-seq-define-global "jj" #'ivy-switch-buffer)
   (key-seq-define-global "jf" #'counsel-find-file))
 
-(use-package lsp-mode
-  :hook (ls-after-open . lsp-enable-imenu)
-  :init
-  (csetq lsp-enable-eldoc t)
-  (csetq lsp-highlight-symbol-at-point nil))
-
-(use-package lsp-ui
-  :disabled t
-  ;; :hook (lsp-mode . lsp-ui-mode)
-  :after lsp-mode
-  :init
-  ;; Disable type information shown in sideline (enable it per mode if needed)
-  ;; Allow it to display linting errors only.
-  (csetq lsp-ui-sideline-ignore-duplicate t)
-  (csetq lsp-ui-sideline-show-hover nil)
-  (csetq lsp-ui-sideline-show-symbol nil)
-
-  ;; Too slow for now (and error reporting is one step back)
-  (csetq lsp-ui-flycheck-enable nil)
-  (csetq lsp-ui-flycheck-live-reporting nil))
-
-(use-package lsp-python
-  :hook (python-mode . lsp-python-enable))
-
 (use-package magit
   :bind (("C-x g" . magit-status))
   :hook (git-commit-mode . git-commit-turn-on-flyspell)
@@ -1095,7 +1038,6 @@ _v_ verify setup    _n_ next            _d_ disable
                  "*ag search*"
                  "*compilation*"
                  "*Help*"
-                 "*Flycheck error messages*"
                  "*Finder Category*"
                  "*Finder-package*"
                  "*RE-Builder*"
@@ -1313,6 +1255,8 @@ _v_ verify setup    _n_ next            _d_ disable
   :config
   (rg-enable-default-bindings))
 
+(use-package rmsbolt)
+
 (use-package savehist
   :ensure nil
   :init
@@ -1345,7 +1289,7 @@ _v_ verify setup    _n_ next            _d_ disable
   (csetq hackle-inhibit-window-quit-on-same-windows t)
   (csetq shackle-default-alignment 'right)
   (csetq shackle-rules '((help-mode :align t :select t)
-                         ((compilation-mode flycheck-error-list-mode rg-mode grep-mode occur-mode xref--xref-buffer-mode)
+                         ((compilation-mode rg-mode grep-mode occur-mode xref--xref-buffer-mode)
                           :noselect t :align below :size 0.25)
                          ("\\`\\*magit.*?\\*\\'" :regexp t :ignore t)
                          ))
@@ -1451,7 +1395,7 @@ _v_ verify setup    _n_ next            _d_ disable
   (global-undo-tree-mode t)
 
   ;; Keep region when undoing in region
-  (defadvice undo-tree-undo (around keep-region activate)
+  (defadvice undo-tree-keep-region (around keep-region activate)
     (if (use-region-p)
         (let ((m (set-marker (make-marker) (mark)))
               (p (set-marker (make-marker) (point))))
@@ -1568,7 +1512,7 @@ _o_ other            ^^                 ^^
   :config
   (volatile-highlights-mode t)
 
-  (vhl/define-extension 'vhl-undo-tree #'undo-tree-move #'undo-tree-undo #'undo-tree-redo)
+  (vhl/define-extension 'vhl-undo-tree #'undo-tree-move #'undo-tree-undo #'undo-tree-redo #'undo)
   (vhl/install-extension 'vhl-undo-tree))
 
 (use-package web-mode

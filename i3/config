@@ -4,101 +4,64 @@
 
 set $mod Mod4
 
-set $ws1 1: dev
-set $ws2 2: www
-set $ws3 3: files
+set $ws1 1
+set $ws2 2
+set $ws3 3
 set $ws4 4
 set $ws5 5
 set $ws6 6
 set $ws7 7
 set $ws8 8
-set $ws9 9: non-work
-set $ws10 10: mail
+set $ws9 9
+set $ws10 10
 
-# This font is widely installed, provides lots of unicode glyphs, right-to-left
-# text rendering and scalability on retina/hidpi displays (thanks to pango).
-font pango:Iosevka, Icons, Symbola 10
-# font pango:Cousine 10
+font pango: Fira Mono, Font Awesome 5, Symbola 10
 
 # Use Mouse+$mod to drag floating windows to their wanted position
 floating_modifier $mod
 
 # start a terminal
-# bindsym $mod+Return exec i3-sensible-terminal
-bindsym $mod+Return exec uxterm
+# bindsym $mod+Return exec xterm -geometry 112x30
+bindsym $mod+Return exec kitty
+# bindsym $mod+Return exec urxvt -geometry 112x30
+
 
 # emacs
 # bindsym $mod+e exec emacsclient -c --alternate-editor=
 # bindsym $mod+m exec emacsclient -c --alternate-editor= -e '(notmuch-hello)'
 
 # kill focused window
-bindsym $mod+Shift+q kill
+bindsym $mod+q kill
 
-# start dmenu (a program launcher)
-# bindsym $mod+p exec dmenu_run -p 'Command: ' -fn 'DejaVu Sans Mono-10'
-# There also is the (new) i3-dmenu-desktop which only displays applications
-# shipping a .desktop file. It is a wrapper around dmenu, so you need that
-# installed.
-# bindsym $mod+d exec --no-startup-id i3-dmenu-desktop --dmenu="dmenu -p 'Desktop application:' -i -fn 'DejaVu Sans Mono-10'"
-
-bindsym $mod+p exec rofi -modi run -show run
-bindsym $mod+d exec rofi -show drun
+bindsym $mod+Shift+p exec rofi -modi run -show run
+bindsym $mod+p exec rofi -show drun
 bindsym $mod+Tab exec rofi -modi window -show window
 
 # change focus
-bindsym $mod+Shift+h focus left
-bindsym $mod+Shift+j focus down
-bindsym $mod+Shift+k focus up
-bindsym $mod+Shift+l focus right
-
-# alternatively, you can use the cursor keys:
-bindsym $mod+Left focus left
-bindsym $mod+Down focus down
-bindsym $mod+Up focus up
-bindsym $mod+Right focus right
+bindsym $mod+h focus left
+bindsym $mod+j focus down
+bindsym $mod+k focus up
+bindsym $mod+l focus right
 
 # move focused window
-bindsym $mod+Ctrl+h move left
-bindsym $mod+Ctrl+j move down
-bindsym $mod+Ctrl+k move up
-bindsym $mod+Ctrl+l move right
+bindsym $mod+Shift+h move left
+bindsym $mod+Shift+j move down
+bindsym $mod+Shift+k move up
+bindsym $mod+Shift+l move right
 
-# alternatively, you can use the cursor keys:
-bindsym $mod+Shift+Left move left
-bindsym $mod+Shift+Down move down
-bindsym $mod+Shift+Up move up
-bindsym $mod+Shift+Right move right
-
-# split in horizontal orientation
-bindsym $mod+v split h
-
-# split in vertical orientation
-bindsym $mod+Shift+v split v
-
-# enter fullscreen mode for the focused container
 bindsym $mod+f fullscreen toggle
 
-# change container layout (stacked, tabbed, toggle split)
+bindsym $mod+v split toggle
 bindsym $mod+s layout stacking
 bindsym $mod+w layout tabbed
-bindsym $mod+t layout toggle split
+bindsym $mod+t layout toggle all
 
-# toggle tiling / floating
 bindsym $mod+space floating toggle
-
-# change focus between tiling / floating windows
 bindsym $mod+Shift+space focus mode_toggle
 
-# show on all screens
-bindsym $mod+o sticky toggle
-
-# focus the parent container
 bindsym $mod+a focus parent
-
-# focus the child container
 bindsym $mod+Shift+a focus child
 
-# switch to workspace
 bindsym $mod+1 workspace $ws1
 bindsym $mod+2 workspace $ws2
 bindsym $mod+3 workspace $ws3
@@ -110,7 +73,6 @@ bindsym $mod+8 workspace $ws8
 bindsym $mod+9 workspace $ws9
 bindsym $mod+0 workspace $ws10
 
-# move focused container to workspace
 bindsym $mod+Shift+1 move container to workspace $ws1
 bindsym $mod+Shift+2 move container to workspace $ws2
 bindsym $mod+Shift+3 move container to workspace $ws3
@@ -122,20 +84,21 @@ bindsym $mod+Shift+8 move container to workspace $ws8
 bindsym $mod+Shift+9 move container to workspace $ws9
 bindsym $mod+Shift+0 move container to workspace $ws10
 
-# move containers to monitor
 bindsym $mod+Shift+greater move container to output left
 bindsym $mod+Shift+less move container to output right
 
-# workspace monitors
-workspace "$ws1" output eDP1
-workspace "$ws2" output DP2
-workspace "$ws10" output DP2
+bindsym $mod+x move container to output right; focus output right
+bindsym $mod+Shift+x move workspace to output right
 
-# reload the configuration file
+bindsym $mod+o focus output right
+
+# workspace monitors
+# workspace "$ws1" output eDP1
+# workspace "$ws2" output DP2
+# workspace "$ws10" output DP2
+
 bindsym $mod+Shift+c reload
-# restart i3 inplace (preserves your layout/session, can be used to upgrade i3)
 bindsym $mod+Shift+r restart
-# exit i3 (logs you out of your X session)
 bindsym $mod+Shift+e exec "i3-nagbar -t warning -m 'You pressed the exit shortcut. Do you really want to exit i3? This will end your X session.' -b 'Yes, exit i3' 'i3-msg exit'"
 
 bindsym $mod+i [class="Emacs"] focus
@@ -145,78 +108,109 @@ bindsym $mod+slash [class="URxvt"] focus
 bindsym $mod+Shift+minus move scratchpad
 bindsym $mod+minus scratchpad show
 
-# bindsym $mod+l exec --no-startup-id i3lock-fancy -p
+bindsym $mod+Mod1+l exec --no-startup-id i3lock -t -f -i ~/Pictures/Wallpapers/portal.png
+bindsym Print exec flameshot --no-startup-id full -p ~/Pictures/Screenshots
+bindsym Ctrl+Print exec --no-startup-id flameshot gui -p ~/Pictures/Screenshots
+bindsym $mod+e exec pcmanfm
 
 # In case I use a keyboard without
-bindsym $mod+Ctrl+n exec mpc next
-bindsym $mod+Ctrl+b exec mpc prev
-bindsym $mod+Ctrl+m exec mpc toggle
-bindsym XF86AudioNext exec mpc next
-bindsym XF86AudioPrev exec mpc prev
-bindsym XF86AudioPlay exec mpc toggle
-bindsym $mod+comma exec urxvt -title 'ncmpcpp-comma' -geometry 140x36 -e ncmpcpp
+bindsym $mod+Ctrl+period exec --no-startup-id playerctl next
+bindsym $mod+Ctrl+comma exec --no-startup-id playerctl previous
+bindsym $mod+Ctrl+m exec --no-startup-id playerctl play-pause
+bindsym XF86AudioNext exec --no-startup-id playerctl next
+bindsym XF86AudioPrev exec --no-startup-id playerctl previous
+bindsym XF86AudioPlay exec --no-startup-id playerctl play-pause
 
 bindsym XF86AudioRaiseVolume exec --no-startup-id pactl set-sink-volume 0 +5%
 bindsym XF86AudioLowerVolume exec --no-startup-id pactl set-sink-volume 0 -5%
-bindsym XF86MonBrightnessUp exec xbacklight -inc 10
-bindsym XF86MonBrightnessDown exec xbacklight -dec 10
+bindsym XF86AudioMute exec --no-startup-id pactl set-sink-mute 0 toggle
 
-bindsym $mod+j exec emacsclient --alternate-editor= -c
+bindsym $mod+Ctrl+Up exec --no-startup-id pactl set-sink-volume 0 +5%
+bindsym $mod+Ctrl+Down exec --no-startup-id pactl set-sink-volume 0 -5%
 
-mode "resize" {
-        bindsym h resize shrink width 10 px or 10 ppt
-        bindsym j resize grow height 10 px or 10 ppt
-        bindsym k resize shrink height 10 px or 10 ppt
-        bindsym l resize grow width 10 px or 10 ppt
+bindsym XF86MonBrightnessUp exec --no-startup-id xbacklight -inc 10
+bindsym XF86MonBrightnessDown exec --no-startup-id xbacklight -dec 10
 
-        bindsym Left resize shrink width 10 px or 10 ppt
-        bindsym Down resize grow height 10 px or 10 ppt
-        bindsym Up resize shrink height 10 px or 10 ppt
-        bindsym Right resize grow width 10 px or 10 ppt
+# F12 and F12+Fn on microsoft keyboard
+bindsym $mod+Ctrl+XF86TouchpadOff exec --no-startup-id xterm -class force_float -geometry 112x30
+bindsym F12 exec --no-startup-id xterm -class force_float -geometry 112x30
 
-        # back to normal: Enter or Escape
-        bindsym Return mode "default"
-        bindsym Escape mode "default"
-}
+# bindsym $mod+j exec emacsclient --alternate-editor= -c
 
 bindsym $mod+r mode "resize"
+mode "resize" {
+    bindsym h resize shrink width 10 px or 10 ppt
+    bindsym j resize grow height 10 px or 10 ppt
+    bindsym k resize shrink height 10 px or 10 ppt
+    bindsym l resize grow width 10 px or 10 ppt
 
-bar {
-        # status_command i3status
-        status_command $HOME/dotfiles/manual_bin/conky-i3bar.sh
-        tray_output primary
-        separator_symbol ":|:"
-        tray_padding 0
+    bindsym Left resize shrink width 10 px or 10 ppt
+    bindsym Down resize grow height 10 px or 10 ppt
+    bindsym Up resize shrink height 10 px or 10 ppt
+    bindsym Right resize grow width 10 px or 10 ppt
+
+    # back to normal: Enter or Escape
+    bindsym Return mode "default"
+    bindsym Escape mode "default"
 }
 
-# Appearance config
+client.focused  #4c7899 #494844 #ffffff #2E9EF4 #f07746
+
+bar {
+    colors {
+        focused_workspace   #f07746 #494844 #ffffff
+    }
+
+    tray_output primary
+    tray_padding 0
+    status_command i3status
+
+    # status_command $HOME/dotfiles/manual_bin/conky-i3bar.sh
+    separator_symbol "|"
+    position top
+}
+
+# Misc config
 new_window pixel 3
-hide_edge_borders smart
-popup_during_fullscreen leave_fullscreen
+popup_during_fullscreen smart
 force_focus_wrapping yes
 workspace_auto_back_and_forth yes
 force_display_urgency_hint 500 ms
 focus_on_window_activation smart
+focus_follows_mouse no
 show_marks yes
 
+default_border pixel 2
+hide_edge_borders smart
+
+# Where to put stuff
 assign [class="^Firefox$"] → $ws2
-assign [class="^FirefoxNightly$"] → $ws2
+assign [class="^Nightly$"] → $ws2
+assign [class="^Navigator$"] → $ws2
+assign [class="^kmail2$"] → $ws10
+assign [class="^Thunderbird$"] → $ws10
 
 # Special windows
 for_window [window_role="pop-up"] floating enable
 for_window [window_role="About"] floating enable
 for_window [window_role="task_dialog"] floating enable
-#for_window [class="XTerm"] floating enable
 for_window [class="Pavucontrol"] floating enable
-for_window [title="^ncmpcpp-comma$"] floating enable
 for_window [class="mpv"] floating enable
+for_window [class="Lxappearance"] floating enable
+for_window [class="^force_float$"] floating enable
+for_window [class="^Nm-connection-editor$"] floating enable
+for_window [class="^Pcmanfm$"] floating enable
+for_window [class="^Vncviewer$"] floating enable
+for_window [class="Spotify"] move to workspace $ws3
 
 # Some information
-# exec --no-startup-id nm-applet&
 exec --no-startup-id xrdb -merge $HOME/.Xresources
+exec --no-startup-id nm-applet&
+exec --no-startup-id xfce4-power-manager
 
-# Display
-# exec --no-startup-id xrandr --output DP2 --left-of eDP1 --rotate left
+# Displays
+exec --no-startup-id autorandr --change
 
 # Wallpapers
-# exec --no-startup-id feh --bg-scale ~/Pictures/Wallpapers/paid_to_think.png --bg-scale ~/Pictures/Wallpapers/paid_to_think_vert.png
+exec --no-startup-id xrandr | grep 'HDMI1 connected' && feh --bg-scale --no-xinerama ~/Pictures/Wallpapers/calvin.png
+exec --no-startup-id xrandr | grep 'HDMI1 disconnected' && feh --bg-scale ~/Pictures/Wallpapers/calvin-0.png
