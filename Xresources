@@ -8,8 +8,8 @@ Xft.lcdfilter:  lcddefault
 Xft.rgba:       rgb
 
 URxvt.font:             xft:Iosevka SS09:size=11
-URxvt.boldFont:         xft:Iosevka SS09:size=11:bold
 URxvt.italicFont:       xft:Iosevka SS09:size=11:italic
+URxvt.boldFont:         xft:Iosevka SS09:size=11:bold
 URxvt.boldItalicFont:   xft:Iosevka SS09:size=11:bold:italic
 
 ! #include "/home/csirb/.Xresources.solarized"
@@ -44,6 +44,9 @@ xterm*faceSize2: 10
 xterm*faceSize3: 12
 xterm*faceSize4: 16
 xterm*faceSize5: 22
+
+xterm*colorAttrMode: true
+xterm*veryBoldColors: 4
 
 xterm*VT100.Translations: #override \
         Ctrl <Key> [:       smaller-vt-font() \n\
@@ -84,6 +87,14 @@ URxvt*scrollTtyKeypress: true
 ! This is how it is suposed to be
 URxvt*secondaryScreen: 1
 URxvt*secondaryScroll: 0
+
+URxvt*skipBuiltinGlyphs: true
+
+! Show colors in bold
+URxvt*intensityStyles: False
+
+URxvt*perl-ext:
+URxvt*perl-ext-common:
 
 !! No colorscheme (white text, black background)
 ! *background: #000000

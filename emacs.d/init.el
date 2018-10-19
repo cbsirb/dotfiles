@@ -440,7 +440,8 @@ For anything else there is ctags."
 
 (use-package company
   :diminish
-  :bind (:map company-active-map
+  :bind (("C-j" . #'company-complete)
+         :map company-active-map
          ("ESC" . #'company-abort)
          ("C-l" . #'company-show-location)
          ("C-n" . #'company-select-next)
@@ -452,7 +453,7 @@ For anything else there is ctags."
   (csetq company-dabbrev-downcase nil)
   (csetq company-dabbrev-ignore-case t)
   (csetq company-idle-delay 0)
-  (csetq company-minimum-prefix-length 3)
+  (csetq company-minimum-prefix-length 4)
   (csetq company-require-match nil)
   (csetq company-selection-wrap-around t)
   (csetq company-tooltip-align-annotations t)
@@ -683,6 +684,13 @@ _SWITCH should be 'diff'."
   :init
   (csetq eglot-events-buffer-size 0)
   :config
+  (csetq eglot-ignored-server-capabilites
+         '(:documentHighlightProvider
+           :foldingRangeProvider
+           :documentOnTypeFormattingProvider
+           :codeLensProvider
+           :documentLinkProvider
+           :colorProvider))
   (add-to-list 'eglot-server-programs '((c++-mode c-mode) . (eglot-cquery "cquery"))))
 
 (use-package eshell
@@ -1166,6 +1174,7 @@ _q_ quit            _c_ create          _p_ previous
   :hook (prog-mode . user-prog-mode-hook))
 
 (use-package projectile
+  :diminish
   :preface
   (defun user-projectile-invalidate-cache (&rest _args)
     (projectile-invalidate-cache nil))

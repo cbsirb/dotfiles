@@ -22,13 +22,8 @@ floating_modifier $mod
 
 # start a terminal
 # bindsym $mod+Return exec xterm -geometry 112x30
-bindsym $mod+Return exec kitty
-# bindsym $mod+Return exec urxvt -geometry 112x30
-
-
-# emacs
-# bindsym $mod+e exec emacsclient -c --alternate-editor=
-# bindsym $mod+m exec emacsclient -c --alternate-editor= -e '(notmuch-hello)'
+# bindsym $mod+Return exec kitty
+bindsym $mod+Return exec xterm -geometry 112x30
 
 # kill focused window
 bindsym $mod+q kill
@@ -102,14 +97,13 @@ bindsym $mod+Shift+r restart
 bindsym $mod+Shift+e exec "i3-nagbar -t warning -m 'You pressed the exit shortcut. Do you really want to exit i3? This will end your X session.' -b 'Yes, exit i3' 'i3-msg exit'"
 
 bindsym $mod+i [class="Emacs"] focus
-bindsym $mod+Shift+i [class="Firefox"] focus
+bindsym $mod+Shift+i [class="Nightly"] focus
 bindsym $mod+u [urgent=latest] focus
-bindsym $mod+slash [class="URxvt"] focus
 bindsym $mod+Shift+minus move scratchpad
 bindsym $mod+minus scratchpad show
 
 bindsym $mod+Mod1+l exec --no-startup-id i3lock -t -f -i ~/Pictures/Wallpapers/portal.png
-bindsym Print exec flameshot --no-startup-id full -p ~/Pictures/Screenshots
+bindsym Print exec --no-startup-id flameshot full -p ~/Pictures/Screenshots
 bindsym Ctrl+Print exec --no-startup-id flameshot gui -p ~/Pictures/Screenshots
 bindsym $mod+e exec pcmanfm
 
@@ -207,6 +201,8 @@ for_window [class="Spotify"] move to workspace $ws3
 exec --no-startup-id xrdb -merge $HOME/.Xresources
 exec --no-startup-id nm-applet&
 exec --no-startup-id xfce4-power-manager
+
+exec --no-startup-id xset r rate 400 44
 
 # Displays
 exec --no-startup-id autorandr --change
