@@ -39,9 +39,9 @@ set ignorecase
 set smartcase
 set hlsearch
 
-set wildignore+=*.swp,*.bak
-set wildignore+=*.pyc,*.class,*.sln,*.aps
+set wildignore+=*.swp
 set wildignore+=*.vcxproj,*.vcproj,*.sdf,*.filters,*.user
+set wildignore+=*.pyc,*.class,*.sln,*.aps
 set wildignore+=*.dll,*.exe,*.pdb,*.lib,*.o,*.db
 set wildignore+=*/.git/*,*/.hg/*,*/.svn/*
 set wildignore+=.git/*,.hg/*,.svn/*

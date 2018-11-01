@@ -23,7 +23,7 @@ floating_modifier $mod
 # start a terminal
 # bindsym $mod+Return exec xterm -geometry 112x30
 # bindsym $mod+Return exec kitty
-bindsym $mod+Return exec xterm -geometry 112x30
+bindsym $mod+Return exec urxvt -geometry 112x30
 
 # kill focused window
 bindsym $mod+q kill
@@ -183,6 +183,7 @@ assign [class="^Nightly$"] → $ws2
 assign [class="^Navigator$"] → $ws2
 assign [class="^kmail2$"] → $ws10
 assign [class="^Thunderbird$"] → $ws10
+assign [class="^Slack$"] → $ws9
 
 # Special windows
 for_window [window_role="pop-up"] floating enable
@@ -196,6 +197,7 @@ for_window [class="^Nm-connection-editor$"] floating enable
 for_window [class="^Pcmanfm$"] floating enable
 for_window [class="^Vncviewer$"] floating enable
 for_window [class="Spotify"] move to workspace $ws3
+for_window [class="Slack"] move to workspace $ws9
 
 # Some information
 exec --no-startup-id xrdb -merge $HOME/.Xresources

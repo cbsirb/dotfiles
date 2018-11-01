@@ -272,6 +272,10 @@
 (define-key input-decode-map [?\C-m] [C-m])
 (define-key input-decode-map [?\C-\M-m] [C-M-m])
 
+(bind-key "M-u" #'upcase-dwim)
+(bind-key "M-l" #'downcase-dwim)
+(bind-key "M-c" #'capitalize-dwim)
+
 (bind-key "C-c t d" #'toggle-debug-on-error)
 (bind-key "C-c t q" #'toggle-debug-on-quit)
 (bind-key [remap just-one-space] #'cycle-spacing)
@@ -679,6 +683,7 @@ _SWITCH should be 'diff'."
   :hook (prog-mode . editorconfig-mode))
 
 (use-package eglot
+  :disabled t
   :hook ((c-mode-common . eglot-ensure)
          (python-mode . eglot-ensure))
   :init
