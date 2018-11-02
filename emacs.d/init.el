@@ -683,12 +683,22 @@ _SWITCH should be 'diff'."
   :hook (prog-mode . editorconfig-mode))
 
 (use-package eglot
-  :disabled t
   :hook ((c-mode-common . eglot-ensure)
          (python-mode . eglot-ensure))
   :init
   (csetq eglot-events-buffer-size 0)
   :config
+
+  (cl-defmethod eglot-initialization-options ((server eglot-cquery))
+    "Passes through required cquery initialization options"
+    (let* ((root (car (project-roots (eglot--project server))))
+           (cache (expand-file-name ".cquery_cached_index/" root)))
+      (list :cacheDirectory (file-name-as-directory cache)
+            :progressReportFrequencyMs -1
+            :diagnostics (list :onType :json-false)
+            :completion (list :detailedLabel t)
+            )))
+
   (csetq eglot-ignored-server-capabilites
          '(:documentHighlightProvider
            :foldingRangeProvider
@@ -696,7 +706,9 @@ _SWITCH should be 'diff'."
            :codeLensProvider
            :documentLinkProvider
            :colorProvider))
-  (add-to-list 'eglot-server-programs '((c++-mode c-mode) . (eglot-cquery "cquery"))))
+
+  (add-to-list 'eglot-server-programs
+               '((c++-mode c-mode) . (eglot-cquery "cquery"))))
 
 (use-package eshell
   :ensure nil
