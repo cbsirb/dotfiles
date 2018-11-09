@@ -151,6 +151,7 @@
 (csetq eval-expression-print-level nil)
 
 (csetq read-file-name-completion-ignore-case t)
+(csetq completion-ignore-case t)
 
 (csetq column-number-indicator-zero-based nil)
 

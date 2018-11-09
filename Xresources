@@ -112,6 +112,7 @@ URxvt*perl-ext-common:
 
 *background:            S_base3
 *foreground:            S_base00
+*borderColor:           S_base3
 
 xterm*background:       S_base3
 xterm*foreground:       S_base00
