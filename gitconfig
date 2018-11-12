@@ -52,8 +52,8 @@
     # ignore executable bit
     fileMode = false
 
-[pull]
-    rebase = true
+; [pull]
+;     rebase = true
 
 ; [transfer]
 ;     fsckobjects = true

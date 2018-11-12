@@ -11,7 +11,7 @@
   "Set the VARIABLE to VALUE, but use `set-default' if needed."
   `(funcall (or (get ',variable 'custom-set) 'set-default) ',variable ,value))
 
-(csetq gc-cons-threshold (* 5 gc-cons-threshold))
+(csetq gc-cons-threshold (* 10 gc-cons-threshold))
 
 ;; Apparently, when using default values, the input lag and hangs disappears
 ;; (csetq gc-cons-threshold (* 384 1024 1024))
@@ -117,6 +117,8 @@
 (csetq large-file-warning-threshold (* 50 1024 1024))
 (csetq directory-free-space-args "-kh")
 
+(csetq completion-ignore-case t)
+
 (csetq sentence-end-double-space nil)
 
 (csetq ad-redefinition-action 'accept)
@@ -151,7 +153,6 @@
 (csetq eval-expression-print-level nil)
 
 (csetq read-file-name-completion-ignore-case t)
-(csetq completion-ignore-case t)
 
 (csetq column-number-indicator-zero-based nil)
 
@@ -272,6 +273,11 @@
 ;;; Keybindings
 (define-key input-decode-map [?\C-m] [C-m])
 (define-key input-decode-map [?\C-\M-m] [C-M-m])
+
+;; Setup the gui appearance
+(when (fboundp 'tool-bar-mode) (tool-bar-mode 0))
+(when (fboundp 'menu-bar-mode) (menu-bar-mode 0))
+(when (fboundp 'scroll-bar-mode) (scroll-bar-mode 0))
 
 (bind-key "M-u" #'upcase-dwim)
 (bind-key "M-l" #'downcase-dwim)
@@ -886,7 +892,7 @@ _q_ quit            _c_ create          _p_ previous
   :hook ((find-file . highlight-symbol-mode)
          (find-file . highlight-symbol-nav-mode))
   :init
-  (csetq highlight-symbol-idle-delay 0.2)
+  (csetq highlight-symbol-idle-delay 0.4)
   (csetq highlight-symbol-highlight-single-occurrence nil))
 
 (use-package hl-todo
@@ -1165,6 +1171,15 @@ _q_ quit            _c_ create          _p_ previous
 
 (use-package nasm-mode
   :mode "\\.asm\\'")
+
+(use-package objed
+  :bind (("C-\\" . objed-activate)
+         :map objed-map
+         ("-" . objed-forward-symbol)
+         ("RET" . objed-quit))
+  :config
+  (add-to-list 'objed-keeper-commands 'undo-tree-undo)
+  (add-to-list 'objed-keeper-commands 'undo-tree-redo))
 
 (use-package origami
   :hook (prog-mode . origami-mode)
