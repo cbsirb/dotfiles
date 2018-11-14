@@ -274,11 +274,6 @@
 (define-key input-decode-map [?\C-m] [C-m])
 (define-key input-decode-map [?\C-\M-m] [C-M-m])
 
-;; Setup the gui appearance
-(when (fboundp 'tool-bar-mode) (tool-bar-mode 0))
-(when (fboundp 'menu-bar-mode) (menu-bar-mode 0))
-(when (fboundp 'scroll-bar-mode) (scroll-bar-mode 0))
-
 (bind-key "M-u" #'upcase-dwim)
 (bind-key "M-l" #'downcase-dwim)
 (bind-key "M-c" #'capitalize-dwim)
