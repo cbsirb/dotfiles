@@ -76,6 +76,7 @@
 
 ;;; Packages needed no matter what, and usually others are depended on it
 (use-package habamax-theme
+  :when window-system
   :config
   (load-theme 'habamax t))
 
@@ -271,8 +272,9 @@
   (setq-local show-trailing-whitespace nil))
 
 ;;; Keybindings
-(define-key input-decode-map [?\C-m] [C-m])
-(define-key input-decode-map [?\C-\M-m] [C-M-m])
+(when window-system
+  (define-key input-decode-map [?\C-m] [C-m])
+  (define-key input-decode-map [?\C-\M-m] [C-M-m]))
 
 (bind-key "M-u" #'upcase-dwim)
 (bind-key "M-l" #'downcase-dwim)
