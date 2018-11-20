@@ -323,21 +323,6 @@
   (dolist (ign-dir grep-find-ignored-directories)
     (add-to-list 'ag-ignore-list ign-dir)))
 
-(use-package anzu
-  :demand t
-  :bind (([remap query-replace] . #'anzu-query-replace)
-         ([remap query-replace-regexp] . #'anzu-query-replace-regexp)
-         ("C-c r" . #'anzu-query-replace-at-cursor-thing)
-         :map isearch-mode-map
-         ([remap isearch-query-replace] . #'anzu-isearch-query-replace)
-         ([remap isearch-query-replace-regexp] . #'anzu-isearch-query-replace-regexp))
-  :diminish
-  :init
-  (csetq anzu-replace-to-string-separator " => ")
-
-  :config
-  (global-anzu-mode t))
-
 (use-package autorevert
   :ensure nil
   :diminish auto-revert-mode
@@ -598,11 +583,6 @@ Taken from http://stackoverflow.com/a/3072831/355252."
   :init
   (csetq diff-switches '("-u" "-p" "-w")))
 
-(use-package diff-hl
-  :disabled t
-  :hook ((magit-post-refresh . diff-hl-magit-post-refresh)
-         (find-file . diff-hl-mode)))
-
 (use-package dired
   :ensure nil
   :bind (:map dired-mode-map
@@ -680,11 +660,6 @@ _SWITCH should be 'diff'."
   (csetq ediff-show-clashes-only t)
   (csetq ediff-split-window-function #'split-window-horizontally)
   (csetq ediff-window-setup-function #'ediff-setup-windows-plain))
-
-(use-package editorconfig
-  :disabled t
-  :diminish
-  :hook (prog-mode . editorconfig-mode))
 
 (use-package eglot
   :hook ((c-mode-common . eglot-ensure)
@@ -889,8 +864,9 @@ _q_ quit            _c_ create          _p_ previous
   :hook ((find-file . highlight-symbol-mode)
          (find-file . highlight-symbol-nav-mode))
   :init
-  (csetq highlight-symbol-idle-delay 0.4)
-  (csetq highlight-symbol-highlight-single-occurrence nil))
+  (csetq highlight-symbol-occurrence-message '())
+  (csetq highlight-symbol-idle-delay 0.2)
+  (csetq highlight-symbol-highlight-single-occurrence t))
 
 (use-package hl-todo
   :config
@@ -962,6 +938,7 @@ _q_ quit            _c_ create          _p_ previous
 (use-package isearch
   :ensure nil
   :init
+  (csetq isearch-lazy-count t)
   (csetq isearch-allow-scroll t))
 
 (use-package ivy
@@ -1007,13 +984,11 @@ _q_ quit            _c_ create          _p_ previous
   (csetq json-reformat:indent-width 4)
   (csetq json-reformat:pretty-string? t))
 
-(use-package jump-char
-  :bind (("M-m" . #'jump-char-forward)
-         ("M-M" . #'jump-char-backward))
-  :init
-  (unless (boundp 'lazy-highlight-face)
-    (defvar lazy-highlight-face 'lazy-highlight
-      "Was removed from emacs 26, so redefine it until jump-char fixes it.")))
+(use-package iy-go-to-char
+  :bind (("M-m" . #'iy-go-to-char)
+         ("M-M" . #'iy-go-to-char-backward)
+         ("C-c ;" . #'iy-go-to-or-up-to-continue)
+         ("C-c ," . #'iy-go-to-or-up-to-continue-backward)))
 
 (use-package key-chord
   :init
