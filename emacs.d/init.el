@@ -971,6 +971,12 @@ _q_ quit            _c_ create          _p_ previous
   :config
   (ivy-rich-mode t))
 
+(use-package iy-go-to-char
+  :bind (("M-m" . #'iy-go-to-char)
+         ("M-M" . #'iy-go-to-char-backward)
+         ("C-c ;" . #'iy-go-to-or-up-to-continue)
+         ("C-c ," . #'iy-go-to-or-up-to-continue-backward)))
+
 (use-package js2-mode
   :defer t
   :mode "\\.js\\'"
@@ -983,12 +989,6 @@ _q_ quit            _c_ create          _p_ previous
   :init
   (csetq json-reformat:indent-width 4)
   (csetq json-reformat:pretty-string? t))
-
-(use-package iy-go-to-char
-  :bind (("M-m" . #'iy-go-to-char)
-         ("M-M" . #'iy-go-to-char-backward)
-         ("C-c ;" . #'iy-go-to-or-up-to-continue)
-         ("C-c ," . #'iy-go-to-or-up-to-continue-backward)))
 
 (use-package key-chord
   :init
