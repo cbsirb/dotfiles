@@ -11,7 +11,7 @@
   "Set the VARIABLE to VALUE, but use `set-default' if needed."
   `(funcall (or (get ',variable 'custom-set) 'set-default) ',variable ,value))
 
-(csetq gc-cons-threshold (* 10 gc-cons-threshold))
+;; (csetq gc-cons-threshold (* 10 gc-cons-threshold))
 
 ;; Apparently, when using default values, the input lag and hangs disappears
 ;; (csetq gc-cons-threshold (* 384 1024 1024))
@@ -250,6 +250,7 @@
                    "*Occur*"
                    "*xref*"
                    "*Flymake diagnostics"
+                   "*Flycheck"
                    "*ivy-"
                    "*hgrep*"
                    ))
@@ -455,9 +456,7 @@ For anything else there is ctags."
 
   (use-package user-completion
     :load-path "lisp"
-    :bind (("C-c /" . #'user-complete-line)))
-  :config
-  (csetq company-backends (append '(company-capf) (delete 'company-capf company-backends))))
+    :bind (("C-c /" . #'user-complete-line))))
 
 (use-package compile
   :ensure nil
@@ -531,14 +530,18 @@ Taken from http://stackoverflow.com/a/3072831/355252."
   ;; :commands (lsp-cquery-enable)
   :bind (:map c-mode-base-map
               ("M-o" . #'user-cquery-show/body))
+  :hook (c-mode-common . lsp-cquery-enable)
   :preface
   (defhydra user-cquery-show (:exit t)
     ("b" (cquery-xref-find-custom "$cquery/base") "base")
     ("c" (cquery-xref-find-custom "$cquery/callers") "callers")
     ("d" (cquery-xref-find-custom "$cquery/derived") "derived")
-    ("v" (cquery-xref-find-custom "$cquery/vars") "vars"))
+    ("v" (cquery-xref-find-custom "$cquery/vars") "vars")
+
+    ("." lsp-ui-peek-find-references "references")
+    ("s" lsp-ui-peek-find-workspace-symbol "symbol"))
   :init
-  (csetq cquery-extra-init-params '(:diagnostics (:frequencyMs -1)))
+  (csetq cquery-extra-init-params '(:diagnostics (:onType :json-false) :emitInactiveRegions t))
   (csetq cquery-project-roots '("compile_commands.json")))
 
 (use-package comint
@@ -662,6 +665,7 @@ _SWITCH should be 'diff'."
   (csetq ediff-window-setup-function #'ediff-setup-windows-plain))
 
 (use-package eglot
+  :disabled
   :hook ((c-mode-common . eglot-ensure)
          (python-mode . eglot-ensure))
   :init
@@ -772,13 +776,55 @@ _q_ quit            _c_ create          _p_ previous
   :config
   (eyebrowse-mode t))
 
-(use-package flymake
-  :ensure nil
-  :bind (("C-c f n" . #'flymake-goto-next-error)
-         ("C-c f p" . #'flymake-goto-prev-error))
+(use-package flycheck
+  :commands (flycheck-mode
+             flycheck-select-checker
+             flycheck-next-error
+             flycheck-previous-error)
+  :bind (("C-c f" . user-flycheck-hydra/body)
+         ("C-c t f" . flycheck-mode))
   :init
-  (csetq flymake-no-changes-timeout nil)
-  (csetq flymake-start-syntax-check-on-newline nil))
+
+  (csetq flycheck-display-errors-delay 0.0)
+  (csetq flycheck-check-syntax-automatically '(save mode-enabled))
+  (csetq flycheck-standard-error-navigation nil)
+  (csetq flycheck-display-errors-function
+         #'flycheck-display-error-messages-unless-error-list)
+
+  :config
+  (defhydra user-flycheck-hydra (:color pink)
+    "
+^
+^Flycheck^          ^Errors^            ^Checker^
+^────────^──────────^──────^────────────^───────^───────────
+_q_ quit            _p_ previous        _?_ describe
+_v_ verify setup    _n_ next            _d_ disable
+^^                  _f_ check           _s_ select
+^^                  _l_ list            ^^
+^^                  _w_ copy            ^^
+^^                  ^^                  ^^
+"
+    ("q" nil)
+    ("p" flycheck-previous-error)
+    ("n" flycheck-next-error)
+    ("?" flycheck-describe-checker :color blue)
+    ("d" flycheck-disable-checker :color blue)
+    ("f" flycheck-buffer)
+    ("l" flycheck-list-errors :color blue)
+    ("m" flycheck-manual :color blue)
+    ("s" flycheck-select-checker :color blue)
+    ("v" flycheck-verify-setup :color blue)
+    ("w" flycheck-copy-errors-as-kill :color blue))
+  (global-flycheck-mode t))
+
+
+;; (use-package flymake
+;;   :ensure nil
+;;   :bind (("C-c f n" . #'flymake-goto-next-error)
+;;          ("C-c f p" . #'flymake-goto-prev-error))
+;;   :init
+;;   (csetq flymake-no-changes-timeout nil)
+;;   (csetq flymake-start-syntax-check-on-newline nil))
 
 (use-package grep
   :ensure nil
@@ -1007,6 +1053,43 @@ _q_ quit            _c_ create          _p_ previous
   ;; (key-seq-define-global "jf" #'helm-find-files))
   (key-seq-define-global "jj" #'ivy-switch-buffer)
   (key-seq-define-global "jf" #'counsel-find-file))
+
+(use-package lsp-mode
+  :init
+  ;; performance reasons
+  (csetq lsp-enable-on-type-formatting nil)
+  (csetq lsp-enable-indentation nil)
+  (csetq lsp-before-save-edits nil)
+
+  ;; annoying to filter with ivy
+  (csetq lsp-imenu-show-container-name nil)
+  (add-hook 'lsp-after-open-hook 'lsp-enable-imenu)
+
+  :config
+  (use-package company-lsp
+    :init
+    (csetq company-lsp-async t)
+    (csetq company-lsp-cache-candidates nil)
+
+    (add-hook 'lsp-mode-hook (lambda () (add-to-list 'company-backends 'company-lsp))))
+
+  (use-package lsp-ui
+    :init
+    (csetq lsp-ui-doc-enable nil)
+
+    (csetq lsp-ui-peek-always-show t)
+
+    (csetq lsp-ui-sideline-enable nil)
+    (csetq lsp-ui-sideline-show-hover nil)
+    (csetq lsp-ui-sideline-show-symbol nil)
+    (csetq lsp-ui-sideline-ignore-duplicate t)
+
+    (csetq lsp-eldoc-hook (delete #'lsp-document-highlight lsp-eldoc-hook))
+
+    (add-hook 'lsp-mode-hook #'lsp-ui-mode)))
+
+(use-package lsp-python
+  :hook (python-mode . lsp-python-enable))
 
 (use-package magit
   :bind (("C-x g" . magit-status))
