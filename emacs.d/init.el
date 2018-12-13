@@ -11,7 +11,7 @@
   "Set the VARIABLE to VALUE, but use `set-default' if needed."
   `(funcall (or (get ',variable 'custom-set) 'set-default) ',variable ,value))
 
-;; (csetq gc-cons-threshold (* 10 gc-cons-threshold))
+(csetq gc-cons-threshold (* 10 gc-cons-threshold))
 
 ;; Apparently, when using default values, the input lag and hangs disappears
 ;; (csetq gc-cons-threshold (* 384 1024 1024))
@@ -671,35 +671,6 @@ _SWITCH should be 'diff'."
   (csetq ediff-split-window-function #'split-window-horizontally)
   (csetq ediff-window-setup-function #'ediff-setup-windows-plain))
 
-(use-package eglot
-  :disabled
-  :hook ((c-mode-common . eglot-ensure)
-         (python-mode . eglot-ensure))
-  :init
-  (csetq eglot-events-buffer-size 0)
-  :config
-
-  (cl-defmethod eglot-initialization-options ((server eglot-cquery))
-    "Passes through required cquery initialization options"
-    (let* ((root (car (project-roots (eglot--project server))))
-           (cache (expand-file-name ".cquery_cached_index/" root)))
-      (list :cacheDirectory (file-name-as-directory cache)
-            :progressReportFrequencyMs -1
-            :diagnostics (list :onType :json-false)
-            :completion (list :detailedLabel t)
-            )))
-
-  (csetq eglot-ignored-server-capabilites
-         '(:documentHighlightProvider
-           :foldingRangeProvider
-           :documentOnTypeFormattingProvider
-           :codeLensProvider
-           :documentLinkProvider
-           :colorProvider))
-
-  (add-to-list 'eglot-server-programs
-               '((c++-mode c-mode) . (eglot-cquery "cquery"))))
-
 (use-package eshell
   :ensure nil
   :defer t
@@ -721,23 +692,6 @@ _SWITCH should be 'diff'."
   (csetq eshell-ls-dired-initial-args (quote ("-h")))
   (csetq eshell-ls-exclude-regexp "~\\'")
   (csetq eshell-ls-initial-args "-h")
-  ;; (csetq eshell-prompt-function (lambda ()
-  ;;                                 (concat
-  ;;                                  (abbreviate-file-name
-  ;;                                   (eshell/pwd))
-  ;;                                  (if (= (user-uid) 0) " # " " $ "))))
-  ;; (csetq eshell-rebind-keys-alist
-  ;;   (quote
-  ;;    (([(control 97)]
-  ;;      . eshell-bol)
-  ;;     ([home]
-  ;;      . eshell-bol)
-  ;;     ([(control 100)]
-  ;;      . eshell-delchar-or-maybe-eof)
-  ;;     ([backspace]
-  ;;      . eshell-delete-backward-char)
-  ;;     ([delete]
-  ;;      . eshell-delete-backward-char))))
   (csetq eshell-stringify-t nil))
 
 (use-package esh-module
@@ -783,48 +737,6 @@ _q_ quit            _c_ create          _p_ previous
   :config
   (eyebrowse-mode t))
 
-(use-package flycheck
-  :disabled
-  :commands (flycheck-mode
-             flycheck-select-checker
-             flycheck-next-error
-             flycheck-previous-error)
-  :bind (("C-c f" . user-flycheck-hydra/body)
-         ("C-c t f" . flycheck-mode))
-  :init
-
-  (csetq flycheck-display-errors-delay 0.0)
-  (csetq flycheck-check-syntax-automatically '(save mode-enabled))
-  (csetq flycheck-standard-error-navigation nil)
-  (csetq flycheck-display-errors-function
-         #'flycheck-display-error-messages-unless-error-list)
-
-  :config
-  (defhydra user-flycheck-hydra (:color pink)
-    "
-^
-^Flycheck^          ^Errors^            ^Checker^
-^────────^──────────^──────^────────────^───────^───────────
-_q_ quit            _p_ previous        _?_ describe
-_v_ verify setup    _n_ next            _d_ disable
-^^                  _f_ check           _s_ select
-^^                  _l_ list            ^^
-^^                  _w_ copy            ^^
-^^                  ^^                  ^^
-"
-    ("q" nil)
-    ("p" flycheck-previous-error)
-    ("n" flycheck-next-error)
-    ("?" flycheck-describe-checker :color blue)
-    ("d" flycheck-disable-checker :color blue)
-    ("f" flycheck-buffer)
-    ("l" flycheck-list-errors :color blue)
-    ("m" flycheck-manual :color blue)
-    ("s" flycheck-select-checker :color blue)
-    ("v" flycheck-verify-setup :color blue)
-    ("w" flycheck-copy-errors-as-kill :color blue))
-  (global-flycheck-mode t))
-
 
 (use-package flymake
   :ensure nil
@@ -850,66 +762,11 @@ _v_ verify setup    _n_ next            _d_ disable
   :init
   (csetq gdb-many-windows t))
 
-;; (use-package helm
-;;   :diminish
-;;   :demand
-;;   :bind (([remap execute-extended-command] . #'helm-M-x)
-;;          ([remap find-file] . #'helm-find-files)
-;;          ([remap imenu] . #'helm-imenu)
-;;          ([remap switch-to-buffer] . #'helm-mini)
-;;          ([remap yank-pop] . #'helm-show-kill-ring)
-;;          ("C-c h" . #'helm-command-prefix)
-;;          ("C-h SPC" . #'helm-all-mark-rings)
-;;          :map minibuffer-local-map
-;;          ("C-c C-l" . #'helm-minibuffer-history)
-;;          :map helm-map
-;;          ("<tab>" . #'helm-execute-persistent-action)
-;;          ("C-i" . #'helm-execute-persistent-action)
-;;          ("C-z" . #'helm-select-action))
-;;   :hook (helm-minibuffer-set-up . helm-hide-minibuffer-maybe)
-;;   :init
-;;   (require 'helm-config)
-
-;;   ;; Display in own frame
-;;   ;; (csetq helm-display-function 'helm-display-buffer-in-own-frame)
-;;   ;; (csetq helm-display-buffer-reuse-frame t)
-;;   ;; (csetq helm-use-undecorated-frame-option t)
-
-;;   (setq helm-autoresize-max-height 20)
-;;   (setq helm-autoresize-min-height 20)
-
-;;   (csetq helm-echo-input-in-header-line t)
-;;   (csetq helm-ff-file-name-history-use-recentf t)
-;;   (csetq helm-net-prefer-curl t)
-;;   (csetq helm-split-window-inside-p t)
-
-;;   :config
-;;   (helm-mode t)
-;;   (helm-autoresize-mode t))
-
-;; (use-package helm-projectile
-;;   :after helm
-;;   :config
-;;   (helm-projectile-on))
-
-;; (use-package helm-descbinds
-;;   :after helm
-;;   :config
-;;   (helm-descbinds-mode t))
-
 (use-package hexl
   :if (< emacs-major-version 27)
   :ensure nil
   :init
   (csetq hexl-bits 8))
-
-(use-package highlight-indent-guides
-  :disabled
-  :diminish
-  :hook (prog-mode . highlight-indent-guides-mode)
-  :init
-  (csetq highlight-indent-guides-method 'character)
-  (csetq highlight-indent-guides-character ?\|))
 
 (use-package highlight-symbol
   :diminish
@@ -1101,11 +958,6 @@ _v_ verify setup    _n_ next            _d_ disable
     (csetq lsp-eldoc-hook (delete #'lsp-document-highlight lsp-eldoc-hook))
 
     (add-hook 'lsp-mode-hook #'lsp-ui-mode)))
-
-(use-package lsp-python
-  :disabled
-  :after lsp-mode
-  :hook (python-mode . lsp))
 
 (use-package magit
   :bind (("C-x g" . magit-status))
