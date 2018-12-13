@@ -143,6 +143,10 @@ command! SS echo map(synstack(line('.'), col('.')), 'synIDattr(v:val, "name")')
 
 command! -nargs=* -bang ReplaceSymbolInFunction silent call func#replace_symbol_in_function(<f-args>, '<bang>')
 
+command! -range=% TR let b:wv = winsaveview() |
+            \ keeppattern <line1>,<line2>s/\s\+$// |
+            \ call winrestview(b:wv)
+
 """"""""""""
 " Mappings "
 """"""""""""
@@ -246,6 +250,13 @@ nmap <silent> [w <Plug>(ale_previous)
 nmap <silent> ]w <Plug>(ale_next)
 nmap <silent> ]W <Plug>(ale_last)
 
+" Lsp stuff
+nnoremap gd :LspDefinition<CR>
+nnoremap gr :LspReferences<CR>
+nnoremap <Space>i :LspDocumentSymbol<CR>
+nnoremap <Space>I :LspWorkspaceSymbol<CR>
+
+
 """"""""""""""""""""""""""""""""""
 " Built-in plugins configuration "
 """"""""""""""""""""""""""""""""""
@@ -294,6 +305,8 @@ let g:ale_statusline_format = ["\u2717 %d", "\u271a %d", "\u2713 ok"]
 let g:ale_echo_msg_format   = '[%linter%] %s [%severity%]'
 
 let g:ale_python_pylint_executable = 'pylint'
+let g:ale_python_auto_pipenv = 1
+let g:ale_python_pylint_auto_pipenv = 1
 
 let g:ale_linters = {
       \ 'cpp': ['gcc'],
@@ -302,3 +315,55 @@ let g:ale_linters = {
       \}
 
 let g:fzf_layout = { 'down': '~20%' }
+
+if executable('cquery')
+   au User lsp_setup call lsp#register_server({
+      \ 'name': 'cquery',
+      \ 'cmd': {server_info->['cquery']},
+      \ 'root_uri': {server_info->lsp#utils#path_to_uri(lsp#utils#find_nearest_parent_file_directory(lsp#utils#get_buffer_path(), 'compile_commands.json'))},
+      \ 'initialization_options': { 'cacheDirectory': '/tmp/.cquery_cache' },
+      \ 'whitelist': ['c', 'ch', 'cpp', 'objc', 'objcpp', 'cc'],
+      \ })
+endif
+
+if executable('pyls')
+    au User lsp_setup call lsp#register_server({
+        \ 'name': 'pyls',
+        \ 'cmd': {server_info->['pyls']},
+        \ 'whitelist': ['python'],
+        \ })
+endif
+
+let g:lsp_signs_enabled = 1
+let g:lsp_diagnostics_echo_cursor = 1
+let g:lsp_signs_error = {'text': '✗'}
+let g:lsp_signs_warning = {'text': '‼'}
+let g:lsp_async_completion = 1
+
+function! LspEnablePerBuffer() abort
+  ALEDisableBuffer
+  nnoremap <buffer> <Space>r :LspRename<CR>
+  setlocal omnifunc=lsp#complete
+endfunction
+
+function! LspPerBuffer() abort
+  let l:servers = lsp#get_whitelisted_servers()
+
+  if 0 == len(l:servers)
+      return
+  endif
+
+  for l:server in l:servers
+    if lsp#get_server_status(l:server) == 'running'
+      call LspEnablePerBuffer()
+      break
+    endif
+  endfor
+
+endfunction
+
+augroup LSP
+  autocmd!
+  autocmd User lsp_server_init call LspEnablePerBuffer()
+  autocmd BufWinEnter * call LspPerBuffer()
+augroup END

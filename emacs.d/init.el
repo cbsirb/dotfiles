@@ -413,7 +413,8 @@ For anything else there is ctags."
   (defun user-c-mode-common-hook ()
     "Hook for C/C++ mode."
     (c-toggle-electric-state t)
-    (c-toggle-syntactic-indentation t))
+    (c-toggle-syntactic-indentation t)
+    (lsp-ui-doc-enable nil))
 
   :config
   (c-add-style "allman" user-allman-style)
@@ -527,10 +528,8 @@ Taken from http://stackoverflow.com/a/3072831/355252."
 
 (use-package cquery
   :after cc-mode
-  ;; :commands (lsp-cquery-enable)
   :bind (:map c-mode-base-map
               ("M-o" . #'user-cquery-show/body))
-  :hook (c-mode-common . lsp-cquery-enable)
   :preface
   (defhydra user-cquery-show (:exit t)
     ("b" (cquery-xref-find-custom "$cquery/base") "base")
@@ -777,6 +776,7 @@ _q_ quit            _c_ create          _p_ previous
   (eyebrowse-mode t))
 
 (use-package flycheck
+  :disabled
   :commands (flycheck-mode
              flycheck-select-checker
              flycheck-next-error
@@ -818,13 +818,13 @@ _v_ verify setup    _n_ next            _d_ disable
   (global-flycheck-mode t))
 
 
-;; (use-package flymake
-;;   :ensure nil
-;;   :bind (("C-c f n" . #'flymake-goto-next-error)
-;;          ("C-c f p" . #'flymake-goto-prev-error))
-;;   :init
-;;   (csetq flymake-no-changes-timeout nil)
-;;   (csetq flymake-start-syntax-check-on-newline nil))
+(use-package flymake
+  :ensure nil
+  :bind (("C-c f n" . #'flymake-goto-next-error)
+         ("C-c f p" . #'flymake-goto-prev-error))
+  :init
+  (csetq flymake-no-changes-timeout nil)
+  (csetq flymake-start-syntax-check-on-newline nil))
 
 (use-package grep
   :ensure nil
@@ -896,6 +896,7 @@ _v_ verify setup    _n_ next            _d_ disable
   (csetq hexl-bits 8))
 
 (use-package highlight-indent-guides
+  :disabled
   :diminish
   :hook (prog-mode . highlight-indent-guides-mode)
   :init
@@ -985,7 +986,8 @@ _v_ verify setup    _n_ next            _d_ disable
   :ensure nil
   :init
   (csetq isearch-lazy-count t)
-  (csetq isearch-allow-scroll t))
+  (csetq isearch-allow-scroll 'unlimited)
+  (csetq isearch-yank-on-move 'shift))
 
 (use-package ivy
   :demand t
@@ -1055,6 +1057,7 @@ _v_ verify setup    _n_ next            _d_ disable
   (key-seq-define-global "jf" #'counsel-find-file))
 
 (use-package lsp-mode
+  :hook (prog-mode . lsp)
   :init
   ;; performance reasons
   (csetq lsp-enable-on-type-formatting nil)
@@ -1066,6 +1069,8 @@ _v_ verify setup    _n_ next            _d_ disable
   (add-hook 'lsp-after-open-hook 'lsp-enable-imenu)
 
   :config
+  (require 'lsp-clients)
+
   (use-package company-lsp
     :init
     (csetq company-lsp-async t)
@@ -1075,7 +1080,8 @@ _v_ verify setup    _n_ next            _d_ disable
 
   (use-package lsp-ui
     :init
-    (csetq lsp-ui-doc-enable nil)
+    (csetq lsp-ui-doc-enable t)
+    (csetq lsp-ui-doc-include-signature t)
 
     (csetq lsp-ui-peek-always-show t)
 
@@ -1089,7 +1095,9 @@ _v_ verify setup    _n_ next            _d_ disable
     (add-hook 'lsp-mode-hook #'lsp-ui-mode)))
 
 (use-package lsp-python
-  :hook (python-mode . lsp-python-enable))
+  :disabled
+  :after lsp-mode
+  :hook (python-mode . lsp))
 
 (use-package magit
   :bind (("C-x g" . magit-status))
@@ -1611,6 +1619,13 @@ _o_ other            ^^                 ^^
 
   (vhl/define-extension 'vhl-undo-tree #'undo-tree-move #'undo-tree-undo #'undo-tree-redo #'undo)
   (vhl/install-extension 'vhl-undo-tree))
+
+(use-package wdired
+  :after dired
+  :ensure nil
+  :init
+  (csetq wdired-create-parent-directories t)
+  (csetq wdired-allow-to-change-permissions t))
 
 (use-package web-mode
   :defer t

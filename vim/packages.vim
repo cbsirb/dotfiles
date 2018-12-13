@@ -46,6 +46,10 @@ call minpac#add('sgur/vim-textobj-parameter') " ,
 
 call minpac#add('junegunn/fzf')
 
+call minpac#add('prabirshrestha/async.vim')
+call minpac#add('prabirshrestha/vim-lsp')
+call minpac#add('pdavydov108/vim-lsp-cquery')
+
 " Colorschemes
 call minpac#add('robertmeta/nofrils', {'type':'opt'})
 call minpac#add('romainl/Apprentice', {'type':'opt'})
