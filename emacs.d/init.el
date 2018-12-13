@@ -589,10 +589,18 @@ Taken from http://stackoverflow.com/a/3072831/355252."
   :ensure nil
   :bind (:map dired-mode-map
               ("SPC" . #'dired-mark)
-              ("C-c C-w" . #'wdired-change-to-wdired-mode)
               ("<C-return>" . #'user-open-in-external-app)
-              ("<tab>" . #'dired-next-window))
+              ("<tab>" . #'user-dired-next-window))
   :preface
+  (defun user-dired-next-window ()
+    (interactive)
+    (let ((next (car (cl-remove-if-not #'(lambda (wind)
+                                           (with-current-buffer (window-buffer wind)
+                                             (eq major-mode 'dired-mode)))
+                                       (cdr (window-list))))))
+      (when next
+        (select-window next))))
+
   (defun user-open-in-external-app ()
     "Open the file(s) at point with an external application."
     (interactive)
@@ -1623,6 +1631,8 @@ _o_ other            ^^                 ^^
 (use-package wdired
   :after dired
   :ensure nil
+  :bind (:map dired-mode-map
+              ("C-c M-w" . #'wdired-change-to-wdired-mode))
   :init
   (csetq wdired-create-parent-directories t)
   (csetq wdired-allow-to-change-permissions t))
