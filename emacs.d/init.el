@@ -11,7 +11,7 @@
   "Set the VARIABLE to VALUE, but use `set-default' if needed."
   `(funcall (or (get ',variable 'custom-set) 'set-default) ',variable ,value))
 
-(csetq gc-cons-threshold (* 10 gc-cons-threshold))
+(csetq gc-cons-threshold (* 20 gc-cons-threshold))
 
 ;; Apparently, when using default values, the input lag and hangs disappears
 ;; (csetq gc-cons-threshold (* 384 1024 1024))
@@ -58,11 +58,11 @@
 (add-to-list 'load-path (expand-file-name "lisp" user-emacs-directory))
 (add-to-list 'load-path (expand-file-name "site-lisp" user-emacs-directory))
 
-(add-hook 'after-init-hook
-          (lambda ()
-            (message "Time to load init file: %s"
-                     (emacs-init-time))
-            (garbage-collect)))
+;; (add-hook 'after-init-hook
+;;           (lambda ()
+;;             (message "Time to load init file: %s"
+;;                      (emacs-init-time))
+;;             (garbage-collect)))
 
 ;; Install use-package if needed
 (unless (package-installed-p 'use-package)
@@ -72,11 +72,14 @@
 (csetq use-package-enable-imenu-support t)
 (csetq use-package-expand-minimally t)
 (csetq use-package-always-ensure t)
+(csetq use-package-compute-statistics t)
 (require 'use-package)
 
 ;;; Packages needed no matter what, and usually others are depended on it
 (use-package habamax-theme
   :when window-system
+  :init
+  (csetq habamax-theme-variable-heading-heights t)
   :config
   (load-theme 'habamax t))
 
@@ -224,12 +227,12 @@
 (set-face-attribute 'default nil
                     :family "Iosevka SS09"
                     :height 105
-                    :weight 'regular)
+                    :weight 'normal)
 
 (set-face-attribute 'variable-pitch nil
                     :family "Fira Sans"
                     :height 110
-                    :weight 'regular)
+                    :weight 'normal)
 
 (when (member "Symbola" (font-family-list))
   (set-fontset-font t 'unicode "Symbola" nil 'prepend))
@@ -239,32 +242,32 @@
 (column-number-mode t)
 (csetq visible-cursor nil)
 
-(csetq display-buffer-alist
-       `((,(rx bos
-               (or "*Compile-Log*"
-                   "*Warnings*"
-                   "*compilation"
-                   "*rg*"
-                   "*grep*"
-                   "*ag search*"
-                   "*Occur*"
-                   "*xref*"
-                   "*Flymake diagnostics"
-                   "*Flycheck"
-                   "*ivy-"
-                   "*hgrep*"
-                   ))
-          (display-buffer-reuse-window
-           display-buffer-in-side-window)
-          (side            . bottom)
-          (reusable-frames . nil)
-          (window-height   . 0.25))
+;; (csetq display-buffer-alist
+;;        `((,(rx bos
+;;                (or "*Compile-Log*"
+;;                    "*Warnings*"
+;;                    "*compilation"
+;;                    "*rg*"
+;;                    "*grep*"
+;;                    "*ag search*"
+;;                    "*Occur*"
+;;                    "*xref*"
+;;                    "*Flymake diagnostics"
+;;                    "*Flycheck"
+;;                    "*ivy-"
+;;                    "*hgrep*"
+;;                    ))
+;;           (display-buffer-reuse-window
+;;            display-buffer-in-side-window)
+;;           (side            . bottom)
+;;           (reusable-frames . nil)
+;;           (window-height   . 0.25))
 
-         ;; Let `display-buffer' reuse visible frames for all buffers. This must be
-         ;; the last entry in `display-buffer-alist', because it overrides any later
-         ;; entry with more specific actions.
-         ("." nil (reusable-frames . nil))
-         ))
+;;          ;; Let `display-buffer' reuse visible frames for all buffers. This must be
+;;          ;; the last entry in `display-buffer-alist', because it overrides any later
+;;          ;; entry with more specific actions.
+;;          ("." nil (reusable-frames . nil))
+;;          ))
 
 ;;; Global functions
 (defun user-results-buffer-hook ()
@@ -277,19 +280,8 @@
   (define-key input-decode-map [?\C-m] [C-m])
   (define-key input-decode-map [?\C-\M-m] [C-M-m]))
 
-(bind-key "M-u" #'upcase-dwim)
-(bind-key "M-l" #'downcase-dwim)
-(bind-key "M-c" #'capitalize-dwim)
-
 (bind-key "C-c t d" #'toggle-debug-on-error)
 (bind-key "C-c t q" #'toggle-debug-on-quit)
-(bind-key [remap just-one-space] #'cycle-spacing)
-(bind-key "M-g" #'goto-line)
-(bind-key "C-8" #'repeat-complex-command)
-
-(bind-key "C-o" #'isearch-occur isearch-mode-map)
-(bind-key "<tab>" #'isearch-repeat-forward isearch-mode-map)
-(bind-key "<backtab>" #'isearch-repeat-backward isearch-mode-map)
 
 (unbind-key "C-z")
 (unbind-key "C-x C-z")
@@ -414,7 +406,11 @@ For anything else there is ctags."
     "Hook for C/C++ mode."
     (c-toggle-electric-state t)
     (c-toggle-syntactic-indentation t)
-    (lsp-ui-doc-enable nil))
+
+    (when lsp-mode
+      (lsp-ui-doc-enable nil)
+      (flymake-mode-off)
+      (setq-local flymake-diagnostic-functions (remove #'flymake-cc flymake-diagnostic-functions))))
 
   :config
   (c-add-style "allman" user-allman-style)
@@ -423,9 +419,33 @@ For anything else there is ctags."
                            (awk-mode . "awk")
                            (other . "linux"))))
 
+(use-package ccls
+  :after cc-mode
+  :bind (:map c-mode-base-map
+              ("M-o" . #'user-ccls-show/body))
+  :preface
+  (defun user-ccls-callee-hierarchy ()
+    (interactive)
+    (ccls-call-hierarchy t))
+
+  (defhydra user-ccls-show (:exit t)
+    ("i" ccls-inheritance-hierarchy "base inheritance")
+    ("I" ccls-inheritance-hierarchy "derived inheritance")
+    ("c" ccls-call-hierarchy "callers")
+    ("C" user-ccls-callee-hierarchy "callee")
+    ("m" ccls-member-hierarchy "members")
+    ("." lsp-ui-peek-find-references "references")
+    ("s" lsp-ui-peek-find-workspace-symbol "symbol"))
+
+  :init
+  (csetq ccls-initialization-options '(:diagnostics (:onOpen -1 :opSave -1 :onChange -1))))
+
 (use-package cmake-mode
-  :defer t
   :mode "CMakeLists\\.txt\\'")
+
+(use-package cmake-font-lock
+  :after cmake-mode
+  :hook (cmake-mode . cmake-font-lock-activate))
 
 (use-package comment-dwim-2
   :after selected
@@ -462,8 +482,19 @@ For anything else there is ctags."
 (use-package compile
   :ensure nil
   :diminish compilation-in-progress
-  :bind (("C-c c" . #'compile))
+  :bind (([remap comment-region] . user-compile-without-ask)
+         ("C-c c" . #'compile))
   :preface
+  (defun user-compile-without-ask ()
+    (interactive)
+    (let ((compilation-read-command nil))
+      (if projectile-mode
+          (projectile-compile-project nil)
+        (compile compile-command))))
+
+  (defun user-switch-to-compilation-window (buffer _msg)
+    (select-window (get-buffer-window buffer)))
+
   (defvar user-compile-process nil
     "The current compilation process or nil if none.")
 
@@ -502,7 +533,7 @@ Taken from http://stackoverflow.com/a/3072831/355252."
     (let ((inhibit-read-only t))
       (ansi-color-apply-on-region compilation-filter-start (point-max))))
 
-  :hook ((compilation-start . user-compile-start)
+  :hook (;; (compilation-start . user-compile-start)
          (compilation-filter . user-colorize-compilation-buffer)
          (compilation-mode . user-results-buffer-hook))
 
@@ -514,8 +545,9 @@ Taken from http://stackoverflow.com/a/3072831/355252."
   (csetq compilation-disable-input t)
   (csetq compilation-scroll-output 'first-error)
 
-  :config
-  (add-hook 'compilation-finish-functions #'user-compile-done))
+  ;; :config
+  (add-hook 'compilation-finish-functions #'user-switch-to-compilation-window)
+  )
 
 (use-package counsel
   :after ivy
@@ -525,23 +557,6 @@ Taken from http://stackoverflow.com/a/3072831/355252."
   (csetq counsel-grep-post-action-hook '(recenter))
   :config
   (counsel-mode t))
-
-(use-package cquery
-  :after cc-mode
-  :bind (:map c-mode-base-map
-              ("M-o" . #'user-cquery-show/body))
-  :preface
-  (defhydra user-cquery-show (:exit t)
-    ("b" (cquery-xref-find-custom "$cquery/base") "base")
-    ("c" (cquery-xref-find-custom "$cquery/callers") "callers")
-    ("d" (cquery-xref-find-custom "$cquery/derived") "derived")
-    ("v" (cquery-xref-find-custom "$cquery/vars") "vars")
-
-    ("." lsp-ui-peek-find-references "references")
-    ("s" lsp-ui-peek-find-workspace-symbol "symbol"))
-  :init
-  (csetq cquery-extra-init-params '(:diagnostics (:onType :json-false) :emitInactiveRegions t))
-  (csetq cquery-project-roots '("compile_commands.json")))
 
 (use-package comint
   :ensure nil
@@ -649,6 +664,12 @@ Taken from http://stackoverflow.com/a/3072831/355252."
   :init
   (csetq dired-omit-verbose nil))
 
+(use-package disk-usage)
+
+(use-package easy-kill
+  :bind (([remap kill-ring-save] . #'easy-kill)
+         ([remap mark-sexp] . #'easy-mark)))
+
 (use-package ediff
   :ensure nil
   :defer t
@@ -711,7 +732,7 @@ _SWITCH should be 'diff'."
 (use-package eyebrowse
   :bind ("C-c e" . #'user-eyebrowse-hydra/body)
   :preface
-  (defhydra user-eyebrowse-hydra (:color blue)
+  (defhydra user-eyebrowse-hydra (:color pink)
     "
 ^
 ^Eyebrowse^         ^Do^                ^Switch^
@@ -740,11 +761,42 @@ _q_ quit            _c_ create          _p_ previous
 
 (use-package flymake
   :ensure nil
+  :preface
+  (defun flymake-display-at-point ()
+    "Display the flymake diagnostic text for the thing at point."
+    (interactive)
+    (when (and flymake-mode
+               (get-char-property (point) 'flymake-diagnostic))
+      (let ((text (flymake--diag-text (get-char-property (point) 'flymake-diagnostic))))
+        (when text (message "%s" text)))))
+
+  (defun user-flymake-make-diagnostic (orig-fun &rest args)
+    (let ((buffer (nth 0 args))
+          (beg (nth 1 args))
+          (end (nth 2 args))
+          (type (nth 3 args))
+          (text (nth 4 args)))
+      (flymake--diag-make :buffer buffer :beg beg :end end
+                          :type type :text text :data nil
+                          :overlay-properties nil)
+      )
+    ;; (apply orig-fun (nth 0 args) (nth 1 args) (nth 2 args) (nth 3 args) (nth 4 args) (nth 5 args) nil nil)
+    )
+
   :bind (("C-c f n" . #'flymake-goto-next-error)
-         ("C-c f p" . #'flymake-goto-prev-error))
+         ("C-c f p" . #'flymake-goto-prev-error)
+         ("C-c f s" . #'flymake-start)
+         ("C-c f f" . #'flymake-display-at-point))
   :init
   (csetq flymake-no-changes-timeout nil)
-  (csetq flymake-start-syntax-check-on-newline nil))
+  (csetq flymake-start-syntax-check-on-newline nil)
+  :config
+  (advice-add #'flymake-make-diagnostic :around #'user-flymake-make-diagnostic))
+
+(use-package flymake-diagnostic-at-point
+  :disabled
+  :after flymake
+  :hook (flymake-mode . flymake-diagnostic-at-point-mode))
 
 (use-package grep
   :ensure nil
@@ -777,8 +829,10 @@ _q_ quit            _c_ create          _p_ previous
          (find-file . highlight-symbol-nav-mode))
   :init
   (csetq highlight-symbol-occurrence-message '())
-  (csetq highlight-symbol-idle-delay 0.2)
-  (csetq highlight-symbol-highlight-single-occurrence t))
+  (csetq highlight-symbol-idle-delay 0.3)
+  (csetq highlight-symbol-highlight-single-occurrence t)
+  :config
+  (set-face-bold 'highlight-symbol-face t))
 
 (use-package hl-todo
   :config
@@ -849,6 +903,10 @@ _q_ quit            _c_ create          _p_ previous
 
 (use-package isearch
   :ensure nil
+  :bind (:map isearch-mode-map
+         ("C-o" . #'isearch-occur)
+         ("<tab>" . #'isearch-repeat-forward)
+         ("<backtab>" . #'isearch-repeat-backward))
   :init
   (csetq isearch-lazy-count t)
   (csetq isearch-allow-scroll 'unlimited)
@@ -864,17 +922,26 @@ _q_ quit            _c_ create          _p_ previous
          ([escape] . user-minibuffer-keyboard-quit))
   :init
   (csetq ivy-count-format "(%d/%d) ")
-  (csetq ivy-display-style 'fancy)
-  (csetq ivy-dynamic-exhibit-delay-ms 150)
   (csetq ivy-height 9)
-  (csetq ivy-on-del-error-function nil)
-  (csetq ivy-use-selectable-prompt t)
+  ;; (csetq ivy-on-del-error-function nil)
+  ;; (csetq ivy-use-selectable-prompt t)
   (csetq ivy-use-virtual-buffers t)
   (csetq ivy-virtual-abbreviate 'full)
   (csetq ivy-wrap t)
 
   :config
   (ivy-mode t))
+
+(use-package ivy-posframe
+  :after ivy
+  :init
+  (csetq ivy-height 15)
+  (csetq ivy-display-function #'ivy-posframe-display-at-point)
+  (setq ivy-posframe-parameters
+        '((left-fringe . 8)
+          (right-fringe . 8)))
+  :config
+  (ivy-posframe-enable))
 
 (use-package ivy-rich
   :after ivy
@@ -922,28 +989,33 @@ _q_ quit            _c_ create          _p_ previous
   (key-seq-define-global "jf" #'counsel-find-file))
 
 (use-package lsp-mode
-  :hook (prog-mode . lsp)
+  :commands lsp
+  :hook ((c-mode-common . lsp)
+         (python-mode . lsp))
   :init
   ;; performance reasons
   (csetq lsp-enable-on-type-formatting nil)
   (csetq lsp-enable-indentation nil)
   (csetq lsp-before-save-edits nil)
 
-  ;; annoying to filter with ivy
-  (csetq lsp-imenu-show-container-name nil)
   (add-hook 'lsp-after-open-hook 'lsp-enable-imenu)
+
+  (csetq lsp-auto-guess-root t)
 
   :config
   (require 'lsp-clients)
 
+  ;; Until I have a method of selecting the prefered lsp-client (per project or globally)
+  (remhash 'clangd lsp-clients)
+
   (use-package company-lsp
+    :commands company-lsp
     :init
     (csetq company-lsp-async t)
-    (csetq company-lsp-cache-candidates nil)
-
-    (add-hook 'lsp-mode-hook (lambda () (add-to-list 'company-backends 'company-lsp))))
+    (csetq company-lsp-cache-candidates nil))
 
   (use-package lsp-ui
+    :commands lsp-ui-mode
     :init
     (csetq lsp-ui-doc-enable t)
     (csetq lsp-ui-doc-include-signature t)
@@ -955,9 +1027,7 @@ _q_ quit            _c_ create          _p_ previous
     (csetq lsp-ui-sideline-show-symbol nil)
     (csetq lsp-ui-sideline-ignore-duplicate t)
 
-    (csetq lsp-eldoc-hook (delete #'lsp-document-highlight lsp-eldoc-hook))
-
-    (add-hook 'lsp-mode-hook #'lsp-ui-mode)))
+    (csetq lsp-eldoc-hook (delete #'lsp-document-highlight lsp-eldoc-hook))))
 
 (use-package magit
   :bind (("C-x g" . magit-status))
@@ -968,7 +1038,7 @@ _q_ quit            _c_ create          _p_ previous
   (csetq magit-diff-refine-hunk t)
   (csetq magit-display-buffer-function
          #'magit-display-buffer-fullframe-status-v1)
-  (csetq magit-process-popup-time 15)
+  (csetq magit-process-popup-time 20)
   (csetq magit-refs-show-commit-count 'all))
 
 (use-package magit-gitflow
@@ -1096,6 +1166,7 @@ _q_ quit            _c_ create          _p_ previous
   :mode "\\.asm\\'")
 
 (use-package objed
+  :disabled
   :bind (("C-\\" . objed-activate)
          :map objed-map
          ("-" . objed-forward-symbol)
@@ -1103,17 +1174,6 @@ _q_ quit            _c_ create          _p_ previous
   :config
   (add-to-list 'objed-keeper-commands 'undo-tree-undo)
   (add-to-list 'objed-keeper-commands 'undo-tree-redo))
-
-(use-package origami
-  :hook (prog-mode . origami-mode)
-  :bind (("C-x n n" . origami-forward-toggle-node)
-         ("C-x n t" . origami-recursively-toggle-node)
-         ("C-x n a" . origami-toggle-all-nodes)
-         ("C-x n o" . origami-open-node)
-         ("C-x n c" . origami-close-node)
-         ("C-x n u" . origami-undo)
-         ("C-x n _" . origami-redo)
-         ("C-x n r" . origami-reset)))
 
 (use-package pipenv
   :hook (python-mode . pipenv-mode)
@@ -1130,33 +1190,37 @@ _q_ quit            _c_ create          _p_ previous
   :hook (prog-mode . user-prog-mode-hook))
 
 (use-package projectile
+  :commands projectile-mode
   :diminish
+  :bind (:map projectile-mode-map
+              ("C-c p" . projectile-command-map))
+  :hook (after-init . projectile-mode)
   :preface
   (defun user-projectile-invalidate-cache (&rest _args)
     (projectile-invalidate-cache nil))
+
   :init
   (csetq projectile-completion-system 'ivy)
   (csetq projectile-enable-caching t)
   (csetq projectile-indexing-method 'alien)
   (csetq projectile-sort-order 'recentf)
   (csetq projectile-use-git-grep t)
-  (csetq projectile-keymap-prefix (kbd "C-c p"))
 
   :config
-  (projectile-mode t)
-
   (add-to-list 'projectile-globally-ignored-directories ".vscode")
-  (add-to-list 'projectile-globally-ignored-directories ".cquery_cached_index")
+  (add-to-list 'projectile-globally-ignored-directories ".ccls-cache")
 
-  (eval-after-load 'magit-branch
-    '(progn
-       (advice-add 'magit-checkout
-                   :after #'user-projectile-invalidate-cache)
-       (advice-add 'magit-branch-and-checkout
-                   :after #'user-projectile-invalidate-cache))))
+  ;; (eval-after-load 'magit-branch
+  ;;   '(progn
+  ;;      (advice-add 'magit-checkout
+  ;;                  :after #'user-projectile-invalidate-cache)
+  ;;      (advice-add 'magit-branch-and-checkout
+  ;;                  :after #'user-projectile-invalidate-cache)))
+  )
 
 (use-package python
   :ensure nil
+  :defer t
   :init
   (when (executable-find "ipython")
     (csetq python-shell-interpreter "ipython")
@@ -1213,14 +1277,14 @@ _q_ quit            _c_ create          _p_ previous
 
 (use-package rg
   :demand t
-  :hook (rg-mode . wgrep-ag-setup)
   :init
   (csetq rg-ignore-case 'smart)
   (csetq rg-hide-command nil)
   :config
   (rg-enable-default-bindings))
 
-(use-package rmsbolt)
+(use-package rmsbolt
+  :defer t)
 
 (use-package savehist
   :ensure nil
@@ -1247,25 +1311,20 @@ _q_ quit            _c_ create          _p_ previous
   :config
   (selected-global-mode t))
 
-(use-package shackle
-  :disabled
-  :init
-  (csetq shackle-select-reused-windows t)
-  (csetq hackle-inhibit-window-quit-on-same-windows t)
-  (csetq shackle-default-alignment 'right)
-  (csetq shackle-rules '((help-mode :align t :select t)
-                         ((compilation-mode rg-mode grep-mode occur-mode xref--xref-buffer-mode)
-                          :noselect t :align below :size 0.25)
-                         ("\\`\\*magit.*?\\*\\'" :regexp t :ignore t)
-                         ))
-  (csetq shackle-default-rule '(:select t))
-  :config
-  (shackle-mode t))
-
 (use-package sh-script
   :ensure nil
   :init
   (csetq sh-basic-offset 2))
+
+(use-package simple
+  :ensure nil
+  :bind (("M-u" . #'upcase-dwim)
+         ("M-l" . #'downcase-dwim)
+         ("M-c" . #'capitalize-dwim)
+         ("M-g" . #'goto-line)
+         ("C-8" . #'repeat-complex-command)
+         ([remap just-one-space] . #'cycle-spacing)
+         ([remap newline] . #'newline-and-indent)))
 
 (use-package smartparens
   :demand t
@@ -1331,6 +1390,9 @@ _q_ quit            _c_ create          _p_ previous
   :config
   (require 'smartparens-config)
 
+  (add-to-list 'sp--special-self-insert-commands #'c-electric-paren)
+  (add-to-list 'sp--special-self-insert-commands #'c-electric-brace)
+
   (sp-local-pair 'c-mode "{" nil :post-handlers '(:add user-open-block-c-mode))
   (sp-local-pair 'c++-mode "{" nil :post-handlers '(:add user-open-block-c-mode))
 
@@ -1339,12 +1401,52 @@ _q_ quit            _c_ create          _p_ previous
 
   (show-smartparens-global-mode t))
 
+(use-package smerge-mode
+  :ensure nil
+  :bind (("C-c <C-m>" . user-hydra-smerge/body))
+  :preface
+  (defhydra user-hydra-smerge
+    (:color pink
+     :hint nil
+     :pre (smerge-mode 1)
+     ;; Disable `smerge-mode' when quitting hydra if
+     ;; no merge conflicts remain.
+     :post (smerge-auto-leave))
+
+    "
+^Move^       ^Keep^               ^Diff^                 ^Other^
+^^-----------^^-------------------^^---------------------^^-------
+_n_ext       _b_ase               _<_: upper/base        _C_ombine
+_p_rev       _u_pper              _=_: upper/lower       _r_esolve
+^^           _l_ower              _>_: base/lower        _k_ill current
+^^           _a_ll                _R_efine
+^^           _RET_: current       _E_diff
+"
+    ("n" smerge-next)
+    ("p" smerge-prev)
+    ("b" smerge-keep-base)
+    ("u" smerge-keep-upper)
+    ("l" smerge-keep-lower)
+    ("a" smerge-keep-all)
+    ("RET" smerge-keep-current)
+    ("\C-m" smerge-keep-current)
+    ("<" smerge-diff-base-upper)
+    ("=" smerge-diff-upper-lower)
+    (">" smerge-diff-base-lower)
+    ("R" smerge-refine)
+    ("E" smerge-ediff)
+    ("C" smerge-combine-with-next)
+    ("r" smerge-resolve)
+    ("k" smerge-kill-current)
+    ("q" nil "cancel" :color blue)))
+
 (use-package smex
   :defer t
   :config
   (smex-initialize))
 
 (use-package tramp
+  :defer t
   :ensure nil
   :init
   (csetq tramp-default-method "ssh"))
@@ -1386,7 +1488,6 @@ _q_ quit            _c_ create          _p_ previous
   :bind (("<C-return>" . #'user-open-line-above)
          ("C-a" . #'user-smarter-move-beginning-of-line)
          ("C-w" . #'user-smarter-kill-word-or-region)
-         ([remap kill-ring-save] . #'user-smarter-copy-line-or-region)
          ([remap backward-kill-word] . #'user-smarter-backward-kill-word)
          ("M-]" . #'user-next-error)
          ("M-[" . #'user-prev-error)
@@ -1398,9 +1499,8 @@ _q_ quit            _c_ create          _p_ previous
          ([remap scroll-down-command] . #'user-scroll-half-page-down)
          ("C-'" . #'push-mark-no-activate)
          ("M-'" . #'jump-to-mark)
-         ([remap exchange-point-and-mark] . #'exchange-point-and-mark-no-activate)
-         :map isearch-mode-map
-         ("<backspace>" . #'user-isearch-delete)
+         ;; :map isearch-mode-map
+         ;; ("<backspace>" . #'user-isearch-delete)
          :map minibuffer-local-map
          ("<escape>" . #'user-minibuffer-keyboard-quit)
          :map minibuffer-local-ns-map
@@ -1414,7 +1514,8 @@ _q_ quit            _c_ create          _p_ previous
 
 (use-package user-window
   :load-path "lisp"
-  :bind ("C-c w" . #'user-windows-hydra/body)
+  :bind (("C-c w" . #'user-windows-hydra/body)
+         ([remap exchange-point-and-mark] . #'exchange-point-and-mark-no-activate))
   :preface
   (defhydra user-windows-hydra (:color pink)
     "
@@ -1460,13 +1561,6 @@ _o_ other            ^^                 ^^
 
 (use-package visual-fill-column
   :commands (visual-fill-column-mode global-visual-fill-column-mode))
-
-(use-package vlf
-  :defer t
-  :defines vlf-forbidden-modes-list
-  :config
-  (require 'vlf-setup)
-  (add-to-list 'vlf-forbidden-modes-list 'pdf-view-mode))
 
 (use-package volatile-highlights
   :after undo-tree
@@ -1537,8 +1631,7 @@ _o_ other            ^^                 ^^
 
 (use-package which-func
   :ensure nil
-  :config
-  (which-function-mode t))
+  :hook (prog-mode . which-function-mode))
 
 (use-package which-key
   :diminish
@@ -1546,6 +1639,7 @@ _o_ other            ^^                 ^^
   (csetq which-key-side-window-location 'right)
   (csetq which-key-idle-delay 1)
   (csetq which-key-sort-order 'which-key-prefix-then-key-order)
+  ;; (csetq which-key-show-transient-maps t)
 
   (which-key-mode t))
 
