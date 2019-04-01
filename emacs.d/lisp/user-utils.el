@@ -7,7 +7,7 @@
 ;;; Code:
 
 ;;;###autoload
-(defun user-minibuffer-keyboard-quit ()
+(defun user/minibuffer-keyboard-quit ()
   "Abort recursive edit.
 In Delete Selection mode, if the mark is active, just deactivate it;
 then it takes a second \\[keyboard-quit] to abort the minibuffer."
@@ -18,12 +18,12 @@ then it takes a second \\[keyboard-quit] to abort the minibuffer."
     (abort-recursive-edit)))
 
 ;;;###autoload
-(defun user-forward-paragraph (&optional n)
+(defun user/forward-paragraph (&optional n)
   "Advance just past next blank line.
 With N goes forward that many paragraphs."
   (interactive "p")
   (let ((para-commands
-         '(user-forward-paragraph user-backward-paragraph)))
+         '(user/forward-paragraph user/backward-paragraph)))
     ;; Only push mark if it's not active and we're not repeating.
     (or (use-region-p)
         (not (member this-command para-commands))
@@ -42,13 +42,13 @@ With N goes forward that many paragraphs."
     ))
 
 ;;;###autoload
-(defun user-backward-paragraph (&optional n)
+(defun user/backward-paragraph (&optional n)
   "Go back up to previous blank line.
 With N goes back that many paragraphs."
   (interactive "p")
-  (user-forward-paragraph (- n)))
+  (user/forward-paragraph (- n)))
 
-(defmacro user-bol-with-prefix (function)
+(defmacro user/bol-with-prefix (function)
   "Define a new function which call FUNCTION.
 Except it moves to beginning of line before calling FUNCTION when
 called with a prefix argument.  The FUNCTION still receives the
@@ -66,7 +66,7 @@ prefix argument."
        ',name)))
 
 ;;;###autoload
-(defun user-isearch-delete ()
+(defun user/isearch-delete ()
   "Delete non-matching text or the last character.
 If it's a regexp delete only the last char but only if
 the error is \"incomplete input\", or \"trailing backslash\".
@@ -95,7 +95,7 @@ That way we don't remove the whole regexp for a simple typo.
   (isearch-update))
 
 ;;;###autoload
-(defun user-smarter-move-beginning-of-line (arg)
+(defun user/smarter-move-beginning-of-line (arg)
   "Move point back to indentation of beginning of line.
 
 Move point to the first non-whitespace character on this line.
@@ -119,7 +119,7 @@ point reaches the beginning or end of the buffer, stop there."
       (move-beginning-of-line 1))))
 
 ;;;###autoload
-(defun user-open-line-above (arg)
+(defun user/open-line-above (arg)
   "Same thing as vim 'O' command.  With ARG opens that many lines."
   (interactive "p")
 
@@ -130,7 +130,7 @@ point reaches the beginning or end of the buffer, stop there."
   (indent-according-to-mode))
 
 ;;;###autoload
-(defun user-smarter-backward-kill-word ()
+(defun user/smarter-backward-kill-word ()
   "Deletes the previous word, respecting:
 1. If the cursor is at the beginning of line, delete the '\n'.
 2. If there is only whitespace, delete only to beginning of line and exit.
@@ -164,17 +164,17 @@ point reaches the beginning or end of the buffer, stop there."
         (delete-char -1)))))
 
 ;;;###autoload
-(defun user-smarter-kill-word-or-region ()
+(defun user/smarter-kill-word-or-region ()
   "If the region is active, will call `kill-region'.
-Else it will use `user-smarter-backward-kill-word'.
+Else it will use `user/smarter-backward-kill-word'.
 Basically simulates `C-w' in bash or vim when no region is active."
   (interactive)
   (if (use-region-p)
       (kill-region (region-beginning) (region-end))
-    (user-smarter-backward-kill-word)))
+    (user/smarter-backward-kill-word)))
 
 ;;;###autoload
-(defun user-smarter-copy-line-or-region ()
+(defun user/smarter-copy-line-or-region ()
   "If the region is active, will call `kill-ring-save'.
 Else it will call `kill-ring-save' on the current line."
   (interactive)
@@ -184,7 +184,7 @@ Else it will call `kill-ring-save' on the current line."
     (kill-ring-save (line-beginning-position) (1+ (line-end-position)))))
 
 ;;;###autoload
-(defun user-comment-dwim (arg)
+(defun user/comment-dwim (arg)
   "If a region is selected, it comments the region like `comment-dwim'.
 If we are at the end of line, adds a comment like `comment-dwim'.
 If none of the above, comment current line with `comment-line'.
@@ -198,7 +198,7 @@ The prefix ARG is given to the comment function."
       (comment-line arg))))
 
 ;;;###autoload
-(defun user-ispell-word-on-line ()
+(defun user/ispell-word-on-line ()
   "Call `ispell-word'.
 If there's nothing wrong with the word at point, keep looking for a typo
 until the beginning of line.  You can skip typos you don't want to fix
@@ -217,7 +217,7 @@ with `SPC', and you can abort completely with `C-g'."
                (> (point) stop))))))
 
 ;;;###autoload
-(defun user-ispell-dwim ()
+(defun user/ispell-dwim ()
   "Call `ispell-buffer' of `ispell-comments-and-strings'.
 Depends if the current major mode is derived from `prog-mode'.
 Saves the position before.  You can skip typos you don't want to fix with
@@ -229,27 +229,27 @@ Saves the position before.  You can skip typos you don't want to fix with
       (ispell-buffer))))
 
 ;;;###autoload
-(defun user-next-error ()
+(defun user/next-error ()
   "Go to the next compilation error/search item (ignoring any errors)."
   (interactive)
   (ignore-errors
     (next-error)))
 
 ;;;###autoload
-(defun user-prev-error ()
+(defun user/prev-error ()
   "Go to the previous compilation error/search item (ignoring any errors)."
   (interactive)
   (ignore-errors
     (previous-error)))
 
 ;;;###autoload
-(defun user-join-line ()
+(defun user/join-line ()
   "Join line like VIM."
   (interactive)
   (join-line -1))
 
 ;;;###autoload
-(defun user-open-terminal ()
+(defun user/open-terminal ()
   "Opens a urxvt/uxterm/xterm in the current directory."
   (interactive)
   (cond
@@ -264,7 +264,7 @@ Saves the position before.  You can skip typos you don't want to fix with
    ((eq system-type 'windows-nt)
     (message "Not supported for now!"))))
 
-(defun user-get-indentation-chars ()
+(defun user/get-indentation-chars ()
   "Helper function to return the number of spaces at the begining of line."
   (save-mark-and-excursion
     (back-to-indentation)
@@ -272,12 +272,12 @@ Saves the position before.  You can skip typos you don't want to fix with
 
 ;; maybe skip comments: (nth 4 (syntax-ppss))
 
-(defun user-forward-c-block ()
+(defun user/forward-c-block ()
   "Go to the next C block (the next line after a '{')."
   (re-search-forward "{\n" (point-max) t)
   (back-to-indentation))
 
-(defun user-backward-c-block ()
+(defun user/backward-c-block ()
   "Go to the previous C block (the next line after a '{')."
   (let ((current-line (line-number-at-pos)))
     (when (re-search-backward "{\n")
@@ -290,54 +290,54 @@ Saves the position before.  You can skip typos you don't want to fix with
             (forward-line)))
       (back-to-indentation))))
 
-(defun user-forward-indentation (&optional n)
+(defun user/forward-indentation (&optional n)
   "Go to the next line that has a different indentation that the current one, \
 and it's not empty.
 If N is negative, then go to the previous block."
   (interactive)
   (unless n (setq n 1))
-  (let ((curr-indent (user-get-indentation-chars)))
+  (let ((curr-indent (user/get-indentation-chars)))
     (forward-line n)
     (while (or (looking-at-p "^\n")
-               (and (= curr-indent (user-get-indentation-chars))
+               (and (= curr-indent (user/get-indentation-chars))
                     (/= (point) (point-max))))
       (forward-line n)))
   (back-to-indentation))
 
 ;;;###autoload
-(defun user-forward-block ()
+(defun user/forward-block ()
   "Go to the next block, based on the current major mode."
   (interactive)
   (cond
-   ((derived-mode-p 'java-mode 'c-mode 'c++-mode 'objc-mode) (user-forward-c-block))
-   (t (user-forward-indentation))))
+   ((derived-mode-p 'java-mode 'c-mode 'c++-mode 'objc-mode) (user/forward-c-block))
+   (t (user/forward-indentation))))
 
 ;;;###autoload
-(defun user-backward-block ()
+(defun user/backward-block ()
   "Go to the previous block, based on the current major mode."
   (interactive)
   (cond
-   ((derived-mode-p 'java-mode 'c-mode 'c++-mode 'objc-mode) (user-backward-c-block))
-   (t (user-forward-indentation -1))))
+   ((derived-mode-p 'java-mode 'c-mode 'c++-mode 'objc-mode) (user/backward-c-block))
+   (t (user/forward-indentation -1))))
 
 ;;;###autoload
-(defun user-clean-windows-whitespace ()
+(defun user/clean-windows-whitespace ()
   "Clean strays ^M (windows end-lines) and trailing whitepsace."
   (interactive)
   (while (re-search-forward "[[:space:]\|?\r]+" nil t)
     (replace-match " " nil nil)))
 
 ;;;###autoload
-(defun user-scroll-half-page-down ()
+(defun user/scroll-half-page-down ()
   "Scrolls exactly half page down keeping cursor/point position."
   (interactive)
-  (user-scroll-half-page t))
+  (user/scroll-half-page t))
 
 ;;;###autoload
-(defun user-scroll-half-page-up ()
+(defun user/scroll-half-page-up ()
   "Scrolls exactly half page up keeping cursor/point position."
   (interactive)
-  (user-scroll-half-page nil))
+  (user/scroll-half-page nil))
 
 (provide 'user-utils)
 

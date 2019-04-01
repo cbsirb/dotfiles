@@ -7,13 +7,13 @@
 ;;; Code:
 
 ;;;###autoload
-(defun user-switch-to-minibuffer ()
+(defun user/switch-to-minibuffer ()
   "Switch to current minibuffer window (if active)."
   (interactive)
   (when (active-minibuffer-window)
     (select-window (active-minibuffer-window))))
 
-(defun user-find-side-windows (&optional side)
+(defun user/find-side-windows (&optional side)
   "Get all side window if any.
 If SIDE is non-nil only get windows on that side."
   (let (windows)
@@ -25,10 +25,10 @@ If SIDE is non-nil only get windows on that side."
     windows))
 
 ;;;###autoload
-(defun user-quit-all-side-windows ()
+(defun user/quit-all-side-windows ()
   "Quit all side windows of the current frame."
   (interactive)
-  (dolist (window (user-find-side-windows))
+  (dolist (window (user/find-side-windows))
     (when (window-live-p window)
       (quit-window nil window)
       ;; When the window is still live, delete it
@@ -36,7 +36,7 @@ If SIDE is non-nil only get windows on that side."
         (delete-window window)))))
 
 ;;;###autoload
-(defun user-toggle-current-window-dedication ()
+(defun user/toggle-current-window-dedication ()
   "Toggle dedication state of a window.
 Taken from http://dfan.org/blog/2009/02/19/emacs-dedicated-windows"
   (interactive)
@@ -47,7 +47,7 @@ Taken from http://dfan.org/blog/2009/02/19/emacs-dedicated-windows"
              (if dedicated "no longer " "")
              (buffer-name))))
 
-(defun user-scroll-half-page (direction)
+(defun user/scroll-half-page (direction)
   "Scrolls half page down if `direction' is non-nil, otherwise will scroll half page up."
   (let ((opos (cdr (nth 6 (posn-at-point)))))
     ;; opos = original position line relative to window

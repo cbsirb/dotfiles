@@ -11,43 +11,45 @@
   "Set the VARIABLE to VALUE, but use `set-default' if needed."
   `(funcall (or (get ',variable 'custom-set) 'set-default) ',variable ,value))
 
-(csetq gc-cons-threshold (* 20 gc-cons-threshold))
+(defvar user/gc-cons-threshold (* 24 gc-cons-threshold))
+(csetq gc-cons-threshold most-positive-fixnum)
 
-;; Apparently, when using default values, the input lag and hangs disappears
-;; (csetq gc-cons-threshold (* 384 1024 1024))
+(csetq user/file-name-handler-alist file-name-handler-alist)
+(csetq file-name-handler-alist '())
 
-;; (defconst user-original-gc-cons (* 7 gc-cons-threshold)
-;;   "My default value of `gc-cons-threshold'.")
+(add-hook 'after-init-hook
+          (lambda ()
+            (csetq gc-cons-threshold user/gc-cons-threshold)
 
-;; (add-hook 'after-init-hook
-;;           (lambda ()
-;;             (csetq gc-cons-threshold user-original-gc-cons)))
+            ;; Don't just blindly set it to the old value, maybe someone decided to add something to it
+            (csetq file-name-handler-alist (append file-name-handler-alist user/file-name-handler-alist))
 
-;; (defvar user-pre-minibuffer-gc-cons gc-cons-threshold)
+            (message "Time to load init file: %s"
+                     (emacs-init-time))
+            (garbage-collect)))
 
-;; (defun user-minibuffer-setup-hook ()
-;;   "Hook to run when entering the minibuffer."
-;;   (csetq user-pre-minibuffer-gc-cons gc-cons-threshold)
-;;   (csetq gc-cons-threshold most-positive-fixnum)
-;;   (setq-local show-trailing-whitespace nil))
+(defun user/minibuffer-setup-hook ()
+  "Hook to run when entering the minibuffer."
+  (csetq gc-cons-threshold most-positive-fixnum)
+  (setq-local show-trailing-whitespace nil))
 
-;; (defun user-minibuffer-exit-hook ()
-;;   "Hook to run when exiting the minibuffer."
-;;   (csetq gc-cons-threshold user-pre-minibuffer-gc-cons))
+(defun user/minibuffer-exit-hook ()
+  "Hook to run when exiting the minibuffer."
+  (csetq gc-cons-threshold user/gc-cons-threshold))
 
-;; ;; Increase the memory while in the minibuffer
-;; (add-hook 'minibuffer-setup-hook #'user-minibuffer-setup-hook)
-;; (add-hook 'minibuffer-exit-hook #'user-minibuffer-exit-hook)
+;; Increase the memory while in the minibuffer
+(add-hook 'minibuffer-setup-hook #'user/minibuffer-setup-hook)
+(add-hook 'minibuffer-exit-hook #'user/minibuffer-exit-hook)
 
 (when (fboundp 'tool-bar-mode) (tool-bar-mode 0))
 (when (fboundp 'menu-bar-mode) (menu-bar-mode 0))
 (when (fboundp 'scroll-bar-mode) (scroll-bar-mode 0))
 
-(defconst user-custom-file (expand-file-name "custom.el" user-emacs-directory)
+(defconst user/custom-file (expand-file-name "custom.el" user-emacs-directory)
   "File used to store settings from Customization UI.")
 
-(when (file-exists-p user-custom-file)
-  (load-file user-custom-file))
+(when (file-exists-p user/custom-file)
+  (load-file user/custom-file))
 
 (csetq load-prefer-newer t)
 
@@ -57,12 +59,6 @@
 
 (add-to-list 'load-path (expand-file-name "lisp" user-emacs-directory))
 (add-to-list 'load-path (expand-file-name "site-lisp" user-emacs-directory))
-
-;; (add-hook 'after-init-hook
-;;           (lambda ()
-;;             (message "Time to load init file: %s"
-;;                      (emacs-init-time))
-;;             (garbage-collect)))
 
 ;; Install use-package if needed
 (unless (package-installed-p 'use-package)
@@ -76,6 +72,7 @@
 (require 'use-package)
 
 ;;; Packages needed no matter what, and usually others are depended on it
+;; (load-theme 'adwaita t)
 (use-package habamax-theme
   :when window-system
   :init
@@ -270,7 +267,7 @@
 ;;          ))
 
 ;;; Global functions
-(defun user-results-buffer-hook ()
+(defun user/results-buffer-hook ()
   "Set various settings on results buffers (compilation, grep, etc.)."
   (setq-local scroll-margin 0)
   (setq-local show-trailing-whitespace nil))
@@ -298,9 +295,9 @@
 
 (use-package abbrev
   :ensure nil
-  :hook (find-file . user-disable-abbrev-mode)
+  :hook (find-file . user/disable-abbrev-mode)
   :preface
-  (defun user-disable-abbrev-mode ()
+  (defun user/disable-abbrev-mode ()
     (abbrev-mode -1)))
 
 (use-package ag
@@ -336,9 +333,9 @@
 
 (use-package cc-mode
   :ensure nil
-  :hook (c-mode-common . user-c-mode-common-hook)
+  :hook (c-mode-common . user/c-mode-common-hook)
   :preface
-  (defconst user-allman-style
+  (defconst user/allman-style
     '((c-electric-pound-behavior     . (alignleft))
       (c-tab-always-indent           . nil)
       (c-comment-only-line-offset    . 0)
@@ -381,7 +378,7 @@
                                         (brace-list-intro        .  4))))
     "A sane style, mostly based on Allman.")
 
-  (defun user-cc-goto-def ()
+  (defun user/cc-goto-def ()
     "Go to the first occurence of the variable/parameter inside the function.  \
 For anything else there is ctags."
     (interactive)
@@ -402,18 +399,17 @@ For anything else there is ctags."
             (goto-char found-point)
             (backward-word)))))
 
-  (defun user-c-mode-common-hook ()
+  (defun user/c-mode-common-hook ()
     "Hook for C/C++ mode."
     (c-toggle-electric-state t)
     (c-toggle-syntactic-indentation t)
 
     (when lsp-mode
       (lsp-ui-doc-enable nil)
-      (flymake-mode-off)
       (setq-local flymake-diagnostic-functions (remove #'flymake-cc flymake-diagnostic-functions))))
 
   :config
-  (c-add-style "allman" user-allman-style)
+  (c-add-style "allman" user/allman-style)
 
   (csetq c-default-style '((java-mode . "java")
                            (awk-mode . "awk")
@@ -422,23 +418,23 @@ For anything else there is ctags."
 (use-package ccls
   :after cc-mode
   :bind (:map c-mode-base-map
-              ("M-o" . #'user-ccls-show/body))
+              ("M-o" . #'user/ccls-show/body))
   :preface
-  (defun user-ccls-callee-hierarchy ()
+  (defun user/ccls-callee-hierarchy ()
     (interactive)
     (ccls-call-hierarchy t))
 
-  (defhydra user-ccls-show (:exit t)
+  (defhydra user/ccls-show (:exit t)
     ("i" ccls-inheritance-hierarchy "base inheritance")
     ("I" ccls-inheritance-hierarchy "derived inheritance")
     ("c" ccls-call-hierarchy "callers")
-    ("C" user-ccls-callee-hierarchy "callee")
+    ("C" user/ccls-callee-hierarchy "callee")
     ("m" ccls-member-hierarchy "members")
     ("." lsp-ui-peek-find-references "references")
     ("s" lsp-ui-peek-find-workspace-symbol "symbol"))
 
   :init
-  (csetq ccls-initialization-options '(:diagnostics (:onOpen -1 :opSave -1 :onChange -1))))
+  (csetq ccls-initialization-options '(:diagnostics (:onOpen 0 :opSave 0 :onChange -1 :spellChecking :json-false))))
 
 (use-package cmake-mode
   :mode "CMakeLists\\.txt\\'")
@@ -475,30 +471,36 @@ For anything else there is ctags."
   (csetq company-tooltip-flip-when-above t)
   (csetq company-transformers '(company-sort-by-occurrence))
 
-  (use-package user-completion
-    :load-path "lisp"
-    :bind (("C-c /" . #'user-complete-line))))
+  ;; (use-package user-completion
+  ;;   :load-path "lisp"
+  ;;   :bind (("C-c /" . #'user/complete-line)))
+  )
+
+(use-package company-posframe
+  :diminish
+  :after company
+  :hook (company-mode . company-posframe-mode))
 
 (use-package compile
   :ensure nil
   :diminish compilation-in-progress
-  :bind (([remap comment-region] . user-compile-without-ask)
+  :bind (([remap comment-region] . #'user/compile-without-ask)
          ("C-c c" . #'compile))
   :preface
-  (defun user-compile-without-ask ()
+  (defun user/compile-without-ask ()
     (interactive)
     (let ((compilation-read-command nil))
       (if projectile-mode
           (projectile-compile-project nil)
         (compile compile-command))))
 
-  (defun user-switch-to-compilation-window (buffer _msg)
+  (defun user/switch-to-compilation-window (buffer _msg)
     (select-window (get-buffer-window buffer)))
 
-  (defvar user-compile-process nil
+  (defvar user/compile-process nil
     "The current compilation process or nil if none.")
 
-  (defun user-bury-buffer (window buffer)
+  (defun user/bury-buffer (window buffer)
     "Bury the BUFFER and switch to the previous buffer in WINDOW, ignoring
 errors.
 
@@ -509,45 +511,44 @@ delete the WINDOW."
         (delete-window window))
       (bury-buffer buffer)))
 
-  (defun user-compile-start (proc)
+  (defun user/compile-start (proc)
     (when (string-equal (buffer-name (current-buffer)) "*compilation*")
-      (setq user-compile-process proc)))
+      (setq user/compile-process proc)))
 
-  (defun user-compile-done (buffer _msg)
+  (defun user/compile-done (buffer _msg)
     (when (string-equal "*compilation*" (buffer-name buffer))
-      (let* ((exit-status (process-exit-status user-compile-process))
+      (let* ((exit-status (process-exit-status user/compile-process))
              (has-errors  (/= 0 exit-status))
              (window (get-buffer-window buffer)))
 
         (when (and window (not has-errors))
-          (run-at-time "1 sec" nil #'user-bury-buffer window buffer)))
+          (run-at-time "1 sec" nil #'user/bury-buffer window buffer)))
 
-      (setq user-compile-process nil)))
+      (setq user/compile-process nil)))
 
   (require 'ansi-color)
 
-  (defun user-colorize-compilation-buffer ()
+  (defun user/colorize-compilation-buffer ()
     "Colorize a compilation mode buffer.
 Taken from http://stackoverflow.com/a/3072831/355252."
     (interactive)
     (let ((inhibit-read-only t))
       (ansi-color-apply-on-region compilation-filter-start (point-max))))
 
-  :hook (;; (compilation-start . user-compile-start)
-         (compilation-filter . user-colorize-compilation-buffer)
-         (compilation-mode . user-results-buffer-hook))
+  :hook (;; (compilation-start . user/compile-start)
+         ;; (compilation-filter . user/colorize-compilation-buffer)
+         (compilation-mode . user/results-buffer-hook))
 
   :init
   (csetq compilation-always-kill t)
   (csetq compilation-ask-about-save nil)
   (csetq compilation-auto-jump-to-first-error nil)
-  (csetq compilation-context-lines 3)
+  (csetq compilation-context-lines nil)
   (csetq compilation-disable-input t)
   (csetq compilation-scroll-output 'first-error)
 
   ;; :config
-  (add-hook 'compilation-finish-functions #'user-switch-to-compilation-window)
-  )
+  (add-hook 'compilation-finish-functions #'user/switch-to-compilation-window))
 
 (use-package counsel
   :after ivy
@@ -580,7 +581,7 @@ Taken from http://stackoverflow.com/a/3072831/355252."
   :init
   (csetq custom-buffer-done-kill t)
   (csetq custom-buffer-verbose-help nil)
-  (csetq custom-file user-custom-file)
+  (csetq custom-file user/custom-file)
   (csetq custom-unlispify-tag-names nil)
   (csetq custom-unlispify-menu-entries nil))
 
@@ -604,10 +605,10 @@ Taken from http://stackoverflow.com/a/3072831/355252."
   :ensure nil
   :bind (:map dired-mode-map
               ("SPC" . #'dired-mark)
-              ("<C-return>" . #'user-open-in-external-app)
-              ("<tab>" . #'user-dired-next-window))
+              ("<C-return>" . #'user/open-in-external-app)
+              ("<tab>" . #'user/dired-next-window))
   :preface
-  (defun user-dired-next-window ()
+  (defun user/dired-next-window ()
     (interactive)
     (let ((next (car (cl-remove-if-not #'(lambda (wind)
                                            (with-current-buffer (window-buffer wind)
@@ -616,7 +617,7 @@ Taken from http://stackoverflow.com/a/3072831/355252."
       (when next
         (select-window next))))
 
-  (defun user-open-in-external-app ()
+  (defun user/open-in-external-app ()
     "Open the file(s) at point with an external application."
     (interactive)
     (let* ((file-list (dired-get-marked-files)))
@@ -649,12 +650,12 @@ Taken from http://stackoverflow.com/a/3072831/355252."
 (use-package dired-toggle
   :bind ("<f5>" . #'dired-toggle)
   :preface
-  (defun user-dired-toggle-mode-hook ()
+  (defun user/dired-toggle-mode-hook ()
     (dired-hide-details-mode t)
     (setq-local visual-line-fringe-indicators '(nil right-curly-arrow))
     (setq-local word-wrap nil))
 
-  :hook (dired-toggle-mode . user-dired-toggle-mode-hook)
+  :hook (dired-toggle-mode . user/dired-toggle-mode-hook)
   :init
   (csetq dired-toggle-window-size 40))
 
@@ -666,6 +667,12 @@ Taken from http://stackoverflow.com/a/3072831/355252."
 
 (use-package disk-usage)
 
+(use-package dumb-jump
+  :hook ((dumb-jump-after-jump . recenter-top-bottom)))
+
+(use-package eacl
+  :bind (("C-x C-l" . #'eacl-complete-line)))
+
 (use-package easy-kill
   :bind (([remap kill-ring-save] . #'easy-kill)
          ([remap mark-sexp] . #'easy-mark)))
@@ -674,7 +681,7 @@ Taken from http://stackoverflow.com/a/3072831/355252."
   :ensure nil
   :defer t
   :preface
-  (defun user-command-line-diff (_switch)
+  (defun user/command-line-diff (_switch)
     "Add the -diff <file1> <file2> argument to Emacs.
 _SWITCH should be 'diff'."
     (if (> 2 (length command-line-args-left))
@@ -683,7 +690,7 @@ _SWITCH should be 'diff'."
             (file2 (pop command-line-args-left)))
         (ediff file1 file2))))
 
-  (add-to-list 'command-switch-alist '("diff"  . user-command-line-diff))
+  (add-to-list 'command-switch-alist '("diff"  . user/command-line-diff))
 
   :init
   (csetq ediff-diff-options "-w")
@@ -692,17 +699,22 @@ _SWITCH should be 'diff'."
   (csetq ediff-split-window-function #'split-window-horizontally)
   (csetq ediff-window-setup-function #'ediff-setup-windows-plain))
 
+(use-package eldoc-box
+  :diminish eldoc-box-hover-mode
+  :hook ((prog-mode . eldoc-box-hover-at-point-mode)
+         (prog-mode . eldoc-box-hover-mode)))
+
 (use-package eshell
   :ensure nil
   :defer t
-  :hook ((eshell-mode . user-eshell-mode-hook)
-         (eshell-first-time-mode . user-eshell-first-time-mode-hook))
+  :hook ((eshell-mode . user/eshell-mode-hook)
+         (eshell-first-time-mode . user/eshell-first-time-mode-hook))
   :preface
-  (defun user-eshell-mode-hook ()
+  (defun user/eshell-mode-hook ()
     (company-mode -1)
     (setq-local scroll-margin 0))
 
-  (defun user-eshell-first-time-mode-hook ()
+  (defun user/eshell-first-time-mode-hook ()
     (add-to-list 'eshell-modules-list 'eshell-rebind)
     (add-to-list 'eshell-modules-list 'eshell-smart)
     (add-to-list 'eshell-modules-list 'eshell-xtra))
@@ -730,9 +742,9 @@ _SWITCH should be 'diff'."
   (csetq expand-region-autocopy-register "e"))
 
 (use-package eyebrowse
-  :bind ("C-c e" . #'user-eyebrowse-hydra/body)
+  :bind ("C-c e" . #'user/eyebrowse-hydra/body)
   :preface
-  (defhydra user-eyebrowse-hydra (:color pink)
+  (defhydra user/eyebrowse-hydra (:color pink)
     "
 ^
 ^Eyebrowse^         ^Do^                ^Switch^
@@ -758,7 +770,6 @@ _q_ quit            _c_ create          _p_ previous
   :config
   (eyebrowse-mode t))
 
-
 (use-package flymake
   :ensure nil
   :preface
@@ -770,7 +781,7 @@ _q_ quit            _c_ create          _p_ previous
       (let ((text (flymake--diag-text (get-char-property (point) 'flymake-diagnostic))))
         (when text (message "%s" text)))))
 
-  (defun user-flymake-make-diagnostic (orig-fun &rest args)
+  (defun user/flymake-make-diagnostic (orig-fun &rest args)
     (let ((buffer (nth 0 args))
           (beg (nth 1 args))
           (end (nth 2 args))
@@ -779,9 +790,7 @@ _q_ quit            _c_ create          _p_ previous
       (flymake--diag-make :buffer buffer :beg beg :end end
                           :type type :text text :data nil
                           :overlay-properties nil)
-      )
-    ;; (apply orig-fun (nth 0 args) (nth 1 args) (nth 2 args) (nth 3 args) (nth 4 args) (nth 5 args) nil nil)
-    )
+      ))
 
   :bind (("C-c f n" . #'flymake-goto-next-error)
          ("C-c f p" . #'flymake-goto-prev-error)
@@ -791,24 +800,38 @@ _q_ quit            _c_ create          _p_ previous
   (csetq flymake-no-changes-timeout nil)
   (csetq flymake-start-syntax-check-on-newline nil)
   :config
-  (advice-add #'flymake-make-diagnostic :around #'user-flymake-make-diagnostic))
+  ;; (advice-add #'flymake-make-diagnostic :around #'user/flymake-make-diagnostic)
+  )
+
+(use-package flymake-posframe
+  :load-path "site-lisp"
+  :hook (flymake-mode . flymake-posframe-mode))
 
 (use-package flymake-diagnostic-at-point
   :disabled
   :after flymake
   :hook (flymake-mode . flymake-diagnostic-at-point-mode))
 
+(use-package flyspell
+  :ensure nil
+  :diminish
+  :init
+  (csetq flyspell-issue-message-flag nil))
+
+;; TBD
+;; (use-package frog-menu)
+
 (use-package grep
   :ensure nil
   :defer t
-  :hook (grep-mode . user-results-buffer-hook))
+  :hook (grep-mode . user/results-buffer-hook))
 
 (use-package gud
   :ensure nil
   :defer t
-  :hook (gud-mode . user-gud-mode-hook)
+  :hook (gud-mode . user/gud-mode-hook)
   :preface
-  (defun user-gud-mode-hook ()
+  (defun user/gud-mode-hook ()
     "Hook to run when GUD mode is activated."
     (company-mode -1))
   :init
@@ -819,20 +842,6 @@ _q_ quit            _c_ create          _p_ previous
   :ensure nil
   :init
   (csetq hexl-bits 8))
-
-(use-package highlight-symbol
-  :diminish
-  :bind (:map highlight-symbol-nav-mode-map
-              ("M-N" . highlight-symbol-next-in-defun)
-              ("M-P" . highlight-symbol-prev-in-defun))
-  :hook ((find-file . highlight-symbol-mode)
-         (find-file . highlight-symbol-nav-mode))
-  :init
-  (csetq highlight-symbol-occurrence-message '())
-  (csetq highlight-symbol-idle-delay 0.3)
-  (csetq highlight-symbol-highlight-single-occurrence t)
-  :config
-  (set-face-bold 'highlight-symbol-face t))
 
 (use-package hl-todo
   :config
@@ -892,14 +901,14 @@ _q_ quit            _c_ create          _p_ previous
 
 (use-package imenu
   :ensure nil
-  :bind ("M-i" . imenu)
+  :bind ("M-i" . #'imenu)
   :hook (imenu-after-jump . recenter-top-bottom)
   :init
   (csetq imenu-auto-rescan t)
   (csetq imenu-auto-rescan-maxout (* 1024 1024)))
 
 (use-package imenu-anywhere
-  :bind (("M-I" . imenu-anywhere)))
+  :bind (("M-I" . #'imenu-anywhere)))
 
 (use-package isearch
   :ensure nil
@@ -915,11 +924,11 @@ _q_ quit            _c_ create          _p_ previous
 (use-package ivy
   :demand t
   :diminish
-  :bind (("C-c C-r" . ivy-resume)
-         ("C-c v s" . ivy-push-view)
-         ("C-c v p" . ivy-pop-view)
+  :bind (("C-c C-r" . #'ivy-resume)
+         ("C-c v s" . #'ivy-push-view)
+         ("C-c v p" . #'ivy-pop-view)
          :map ivy-mode-map
-         ([escape] . user-minibuffer-keyboard-quit))
+         ([escape] . #'user/minibuffer-keyboard-quit))
   :init
   (csetq ivy-count-format "(%d/%d) ")
   (csetq ivy-height 9)
@@ -965,7 +974,7 @@ _q_ quit            _c_ create          _p_ previous
 
 (use-package json-mode
   :bind (:map json-mode-map
-              ("M-q" . json-reformat-region))
+              ("M-q" . #'json-reformat-region))
   :init
   (csetq json-reformat:indent-width 4)
   (csetq json-reformat:pretty-string? t))
@@ -991,7 +1000,7 @@ _q_ quit            _c_ create          _p_ previous
 (use-package lsp-mode
   :commands lsp
   :hook ((c-mode-common . lsp)
-         (python-mode . lsp))
+         (python-mode . #'lsp))
   :init
   ;; performance reasons
   (csetq lsp-enable-on-type-formatting nil)
@@ -1030,7 +1039,7 @@ _q_ quit            _c_ create          _p_ previous
     (csetq lsp-eldoc-hook (delete #'lsp-document-highlight lsp-eldoc-hook))))
 
 (use-package magit
-  :bind (("C-x g" . magit-status))
+  :bind (("C-x g" . #'magit-status))
   :hook (git-commit-mode . git-commit-turn-on-flyspell)
   :init
   (csetq magit-diff-arguments
@@ -1090,14 +1099,14 @@ _q_ quit            _c_ create          _p_ previous
 
 (use-package multi-term
   :if (eq system-type 'gnu/linux)
-  :bind (("C-; C-;" . multi-term-next)
-         ("C-; c" . multi-term)
-         ("C-; d" . multi-term-dedicated-toggle)
-         ("C-; n" . multi-term-next)
-         ("C-; p" . multi-term-prev))
-  :hook (term-mode . user-term-mode-hook)
+  :bind (("C-; C-;" . #'multi-term-next)
+         ("C-; c" . #'multi-term)
+         ("C-; d" . #'multi-term-dedicated-toggle)
+         ("C-; n" . #'multi-term-next)
+         ("C-; p" . #'multi-term-prev))
+  :hook (term-mode . user/term-mode-hook)
   :preface
-  (defun user-term-mode-hook ()
+  (defun user/term-mode-hook ()
     (company-mode -1)
     (setq-local scroll-margin 0))
 
@@ -1108,48 +1117,49 @@ _q_ quit            _c_ create          _p_ previous
   (csetq multi-term-scroll-show-maximum-output t))
 
 (use-package multiple-cursors
-  :bind (("C-," . mc/unmark-next-like-this)
-         ("C-<" . mc/unmark-previous-like-this)
-         ("C-." . mc/mark-next-like-this)
-         ("C->" . mc/mark-previous-like-this)
-         ("C-S-<mouse-1>" . mc/add-cursor-on-click)
-         ("C-c m ^"     . mc/edit-beginnings-of-lines)
-         ("C-c m `"     . mc/edit-beginnings-of-lines)
-         ("C-c m $"     . mc/edit-ends-of-lines)
-         ("C-c m '"     . mc/edit-ends-of-lines)
-         ("C-c m R"     . mc/reverse-regions)
-         ("C-c m S"     . mc/sort-regions)
-         ("C-c m W"     . mc/mark-all-words-like-this)
-         ("C-c m Y"     . mc/mark-all-symbols-like-this)
-         ("C-c m a"     . mc/mark-all-like-this-dwim)
-         ("C-c m c"     . mc/mark-all-dwim)
-         ("C-c m l"     . mc/insert-letters)
-         ("C-c m n"     . mc/insert-numbers)
-         ("C-c m r"     . mc/mark-all-in-region)
-         ("C-c m s"     . set-rectangular-region-anchor)
-         ("C-c m %"     . mc/mark-all-in-region-regexp)
-         ("C-c m t"     . mc/mark-sgml-tag-pair)
-         ("C-c m w"     . mc/mark-next-like-this-word)
-         ("C-c m x"     . mc/mark-more-like-this-extended)
-         ("C-c m y"     . mc/mark-next-like-this-symbol)
-         ("C-c m C-SPC" . mc/mark-pop)
-         ("C-c m ("     . mc/mark-all-symbols-like-this-in-defun)
-         ("C-c m C-("   . mc/mark-all-words-like-this-in-defun)
-         ("C-c m M-("   . mc/mark-all-like-this-in-defun)
-         ("C-c m ["     . mc/vertical-align-with-space)
-         ("C-c m {"     . mc/vertical-align)
+  :after selected
+  :bind (("C-," . #'mc/unmark-next-like-this)
+         ("C-<" . #'mc/unmark-previous-like-this)
+         ("C-." . #'mc/mark-next-like-this)
+         ("C->" . #'mc/mark-previous-like-this)
+         ("C-S-<mouse-1>" . #'mc/add-cursor-on-click)
+         ("C-c m ^"     . #'mc/edit-beginnings-of-lines)
+         ("C-c m `"     . #'mc/edit-beginnings-of-lines)
+         ("C-c m $"     . #'mc/edit-ends-of-lines)
+         ("C-c m '"     . #'mc/edit-ends-of-lines)
+         ("C-c m R"     . #'mc/reverse-regions)
+         ("C-c m S"     . #'mc/sort-regions)
+         ("C-c m W"     . #'mc/mark-all-words-like-this)
+         ("C-c m Y"     . #'mc/mark-all-symbols-like-this)
+         ("C-c m a"     . #'mc/mark-all-like-this-dwim)
+         ("C-c m c"     . #'mc/mark-all-dwim)
+         ("C-c m l"     . #'mc/insert-letters)
+         ("C-c m n"     . #'mc/insert-numbers)
+         ("C-c m r"     . #'mc/mark-all-in-region)
+         ("C-c m s"     . #'set-rectangular-region-anchor)
+         ("C-c m %"     . #'mc/mark-all-in-region-regexp)
+         ("C-c m t"     . #'mc/mark-sgml-tag-pair)
+         ("C-c m w"     . #'mc/mark-next-like-this-word)
+         ("C-c m x"     . #'mc/mark-more-like-this-extended)
+         ("C-c m y"     . #'mc/mark-next-like-this-symbol)
+         ("C-c m C-SPC" . #'mc/mark-pop)
+         ("C-c m ("     . #'mc/mark-all-symbols-like-this-in-defun)
+         ("C-c m C-("   . #'mc/mark-all-words-like-this-in-defun)
+         ("C-c m M-("   . #'mc/mark-all-like-this-in-defun)
+         ("C-c m ["     . #'mc/vertical-align-with-space)
+         ("C-c m {"     . #'mc/vertical-align)
          :map selected-keymap
-         ("c"   . mc/edit-lines)
-         ("."   . mc/mark-next-like-this)
-         ("<"   . mc/unmark-next-like-this)
-         ("C->" . mc/skip-to-next-like-this)
-         (","   . mc/mark-previous-like-this)
-         (">"   . mc/unmark-previous-like-this)
-         ("C-<" . mc/skip-to-previous-like-this)
-         ("y"   . mc/mark-next-symbol-like-this)
-         ("Y"   . mc/mark-previous-symbol-like-this)
-         ("w"   . mc/mark-next-word-like-this)
-         ("W"   . mc/mark-previous-word-like-this))
+         ("c"   . #'mc/edit-lines)
+         ("."   . #'mc/mark-next-like-this)
+         ("<"   . #'mc/unmark-next-like-this)
+         ("C->" . #'mc/skip-to-next-like-this)
+         (","   . #'mc/mark-previous-like-this)
+         (">"   . #'mc/unmark-previous-like-this)
+         ("C-<" . #'mc/skip-to-previous-like-this)
+         ("y"   . #'mc/mark-next-symbol-like-this)
+         ("Y"   . #'mc/mark-previous-symbol-like-this)
+         ("w"   . #'mc/mark-next-word-like-this)
+         ("W"   . #'mc/mark-previous-word-like-this))
   :preface
   (defun mc-prompt-once-advice (fn &rest args)
     (setq mc--this-command (lambda () (interactive) (apply fn args)))
@@ -1167,10 +1177,9 @@ _q_ quit            _c_ create          _p_ previous
 
 (use-package objed
   :disabled
-  :bind (("C-\\" . objed-activate)
+  :bind (("s-SPC" . #'objed-activate)
          :map objed-map
-         ("-" . objed-forward-symbol)
-         ("RET" . objed-quit))
+         ("RET" . #'objed-quit))
   :config
   (add-to-list 'objed-keeper-commands 'undo-tree-undo)
   (add-to-list 'objed-keeper-commands 'undo-tree-redo))
@@ -1183,20 +1192,20 @@ _q_ quit            _c_ create          _p_ previous
 (use-package prog-mode
   :ensure nil
   :preface
-  (defun user-prog-mode-hook ()
+  (defun user/prog-mode-hook ()
     "Settings for all programming modes."
     (setq-local show-trailing-whitespace t))
 
-  :hook (prog-mode . user-prog-mode-hook))
+  :hook (prog-mode . user/prog-mode-hook))
 
 (use-package projectile
   :commands projectile-mode
   :diminish
   :bind (:map projectile-mode-map
-              ("C-c p" . projectile-command-map))
+              ("C-c p" . #'projectile-command-map))
   :hook (after-init . projectile-mode)
   :preface
-  (defun user-projectile-invalidate-cache (&rest _args)
+  (defun user/projectile-invalidate-cache (&rest _args)
     (projectile-invalidate-cache nil))
 
   :init
@@ -1213,9 +1222,9 @@ _q_ quit            _c_ create          _p_ previous
   ;; (eval-after-load 'magit-branch
   ;;   '(progn
   ;;      (advice-add 'magit-checkout
-  ;;                  :after #'user-projectile-invalidate-cache)
+  ;;                  :after #'user/projectile-invalidate-cache)
   ;;      (advice-add 'magit-branch-and-checkout
-  ;;                  :after #'user-projectile-invalidate-cache)))
+  ;;                  :after #'user/projectile-invalidate-cache)))
   )
 
 (use-package python
@@ -1234,9 +1243,9 @@ _q_ quit            _c_ create          _p_ previous
            "';'.join(get_ipython().Completer.all_completions('''%s'''), module_completion('''%s'''))\n")))
 
 (use-package pyvenv
-  :hook (python-mode . user-auto-virtualenv)
+  :hook (python-mode . user/auto-virtualenv)
   :preface
-  (defun user-auto-virtualenv ()
+  (defun user/auto-virtualenv ()
     (pyvenv-mode t)
 
     ;; A dolist would be appropriate, but I only use venv as virtualenv name
@@ -1348,7 +1357,7 @@ _q_ quit            _c_ create          _p_ previous
          )
 
   :preface
-  (defun user-open-block-c-mode (_id action _context)
+  (defun user/open-block-c-mode (_id action _context)
     (case action
       ((insert) (let (should-indent)
                   (save-excursion
@@ -1393,19 +1402,21 @@ _q_ quit            _c_ create          _p_ previous
   (add-to-list 'sp--special-self-insert-commands #'c-electric-paren)
   (add-to-list 'sp--special-self-insert-commands #'c-electric-brace)
 
-  (sp-local-pair 'c-mode "{" nil :post-handlers '(:add user-open-block-c-mode))
-  (sp-local-pair 'c++-mode "{" nil :post-handlers '(:add user-open-block-c-mode))
+  (sp-local-pair 'c-mode "{" nil :post-handlers '(:add user/open-block-c-mode))
+  (sp-local-pair 'c++-mode "{" nil :post-handlers '(:add user/open-block-c-mode))
 
   (sp-local-pair 'emacs-lisp-mode "`" nil :actions nil)
   (sp-local-pair 'emacs-lisp-mode "'" nil :actions nil)
+  (sp-local-pair 'c-mode "'" nil :actions nil)
+  (sp-local-pair 'c++-mode "'" nil :actions nil)
 
   (show-smartparens-global-mode t))
 
 (use-package smerge-mode
   :ensure nil
-  :bind (("C-c <C-m>" . user-hydra-smerge/body))
+  :bind (("C-c <C-m>" . #'user/hydra-smerge/body))
   :preface
-  (defhydra user-hydra-smerge
+  (defhydra user/hydra-smerge
     (:color pink
      :hint nil
      :pre (smerge-mode 1)
@@ -1444,6 +1455,16 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
   :defer t
   :config
   (smex-initialize))
+
+(use-package symbol-overlay
+  :diminish
+  :hook ((find-file . symbol-overlay-mode))
+  :bind (("M-*" . #'symbol-overlay-put)
+         ("M-n" . #'symbol-overlay-jump-next)
+         ("M-p" . #'symbol-overlay-jump-prev)
+         ("M-8" . #'symbol-overlay-toggle-in-scope))
+  :init
+  (csetq symbol-overlay-displayed-window t))
 
 (use-package tramp
   :defer t
@@ -1485,39 +1506,39 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
 
 (use-package user-utils
   :load-path "lisp"
-  :bind (("<C-return>" . #'user-open-line-above)
-         ("C-a" . #'user-smarter-move-beginning-of-line)
-         ("C-w" . #'user-smarter-kill-word-or-region)
-         ([remap backward-kill-word] . #'user-smarter-backward-kill-word)
-         ("M-]" . #'user-next-error)
-         ("M-[" . #'user-prev-error)
-         ([remap forward-paragraph] . #'user-forward-paragraph)
-         ([remap backward-paragraph] . #'user-backward-paragraph)
-         ("M-j" . #'user-join-line)
-         ("C-`" . #'user-open-terminal)
-         ([remap scroll-up-command] . #'user-scroll-half-page-up)
-         ([remap scroll-down-command] . #'user-scroll-half-page-down)
+  :bind (("<C-return>" . #'user/open-line-above)
+         ("C-a" . #'user/smarter-move-beginning-of-line)
+         ("C-w" . #'user/smarter-kill-word-or-region)
+         ([remap backward-kill-word] . #'user/smarter-backward-kill-word)
+         ("M-]" . #'user/next-error)
+         ("M-[" . #'user/prev-error)
+         ([remap forward-paragraph] . #'user/forward-paragraph)
+         ([remap backward-paragraph] . #'user/backward-paragraph)
+         ("M-j" . #'user/join-line)
+         ("C-`" . #'user/open-terminal)
+         ([remap scroll-up-command] . #'user/scroll-half-page-up)
+         ([remap scroll-down-command] . #'user/scroll-half-page-down)
          ("C-'" . #'push-mark-no-activate)
          ("M-'" . #'jump-to-mark)
          ;; :map isearch-mode-map
-         ;; ("<backspace>" . #'user-isearch-delete)
+         ;; ("<backspace>" . #'user/isearch-delete)
          :map minibuffer-local-map
-         ("<escape>" . #'user-minibuffer-keyboard-quit)
+         ("<escape>" . #'user/minibuffer-keyboard-quit)
          :map minibuffer-local-ns-map
-         ("<escape>" . #'user-minibuffer-keyboard-quit)
+         ("<escape>" . #'user/minibuffer-keyboard-quit)
          :map minibuffer-local-completion-map
-         ("<escape>" . #'user-minibuffer-keyboard-quit)
+         ("<escape>" . #'user/minibuffer-keyboard-quit)
          :map minibuffer-local-must-match-map
-         ("<escape>" . #'user-minibuffer-keyboard-quit)
+         ("<escape>" . #'user/minibuffer-keyboard-quit)
          :map minibuffer-local-isearch-map
-         ("<escape>" . #'user-minibuffer-keyboard-quit)))
+         ("<escape>" . #'user/minibuffer-keyboard-quit)))
 
 (use-package user-window
   :load-path "lisp"
-  :bind (("C-c w" . #'user-windows-hydra/body)
+  :bind (("C-c w" . #'user/windows-hydra/body)
          ([remap exchange-point-and-mark] . #'exchange-point-and-mark-no-activate))
   :preface
-  (defhydra user-windows-hydra (:color pink)
+  (defhydra user/windows-hydra (:color pink)
     "
 ^
 ^Movement^           ^Window^            ^Zoom^
@@ -1533,14 +1554,14 @@ _o_ other            ^^                 ^^
 "
     ("q" nil)
     ("b" balance-windows :color blue)
-    ("d" user-toggle-current-window-dedication :color blue)
+    ("d" user/toggle-current-window-dedication :color blue)
     ("f" toggle-frame-fullscreen :color blue)
     ("i" enlarge-window)
     ("j" shrink-window-horizontally)
     ("k" shrink-window)
     ("l" enlarge-window-horizontally)
     ("o" other-window)
-    ("m" user-switch-to-minibuffer :color blue)
+    ("m" user/switch-to-minibuffer :color blue)
     ("1" delete-other-windows :color blue)
     ("2" split-window-right :color blue)
     ("3" split-window-below :color blue)
@@ -1585,7 +1606,7 @@ _o_ other            ^^                 ^^
 
 (use-package web-mode
   :defer t
-  :hook (web-mode . user-web-mode-hook)
+  :hook (web-mode . user/web-mode-hook)
   :mode
   (("\\.phtml\\'" . web-mode)
    ("\\.tpl\\.php\\'" . web-mode)
@@ -1597,7 +1618,7 @@ _o_ other            ^^                 ^^
    ("\\.html?\\'" . web-mode)
    ("\\.jsx$\\'" . web-mode))
   :preface
-  (defun user-web-mode-hook ()
+  (defun user/web-mode-hook ()
     "Hook to run when `web-mode' is active."
     (smartparens-mode -1))
 
@@ -1631,7 +1652,8 @@ _o_ other            ^^                 ^^
 
 (use-package which-func
   :ensure nil
-  :hook (prog-mode . which-function-mode))
+  :hook ((prog-mode . which-function-mode)
+         (lsp-mode . which-function-mode)))
 
 (use-package which-key
   :diminish

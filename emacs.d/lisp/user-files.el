@@ -7,7 +7,7 @@
 ;;; Code:
 
 ;;;###autoload
-(defun user-delete-file-and-buffer ()
+(defun user/delete-file-and-buffer ()
   "Delete the current file and kill the buffer."
   (interactive)
   (let ((filename (buffer-file-name)))
@@ -19,7 +19,7 @@
       (kill-buffer)))))
 
 ;;;###autoload
-(defun user-rename-file-and-buffer ()
+(defun user/rename-file-and-buffer ()
   "Rename the current file and buffer."
   (interactive)
   (let* ((filename (buffer-file-name))
