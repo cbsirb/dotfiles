@@ -221,8 +221,13 @@
 (when (fboundp 'menu-bar-mode) (menu-bar-mode 0))
 (when (fboundp 'scroll-bar-mode) (scroll-bar-mode 0))
 
+;; (set-face-attribute 'default nil
+;;                     :family "Iosevka SS09"
+;;                     :height 105
+;;                     :weight 'normal)
+
 (set-face-attribute 'default nil
-                    :family "Iosevka SS09"
+                    :family "IBM Plex Mono"
                     :height 105
                     :weight 'normal)
 
@@ -558,6 +563,9 @@ Taken from http://stackoverflow.com/a/3072831/355252."
   (csetq counsel-grep-post-action-hook '(recenter))
   :config
   (counsel-mode t))
+
+(use-package counsel-etags
+  :after counsel)
 
 (use-package comint
   :ensure nil

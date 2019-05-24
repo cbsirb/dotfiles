@@ -10,6 +10,7 @@ call minpac#init()
 call minpac#add('k-takata/minpac', {'type':'opt'})
 
 call minpac#add('tpope/vim-apathy')
+call minpac#add('tpope/vim-characterize')
 call minpac#add('tpope/vim-commentary')
 call minpac#add('tpope/vim-endwise')
 call minpac#add('tpope/vim-fugitive')
@@ -17,11 +18,10 @@ call minpac#add('tpope/vim-git')
 call minpac#add('tpope/vim-ragtag')
 call minpac#add('tpope/vim-repeat')
 call minpac#add('tpope/vim-rsi')
+call minpac#add('tpope/vim-sleuth')
 call minpac#add('tpope/vim-unimpaired')
 call minpac#add('tpope/vim-vinegar')
 call minpac#add('tpope/vim-surround')
-
-call minpac#add('w0rp/ale')
 
 call minpac#add('romainl/vim-qf')
 call minpac#add('romainl/vim-qlist')
@@ -29,6 +29,7 @@ call minpac#add('romainl/vim-tinyMRU')
 
 call minpac#add('tommcdo/vim-lion')
 
+call minpac#add('w0rp/ale')
 call minpac#add('Rip-Rip/clang_complete')
 
 " When I start writing html again
@@ -52,5 +53,4 @@ call minpac#add('prabirshrestha/vim-lsp')
 " Colorschemes
 call minpac#add('robertmeta/nofrils', {'type':'opt'})
 call minpac#add('romainl/Apprentice', {'type':'opt'})
-" call minpac#add('altercation/vim-colors-solarized', {'type':'opt'})
 call minpac#add('romainl/flattened', {'type':'opt'})

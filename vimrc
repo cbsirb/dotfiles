@@ -1,15 +1,13 @@
 source ~/.vim/packages.vim
 
-if !has('nvim')
-  unlet! skip_defaults_vim
-  source $VIMRUNTIME/defaults.vim
-  packadd matchit
-endif
+unlet! skip_defaults_vim
+source $VIMRUNTIME/defaults.vim
+packadd matchit
 
 set showmatch
 
+" TODO: Test it!
 set notimeout
-set ttimeout
 
 set lazyredraw
 set laststatus=2
@@ -69,6 +67,7 @@ set tabpagemax=50
 
 set clipboard^=unnamedplus
 
+set diffopt+=algorithm:patience
 
 set linebreak
 set breakindent
@@ -91,15 +90,14 @@ set viewdir=~/.vim/cache/view
 set colorcolumn=+1
 set cursorline
 
-" Disabled 08.14.2017
-" if !has('gui_running') && has('termguicolors')
-"   if $TERM =~# '-256color' && $TERM !~# 'rxvt'
-"     " Needed in tmux
-"     let &t_8f = "\<Esc>[38;2;%lu;%lu;%lum"
-"     let &t_8b = "\<Esc>[48;2;%lu;%lu;%lum"
-"     set termguicolors
-"   endif
-" endif
+if !has('gui_running') && has('termguicolors')
+  if $TERM =~# '-256color' && $TERM !~# 'rxvt'
+    " Needed in tmux
+    let &t_8f = "\<Esc>[38;2;%lu;%lu;%lum"
+    let &t_8b = "\<Esc>[48;2;%lu;%lu;%lum"
+    set termguicolors
+  endif
+endif
 
 if executable("rg")
   set grepprg=rg\ -H\ --no-heading\ --vimgrep\ -g\ '!{.git,node_modules,vendor}/*'\ -g\ '!tags'\ -g\ '!TAGS'
@@ -112,7 +110,7 @@ endif
 augroup VIMRC
   autocmd!
 
-  autocmd VimEnter * colorscheme flattened_light
+  autocmd VimEnter * colorscheme apprentice
 
   autocmd VimEnter,GUIEnter * set visualbell t_vb=
 
@@ -124,9 +122,7 @@ augroup VIMRC
   autocmd VimEnter,WinEnter,BufWinEnter,FocusGained,CmdwinEnter * setlocal cursorline
   autocmd WinLeave,FocusLost,CmdwinLeave * setlocal nocursorline
 
-  if !has('nvim')
-    autocmd CmdlineEnter /,\? :set hlsearch
-  endif
+  autocmd CmdlineEnter /,\? :set hlsearch
 augroup END
 
 """"""""""""
@@ -162,8 +158,9 @@ nnoremap <expr> j      v:count == 0 ? 'gj' : 'j'
 nnoremap <expr> <Up>   v:count == 0 ? 'gk' : 'k'
 nnoremap <expr> <Down> v:count == 0 ? 'gj' : 'j'
 
-nnoremap <silent> <C-l> :set hlsearch!<CR>
+nnoremap <silent> <C-l> :set hlsearch!<C-R>=has('diff')?'<Bar>diffupdate':''<CR><CR><C-l>
 nnoremap <BS> <C-^>
+inoremap <C-U> <C-G>u<C-U>
 
 nnoremap <silent> <space>0 :call clearmatches()<cr>
 nnoremap <silent> <space>1 :call highlight#word(1)<cr>
@@ -358,7 +355,6 @@ function! LspPerBuffer() abort
       break
     endif
   endfor
-
 endfunction
 
 augroup LSP

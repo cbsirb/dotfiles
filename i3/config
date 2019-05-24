@@ -23,7 +23,7 @@ floating_modifier $mod
 # start a terminal
 # bindsym $mod+Return exec xterm -geometry 112x30
 # bindsym $mod+Return exec kitty
-bindsym $mod+Return exec urxvt -geometry 112x30
+bindsym $mod+Return exec alacritty -d 112 30
 
 # kill focused window
 bindsym $mod+q kill
