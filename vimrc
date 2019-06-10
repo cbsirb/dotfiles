@@ -110,7 +110,7 @@ endif
 augroup VIMRC
   autocmd!
 
-  autocmd VimEnter * colorscheme apprentice
+  autocmd VimEnter * colorscheme parchment
 
   autocmd VimEnter,GUIEnter * set visualbell t_vb=
 

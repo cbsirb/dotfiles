@@ -72,17 +72,21 @@
 (require 'use-package)
 
 ;;; Packages needed no matter what, and usually others are depended on it
-;; (load-theme 'adwaita t)
-(use-package habamax-theme
-  :when window-system
-  :init
-  (csetq habamax-theme-variable-heading-heights t)
+;; (use-package habamax-theme
+;;   :init
+;;   (csetq habamax-theme-variable-heading-heights t)
+;;   :config
+;;   (load-theme 'habamax t))
+
+(use-package parchment-theme
   :config
-  (load-theme 'habamax t))
+  (load-theme 'parchment t))
 
 (use-package ignoramus
   :config
   (ignoramus-setup))
+
+(use-package no-littering)
 
 (use-package diminish
   :demand t
@@ -323,7 +327,7 @@
   :diminish auto-revert-mode
   :init
   (csetq auto-revert-verbose nil)
-  (csetq global-auto-revert-non-file-buffers t)
+  (csetq auto-revert-avoid-polling t)
 
   :config
   (global-auto-revert-mode))
@@ -418,7 +422,7 @@ For anything else there is ctags."
 
   (csetq c-default-style '((java-mode . "java")
                            (awk-mode . "awk")
-                           (other . "linux"))))
+                           (other . "allman"))))
 
 (use-package ccls
   :after cc-mode
@@ -450,9 +454,7 @@ For anything else there is ctags."
 
 (use-package comment-dwim-2
   :after selected
-  :bind (("M-;" . #'comment-dwim-2)
-         :map selected-keymap
-         (";" . #'comment-dwim-2)))
+  :bind ("M-;" . #'comment-dwim-2))
 
 (use-package company
   :diminish
@@ -482,6 +484,7 @@ For anything else there is ctags."
   )
 
 (use-package company-posframe
+  :when window-system
   :diminish
   :after company
   :hook (company-mode . company-posframe-mode))
@@ -601,6 +604,11 @@ Taken from http://stackoverflow.com/a/3072831/355252."
   (csetq dabbrev-case-replace nil)
   (csetq dabbrev-abbrev-skip-leading-regexp "[^ ]*[<>=*$]"))
 
+(use-package daemons
+  :commands (daemons daemons-start daemons-stop daemons-status)
+  :init
+  (csetq daemons-always-sudo t))
+
 (use-package diff-mode
   :ensure nil
   :hook ((diff-mode . diff-delete-empty-files)
@@ -673,7 +681,11 @@ Taken from http://stackoverflow.com/a/3072831/355252."
   :init
   (csetq dired-omit-verbose nil))
 
-(use-package disk-usage)
+(use-package disk-usage
+  :commands (disk-usage))
+
+(use-package docker
+  :commands (docker))
 
 (use-package dumb-jump
   :hook ((dumb-jump-after-jump . recenter-top-bottom)))
@@ -708,6 +720,7 @@ _SWITCH should be 'diff'."
   (csetq ediff-window-setup-function #'ediff-setup-windows-plain))
 
 (use-package eldoc-box
+  :disabled
   :diminish eldoc-box-hover-mode
   :hook ((prog-mode . eldoc-box-hover-at-point-mode)
          (prog-mode . eldoc-box-hover-mode)))
@@ -812,6 +825,7 @@ _q_ quit            _c_ create          _p_ previous
   )
 
 (use-package flymake-posframe
+  :when window-system
   :load-path "site-lisp"
   :hook (flymake-mode . flymake-posframe-mode))
 
@@ -950,6 +964,8 @@ _q_ quit            _c_ create          _p_ previous
   (ivy-mode t))
 
 (use-package ivy-posframe
+  :diminish
+  :when window-system
   :after ivy
   :init
   (csetq ivy-height 15)
@@ -958,7 +974,7 @@ _q_ quit            _c_ create          _p_ previous
         '((left-fringe . 8)
           (right-fringe . 8)))
   :config
-  (ivy-posframe-enable))
+  (ivy-posframe-mode t))
 
 (use-package ivy-rich
   :after ivy
@@ -1107,11 +1123,11 @@ _q_ quit            _c_ create          _p_ previous
 
 (use-package multi-term
   :if (eq system-type 'gnu/linux)
-  :bind (("C-; C-;" . #'multi-term-next)
-         ("C-; c" . #'multi-term)
-         ("C-; d" . #'multi-term-dedicated-toggle)
-         ("C-; n" . #'multi-term-next)
-         ("C-; p" . #'multi-term-prev))
+  :bind (("C-z" . #'multi-term-next)
+         ("C-c z c" . #'multi-term)
+         ("C-c z d" . #'multi-term-dedicated-toggle)
+         ("C-c z n" . #'multi-term-next)
+         ("C-c z p" . #'multi-term-prev))
   :hook (term-mode . user/term-mode-hook)
   :preface
   (defun user/term-mode-hook ()
@@ -1125,11 +1141,10 @@ _q_ quit            _c_ create          _p_ previous
   (csetq multi-term-scroll-show-maximum-output t))
 
 (use-package multiple-cursors
-  :after selected
-  :bind (("C-," . #'mc/unmark-next-like-this)
+  :bind (("C->" . #'mc/unmark-next-like-this)
          ("C-<" . #'mc/unmark-previous-like-this)
          ("C-." . #'mc/mark-next-like-this)
-         ("C->" . #'mc/mark-previous-like-this)
+         ("C-," . #'mc/mark-previous-like-this)
          ("C-S-<mouse-1>" . #'mc/add-cursor-on-click)
          ("C-c m ^"     . #'mc/edit-beginnings-of-lines)
          ("C-c m `"     . #'mc/edit-beginnings-of-lines)
@@ -1151,23 +1166,16 @@ _q_ quit            _c_ create          _p_ previous
          ("C-c m x"     . #'mc/mark-more-like-this-extended)
          ("C-c m y"     . #'mc/mark-next-like-this-symbol)
          ("C-c m C-SPC" . #'mc/mark-pop)
+
          ("C-c m ("     . #'mc/mark-all-symbols-like-this-in-defun)
          ("C-c m C-("   . #'mc/mark-all-words-like-this-in-defun)
          ("C-c m M-("   . #'mc/mark-all-like-this-in-defun)
+         ("C-c m d"     . #'mc/mark-all-symbols-like-this-in-defun)
+         ("C-c m C-d"   . #'mc/mark-all-words-like-this-in-defun)
+         ("C-c m M-d"   . #'mc/mark-all-like-this-in-defun)
+
          ("C-c m ["     . #'mc/vertical-align-with-space)
-         ("C-c m {"     . #'mc/vertical-align)
-         :map selected-keymap
-         ("c"   . #'mc/edit-lines)
-         ("."   . #'mc/mark-next-like-this)
-         ("<"   . #'mc/unmark-next-like-this)
-         ("C->" . #'mc/skip-to-next-like-this)
-         (","   . #'mc/mark-previous-like-this)
-         (">"   . #'mc/unmark-previous-like-this)
-         ("C-<" . #'mc/skip-to-previous-like-this)
-         ("y"   . #'mc/mark-next-symbol-like-this)
-         ("Y"   . #'mc/mark-previous-symbol-like-this)
-         ("w"   . #'mc/mark-next-word-like-this)
-         ("W"   . #'mc/mark-previous-word-like-this))
+         ("C-c m {"     . #'mc/vertical-align))
   :preface
   (defun mc-prompt-once-advice (fn &rest args)
     (setq mc--this-command (lambda () (interactive) (apply fn args)))
@@ -1185,12 +1193,13 @@ _q_ quit            _c_ create          _p_ previous
 
 (use-package objed
   :disabled
-  :bind (("s-SPC" . #'objed-activate)
-         :map objed-map
-         ("RET" . #'objed-quit))
   :config
   (add-to-list 'objed-keeper-commands 'undo-tree-undo)
-  (add-to-list 'objed-keeper-commands 'undo-tree-redo))
+  (add-to-list 'objed-keeper-commands 'undo-tree-redo)
+
+  (define-key objed-op-map "x" 'counsel-M-x)
+
+  (objed-mode t))
 
 (use-package pipenv
   :hook (python-mode . pipenv-mode)
@@ -1262,6 +1271,9 @@ _q_ quit            _c_ create          _p_ previous
       (if (and root (file-exists-p root))
           (pyvenv-activate (expand-file-name "venv" root))))))
 
+(use-package rainbow-mode
+  :commands (rainbow-mode))
+
 (use-package realgud
   :commands (realgud:bashdb realgud:gdb realgud:gub realgud:ipdb
                             realgud:jdb realgud:kshdb realgud:nodejs realgud:pdb
@@ -1269,25 +1281,19 @@ _q_ quit            _c_ create          _p_ previous
 
 (use-package recentf
   :ensure nil
-  :after ignoramus
   :init
   (csetq recentf-auto-cleanup 'never)
   (csetq recentf-exclude (list
-                          "/\\.git/.*\\'"        ; Git contents
                           "/elpa/.*\\'"          ; Package files
                           "PKGBUILD"             ; ArchLinux aur
-                          "COMMIT_MSG"
-                          "COMMIT_EDITMSG"
                           "crontab.*"
                           #'ignoramus-boring-p))
   (csetq recentf-max-saved-items 500)
   (csetq recentf-max-menu-items 20)
 
   :config
-  (use-package no-littering
-    :config
-    (add-to-list 'recentf-exclude no-littering-var-directory)
-    (add-to-list 'recentf-exclude no-littering-etc-directory))
+  (add-to-list 'recentf-exclude no-littering-var-directory)
+  (add-to-list 'recentf-exclude no-littering-etc-directory)
 
   (recentf-mode t)
   (run-at-time (* 5 60) (* 5 60) #'recentf-save-list))
@@ -1323,6 +1329,7 @@ _q_ quit            _c_ create          _p_ previous
   (save-place-mode t))
 
 (use-package selected
+  :disabled
   :demand t
   :diminish selected-minor-mode
   :config
@@ -1403,6 +1410,16 @@ _q_ quit            _c_ create          _p_ previous
 
   :hook ((prog-mode . smartparens-mode)
          (minibuffer-setup . turn-on-smartparens-strict-mode))
+
+  :init
+  (csetq sp-highlight-pair-overlay nil)
+  (csetq sp-highlight-wrap-overlay nil)
+  (csetq sp-highlight-wrap-tag-overlay nil)
+  (csetq sp-show-pair-from-inside t)
+  (csetq sp-cancel-autoskip-on-backward-movement nil)
+  (csetq sp-max-pair-length 4)
+  (csetq sp-max-prefix-length 50)
+  (csetq sp-escape-quotes-after-insert nil)
 
   :config
   (require 'smartparens-config)
