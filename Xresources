@@ -7,12 +7,10 @@ Xft.hintstyle:  hintfull
 Xft.lcdfilter:  lcddefault
 Xft.rgba:       rgb
 
-URxvt.font:             xft:Iosevka SS09:size=11
-URxvt.italicFont:       xft:Iosevka SS09:size=11:italic
-URxvt.boldFont:         xft:Iosevka SS09:size=11:bold
-URxvt.boldItalicFont:   xft:Iosevka SS09:size=11:bold:italic
-
-! #include "/home/csirb/.Xresources.solarized"
+URxvt.font:             xft:IBM Plex Mono:size=10
+URxvt.italicFont:       xft:IBM Plex Mono:size=10:italic
+URxvt.boldFont:         xft:IBM Plex Mono:size=10:bold
+URxvt.boldItalicFont:   xft:IBM Plex Mono:size=10:bold:italic
 
 xterm*saveLines: 100000
 
@@ -22,7 +20,7 @@ xterm*termName: xterm-256color
 xterm*locale: true
 xterm*metaSendsEscape: true
 xterm*eightBitInput: false
-xterm*faceName: xft:Iosevka Term SS09:style=Regular:size=11
+xterm*faceName: xft:IBM Plex Mono:style=Regular:size=10
 
 xterm*multiScroll: true
 xterm*jumpScroll: true
@@ -60,7 +58,7 @@ xterm*VT100.Translations: #override \
 ! URxvt config
 URxvt*depth: 32
 URxvt*buffered: true
-URxvt*letterSpace: -1
+! URxvt*letterSpace: -1
 
 URxvt*iconFile: /usr/share/icons/Adwaita/scalable/apps/utilities-terminal-symbolic.svg
 URxvt*iconName: urxvt
@@ -90,9 +88,6 @@ URxvt*secondaryScroll: 0
 
 URxvt*skipBuiltinGlyphs: true
 
-! Show colors in bold
-URxvt*intensityStyles: False
-
 URxvt*perl-ext:
 URxvt*perl-ext-common:
 
@@ -100,65 +95,27 @@ URxvt*perl-ext-common:
 ! *background: #000000
 ! *foreground: #ffffff
 
-!! Colorscheme
-#define S_base03        #002b36
-#define S_base02        #073642
-#define S_base01        #586e75
-#define S_base00        #657b83
-#define S_base0         #839496
-#define S_base1         #93a1a1
-#define S_base2         #eee8d5
-#define S_base3         #fdf6e3
+*background:            #ffffea
+*foreground:            #000000
+xterm*background:       #ffffea
+xterm*foreground:       #000000
 
-*background:            S_base3
-*foreground:            S_base00
-*borderColor:           S_base3
+*color0:                #000000
+*color1:                #880000
+*color2:                #005500
+*color3:                #663311
+*color4:                #004488
+*color5:                #770077
+*color6:                #007777
+*color7:                #eeeecc
+*color8:                #eaeaea
+*color9:                #ffeaea
+*color10:               #eaffea
+*color11:               #eeee9e
+*color12:               #cceeff
+*color13:               #ffeaff
+*color14:               #eaffff
+*color15:               #ffffea
 
-xterm*background:       S_base3
-xterm*foreground:       S_base00
-
-*fadeColor:             S_base3
-*cursorColor:           S_base01
-*pointerColorBackground:S_base1
-*pointerColorForeground:S_base01
-
-#define S_yellow        #b58900
-#define S_orange        #cb4b16
-#define S_red           #dc322f
-#define S_magenta       #d33682
-#define S_violet        #6c71c4
-#define S_blue          #268bd2
-#define S_cyan          #2aa198
-#define S_green         #859900
-
-!! black dark/light
-*color0:                S_base02
-*color8:                S_base03
-
-!! red dark/light
-*color1:                S_red
-*color9:                S_orange
-
-!! green dark/light
-*color2:                S_green
-*color10:               S_base01
-
-!! yellow dark/light
-*color3:                S_yellow
-*color11:               S_base00
-
-!! blue dark/light
-*color4:                S_blue
-*color12:               S_base0
-
-!! magenta dark/light
-*color5:                S_magenta
-*color13:               S_violet
-
-!! cyan dark/light
-*color6:                S_cyan
-*color14:               S_base1
-
-!! white dark/light
-*color7:                S_base2
-*color15:               S_base3
+URxvt*intensityStyles:  false
+XTerm*boldColors:       false

@@ -355,10 +355,6 @@
                                         (defun-close . (before after))
                                         (inline-open . (before after))
                                         (inline-close . (before after))
-                                        ;; (brace-list-open)
-                                        ;; (brace-list-close)
-                                        ;; (brace-list-intro)
-                                        ;; (brace-list-entry)
                                         (block-open . (before after))
                                         (block-close . (before))
                                         (substatement-open . (before after))
@@ -1234,15 +1230,7 @@ _q_ quit            _c_ create          _p_ previous
 
   :config
   (add-to-list 'projectile-globally-ignored-directories ".vscode")
-  (add-to-list 'projectile-globally-ignored-directories ".ccls-cache")
-
-  ;; (eval-after-load 'magit-branch
-  ;;   '(progn
-  ;;      (advice-add 'magit-checkout
-  ;;                  :after #'user/projectile-invalidate-cache)
-  ;;      (advice-add 'magit-branch-and-checkout
-  ;;                  :after #'user/projectile-invalidate-cache)))
-  )
+  (add-to-list 'projectile-globally-ignored-directories ".ccls-cache"))
 
 (use-package python
   :ensure nil
