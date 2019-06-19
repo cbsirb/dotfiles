@@ -7,10 +7,10 @@ Xft.hintstyle:  hintfull
 Xft.lcdfilter:  lcddefault
 Xft.rgba:       rgb
 
-URxvt.font:             xft:IBM Plex Mono:size=10
-URxvt.italicFont:       xft:IBM Plex Mono:size=10:italic
-URxvt.boldFont:         xft:IBM Plex Mono:size=10:bold
-URxvt.boldItalicFont:   xft:IBM Plex Mono:size=10:bold:italic
+URxvt.font:             xft:IBM Plex Mono Medium:size=10
+URxvt.italicFont:       xft:IBM Plex Mono Medium:size=10:italic
+URxvt.boldFont:         xft:IBM Plex Mono Medium:size=10:bold
+URxvt.boldItalicFont:   xft:IBM Plex Mono Medium:size=10:bold:italic
 
 xterm*saveLines: 100000
 
@@ -20,7 +20,7 @@ xterm*termName: xterm-256color
 xterm*locale: true
 xterm*metaSendsEscape: true
 xterm*eightBitInput: false
-xterm*faceName: xft:IBM Plex Mono:style=Regular:size=10
+xterm*faceName: xft:IBM Plex Mono Medium:style=Regular:size=10
 
 xterm*multiScroll: true
 xterm*jumpScroll: true

@@ -225,11 +225,6 @@
 (when (fboundp 'menu-bar-mode) (menu-bar-mode 0))
 (when (fboundp 'scroll-bar-mode) (scroll-bar-mode 0))
 
-;; (set-face-attribute 'default nil
-;;                     :family "Iosevka SS09"
-;;                     :height 105
-;;                     :weight 'normal)
-
 (set-face-attribute 'default nil
                     :family "IBM Plex Mono"
                     :height 105
@@ -282,7 +277,7 @@
   (setq-local show-trailing-whitespace nil))
 
 ;;; Keybindings
-(when window-system
+(when (display-graphic-p)
   (define-key input-decode-map [?\C-m] [C-m])
   (define-key input-decode-map [?\C-\M-m] [C-M-m]))
 
@@ -293,7 +288,6 @@
 (unbind-key "C-x C-z")
 (unbind-key "C-x f")
 (unbind-key "C-x m")
-(unbind-key "<insert>")
 (unbind-key "M-o")
 (unbind-key "C-x >")
 (unbind-key "C-x <")
@@ -383,6 +377,16 @@
                                         (brace-list-intro        .  4))))
     "A sane style, mostly based on Allman.")
 
+  (defconst user/k&r-style
+    '((c-basic-offset . 4)
+      (c-comment-only-line-offset . 0)
+      (c-offsets-alist . ((statement-block-intro . +)
+                          (knr-argdecl-intro . 0)
+                          (substatement-open . 0)
+                          (substatement-label . 0)
+                          (label . 0)
+                          (statement-cont . +)))))
+
   (defun user/cc-goto-def ()
     "Go to the first occurence of the variable/parameter inside the function.  \
 For anything else there is ctags."
@@ -415,10 +419,11 @@ For anything else there is ctags."
 
   :config
   (c-add-style "allman" user/allman-style)
+  (c-add-style "sane-k&r" user/k&r-style)
 
   (csetq c-default-style '((java-mode . "java")
                            (awk-mode . "awk")
-                           (other . "allman"))))
+                           (other . "sane-k&r"))))
 
 (use-package ccls
   :after cc-mode
@@ -478,12 +483,6 @@ For anything else there is ctags."
   ;;   :load-path "lisp"
   ;;   :bind (("C-c /" . #'user/complete-line)))
   )
-
-(use-package company-posframe
-  :when window-system
-  :diminish
-  :after company
-  :hook (company-mode . company-posframe-mode))
 
 (use-package compile
   :ensure nil
@@ -741,7 +740,7 @@ _SWITCH should be 'diff'."
   (csetq eshell-history-size 50000)
   (csetq eshell-ls-dired-initial-args (quote ("-h")))
   (csetq eshell-ls-exclude-regexp "~\\'")
-  (csetq eshell-ls-initial-args "-h")
+  (csetq eshell-ls-initial-args "-hA")
   (csetq eshell-stringify-t nil))
 
 (use-package esh-module
@@ -798,17 +797,6 @@ _q_ quit            _c_ create          _p_ previous
       (let ((text (flymake--diag-text (get-char-property (point) 'flymake-diagnostic))))
         (when text (message "%s" text)))))
 
-  (defun user/flymake-make-diagnostic (orig-fun &rest args)
-    (let ((buffer (nth 0 args))
-          (beg (nth 1 args))
-          (end (nth 2 args))
-          (type (nth 3 args))
-          (text (nth 4 args)))
-      (flymake--diag-make :buffer buffer :beg beg :end end
-                          :type type :text text :data nil
-                          :overlay-properties nil)
-      ))
-
   :bind (("C-c f n" . #'flymake-goto-next-error)
          ("C-c f p" . #'flymake-goto-prev-error)
          ("C-c f s" . #'flymake-start)
@@ -816,19 +804,15 @@ _q_ quit            _c_ create          _p_ previous
   :init
   (csetq flymake-no-changes-timeout nil)
   (csetq flymake-start-syntax-check-on-newline nil)
-  :config
+  ;; :config
   ;; (advice-add #'flymake-make-diagnostic :around #'user/flymake-make-diagnostic)
   )
 
-(use-package flymake-posframe
-  :when window-system
-  :load-path "site-lisp"
-  :hook (flymake-mode . flymake-posframe-mode))
-
 (use-package flymake-diagnostic-at-point
-  :disabled
-  :after flymake
-  :hook (flymake-mode . flymake-diagnostic-at-point-mode))
+  :hook (flymake-mode . flymake-diagnostic-at-point-mode)
+  :init
+  (csetq flymake-diagnostic-at-point-display-diagnostic-function
+         #'flymake-diagnostic-at-point-display-popup))
 
 (use-package flyspell
   :ensure nil
@@ -843,6 +827,87 @@ _q_ quit            _c_ create          _p_ previous
   :ensure nil
   :defer t
   :hook (grep-mode . user/results-buffer-hook))
+
+(use-package gnus
+  :ensure nil
+  :preface
+  (defhydra user/hydra-gnus-group (:color blue)
+    "
+[_A_] Remote groups (A A) [_g_] Refresh
+[_L_] Local groups        [_\\^_] List servers
+[_c_] Mark all read       [_m_] Compose new mail
+[_G_] Search mails (G G) [_#_] Mark mail
+"
+    ("A" gnus-group-list-active)
+    ("L" gnus-group-list-all-groups)
+    ("c" gnus-topic-catchup-articles)
+    ("G" dianyou-group-make-nnir-group)
+    ("g" gnus-group-get-new-news)
+    ("^" gnus-group-enter-server-mode)
+    ("m" gnus-group-new-mail)
+    ("#" gnus-topic-mark-topic)
+    ("q" nil))
+
+  (defhydra user/hydra-gnus-summary (:color blue)
+    "
+[_s_] Show thread   [_F_] Forward (C-c C-f)
+[_h_] Hide thread   [_e_] Resend (S D e)
+[_n_] Refresh (/ N) [_r_] Reply
+[_!_] Mail -> disk  [_R_] Reply with original
+[_d_] Disk -> mail  [_w_] Reply all (S w)
+[_c_] Read all      [_W_] Reply all with original (S W)
+[_#_] Mark
+"
+    ("s" gnus-summary-show-thread)
+    ("h" gnus-summary-hide-thread)
+    ("n" gnus-summary-insert-new-articles)
+    ("F" gnus-summary-mail-forward)
+    ("!" gnus-summary-tick-article-forward)
+    ("d" gnus-summary-put-mark-as-read-next)
+    ("c" gnus-summary-catchup-and-exit)
+    ("e" gnus-summary-resend-message-edit)
+    ("R" gnus-summary-reply-with-original)
+    ("r" gnus-summary-reply)
+    ("W" gnus-summary-wide-reply-with-original)
+    ("w" gnus-summary-wide-reply)
+    ("#" gnus-topic-mark-topic)
+    ("q" nil))
+
+  (defhydra user/hydra-gnus-article (:color blue)
+    "
+[_o_] Save attachment        [_F_] Forward
+[_v_] Play video/audio       [_r_] Reply
+[_d_] CLI to dowloand stream [_R_] Reply with original
+[_b_] Open external browser  [_w_] Reply all (S w)
+[_f_] Click link/button      [_W_] Reply all with original (S W)
+[_g_] Focus link/button
+"
+    ("F" gnus-summary-mail-forward)
+    ("r" gnus-article-reply)
+    ("R" gnus-article-reply-with-original)
+    ("w" gnus-article-wide-reply)
+    ("W" gnus-article-wide-reply-with-original)
+    ("o" gnus-mime-save-part)
+    ("v" w3mext-open-with-mplayer)
+    ("d" w3mext-download-rss-stream)
+    ("b" w3mext-open-link-or-image-or-url)
+    ("f" w3m-lnum-follow)
+    ("g" w3m-lnum-goto)
+    ("q" nil))
+
+  :bind (;; ("C-x m" . #'gnus)
+         :map gnus-group-mode-map
+         ("y" . #'user/hydra-gnus-group/body)
+         ("o" . #'gnus-group-list-all-groups)
+         :map gnus-summary-mode-map
+         ("y" . #'user/hydra-gnus-summary/body)
+         (">" . #'gnus-summary-show-thread)
+         ("<" . #'gnus-summary-hide-thread)
+         :map gnus-article-mode-map
+         ("y" . #'user/hydra-gnus-article/body))
+
+  :init
+  (csetq gnus-init-file (expand-file-name "gnus.el" user-emacs-directory)))
 
 (use-package gud
   :ensure nil
@@ -961,14 +1026,23 @@ _q_ quit            _c_ create          _p_ previous
 
 (use-package ivy-posframe
   :diminish
-  :when window-system
-  :after ivy
+  :disabled
+  :commands (ivy-posframe-mode)
+  :preface
+  (defun user/enable-posframe-maybe (&rest _frame)
+    (when (and (display-graphic-p)
+               (not ivy-posframe-mode))
+      (ivy-posframe-mode)))
   :init
   (csetq ivy-height 15)
   (csetq ivy-display-function #'ivy-posframe-display-at-point)
   (setq ivy-posframe-parameters
         '((left-fringe . 8)
           (right-fringe . 8)))
+
+  (add-hook 'after-make-frame-functions #'user/enable-posframe-maybe)
+  (add-hook 'after-init-hook #'user/enable-posframe-maybe)
+
   :config
   (ivy-posframe-mode t))
 
@@ -1015,7 +1089,8 @@ _q_ quit            _c_ create          _p_ previous
   ;; (key-seq-define-global "jj" #'helm-mini)
   ;; (key-seq-define-global "jf" #'helm-find-files))
   (key-seq-define-global "jj" #'ivy-switch-buffer)
-  (key-seq-define-global "jf" #'counsel-find-file))
+  (key-seq-define-global "jf" #'counsel-find-file)
+  (key-seq-define-global "jx" #'counsel-M-x))
 
 (use-package lsp-mode
   :commands lsp
@@ -1092,6 +1167,7 @@ _q_ quit            _c_ create          _p_ previous
                  "*ag search*"
                  "*compilation*"
                  "*Help*"
+                 "*Ido Completions*"
                  "*Finder Category*"
                  "*Finder-package*"
                  "*RE-Builder*"
@@ -1105,9 +1181,14 @@ _q_ quit            _c_ create          _p_ previous
                  "\\`\\*.* annots\\*\\'"
                  "\\`\\*Contents*\\*\\'"
                  "\\`\\*ivy-occur.*\\*\\'"
+                 "\\`\\*Ido.*\\*\\'"
                  "\\`\\*\\(Wo\\)?Man .*\\*\\'"))
 
   (midnight-mode t))
+
+(use-package minions
+  :config
+  (minions-mode t))
 
 (use-package misc
   :ensure nil
@@ -1116,6 +1197,34 @@ _q_ quit            _c_ create          _p_ previous
 
 (use-package mouse-copy
   :ensure nil)
+
+(use-package mu4e
+  :load-path "/usr/share/emacs/site-lisp/mu4e"
+  :bind (("C-x m" . mu4e))
+  :init
+  (csetq message-kill-buffer-on-exit t)
+
+  (csetq mu4e-maildir (expand-file-name "~/.mail"))
+  (csetq mu4e-headers-auto-update t)
+  (csetq mu4e-view-show-images t)
+  (csetq mu4e-view-show-addresses t)
+  (csetq mu4e-update-interval 120)
+  (csetq mu4e-confirm-quit nil)
+  (csetq mu4e-attachment-dir (expand-file-name "~/Downloads"))
+  (csetq mu4e-change-filenames-when-moving t)
+  (csetq mu4e-context-policy 'pick-first)
+  (csetq mu4e-display-update-status-in-modeline t)
+  (csetq mu4e-use-fancy-chars t)
+  (csetq mu4e-save-multiple-attachments-without-asking t)
+  (csetq mu4e-compose-dont-reply-to-self t)
+  (csetq mu4e-headers-include-related t)
+  (csetq mu4e-completing-read-function 'completing-read)
+
+  (csetq mu4e-headers-unread-mark '("u" . "✉"))
+  ;; TODO mu4e-view-attachment-assoc
+
+  :config
+  (load-file (expand-file-name "mu4e.el" user-emacs-directory)))
 
 (use-package multi-term
   :if (eq system-type 'gnu/linux)
@@ -1272,12 +1381,14 @@ _q_ quit            _c_ create          _p_ previous
   :init
   (csetq recentf-auto-cleanup 'never)
   (csetq recentf-exclude (list
+                          "/usr/share/emacs/.*\\'"
                           "/elpa/.*\\'"          ; Package files
                           "PKGBUILD"             ; ArchLinux aur
                           "crontab.*"
+                          "/tmp/.*\\'"
                           #'ignoramus-boring-p))
   (csetq recentf-max-saved-items 500)
-  (csetq recentf-max-menu-items 20)
+  (csetq recentf-max-menu-items 100)
 
   :config
   (add-to-list 'recentf-exclude no-littering-var-directory)
@@ -1418,10 +1529,11 @@ _q_ quit            _c_ create          _p_ previous
   (sp-local-pair 'c-mode "{" nil :post-handlers '(:add user/open-block-c-mode))
   (sp-local-pair 'c++-mode "{" nil :post-handlers '(:add user/open-block-c-mode))
 
-  (sp-local-pair 'emacs-lisp-mode "`" nil :actions nil)
-  (sp-local-pair 'emacs-lisp-mode "'" nil :actions nil)
   (sp-local-pair 'c-mode "'" nil :actions nil)
   (sp-local-pair 'c++-mode "'" nil :actions nil)
+
+  (sp-local-pair 'emacs-lisp-mode "`" nil :actions nil)
+  (sp-local-pair 'emacs-lisp-mode "'" nil :actions nil)
 
   (show-smartparens-global-mode t))
 
@@ -1465,7 +1577,6 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
     ("q" nil "cancel" :color blue)))
 
 (use-package smex
-  :defer t
   :config
   (smex-initialize))
 
@@ -1525,8 +1636,8 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
          ([remap backward-kill-word] . #'user/smarter-backward-kill-word)
          ("M-]" . #'user/next-error)
          ("M-[" . #'user/prev-error)
-         ([remap forward-paragraph] . #'user/forward-paragraph)
-         ([remap backward-paragraph] . #'user/backward-paragraph)
+         ;; ([remap forward-paragraph] . #'user/forward-paragraph)
+         ;; ([remap backward-paragraph] . #'user/backward-paragraph)
          ("M-j" . #'user/join-line)
          ("C-`" . #'user/open-terminal)
          ([remap scroll-up-command] . #'user/scroll-half-page-up)
