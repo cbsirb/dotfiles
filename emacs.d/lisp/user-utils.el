@@ -95,7 +95,7 @@ That way we don't remove the whole regexp for a simple typo.
   (isearch-update))
 
 ;;;###autoload
-(defun user/smarter-move-beginning-of-line (arg)
+(defun user/move-beginning-of-line (arg)
   "Move point back to indentation of beginning of line.
 
 Move point to the first non-whitespace character on this line.
@@ -130,7 +130,7 @@ point reaches the beginning or end of the buffer, stop there."
   (indent-according-to-mode))
 
 ;;;###autoload
-(defun user/smarter-backward-kill-word ()
+(defun user/backward-kill-word ()
   "Deletes the previous word, respecting:
 1. If the cursor is at the beginning of line, delete the '\n'.
 2. If there is only whitespace, delete only to beginning of line and exit.
@@ -164,17 +164,17 @@ point reaches the beginning or end of the buffer, stop there."
         (delete-char -1)))))
 
 ;;;###autoload
-(defun user/smarter-kill-word-or-region ()
+(defun user/kill-word-or-region ()
   "If the region is active, will call `kill-region'.
-Else it will use `user/smarter-backward-kill-word'.
+Else it will use `user/backward-kill-word'.
 Basically simulates `C-w' in bash or vim when no region is active."
   (interactive)
   (if (use-region-p)
       (kill-region (region-beginning) (region-end))
-    (user/smarter-backward-kill-word)))
+    (user/backward-kill-word)))
 
 ;;;###autoload
-(defun user/smarter-copy-line-or-region ()
+(defun user/copy-line-or-region ()
   "If the region is active, will call `kill-ring-save'.
 Else it will call `kill-ring-save' on the current line."
   (interactive)
@@ -326,6 +326,38 @@ If N is negative, then go to the previous block."
   (interactive)
   (while (re-search-forward "[[:space:]\|?\r]+" nil t)
     (replace-match " " nil nil)))
+
+;;;###autoload
+(defun push-mark-no-activate ()
+  "Pushes `point' to `mark-ring' and does not activate the region.
+Equivalent to \\[set-mark-command] when \\[transient-mark-mode] is disabled."
+  (interactive)
+  (push-mark (point) t nil)
+  (message "Pushed mark to ring"))
+
+;;;###autoload
+(defun jump-to-mark ()
+  "Jumps to the local mark, respecting the `mark-ring' order.
+This is the same as using \\[set-mark-command] with the prefix argument."
+  (interactive)
+  (set-mark-command 1))
+
+;;;###autoload
+(defun exchange-point-and-mark-no-activate ()
+  "Identical to \\[exchange-point-and-mark] but will not activate the region."
+  (interactive)
+  (exchange-point-and-mark)
+  (deactivate-mark nil))
+
+(defun user/scroll-half-page (direction)
+  "Scrolls half page down if `direction' is non-nil, otherwise will scroll half page up."
+  (let ((opos (cdr (nth 6 (posn-at-point)))))
+    ;; opos = original position line relative to window
+    (move-to-window-line nil)     ;; Move cursor to middle line
+    (if direction
+        (recenter-top-bottom -1)  ;; Current line becomes last
+      (recenter-top-bottom 0))    ;; Current line becomes first
+    (move-to-window-line opos)))  ;; Restore cursor/point position
 
 ;;;###autoload
 (defun user/scroll-half-page-down ()
