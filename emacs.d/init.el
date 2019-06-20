@@ -54,7 +54,7 @@
 (csetq load-prefer-newer t)
 
 (when (< emacs-major-version 27)
-  (load-file (expand-file-name "early-init" user-emacs-directory))
+  (load-file (expand-file-name "early-init.el" user-emacs-directory))
   (package-initialize))
 
 (add-to-list 'load-path (expand-file-name "lisp" user-emacs-directory))
@@ -69,15 +69,14 @@
 (csetq use-package-expand-minimally t)
 (csetq use-package-always-ensure t)
 (csetq use-package-compute-statistics t)
-(require 'use-package)
+(csetq use-package-verbose t)
+
+(eval-when-compile
+  (require 'use-package))
+(require 'diminish)
+(require 'bind-key)
 
 ;;; Packages needed no matter what, and usually others are depended on it
-;; (use-package habamax-theme
-;;   :init
-;;   (csetq habamax-theme-variable-heading-heights t)
-;;   :config
-;;   (load-theme 'habamax t))
-
 (use-package parchment-theme
   :config
   (load-theme 'parchment t))
@@ -88,17 +87,12 @@
 
 (use-package no-littering)
 
-(use-package diminish
-  :demand t
-  :config
-  (with-eval-after-load "eldoc"
-    (diminish 'eldoc-mode)))
-
 (use-package exec-path-from-shell
   :config
   (exec-path-from-shell-initialize))
 
 (use-package hydra
+  :defer t
   :config
   (hydra-add-font-lock))
 
@@ -142,7 +136,6 @@
 (csetq select-active-regions nil)
 (csetq display-raw-bytes-as-hex t)
 (csetq ring-bell-function 'ignore)
-(csetq reb-re-syntax 'string)
 (csetq save-silently t)
 
 (csetq undo-limit (* 10 undo-limit))
@@ -284,7 +277,6 @@
 (bind-key "C-c t d" #'toggle-debug-on-error)
 (bind-key "C-c t q" #'toggle-debug-on-quit)
 
-(unbind-key "C-z")
 (unbind-key "C-x C-z")
 (unbind-key "C-x f")
 (unbind-key "C-x m")
@@ -298,10 +290,7 @@
 
 (use-package abbrev
   :ensure nil
-  :hook (find-file . user/disable-abbrev-mode)
-  :preface
-  (defun user/disable-abbrev-mode ()
-    (abbrev-mode -1)))
+  :hook (find-file . (lambda () (abbrev-mode -1))))
 
 (use-package ag
   :defer t
@@ -459,14 +448,12 @@ For anything else there is ctags."
 
 (use-package company
   :diminish
-  :bind (("C-j" . #'company-complete)
-         :map company-active-map
+  :bind (:map company-active-map
          ("ESC" . #'company-abort)
          ("C-l" . #'company-show-location)
          ("C-n" . #'company-select-next)
          ("C-p" . #'company-select-previous)
          ("C-w" . nil))
-  :hook (after-init . global-company-mode)
   :init
   (csetq company-dabbrev-code-ignore-case t)
   (csetq company-dabbrev-downcase nil)
@@ -478,11 +465,7 @@ For anything else there is ctags."
   (csetq company-tooltip-align-annotations t)
   (csetq company-tooltip-flip-when-above t)
   (csetq company-transformers '(company-sort-by-occurrence))
-
-  ;; (use-package user-completion
-  ;;   :load-path "lisp"
-  ;;   :bind (("C-c /" . #'user/complete-line)))
-  )
+  :config (global-company-mode))
 
 (use-package compile
   :ensure nil
@@ -568,11 +551,11 @@ Taken from http://stackoverflow.com/a/3072831/355252."
 (use-package comint
   :ensure nil
   :bind (:map comint-mode-map
-              ("<down>" . #'comint-next-input)
-              ("<up>"   . #'comint-previous-input)
-              ("C-n"    . #'comint-next-input)
-              ("C-p"    . #'comint-previous-input)
-              ("C-r"    . #'comint-history-isearch-backward))
+         ("<down>" . #'comint-next-input)
+         ("<up>"   . #'comint-previous-input)
+         ("C-n"    . #'comint-next-input)
+         ("C-p"    . #'comint-previous-input)
+         ("C-r"    . #'comint-history-isearch-backward))
   :init
   (csetq comint-process-echoes t)
   (csetq comint-prompt-read-only t)
@@ -585,9 +568,8 @@ Taken from http://stackoverflow.com/a/3072831/355252."
 (use-package cus-edit
   :ensure nil
   :init
-  (csetq custom-buffer-done-kill t)
-  (csetq custom-buffer-verbose-help nil)
   (csetq custom-file user/custom-file)
+  (csetq custom-buffer-done-kill t)
   (csetq custom-unlispify-tag-names nil)
   (csetq custom-unlispify-menu-entries nil))
 
@@ -615,9 +597,9 @@ Taken from http://stackoverflow.com/a/3072831/355252."
 (use-package dired
   :ensure nil
   :bind (:map dired-mode-map
-              ("SPC" . #'dired-mark)
-              ("<C-return>" . #'user/open-in-external-app)
-              ("<tab>" . #'user/dired-next-window))
+         ("SPC" . #'dired-mark)
+         ("<C-return>" . #'user/open-in-external-app)
+         ("<tab>" . #'user/dired-next-window))
   :preface
   (defun user/dired-next-window ()
     (interactive)
@@ -649,24 +631,23 @@ Taken from http://stackoverflow.com/a/3072831/355252."
 
 (use-package dired-du
   :after dired
-  :config
+  :commands dired-du-mode
+  :init
   (csetq dired-du-size-format t)
   (csetq dired-du-update-headers t))
 
 (use-package dired-narrow
   :after dired
+  :commands dired-narrow
   :bind (:map dired-mode-map
               ("/" . #'dired-narrow)))
 
 (use-package dired-toggle
   :bind ("<f5>" . #'dired-toggle)
-  :preface
-  (defun user/dired-toggle-mode-hook ()
-    (dired-hide-details-mode t)
-    (setq-local visual-line-fringe-indicators '(nil right-curly-arrow))
-    (setq-local word-wrap nil))
-
-  :hook (dired-toggle-mode . user/dired-toggle-mode-hook)
+  :hook (dired-toggle-mode . (lambda ()
+                               (dired-hide-details-mode t)
+                               (setq-local visual-line-fringe-indicators '(nil right-curly-arrow))
+                               (setq-local word-wrap nil)))
   :init
   (csetq dired-toggle-window-size 40))
 
@@ -677,15 +658,16 @@ Taken from http://stackoverflow.com/a/3072831/355252."
   (csetq dired-omit-verbose nil))
 
 (use-package disk-usage
-  :commands (disk-usage))
+  :commands disk-usage)
 
 (use-package docker
-  :commands (docker))
+  :commands docker)
 
 (use-package dumb-jump
   :hook ((dumb-jump-after-jump . recenter-top-bottom)))
 
 (use-package eacl
+  :commands eacl-complete-line
   :bind (("C-x C-l" . #'eacl-complete-line)))
 
 (use-package easy-kill
@@ -722,19 +704,13 @@ _SWITCH should be 'diff'."
 
 (use-package eshell
   :ensure nil
-  :defer t
-  :hook ((eshell-mode . user/eshell-mode-hook)
-         (eshell-first-time-mode . user/eshell-first-time-mode-hook))
-  :preface
-  (defun user/eshell-mode-hook ()
-    (company-mode -1)
-    (setq-local scroll-margin 0))
-
-  (defun user/eshell-first-time-mode-hook ()
-    (add-to-list 'eshell-modules-list 'eshell-rebind)
-    (add-to-list 'eshell-modules-list 'eshell-smart)
-    (add-to-list 'eshell-modules-list 'eshell-xtra))
-
+  :hook ((eshell-mode . (lambda ()
+                          (company-mode -1)
+                          (setq-local scroll-margin 0)))
+         (eshell-first-time-mode . (lambda ()
+                                     (add-to-list 'eshell-modules-list 'eshell-rebind)
+                                     (add-to-list 'eshell-modules-list 'eshell-smart)
+                                     (add-to-list 'eshell-modules-list 'eshell-xtra))))
   :init
   (csetq eshell-hist-ignoredups t)
   (csetq eshell-history-size 50000)
@@ -830,6 +806,7 @@ _q_ quit            _c_ create          _p_ previous
 
 (use-package gnus
   :ensure nil
+  :commands gnus
   :preface
   (defhydra user/hydra-gnus-group (:color blue)
     "
@@ -911,17 +888,11 @@ _q_ quit            _c_ create          _p_ previous
 
 (use-package gud
   :ensure nil
-  :defer t
-  :hook (gud-mode . user/gud-mode-hook)
-  :preface
-  (defun user/gud-mode-hook ()
-    "Hook to run when GUD mode is activated."
-    (company-mode -1))
+  :hook (gud-mode . (lambda () (company-mode -1)))
   :init
   (csetq gdb-many-windows t))
 
 (use-package hexl
-  :if (< emacs-major-version 27)
   :ensure nil
   :init
   (csetq hexl-bits 8))
@@ -932,6 +903,9 @@ _q_ quit            _c_ create          _p_ previous
 
 (use-package ibuffer
   :ensure nil
+  :hook ((ibuffer-mode . (lambda ()
+                           (ibuffer-switch-to-saved-filter-groups "default")))
+         (ibuffer-mode . ibuffer-auto-mode))
   :bind (("C-x C-b" . #'ibuffer))
   :init
   (csetq ibuffer-saved-filter-groups
@@ -939,10 +913,7 @@ _q_ quit            _c_ create          _p_ previous
 
             ("Interactive" (or (mode . lisp-interaction-mode)
                                (name . "\*Messages\*")
-                               (name . "\*compilation\*")
-                               (name . "\*Customize\*")
-                               (name . "\*ag search\*")
-                               (name . "\*grep\*")))
+                               (name . "\*Customize\*")))
 
             ("Dired" (mode . dired-mode))
 
@@ -952,35 +923,20 @@ _q_ quit            _c_ create          _p_ previous
 
             ("Org-Mode" (mode . org-mode))
 
-            ("Programming" (or (mode . c-mode)
-                               (mode . c++-mode)
-                               (mode . makefile-mode)
-                               (mode . cmake-mode)
-                               (mode . ruby-mode)
-                               (mode . perl-mode)
-                               (mode . python-mode)
-                               (mode . js-mode)
-                               (mode . js2-mode)
-                               (mode . css-mode)
-                               (mode . web-mode)
-                               (mode . emacs-lisp-mode)))
+            ("Programming" (derived-mode . prog-mode))
 
             ("Magit" (name . "\*magit"))
 
             ("Help" (or (name . "\*Help\*")
                         (name . "\*Apropos\*")
-                        (name . "\*info\*"))))))
+                        (name . "\*info\*")))
+
+            ("Virtual" (name . "\*")))))
 
   (defalias 'list-buffers 'ibuffer)
 
   (csetq ibuffer-default-shrink-to-minimum-size t)
-  (csetq ibuffer-show-empty-filter-groups nil)
-
-  :config
-  (add-hook 'ibuffer-mode-hook
-            '(lambda ()
-               (ibuffer-auto-mode 1)      ;auto update
-               (ibuffer-switch-to-saved-filter-groups "default"))))
+  (csetq ibuffer-show-empty-filter-groups nil))
 
 (use-package imenu
   :ensure nil
@@ -1005,7 +961,6 @@ _q_ quit            _c_ create          _p_ previous
   (csetq isearch-yank-on-move 'shift))
 
 (use-package ivy
-  :demand t
   :diminish
   :bind (("C-c C-r" . #'ivy-resume)
          ("C-c v s" . #'ivy-push-view)
@@ -1027,7 +982,7 @@ _q_ quit            _c_ create          _p_ previous
 (use-package ivy-posframe
   :diminish
   :disabled
-  :commands (ivy-posframe-mode)
+  :commands ivy-posframe-mode
   :preface
   (defun user/enable-posframe-maybe (&rest _frame)
     (when (and (display-graphic-p)
@@ -1061,12 +1016,12 @@ _q_ quit            _c_ create          _p_ previous
          ("C-c ," . #'iy-go-to-or-up-to-continue-backward)))
 
 (use-package js2-mode
-  :defer t
   :mode "\\.js\\'"
   :init
   (csetq js2-skip-preprocessor-directives t))
 
 (use-package json-mode
+  :mode "\\.json\\'"
   :bind (:map json-mode-map
               ("M-q" . #'json-reformat-region))
   :init
@@ -1233,13 +1188,10 @@ _q_ quit            _c_ create          _p_ previous
          ("C-c z d" . #'multi-term-dedicated-toggle)
          ("C-c z n" . #'multi-term-next)
          ("C-c z p" . #'multi-term-prev))
-  :hook (term-mode . user/term-mode-hook)
-  :preface
-  (defun user/term-mode-hook ()
-    (company-mode -1)
-    (setq-local scroll-margin 0))
-
-  :init
+  :hook (term-mode . (lambda ()
+                       (company-mode -1)
+                       (setq-local scroll-margin 0)))
+    :init
   ;; (csetq multi-term-program "screen")
   ;; (csetq multi-term-program-switches "-DR")
   (csetq multi-term-dedicated-select-after-open-p t)
@@ -1313,23 +1265,12 @@ _q_ quit            _c_ create          _p_ previous
 
 (use-package prog-mode
   :ensure nil
-  :preface
-  (defun user/prog-mode-hook ()
-    "Settings for all programming modes."
-    (setq-local show-trailing-whitespace t))
-
-  :hook (prog-mode . user/prog-mode-hook))
+  :hook (prog-mode . (lambda ()
+                       (setq-local show-trailing-whitespace t))))
 
 (use-package projectile
-  :commands projectile-mode
   :diminish
-  :bind (:map projectile-mode-map
-              ("C-c p" . #'projectile-command-map))
-  :hook (after-init . projectile-mode)
-  :preface
-  (defun user/projectile-invalidate-cache (&rest _args)
-    (projectile-invalidate-cache nil))
-
+  :bind-keymap (("C-c p" . projectile-command-map))
   :init
   (csetq projectile-completion-system 'ivy)
   (csetq projectile-enable-caching t)
@@ -1338,6 +1279,8 @@ _q_ quit            _c_ create          _p_ previous
   (csetq projectile-use-git-grep t)
 
   :config
+  (projectile-mode t)
+
   (add-to-list 'projectile-globally-ignored-directories ".vscode")
   (add-to-list 'projectile-globally-ignored-directories ".ccls-cache"))
 
@@ -1369,7 +1312,7 @@ _q_ quit            _c_ create          _p_ previous
           (pyvenv-activate (expand-file-name "venv" root))))))
 
 (use-package rainbow-mode
-  :commands (rainbow-mode))
+  :commands rainbow-mode)
 
 (use-package realgud
   :commands (realgud:bashdb realgud:gdb realgud:gub realgud:ipdb
@@ -1398,7 +1341,6 @@ _q_ quit            _c_ create          _p_ previous
   (run-at-time (* 5 60) (* 5 60) #'recentf-save-list))
 
 (use-package rg
-  :demand t
   :init
   (csetq rg-ignore-case 'smart)
   (csetq rg-hide-command nil)
@@ -1406,7 +1348,7 @@ _q_ quit            _c_ create          _p_ previous
   (rg-enable-default-bindings))
 
 (use-package rmsbolt
-  :defer t)
+  :commands rmsbolt-starter)
 
 (use-package savehist
   :ensure nil
@@ -1539,6 +1481,7 @@ _q_ quit            _c_ create          _p_ previous
 
 (use-package smerge-mode
   :ensure nil
+  :defer t
   :bind (("C-c <C-m>" . #'user/hydra-smerge/body))
   :preface
   (defhydra user/hydra-smerge
@@ -1577,6 +1520,7 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
     ("q" nil "cancel" :color blue)))
 
 (use-package smex
+  :commands smex
   :config
   (smex-initialize))
 
@@ -1630,6 +1574,7 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
 
 (use-package user-utils
   :load-path "lisp"
+  :bind* (("M-j" . #'user/join-line))
   :bind (("<C-return>" . #'user/open-line-above)
          ("C-a" . #'user/smarter-move-beginning-of-line)
          ("C-w" . #'user/smarter-kill-word-or-region)
@@ -1638,7 +1583,6 @@ _p_rev       _u_pper              _=_: upper/lower       _r_esolve
          ("M-[" . #'user/prev-error)
          ;; ([remap forward-paragraph] . #'user/forward-paragraph)
          ;; ([remap backward-paragraph] . #'user/backward-paragraph)
-         ("M-j" . #'user/join-line)
          ("C-`" . #'user/open-terminal)
          ([remap scroll-up-command] . #'user/scroll-half-page-up)
          ([remap scroll-down-command] . #'user/scroll-half-page-down)
@@ -1729,8 +1673,7 @@ _o_ other            ^^                 ^^
   (csetq wdired-allow-to-change-permissions t))
 
 (use-package web-mode
-  :defer t
-  :hook (web-mode . user/web-mode-hook)
+  :hook (web-mode . (lambda () (smartparens-mode -1)))
   :mode
   (("\\.phtml\\'" . web-mode)
    ("\\.tpl\\.php\\'" . web-mode)
@@ -1741,11 +1684,6 @@ _o_ other            ^^                 ^^
    ("\\.djhtml\\'" . web-mode)
    ("\\.html?\\'" . web-mode)
    ("\\.jsx$\\'" . web-mode))
-  :preface
-  (defun user/web-mode-hook ()
-    "Hook to run when `web-mode' is active."
-    (smartparens-mode -1))
-
   :init
   (csetq web-mode-code-indent-offset 4)
   (csetq web-mode-markup-indent-offset 2)
