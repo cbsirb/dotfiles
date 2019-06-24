@@ -79,6 +79,8 @@
 (use-package general)
 
 (use-package minions
+  :init
+  (csetq minions-direct '(global-evil-mc multiple-cursors-mode))
   :config
   (minions-mode t))
 
@@ -143,7 +145,7 @@
 
 (csetq auto-window-vscroll nil)
 (csetq use-dialog-box nil)
-(csetq enable-recursive-minibuffers nil)
+(csetq enable-recursive-minibuffers t)
 (csetq echo-keystrokes 0.1)
 (csetq delete-by-moving-to-trash t)
 (csetq create-lockfiles nil)
@@ -202,6 +204,7 @@
   (csetq tooltip-resize-echo-area t))
 
 (csetq tramp-default-method "ssh")
+(csetq tramp-verbose 2)
 
 (csetq uniquify-buffer-name-style 'post-forward)
 (csetq uniquify-separator ":")
@@ -1026,7 +1029,8 @@ _q_ quit            _c_ create          _p_ previous
   ("C-c v s" #'ivy-push-view)
   ("C-c v p" #'ivy-pop-view)
   (:keymaps 'ivy-mode-map
-   "<escape>" #'user/minibuffer-keyboard-quit)
+   "<escape>" #'user/minibuffer-keyboard-quit
+   "C-w" #'evil-delete-backward-word)
   :init
   (csetq ivy-count-format "(%d/%d) ")
   (csetq ivy-height 9)
@@ -1044,6 +1048,8 @@ _q_ quit            _c_ create          _p_ previous
   (leader-def "e"   #'counsel-M-x)
   (leader-def "ff"  #'counsel-find-file)
   (leader-def "fr"  #'counsel-recentf)
+  (:keymaps 'counsel-mode-map
+   "C-w" #'evil-delete-backward-word)
   :init
   (csetq counsel-describe-function-preselect 'ivy-function-called-at-point)
   (csetq counsel-grep-post-action-hook '(recenter))
