@@ -47,7 +47,6 @@ then it takes a second \\[keyboard-quit] to abort the minibuffer."
     (when (get-buffer "*Completions*") (delete-windows-on "*Completions*"))
     (abort-recursive-edit)))
 
-
 ;; Increase the memory while in the minibuffer
 (add-hook 'minibuffer-setup-hook #'user/minibuffer-setup-hook)
 (add-hook 'minibuffer-exit-hook #'user/minibuffer-exit-hook)
@@ -367,20 +366,16 @@ then it takes a second \\[keyboard-quit] to abort the minibuffer."
 (csetq dabbrev-case-replace nil)
 (csetq dabbrev-abbrev-skip-leading-regexp "[^ ]*[<>=*$]")
 
-(general-define-key
- :keymaps 'minibuffer-local-map
-  "ESC" #'user/minibuffer-keyboard-quit
- :keymaps 'minibuffer-local-ns-map
-  "ESC" #'user/minibuffer-keyboard-quit
- :keymaps 'minibuffer-local-completion-map
- "ESC" #'user/minibuffer-keyboard-quit
- :keymaps 'minibuffer-local-must-match-map
-  "ESC" #'user/minibuffer-keyboard-quit
- :keymaps 'minibuffer-local-isearch-map
- "ESC" #'user/minibuffer-keyboard-quit)
-
 (with-eval-after-load 'xref
   (add-to-list 'xref-prompt-for-identifier 'xref-find-references t))
+
+(general-define-key
+ :keymaps '(minibuffer-local-map
+            minibuffer-local-ns-map
+            minibuffer-local-completion-map
+            minibuffer-local-must-match-map
+            minibuffer-local-isearch-map)
+ "<escape>" #'minibuffer-keyboard-quit)
 
 ;; Thank you Fuco1
 (eval-after-load "lisp-mode"
@@ -886,8 +881,8 @@ Lisp function does not specify a special indentation."
   ("C-c C-r" #'ivy-resume)
   ("C-c v s" #'ivy-push-view)
   ("C-c v p" #'ivy-pop-view)
-  ;; (:keymaps 'ivy-mode-map
-  ;;  "ESC" #'user/minibuffer-keyboard-quit)
+  (:keymaps 'ivy-mode-map
+   "<escape>" #'minibuffer-keyboard-quit)
   :init
   (csetq ivy-count-format "(%d/%d) ")
   (csetq ivy-height 9)
