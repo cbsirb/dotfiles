@@ -37,6 +37,17 @@
   "Hook to run when exiting the minibuffer."
   (csetq gc-cons-threshold user/gc-cons-threshold))
 
+(defun minibuffer-keyboard-quit ()
+  "Abort recursive edit.
+In Delete Selection mode, if the mark is active, just deactivate it;
+then it takes a second \\[keyboard-quit] to abort the minibuffer."
+  (interactive)
+  (if (and delete-selection-mode transient-mark-mode mark-active)
+      (setq deactivate-mark t)
+    (when (get-buffer "*Completions*") (delete-windows-on "*Completions*"))
+    (abort-recursive-edit)))
+
+
 ;; Increase the memory while in the minibuffer
 (add-hook 'minibuffer-setup-hook #'user/minibuffer-setup-hook)
 (add-hook 'minibuffer-exit-hook #'user/minibuffer-exit-hook)
@@ -75,7 +86,8 @@
 ;;
 (eval-when-compile
   (require 'use-package))
-(require 'bind-key)
+
+(use-package general)
 
 (use-package use-package-chords
   :init
@@ -91,6 +103,8 @@
 (use-package parchment-theme
   :config
   (load-theme 'parchment t))
+
+;; (set-background-color "honeydew")
 
 (use-package hl-todo
   :config
@@ -353,38 +367,126 @@
 (csetq dabbrev-case-replace nil)
 (csetq dabbrev-abbrev-skip-leading-regexp "[^ ]*[<>=*$]")
 
+(general-define-key
+ :keymaps 'minibuffer-local-map
+  "ESC" #'user/minibuffer-keyboard-quit
+ :keymaps 'minibuffer-local-ns-map
+  "ESC" #'user/minibuffer-keyboard-quit
+ :keymaps 'minibuffer-local-completion-map
+ "ESC" #'user/minibuffer-keyboard-quit
+ :keymaps 'minibuffer-local-must-match-map
+  "ESC" #'user/minibuffer-keyboard-quit
+ :keymaps 'minibuffer-local-isearch-map
+ "ESC" #'user/minibuffer-keyboard-quit)
+
 (with-eval-after-load 'xref
   (add-to-list 'xref-prompt-for-identifier 'xref-find-references t))
+
+;; Thank you Fuco1
+(eval-after-load "lisp-mode"
+  '(defun lisp-indent-function (indent-point state)
+     "This function is the normal value of the variable `lisp-indent-function'.
+The function `calculate-lisp-indent' calls this to determine
+if the arguments of a Lisp function call should be indented specially.
+INDENT-POINT is the position at which the line being indented begins.
+Point is located at the point to indent under (for default indentation);
+STATE is the `parse-partial-sexp' state for that position.
+If the current line is in a call to a Lisp function that has a non-nil
+property `lisp-indent-function' (or the deprecated `lisp-indent-hook'),
+it specifies how to indent.  The property value can be:
+* `defun', meaning indent `defun'-style
+  \(this is also the case if there is no property and the function
+  has a name that begins with \"def\", and three or more arguments);
+ an integer N, meaning indent the first N arguments specially
+  (like ordinary function arguments), and then indent any further
+  arguments like a body;
+* a function to call that returns the indentation (or nil).
+  `lisp-indent-function' calls this function with the same two arguments
+  that it itself received.
+This function returns either the indentation to use, or nil if the
+Lisp function does not specify a special indentation."
+     (let ((normal-indent (current-column))
+           (orig-point (point)))
+       (goto-char (1+ (elt state 1)))
+       (parse-partial-sexp (point) calculate-lisp-indent-last-sexp 0 t)
+       (cond
+        ;; car of form doesn't seem to be a symbol, or is a keyword
+        ((and (elt state 2)
+              (or (not (looking-at "\\sw\\|\\s_"))
+                  (looking-at ":")))
+         (if (not (> (save-excursion (forward-line 1) (point))
+                     calculate-lisp-indent-last-sexp))
+             (progn (goto-char calculate-lisp-indent-last-sexp)
+                    (beginning-of-line)
+                    (parse-partial-sexp (point)
+                                        calculate-lisp-indent-last-sexp 0 t)))
+         ;; Indent under the list or under the first sexp on the same
+         ;; line as calculate-lisp-indent-last-sexp.  Note that first
+         ;; thing on that line has to be complete sexp since we are
+         ;; inside the innermost containing sexp.
+         (backward-prefix-chars)
+         (current-column))
+        ((and (save-excursion
+                (goto-char indent-point)
+                (skip-syntax-forward " ")
+                (not (looking-at ":")))
+              (save-excursion
+                (goto-char orig-point)
+                (looking-at ":")))
+         (save-excursion
+           (goto-char (+ 2 (elt state 1)))
+           (current-column)))
+        (t
+         (let ((function (buffer-substring (point)
+                                           (progn (forward-sexp 1) (point))))
+               method)
+           (setq method (or (function-get (intern-soft function)
+                                          'lisp-indent-function)
+                            (get (intern-soft function) 'lisp-indent-hook)))
+           (cond ((or (eq method 'defun)
+                      (and (null method)
+                           (> (length function) 3)
+                           (string-match "\\`def" function)))
+                  (lisp-indent-defform state indent-point))
+                 ((integerp method)
+                  (lisp-indent-specform method state
+                                        indent-point normal-indent))
+                 (method
+                  (funcall method indent-point state)))))))))
+
 
 ;;
 ;; Some binds that doesn't require use-package (well, we could require simple & misc, but they will be autloaded anyway)
 ;;
 
-(unbind-key "C-x C-z")
-(unbind-key "C-x f")
-(unbind-key "C-x m")
-(unbind-key "M-o")
-(unbind-key "C-x >")
-(unbind-key "C-x <")
-(unbind-key "<C-next>")
-(unbind-key "<C-prior>")
+(general-unbind
+  "C-x C-z"
+  "C-x f"
+  "M-o"
+  "C-x >"
+  "C-x <"
+  "<C-next>"
+  "<C-prior>")
 
-(bind-key* "M-u" #'upcase-dwim)
-(bind-key* "M-l" #'downcase-dwim)
-(bind-key* "M-c" #'capitalize-dwim)
-(bind-key* "M-g" #'goto-line)
-(bind-key* "C-8" #'repeat-complex-command)
-(bind-key* "M-z" #'zap-up-to-char)
-(bind-key* "<C-right>" #'forward-to-word)
-(bind-key* [remap just-one-space] #'cycle-spacing)
-(bind-key* [remap newline] #'newline-and-indent)
+(use-package simple
+  :ensure nil)
+
+(general-define-key "M-u" #'upcase-dwim)
+(general-define-key "M-l" #'downcase-dwim)
+(general-define-key "M-c" #'capitalize-dwim)
+(general-define-key "M-g" #'goto-line)
+(general-define-key "C-8" #'repeat-complex-command)
+(general-define-key "M-z" #'zap-up-to-char)
+(general-define-key "<C-right>" #'forward-to-word)
+(general-define-key [remap just-one-space] #'cycle-spacing)
+(general-define-key [remap newline] #'newline-and-indent)
 
 (when (display-graphic-p)
   (define-key input-decode-map [?\C-m] [C-m])
   (define-key input-decode-map [?\C-\M-m] [C-M-m]))
 
-(bind-key "C-c t d" #'toggle-debug-on-error)
-(bind-key "C-c t q" #'toggle-debug-on-quit)
+(general-define-key "C-c t d" #'toggle-debug-on-error)
+(general-define-key "C-c t q" #'toggle-debug-on-quit)
 
 (key-chord-define-global "jj" #'switch-to-buffer)
 (key-chord-define-global "jf" #'find-file)
@@ -411,7 +513,7 @@
       (let ((require-final-newline t))
         (save-buffer))))
 
-  :hook (prog-mode . whitespace-mode)
+  :ghook 'prog-mode-hook
 
   :init
   (csetq whitespace-display-mappings
@@ -475,10 +577,9 @@
 ;;   (midnight-mode t))
 
 (use-package ibuffer :ensure nil
-  :hook ((ibuffer-mode . (lambda ()
-                           (ibuffer-switch-to-saved-filter-groups "default")))
-         (ibuffer-mode . ibuffer-auto-mode))
-  :bind (("C-x C-b" . #'ibuffer))
+  :gfhook #'ibuffer-auto-mode
+  :general
+  ("C-x C-b" #'ibuffer)
   :init
   (csetq ibuffer-saved-filter-groups
          '(("default"
@@ -511,12 +612,13 @@
   (csetq ibuffer-show-empty-filter-groups nil))
 
 (use-package comint :ensure nil
-  :bind (:map comint-mode-map
-         ("<down>" . #'comint-next-input)
-         ("<up>"   . #'comint-previous-input)
-         ("C-n"    . #'comint-next-input)
-         ("C-p"    . #'comint-previous-input)
-         ("C-r"    . #'comint-history-isearch-backward))
+  :general
+  (:keymaps 'comint-mode-map
+   "<down>" #'comint-next-input
+   "<up>"   #'comint-previous-input
+   "C-n"    #'comint-next-input
+   "C-p"    #'comint-previous-input
+   "C-r"    #'comint-history-isearch-backward)
   :init
   (csetq comint-process-echoes t)
   (csetq comint-prompt-read-only t)
@@ -526,8 +628,9 @@
 
 (use-package compile :ensure nil
   :chords (("jc" . compile-without-ask))
-  :bind (([remap comment-region] . #'compile-without-ask)
-         ("C-c c" . #'compile-without-ask))
+  :general
+  ([remap comment-region] #'compile-without-ask)
+  ("C-c c" #'compile-without-ask)
   :preface
   (defun compile-without-ask (ask)
     (interactive "P")
@@ -552,10 +655,11 @@
   (add-hook 'compilation-finish-functions #'user/switch-to-compilation-window))
 
 (use-package dired-x :ensure nil
-  :bind (:map dired-mode-map
-         ("SPC" . #'dired-mark)
-         ("<C-return>" . #'user/open-in-external-app)
-         ("<tab>" . #'user/dired-next-window))
+  :general
+  (:keymaps 'dired-mode-map
+   "SPC" #'dired-mark
+   "<C-return>" #'user/open-in-external-app
+   "<tab>" #'user/dired-next-window)
   :preface
   (defun user/dired-next-window ()
     (interactive)
@@ -587,8 +691,9 @@
   (csetq dired-omit-verbose nil))
 
 (use-package wdired :ensure nil
-  :bind (:map dired-mode-map
-              ("C-c M-w" . #'wdired-change-to-wdired-mode))
+  :general
+  (:keymaps 'dired-mode-map
+   "C-c M-w" #'wdired-change-to-wdired-mode)
   :init
   (csetq wdired-create-parent-directories t)
   (csetq wdired-allow-to-change-permissions t))
@@ -601,67 +706,58 @@
 
 (use-package dired-narrow
   :commands dired-narrow
-  :bind (:map dired-mode-map
-         ("/" . #'dired-narrow)))
-
-(use-package dired-toggle
-  :bind ("<f5>" . #'dired-toggle)
-  :hook (dired-toggle-mode . (lambda ()
-                               (dired-hide-details-mode t)
-                               (setq-local visual-line-fringe-indicators '(nil right-curly-arrow))
-                               (setq-local word-wrap nil)))
-  :init
-  (csetq dired-toggle-window-size 40))
+  :general
+  (:keymaps 'dired-mode-map
+   "/" #'dired-narrow))
 
 ;;
 ;; Editing & navigation
 ;;
 
 (use-package expand-region
-  :bind (("M-2" . #'er/expand-region)
-         ("M-1" . #'er/contract-region)
-         ("M-@" . #'er/contract-region))
+  :general
+  ("M-2" #'er/expand-region)
+  ("M-1" #'er/contract-region)
+  ("M-@" #'er/contract-region)
   :init
   (csetq expand-region-fast-keys-enabled nil)
   (csetq expand-region-autocopy-register "e"))
 
 (use-package easy-kill
-  :bind (([remap kill-ring-save] . #'easy-kill)
-         ([remap mark-sexp] . #'easy-mark)))
+  :disabled
+  :general
+  ([remap kill-ring-save] #'easy-kill)
+  ([remap mark-sexp] #'easy-mark))
 
 (use-package symbol-overlay
-  :hook ((find-file . symbol-overlay-mode))
-  :bind (("M-*" . #'symbol-overlay-put)
-         ("M-n" . #'symbol-overlay-jump-next)
-         ("M-p" . #'symbol-overlay-jump-prev)
-         ("M-8" . #'symbol-overlay-toggle-in-scope))
+  :ghook find-file-hook
+  :general
+  ("M-*" #'symbol-overlay-put)
+  ("M-n" #'symbol-overlay-jump-next)
+  ("M-p" #'symbol-overlay-jump-prev)
+  ("M-8" #'symbol-overlay-toggle-in-scope)
   :init
   (csetq symbol-overlay-displayed-window t))
 
 (use-package iy-go-to-char
-  :bind (("M-m" . #'iy-go-to-char)
-         ("M-M" . #'iy-go-to-char-backward)
-         ("C-c ;" . #'iy-go-to-or-up-to-continue)
-         ("C-c ," . #'iy-go-to-or-up-to-continue-backward)))
+  :general
+  ("M-m" #'iy-go-to-char)
+  ("M-M" #'iy-go-to-char-backward))
 
 (use-package smartparens
   :demand t
-  :bind (("C-M-k" . #'sp-kill-sexp)
-
-         ("C-M-n" . #'sp-next-sexp)
-         ("C-M-p" . #'sp-previous-sexp)
-
-         ("C-M-f" . #'sp-forward-sexp)
-         ("C-M-b" . #'sp-backward-sexp)
-
-         ("C-M-u" . #'sp-backward-up-sexp)
-         ("C-M-d" . #'sp-down-sexp)
-
-         ("C-(" . #'sp-wrap-round)
-         ("C-{" . #'sp-wrap-curly)
-
-         ("C-M-<right>"   . #'sp-forward-slurp-sexp)
-         ("C-M-<left>"    . #'sp-forward-barf-sexp))
+  :general
+  ("C-M-k"  #'sp-kill-sexp)
+  ("C-M-n"  #'sp-next-sexp)
+  ("C-M-p"  #'sp-previous-sexp)
+  ("C-M-f"  #'sp-forward-sexp)
+  ("C-M-b"  #'sp-backward-sexp)
+  ("C-M-u"  #'sp-backward-up-sexp)
+  ("C-M-d"  #'sp-down-sexp)
+  ("C-("    #'sp-wrap-round)
+  ("C-{"    #'sp-wrap-curly)
+  ("C-M-<right>" #'sp-forward-slurp-sexp)
+  ("C-M-<left>"  #'sp-forward-barf-sexp)
 
   :preface
   (defun user/open-block-c-mode (_id action _context)
@@ -700,8 +796,8 @@
                   (goto-char (point-min))
                   (forward-line (1- ret-line)))))))
 
-  :hook ((prog-mode . smartparens-mode)
-         (minibuffer-setup . turn-on-smartparens-strict-mode))
+  :ghook 'prog-mode-hook
+         ('minibuffer-setup #'turn-on-smartparens-strict-mode)
 
   :init
   (csetq sp-highlight-pair-overlay nil)
@@ -732,41 +828,43 @@
 
 (use-package multiple-cursors
   :defer t
-  :bind* (("C->" . #'mc/unmark-next-like-this)
-          ("C-<" . #'mc/unmark-previous-like-this)
-          ("C-." . #'mc/mark-next-like-this)
-          ("C-," . #'mc/mark-previous-like-this)
-          ("C-S-<mouse-1>" . #'mc/toggle-cursor-on-click)
-          ("C-c m ^"     . #'mc/edit-beginnings-of-lines)
-          ("C-c m `"     . #'mc/edit-beginnings-of-lines)
-          ("C-c m $"     . #'mc/edit-ends-of-lines)
-          ("C-c m '"     . #'mc/edit-ends-of-lines)
-          ("C-c m R"     . #'mc/reverse-regions)
-          ("C-c m S"     . #'mc/sort-regions)
-          ("C-c m W"     . #'mc/mark-all-words-like-this)
-          ("C-c m Y"     . #'mc/mark-all-symbols-like-this)
-          ("C-c m a"     . #'mc/mark-all-like-this-dwim)
-          ("C-c m c"     . #'mc/mark-all-dwim)
-          ("C-c m l"     . #'mc/insert-letters)
-          ("C-c m n"     . #'mc/insert-numbers)
-          ("C-c m r"     . #'mc/mark-all-in-region)
-          ("C-c m s"     . #'set-rectangular-region-anchor)
-          ("C-c m %"     . #'mc/mark-all-in-region-regexp)
-          ("C-c m t"     . #'mc/mark-sgml-tag-pair)
-          ("C-c m w"     . #'mc/mark-next-like-this-word)
-          ("C-c m x"     . #'mc/mark-more-like-this-extended)
-          ("C-c m y"     . #'mc/mark-next-like-this-symbol)
-          ("C-c m C-SPC" . #'mc/mark-pop)
+  :general
+  ("C-S-<mouse-1>" #'mc/toggle-cursor-on-click)
 
-          ("C-c m ("     . #'mc/mark-all-symbols-like-this-in-defun)
-          ("C-c m C-("   . #'mc/mark-all-words-like-this-in-defun)
-          ("C-c m M-("   . #'mc/mark-all-like-this-in-defun)
-          ("C-c m d"     . #'mc/mark-all-symbols-like-this-in-defun)
-          ("C-c m C-d"   . #'mc/mark-all-words-like-this-in-defun)
-          ("C-c m M-d"   . #'mc/mark-all-like-this-in-defun)
+  ("C->"         #'mc/unmark-next-like-this)
+  ("C-<"         #'mc/unmark-previous-like-this)
+  ("C-."         #'mc/mark-next-like-this)
+  ("C-,"         #'mc/mark-previous-like-this)
+  ("C-c m ^"     #'mc/edit-beginnings-of-lines)
+  ("C-c m `"     #'mc/edit-beginnings-of-lines)
+  ("C-c m $"     #'mc/edit-ends-of-lines)
+  ("C-c m '"     #'mc/edit-ends-of-lines)
+  ("C-c m R"     #'mc/reverse-regions)
+  ("C-c m S"     #'mc/sort-regions)
+  ("C-c m W"     #'mc/mark-all-words-like-this)
+  ("C-c m Y"     #'mc/mark-all-symbols-like-this)
+  ("C-c m a"     #'mc/mark-all-like-this-dwim)
+  ("C-c m c"     #'mc/mark-all-dwim)
+  ("C-c m l"     #'mc/insert-letters)
+  ("C-c m n"     #'mc/insert-numbers)
+  ("C-c m r"     #'mc/mark-all-in-region)
+  ("C-c m s"     #'set-rectangular-region-anchor)
+  ("C-c m %"     #'mc/mark-all-in-region-regexp)
+  ("C-c m t"     #'mc/mark-sgml-tag-pair)
+  ("C-c m w"     #'mc/mark-next-like-this-word)
+  ("C-c m x"     #'mc/mark-more-like-this-extended)
+  ("C-c m y"     #'mc/mark-next-like-this-symbol)
+  ("C-c m C-SPC" #'mc/mark-pop)
 
-          ("C-c m ["     . #'mc/vertical-align-with-space)
-          ("C-c m {"     . #'mc/vertical-align))
+  ("C-c m ("     #'mc/mark-all-symbols-like-this-in-defun)
+  ("C-c m C-("   #'mc/mark-all-words-like-this-in-defun)
+  ("C-c m M-("   #'mc/mark-all-like-this-in-defun)
+  ("C-c m d"     #'mc/mark-all-symbols-like-this-in-defun)
+  ("C-c m C-d"   #'mc/mark-all-words-like-this-in-defun)
+  ("C-c m M-d"   #'mc/mark-all-like-this-in-defun)
+
+  ("C-c m ["     #'mc/vertical-align-with-space)
+  ("C-c m {"     #'mc/vertical-align)
   :preface
   (defun mc-prompt-once-advice (fn &rest args)
     (setq mc--this-command (lambda () (interactive) (apply fn args)))
@@ -784,11 +882,12 @@
 ;;
 
 (use-package ivy
-  :bind (("C-c C-r" . #'ivy-resume)
-         ("C-c v s" . #'ivy-push-view)
-         ("C-c v p" . #'ivy-pop-view)
-         :map ivy-mode-map
-         ([escape] . #'user/minibuffer-keyboard-quit))
+  :general
+  ("C-c C-r" #'ivy-resume)
+  ("C-c v s" #'ivy-push-view)
+  ("C-c v p" #'ivy-pop-view)
+  ;; (:keymaps 'ivy-mode-map
+  ;;  "ESC" #'user/minibuffer-keyboard-quit)
   :init
   (csetq ivy-count-format "(%d/%d) ")
   (csetq ivy-height 9)
@@ -797,8 +896,6 @@
   (csetq ivy-use-virtual-buffers t)
   (csetq ivy-virtual-abbreviate 'full)
   (csetq ivy-wrap t)
-
-  :config
   (ivy-mode t))
 
 (use-package counsel
@@ -808,6 +905,13 @@
   (csetq counsel-mode-override-describe-bindings t)
   :config
   (counsel-mode t))
+
+(use-package ivy-rich
+  :init
+  (csetq ivy-rich-switch-buffer-align-virtual-buffer t)
+  (csetq ivy-rich-path-style 'abbrev)
+  :config
+  (ivy-rich-mode t))
 
 (use-package ivy-posframe
   :disabled
@@ -830,24 +934,18 @@
   :config
   (ivy-posframe-mode t))
 
-(use-package ivy-rich
-  :init
-  (csetq ivy-rich-switch-buffer-align-virtual-buffer t)
-  (csetq ivy-rich-path-style 'abbrev)
-  :config
-  (ivy-rich-mode t))
-
 (use-package company
   :preface
   (defun disable-company-mode ()
     (company-mode -1))
 
-  :bind (:map company-active-map
-         ("ESC" . #'company-abort)
-         ("C-l" . #'company-show-location)
-         ("C-n" . #'company-select-next)
-         ("C-p" . #'company-select-previous)
-         ("C-w" . nil))
+  :general
+  (:keymaps 'company-active-map
+   "ESC" #'company-abort
+   "C-l" #'company-show-location
+   "C-n" #'company-select-next
+   "C-p" #'company-select-previous
+   "C-w" nil)
   :init
   (csetq company-dabbrev-code-ignore-case t)
   (csetq company-dabbrev-downcase nil)
@@ -864,7 +962,7 @@
 
 (use-package eacl
   :commands eacl-complete-line
-  :bind (("C-x C-l" . #'eacl-complete-line)))
+  :general ("C-x C-l" #'eacl-complete-line))
 
 ;;
 ;; Extra modes
@@ -873,7 +971,7 @@
 (use-package cmake-mode :defer t)
 
 (use-package cmake-font-lock
-  :hook (cmake-mode . cmake-font-lock-activate))
+  :ghook ('cmake-mode #'cmake-font-lock-activate))
 
 (use-package cython-mode :defer t)
 
@@ -882,8 +980,9 @@
 
 (use-package json-mode
   :mode "\\.json\\'"
-  :bind (:map json-mode-map
-         ("M-q" . #'json-reformat-region))
+  :general
+  (:keymaps 'json-mode-map
+   "M-q" #'json-reformat-region)
   :init
   (csetq json-reformat:indent-width 4)
   (csetq json-reformat:pretty-string? t))
@@ -893,13 +992,45 @@
 ;;
 
 (use-package grep :ensure nil
-  :hook (grep-mode . user/results-buffer-hook))
+  :gfhook #'user/results-buffer-hook)
 
 (use-package isearch :ensure nil
-  :bind (:map isearch-mode-map
-         ("M-o" . #'isearch-occur)
-         ("<tab>" . #'isearch-repeat-forward)
-         ("<backtab>" . #'isearch-repeat-backward))
+  :preface
+
+  (defun isearch-delete-previous ()
+    "Delete non-matching text or the last character.
+If it's a regexp delete only the last char but only if
+the error is \"incomplete input\", or \"trailing backslash\".
+That way we don't remove the whole regexp for a simple typo.
+\(Eg: for \"search-this-\(strni\" it would have deleted the whole \"strni\"\)."
+    (interactive)
+    (if (= 0 (length isearch-string))
+        (ding)
+
+      (if (or (string-equal isearch-error "incomplete input")
+              (isearch-backslash isearch-string))
+          (setq isearch-string (substring isearch-string 0 (1- (length isearch-string))))
+        (setq isearch-string
+              (substring isearch-string
+                         0
+                         (or (isearch-fail-pos) (1- (length isearch-string))))))
+
+      (setq isearch-message
+            (mapconcat #'isearch-text-char-description isearch-string "")))
+
+    (funcall (or isearch-message-function #'isearch-message) nil t)
+
+    (if isearch-other-end (goto-char isearch-other-end))
+    (isearch-search)
+    (isearch-push-state)
+    (isearch-update))
+
+  :general
+  (:keymaps 'isearch-mode-map
+   "M-o"            #'isearch-occur
+   "<tab>"          #'isearch-repeat-forward
+   "<backtab>"      #'isearch-repeat-backward
+   "<C-backspace>"  #'isearch-delete-previous)
   :init
   (csetq isearch-lazy-count t)
   (csetq isearch-allow-scroll 'unlimited)
@@ -938,18 +1069,20 @@
 
 (add-hook 'prog-mode-hook #'show-trailing-whitespace)
 (add-hook 'prog-mode-hook #'which-function-mode)
+(add-hook 'prog-mode-hook #'hs-minor-mode)
 
 (use-package comment-dwim-2
-  :bind ("M-;" . #'comment-dwim-2))
+  :general ("M-;" #'comment-dwim-2))
 
 (use-package counsel-etags :defer t)
 
 (use-package dumb-jump
   :defer t
-  :hook ((dumb-jump-after-jump . recenter-top-bottom)))
+  :config
+  (general-add-hook 'dumb-jump-after-jump-hook #'recenter-top-bottom))
 
 (use-package cc-mode :ensure nil
-  :hook (c-mode-common . user/c-mode-common-hook)
+  :ghook ('c-mode-common-hook #'user/c-mode-common-hook)
   :preface
   (defconst user/allman-style
     '((c-electric-pound-behavior     . (alignleft))
@@ -1000,27 +1133,6 @@
                           (label . 0)
                           (statement-cont . +)))))
 
-  (defun user/cc-goto-def ()
-    "Go to the first occurence of the variable/parameter inside the function.  \
-For anything else there is ctags."
-    (interactive)
-
-    (let ((cur-word (thing-at-point 'symbol))
-          (bound (point))
-          (found-point nil)
-          (case-fold-search nil))
-      (when cur-word
-        (save-mark-and-excursion
-          (c-beginning-of-defun)
-          (if (re-search-forward (concat "\\<" cur-word "\\>") bound t)
-              (setq found-point (point)))))
-
-      (if found-point
-          (progn
-            (push-mark (point) t)
-            (goto-char found-point)
-            (backward-word)))))
-
   (defun user/c-mode-common-hook ()
     "Hook for C/C++ mode."
     (c-toggle-electric-state t)
@@ -1040,8 +1152,8 @@ For anything else there is ctags."
 
 (use-package ccls
   :after cc-mode
-  :bind (:map c-mode-base-map
-         ("M-o" . #'user/ccls-show/body))
+  :demand t
+
   :preface
   (defun user/ccls-callee-hierarchy ()
     (interactive)
@@ -1056,12 +1168,16 @@ For anything else there is ctags."
     ("." lsp-ui-peek-find-references "references")
     ("s" lsp-ui-peek-find-workspace-symbol "symbol"))
 
+  :general
+  (:keymaps 'c-mode-base-map
+   "M-o" #'user/ccls-show/body)
+
   :init
   (csetq ccls-initialization-options '(:diagnostics (:onOpen 0 :opSave 0 :onChange -1 :spellChecking :json-false))))
 
-(use-package python
-  :ensure nil
+(use-package python :ensure nil
   :defer t
+
   :config
   (when (executable-find "ipython")
     (csetq python-shell-interpreter "ipython")
@@ -1075,12 +1191,12 @@ For anything else there is ctags."
            "';'.join(get_ipython().Completer.all_completions('''%s'''), module_completion('''%s'''))\n")))
 
 (use-package pipenv
-  :hook (python-mode . pipenv-mode)
+  :ghook 'python-mode-hook
   :init
   (csetq pipenv-projectile-after-switch-function #'pipenv-projectile-after-switch-extended))
 
 (use-package pyvenv
-  :hook (python-mode . user/auto-virtualenv)
+  :ghook (python-mode-hook #'user/auto-virtualenv)
   :preface
   (defun user/auto-virtualenv ()
     (pyvenv-mode t)
@@ -1097,7 +1213,7 @@ For anything else there is ctags."
   (csetq js2-skip-preprocessor-directives t))
 
 (use-package web-mode
-  :hook (web-mode . (lambda () (smartparens-mode -1)))
+  :gfhook #'turn-off-smartparens-mode
   :mode
   (("\\.phtml\\'" . web-mode)
    ("\\.tpl\\.php\\'" . web-mode)
@@ -1126,14 +1242,14 @@ For anything else there is ctags."
   (csetq web-mode-enable-block-face t)
   (csetq web-mode-enable-part-face t)
 
-  (csetq web-mode-engines-alist
-         '(("django" . "\\.html\\'"))))
+  (csetq web-mode-engines-alist '(("django" . "\\.html\\'"))))
 
 ;; Define this after all the languages (lsp must be added first in lang-mode-hook)
 (use-package lsp-mode
   :commands (lsp lsp-mode)
-  :hook ((c-mode-common . lsp)
-         (python-mode . lsp))
+  :ghook
+  ('c-mode-common-hook #'lsp)
+  ('python-mode-hook #'lsp)
   :init
   ;; performance reasons
   (csetq lsp-enable-on-type-formatting nil)
@@ -1171,8 +1287,7 @@ For anything else there is ctags."
 
     (csetq lsp-eldoc-hook (delete #'lsp-document-highlight lsp-eldoc-hook))))
 
-(use-package flymake
-  :ensure nil
+(use-package flymake :ensure nil
   :defer t
   :preface
   (defun flymake-display-at-point ()
@@ -1183,31 +1298,31 @@ For anything else there is ctags."
       (let ((text (flymake--diag-text (get-char-property (point) 'flymake-diagnostic))))
         (when text (message "%s" text)))))
 
-  :bind (("C-c f n" . #'flymake-goto-next-error)
-         ("C-c f p" . #'flymake-goto-prev-error)
-         ("C-c f s" . #'flymake-start)
-         ("C-c f f" . #'flymake-display-at-point))
+  :general
+  ("C-c f n" #'flymake-goto-next-error)
+  ("C-c f p" #'flymake-goto-prev-error)
+  ("C-c f s" #'flymake-start)
+  ("C-c f f" #'flymake-display-at-point)
   :init
   (csetq flymake-no-changes-timeout nil)
   (csetq flymake-start-syntax-check-on-newline nil))
 
 (use-package flymake-diagnostic-at-point
   :defer t
-  :hook (flymake-mode . flymake-diagnostic-at-point-mode)
+  :ghook 'flymake-mode-hook
   :init
   (csetq flymake-diagnostic-at-point-display-diagnostic-function
          #'flymake-diagnostic-at-point-display-popup))
 
 (use-package imenu :ensure nil
-  :bind ("M-i" . #'imenu)
-  :hook (imenu-after-jump . recenter-top-bottom)
+  :general ("M-i" #'imenu)
+  :ghook ('imenu-after-jump-hook #'recenter-top-bottom)
   :init
   (csetq imenu-auto-rescan t)
   (csetq imenu-auto-rescan-maxout (* 1024 1024)))
 
 (use-package imenu-anywhere
-  :defer t
-  :bind (("M-I" . #'imenu-anywhere)))
+  :general ("M-I" #'imenu-anywhere))
 
 (use-package yasnippet
   :init
@@ -1261,7 +1376,6 @@ For anything else there is ctags."
   :commands rainbow-mode)
 
 (use-package eyebrowse
-  :bind ("C-c e" . #'user/eyebrowse-hydra/body)
   :preface
   (defhydra user/eyebrowse-hydra (:color pink)
     "
@@ -1282,16 +1396,20 @@ _q_ quit            _c_ create          _p_ previous
     ("k" eyebrowse-close-window-config :color red)
     ("r" eyebrowse-rename-window-config)
     ("s" eyebrowse-switch-to-window-config))
+
+  :general ("C-c e" #'user/eyebrowse-hydra/body)
+
   :init
   (csetq eyebrowse-new-workspace t)
   (csetq eyebrowse-switch-back-and-forth t)
   (csetq eyebrowse-wrap-around t)
+
   :config
   (eyebrowse-mode t))
 
 (use-package projectile
   :demand t
-  :bind-keymap (("C-c p" . projectile-command-map))
+  :general ("C-c p" 'projectile-command-map)
   :init
   (csetq projectile-completion-system 'ivy)
   (csetq projectile-enable-caching t)
@@ -1323,11 +1441,13 @@ _q_ quit            _c_ create          _p_ previous
 
 (use-package eshell :ensure nil
   :defer t
-  :hook ((eshell-mode . shell-like-mode-hook)
-         (eshell-first-time-mode . (lambda ()
-                                     (add-to-list 'eshell-modules-list 'eshell-rebind)
-                                     (add-to-list 'eshell-modules-list 'eshell-smart)
-                                     (add-to-list 'eshell-modules-list 'eshell-xtra))))
+  :gfhook #'shell-like-mode-hook
+
+  :ghook ('eshell-first-time-mode
+          (lambda ()
+            (add-to-list 'eshell-modules-list 'eshell-rebind)
+            (add-to-list 'eshell-modules-list 'eshell-smart)
+            (add-to-list 'eshell-modules-list 'eshell-xtra)))
   :init
   (csetq eshell-hist-ignoredups t)
   (csetq eshell-history-size 50000)
@@ -1341,12 +1461,13 @@ _q_ quit            _c_ create          _p_ previous
 
 (use-package multi-term
   :if (eq system-type 'gnu/linux)
-  :bind (("C-z" . #'multi-term-next)
-         ("C-c z c" . #'multi-term)
-         ("C-c z d" . #'multi-term-dedicated-toggle)
-         ("C-c z n" . #'multi-term-next)
-         ("C-c z p" . #'multi-term-prev))
-  :hook (term-mode . shell-like-mode-hook)
+  :general
+  ("C-z" #'multi-term-next)
+  ("C-c z c" #'multi-term)
+  ("C-c z d" #'multi-term-dedicated-toggle)
+  ("C-c z n" #'multi-term-next)
+  ("C-c z p" #'multi-term-prev)
+  :gfhook #'shell-like-mode-hook
   :init
   ;; (csetq multi-term-program "screen")
   ;; (csetq multi-term-program-switches "-DR")
@@ -1424,23 +1545,24 @@ _q_ quit            _c_ create          _p_ previous
     ("g" w3m-lnum-goto)
     ("q" nil))
 
-  :bind (;; ("C-x m" . #'gnus)
-         :map gnus-group-mode-map
-         ("y" . #'user/hydra-gnus-group/body)
-         ("o" . #'gnus-group-list-all-groups)
-         :map gnus-summary-mode-map
-         ("y" . #'user/hydra-gnus-summary/body)
-         (">" . #'gnus-summary-show-thread)
-         ("<" . #'gnus-summary-hide-thread)
-         :map gnus-article-mode-map
-         ("y" . #'user/hydra-gnus-article/body))
+  :general ;; ("C-x m" . #'gnus)
+  (:keymaps 'gnus-group-mode-map
+   "y" #'user/hydra-gnus-group/body
+   "o" #'gnus-group-list-all-groups)
+  (:keymaps 'gnus-summary-mode-map
+   "y" #'user/hydra-gnus-summary/body
+   ">" #'gnus-summary-show-thread
+   "<" #'gnus-summary-hide-thread)
+  (:keymaps 'gnus-article-mode-map
+   "y" #'user/hydra-gnus-article/body)
 
   :init
   (csetq gnus-init-file (expand-file-name "gnus.el" user-emacs-directory)))
 
 (use-package mu4e
   :load-path "/usr/share/emacs/site-lisp/mu4e"
-  :bind (("C-x m" . mu4e))
+  :defer t
+  ;; :general (("C-x m" . mu4e))
   :init
   (csetq message-kill-buffer-on-exit t)
 
@@ -1471,7 +1593,7 @@ _q_ quit            _c_ create          _p_ previous
 ;;
 
 (use-package gud :ensure nil
-  :hook (gud-mode . disable-company-mode)
+  :gfhook #'disable-company-mode
   :init
   (csetq gdb-many-windows t))
 
@@ -1485,8 +1607,8 @@ _q_ quit            _c_ create          _p_ previous
 ;;
 
 (use-package magit
-  :bind (("C-x g" . #'magit-status))
-  :hook (git-commit-mode . git-commit-turn-on-flyspell)
+  :general ("C-x g" #'magit-status)
+  :ghook ('git-commit-mode-hook #'git-commit-turn-on-flyspell)
   :init
   (csetq magit-diff-arguments
          '("--ignore-space-change" "--ignore-all-space"
@@ -1497,7 +1619,7 @@ _q_ quit            _c_ create          _p_ previous
   (csetq magit-refs-show-commit-count 'all))
 
 (use-package magit-gitflow
-  :hook (magit-mode . turn-on-magit-gitflow))
+  :ghook ('magit-mode-hook #'turn-on-magit-gitflow))
 
 ;;
 ;; System replacements
@@ -1526,32 +1648,21 @@ _q_ quit            _c_ create          _p_ previous
 
 (use-package user-utils
   :load-path "lisp"
-  :bind* (("M-j" . #'user/join-line))
-  :bind (("<C-return>" . #'user/open-line-above)
-         ("C-a" . #'user/move-beginning-of-line)
-         ("C-w" . #'user/kill-word-or-region)
-         ([remap backward-kill-word] . #'user/backward-kill-word)
-         ("M-]" . #'user/next-error)
-         ("M-[" . #'user/prev-error)
-         ;; ([remap forward-paragraph] . #'user/forward-paragraph)
-         ;; ([remap backward-paragraph] . #'user/backward-paragraph)
-         ("C-`" . #'user/open-terminal)
-         ([remap scroll-up-command] . #'user/scroll-half-page-up)
-         ([remap scroll-down-command] . #'user/scroll-half-page-down)
-         ("C-'" . #'push-mark-no-activate)
-         ("M-'" . #'jump-to-mark)
-         :map isearch-mode-map
-         ("<C-backspace>" . #'user/isearch-delete)
-         :map minibuffer-local-map
-         ("<escape>" . #'user/minibuffer-keyboard-quit)
-         :map minibuffer-local-ns-map
-         ("<escape>" . #'user/minibuffer-keyboard-quit)
-         :map minibuffer-local-completion-map
-         ("<escape>" . #'user/minibuffer-keyboard-quit)
-         :map minibuffer-local-must-match-map
-         ("<escape>" . #'user/minibuffer-keyboard-quit)
-         :map minibuffer-local-isearch-map
-         ("<escape>" . #'user/minibuffer-keyboard-quit)))
+  :general
+  ("M-j" #'user/join-line)
+  ("<C-return>" #'user/open-line-above)
+  ("C-a" #'user/move-beginning-of-line)
+  ("C-w" #'user/kill-word-or-region)
+  ([remap backward-kill-word] #'user/backward-kill-word)
+  ("M-]" #'user/next-error)
+  ("M-[" #'user/prev-error)
+  ;; ([remap forward-paragraph] . #'user/forward-paragraph)
+  ;; ([remap backward-paragraph] . #'user/backward-paragraph)
+  ("C-`" #'user/open-terminal)
+  ([remap scroll-up-command] #'user/scroll-half-page-up)
+  ([remap scroll-down-command] #'user/scroll-half-page-down)
+  ("C-'" #'push-mark-no-activate)
+  ("M-'" #'jump-to-mark))
 
 (provide 'init)
 

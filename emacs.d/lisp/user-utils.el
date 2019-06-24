@@ -7,17 +7,6 @@
 ;;; Code:
 
 ;;;###autoload
-(defun user/minibuffer-keyboard-quit ()
-  "Abort recursive edit.
-In Delete Selection mode, if the mark is active, just deactivate it;
-then it takes a second \\[keyboard-quit] to abort the minibuffer."
-  (interactive)
-  (if (and delete-selection-mode transient-mark-mode mark-active)
-      (setq deactivate-mark t)
-    (when (get-buffer "*Completions*") (delete-windows-on "*Completions*"))
-    (abort-recursive-edit)))
-
-;;;###autoload
 (defun user/forward-paragraph (&optional n)
   "Advance just past next blank line.
 With N goes forward that many paragraphs."
@@ -64,35 +53,6 @@ prefix argument."
            (forward-line 0))
          (call-interactively ',function))
        ',name)))
-
-;;;###autoload
-(defun user/isearch-delete ()
-  "Delete non-matching text or the last character.
-If it's a regexp delete only the last char but only if
-the error is \"incomplete input\", or \"trailing backslash\".
-That way we don't remove the whole regexp for a simple typo.
-\(Eg: for \"search-this-\(strni\" it would have deleted the whole \"strni\"\)."
-  (interactive)
-  (if (= 0 (length isearch-string))
-      (ding)
-
-    (if (or (string-equal isearch-error "incomplete input")
-            (isearch-backslash isearch-string))
-        (setq isearch-string (substring isearch-string 0 (1- (length isearch-string))))
-      (setq isearch-string
-            (substring isearch-string
-                       0
-                       (or (isearch-fail-pos) (1- (length isearch-string))))))
-
-    (setq isearch-message
-          (mapconcat #'isearch-text-char-description isearch-string "")))
-
-  (funcall (or isearch-message-function #'isearch-message) nil t)
-
-  (if isearch-other-end (goto-char isearch-other-end))
-  (isearch-search)
-  (isearch-push-state)
-  (isearch-update))
 
 ;;;###autoload
 (defun user/move-beginning-of-line (arg)
