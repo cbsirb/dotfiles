@@ -466,6 +466,24 @@ Lisp function does not specify a special indentation."
 (use-package simple
   :ensure nil)
 
+(use-package user-utils
+  :load-path "lisp"
+  :general
+  ("M-j" #'user/join-line)
+  ("<C-return>" #'user/open-line-above)
+  ("C-a" #'user/move-beginning-of-line)
+  ("C-w" #'user/kill-word-or-region)
+  ([remap backward-kill-word] #'user/backward-kill-word)
+  ("M-]" #'user/next-error)
+  ("M-[" #'user/prev-error)
+  ;; ([remap forward-paragraph] . #'user/forward-paragraph)
+  ;; ([remap backward-paragraph] . #'user/backward-paragraph)
+  ("C-`" #'user/open-terminal)
+  ([remap scroll-up-command] #'user/scroll-half-page-up)
+  ([remap scroll-down-command] #'user/scroll-half-page-down)
+  ("C-'" #'push-mark-no-activate)
+  ("M-'" #'jump-to-mark))
+
 (general-define-key "M-u" #'upcase-dwim)
 (general-define-key "M-l" #'downcase-dwim)
 (general-define-key "M-c" #'capitalize-dwim)
@@ -534,42 +552,6 @@ Lisp function does not specify a special indentation."
 
   (recentf-mode t)
   (run-at-time (* 5 60) (* 5 60) #'recentf-save-list))
-
-;; (use-package midnight :ensure nil
-;;   :init
-;;   ;; 5 minutes for special buffers
-;;   (csetq clean-buffer-list-delay-special (* 5 60))
-;;   (csetq midnight-period (* 15 60))
-
-;;   :config
-;;   (midnight-delay-set 'midnight-delay 1)
-
-;;   (add-to-list 'clean-buffer-list-kill-buffer-names
-;;                '("*buffer-selection*"
-;;                  "*Finder*"
-;;                  "*Occur*"
-;;                  "*rg*"
-;;                  "*ag search*"
-;;                  "*compilation*"
-;;                  "*Help*"
-;;                  "*Ido Completions*"
-;;                  "*Finder Category*"
-;;                  "*Finder-package*"
-;;                  "*RE-Builder*"
-;;                  "*vc-change-log*"))
-
-;;   (add-to-list 'clean-buffer-list-kill-regexps
-;;                '("\\`\\*Customize .*\\*\\'"
-;;                  "\\`\\*magit: .*\\*\\'"
-;;                  "\\`\\*magit-.*\\*\\'"
-;;                  "\\`\\*Outline .*\\*\\'"
-;;                  "\\`\\*.* annots\\*\\'"
-;;                  "\\`\\*Contents*\\*\\'"
-;;                  "\\`\\*ivy-occur.*\\*\\'"
-;;                  "\\`\\*Ido.*\\*\\'"
-;;                  "\\`\\*\\(Wo\\)?Man .*\\*\\'"))
-
-;;   (midnight-mode t))
 
 (use-package ibuffer :ensure nil
   :gfhook #'ibuffer-auto-mode
@@ -719,13 +701,12 @@ Lisp function does not specify a special indentation."
   (csetq expand-region-autocopy-register "e"))
 
 (use-package easy-kill
-  :disabled
   :general
   ([remap kill-ring-save] #'easy-kill)
   ([remap mark-sexp] #'easy-mark))
 
 (use-package symbol-overlay
-  :ghook find-file-hook
+  :ghook 'text-mode-hook 'prog-mode-hook
   :general
   ("M-*" #'symbol-overlay-put)
   ("M-n" #'symbol-overlay-jump-next)
@@ -792,7 +773,7 @@ Lisp function does not specify a special indentation."
                   (forward-line (1- ret-line)))))))
 
   :ghook 'prog-mode-hook
-         ('minibuffer-setup #'turn-on-smartparens-strict-mode)
+         ('minibuffer-setup-hook #'smartparens-strict-mode)
 
   :init
   (csetq sp-highlight-pair-overlay nil)
@@ -822,7 +803,6 @@ Lisp function does not specify a special indentation."
   (show-smartparens-global-mode t))
 
 (use-package multiple-cursors
-  :defer t
   :general
   ("C-S-<mouse-1>" #'mc/toggle-cursor-on-click)
 
@@ -830,36 +810,35 @@ Lisp function does not specify a special indentation."
   ("C-<"         #'mc/unmark-previous-like-this)
   ("C-."         #'mc/mark-next-like-this)
   ("C-,"         #'mc/mark-previous-like-this)
-  ("C-c m ^"     #'mc/edit-beginnings-of-lines)
-  ("C-c m `"     #'mc/edit-beginnings-of-lines)
-  ("C-c m $"     #'mc/edit-ends-of-lines)
-  ("C-c m '"     #'mc/edit-ends-of-lines)
-  ("C-c m R"     #'mc/reverse-regions)
-  ("C-c m S"     #'mc/sort-regions)
-  ("C-c m W"     #'mc/mark-all-words-like-this)
-  ("C-c m Y"     #'mc/mark-all-symbols-like-this)
-  ("C-c m a"     #'mc/mark-all-like-this-dwim)
-  ("C-c m c"     #'mc/mark-all-dwim)
-  ("C-c m l"     #'mc/insert-letters)
-  ("C-c m n"     #'mc/insert-numbers)
-  ("C-c m r"     #'mc/mark-all-in-region)
-  ("C-c m s"     #'set-rectangular-region-anchor)
-  ("C-c m %"     #'mc/mark-all-in-region-regexp)
-  ("C-c m t"     #'mc/mark-sgml-tag-pair)
-  ("C-c m w"     #'mc/mark-next-like-this-word)
-  ("C-c m x"     #'mc/mark-more-like-this-extended)
-  ("C-c m y"     #'mc/mark-next-like-this-symbol)
-  ("C-c m C-SPC" #'mc/mark-pop)
-
-  ("C-c m ("     #'mc/mark-all-symbols-like-this-in-defun)
-  ("C-c m C-("   #'mc/mark-all-words-like-this-in-defun)
-  ("C-c m M-("   #'mc/mark-all-like-this-in-defun)
-  ("C-c m d"     #'mc/mark-all-symbols-like-this-in-defun)
-  ("C-c m C-d"   #'mc/mark-all-words-like-this-in-defun)
-  ("C-c m M-d"   #'mc/mark-all-like-this-in-defun)
-
-  ("C-c m ["     #'mc/vertical-align-with-space)
-  ("C-c m {"     #'mc/vertical-align)
+  (:prefix "C-c m"
+   "^"     #'mc/edit-beginnings-of-lines
+   "`"     #'mc/edit-beginnings-of-lines
+   "$"     #'mc/edit-ends-of-lines
+   "'"     #'mc/edit-ends-of-lines
+   "R"     #'mc/reverse-regions
+   "S"     #'mc/sort-regions
+   "W"     #'mc/mark-all-words-like-this
+   "Y"     #'mc/mark-all-symbols-like-this
+   "a"     #'mc/mark-all-like-this-dwim
+   "c"     #'mc/mark-all-dwim
+   "l"     #'mc/insert-letters
+   "n"     #'mc/insert-numbers
+   "r"     #'mc/mark-all-in-region
+   "s"     #'set-rectangular-region-anchor
+   "%"     #'mc/mark-all-in-region-regexp
+   "t"     #'mc/mark-sgml-tag-pair
+   "w"     #'mc/mark-next-like-this-word
+   "x"     #'mc/mark-more-like-this-extended
+   "y"     #'mc/mark-next-like-this-symbol
+   "C-SPC" #'mc/mark-pop
+   "("     #'mc/mark-all-symbols-like-this-in-defun
+   "C-("   #'mc/mark-all-words-like-this-in-defun
+   "M-("   #'mc/mark-all-like-this-in-defun
+   "d"     #'mc/mark-all-symbols-like-this-in-defun
+   "C-d"   #'mc/mark-all-words-like-this-in-defun
+   "M-d"   #'mc/mark-all-like-this-in-defun
+   "["     #'mc/vertical-align-with-space
+   "{"     #'mc/vertical-align)
   :preface
   (defun mc-prompt-once-advice (fn &rest args)
     (setq mc--this-command (lambda () (interactive) (apply fn args)))
@@ -879,15 +858,11 @@ Lisp function does not specify a special indentation."
 (use-package ivy
   :general
   ("C-c C-r" #'ivy-resume)
-  ("C-c v s" #'ivy-push-view)
-  ("C-c v p" #'ivy-pop-view)
   (:keymaps 'ivy-mode-map
    "<escape>" #'minibuffer-keyboard-quit)
   :init
-  (csetq ivy-count-format "(%d/%d) ")
+  (csetq ivy-count-format "")
   (csetq ivy-height 9)
-  ;; (csetq ivy-on-del-error-function nil)
-  ;; (csetq ivy-use-selectable-prompt t)
   (csetq ivy-use-virtual-buffers t)
   (csetq ivy-virtual-abbreviate 'full)
   (csetq ivy-wrap t)
@@ -909,24 +884,14 @@ Lisp function does not specify a special indentation."
   (ivy-rich-mode t))
 
 (use-package ivy-posframe
-  :disabled
-  :commands ivy-posframe-mode
-  :preface
-  (defun user/enable-posframe-maybe (&rest _frame)
-    (when (and (display-graphic-p)
-               (not ivy-posframe-mode))
-      (ivy-posframe-mode)))
-  :init
-  (csetq ivy-height 15)
-  (csetq ivy-display-function #'ivy-posframe-display-at-point)
-  (setq ivy-posframe-parameters
-        '((left-fringe . 8)
-          (right-fringe . 8)))
-
-  (add-hook 'after-make-frame-functions #'user/enable-posframe-maybe)
-  (add-hook 'after-init-hook #'user/enable-posframe-maybe)
-
   :config
+  (csetq ivy-posframe-display-functions-alist
+         '((swiper . nil)
+           (t . ivy-posframe-display-at-point)))
+  (csetq ivy-posframe-parameters
+         '((left-fringe . 4)
+           (right-fringe . 4)))
+
   (ivy-posframe-mode t))
 
 (use-package company
@@ -952,7 +917,6 @@ Lisp function does not specify a special indentation."
   (csetq company-tooltip-align-annotations t)
   (csetq company-tooltip-flip-when-above t)
   (csetq company-transformers '(company-sort-by-occurrence))
-  :config
   (global-company-mode t))
 
 (use-package eacl
@@ -966,7 +930,7 @@ Lisp function does not specify a special indentation."
 (use-package cmake-mode :defer t)
 
 (use-package cmake-font-lock
-  :ghook ('cmake-mode #'cmake-font-lock-activate))
+  :ghook ('cmake-mode-hook #'cmake-font-lock-activate))
 
 (use-package cython-mode :defer t)
 
@@ -1191,7 +1155,7 @@ That way we don't remove the whole regexp for a simple typo.
   (csetq pipenv-projectile-after-switch-function #'pipenv-projectile-after-switch-extended))
 
 (use-package pyvenv
-  :ghook (python-mode-hook #'user/auto-virtualenv)
+  :ghook ('python-mode-hook #'user/auto-virtualenv)
   :preface
   (defun user/auto-virtualenv ()
     (pyvenv-mode t)
@@ -1283,7 +1247,6 @@ That way we don't remove the whole regexp for a simple typo.
     (csetq lsp-eldoc-hook (delete #'lsp-document-highlight lsp-eldoc-hook))))
 
 (use-package flymake :ensure nil
-  :defer t
   :preface
   (defun flymake-display-at-point ()
     "Display the flymake diagnostic text for the thing at point."
@@ -1294,10 +1257,11 @@ That way we don't remove the whole regexp for a simple typo.
         (when text (message "%s" text)))))
 
   :general
-  ("C-c f n" #'flymake-goto-next-error)
-  ("C-c f p" #'flymake-goto-prev-error)
-  ("C-c f s" #'flymake-start)
-  ("C-c f f" #'flymake-display-at-point)
+  (:prefix "C-c f"
+   "n" #'flymake-goto-next-error
+   "p" #'flymake-goto-prev-error
+   "s" #'flymake-start
+   "f" #'flymake-display-at-point)
   :init
   (csetq flymake-no-changes-timeout nil)
   (csetq flymake-start-syntax-check-on-newline nil))
@@ -1408,7 +1372,6 @@ _q_ quit            _c_ create          _p_ previous
   :init
   (csetq projectile-completion-system 'ivy)
   (csetq projectile-enable-caching t)
-  (csetq projectile-indexing-method 'alien)
   (csetq projectile-sort-order 'recentf)
   (csetq projectile-use-git-grep t)
 
@@ -1434,25 +1397,31 @@ _q_ quit            _c_ create          _p_ previous
   (disable-company-mode)
   (setq-local scroll-margin 0))
 
+(add-hook 'term-mode-hook #'shell-like-mode-hook)
+
 (use-package eshell :ensure nil
   :defer t
   :gfhook #'shell-like-mode-hook
 
-  :ghook ('eshell-first-time-mode
+  :ghook ('eshell-load-hook
           (lambda ()
-            (add-to-list 'eshell-modules-list 'eshell-rebind)
-            (add-to-list 'eshell-modules-list 'eshell-smart)
-            (add-to-list 'eshell-modules-list 'eshell-xtra)))
+            (push 'eshell-tramp eshell-modules-list)
+            (push 'eshell-rebind eshell-modules-list)
+            (push 'eshell-smart eshell-modules-list)
+            (push 'eshell-xtra eshell-modules-list)
+            (delq 'eshell-banner eshell-modules-list)))
   :init
   (csetq eshell-hist-ignoredups t)
   (csetq eshell-history-size 50000)
   (csetq eshell-ls-dired-initial-args (quote ("-h")))
   (csetq eshell-ls-exclude-regexp "~\\'")
   (csetq eshell-ls-initial-args "-hA")
-  (csetq eshell-stringify-t nil))
+  (csetq eshell-stringify-t nil)
+  :config
+  (require 'esh-module))
 
-(use-package esh-module :ensure nil
-  :defer t)
+;; (use-package esh-module :ensure nil
+;;   :defer t)
 
 (use-package multi-term
   :if (eq system-type 'gnu/linux)
@@ -1468,120 +1437,6 @@ _q_ quit            _c_ create          _p_ previous
   ;; (csetq multi-term-program-switches "-DR")
   (csetq multi-term-dedicated-select-after-open-p t)
   (csetq multi-term-scroll-show-maximum-output t))
-
-;;
-;; Mail
-;;
-
-(use-package gnus :ensure nil
-  :commands gnus
-  :preface
-  (defhydra user/hydra-gnus-group (:color blue)
-    "
-[_A_] Remote groups (A A) [_g_] Refresh
-[_L_] Local groups        [_\\^_] List servers
-[_c_] Mark all read       [_m_] Compose new mail
-[_G_] Search mails (G G) [_#_] Mark mail
-"
-    ("A" gnus-group-list-active)
-    ("L" gnus-group-list-all-groups)
-    ("c" gnus-topic-catchup-articles)
-    ("G" dianyou-group-make-nnir-group)
-    ("g" gnus-group-get-new-news)
-    ("^" gnus-group-enter-server-mode)
-    ("m" gnus-group-new-mail)
-    ("#" gnus-topic-mark-topic)
-    ("q" nil))
-
-  (defhydra user/hydra-gnus-summary (:color blue)
-    "
-[_s_] Show thread   [_F_] Forward (C-c C-f)
-[_h_] Hide thread   [_e_] Resend (S D e)
-[_n_] Refresh (/ N) [_r_] Reply
-[_!_] Mail -> disk  [_R_] Reply with original
-[_d_] Disk -> mail  [_w_] Reply all (S w)
-[_c_] Read all      [_W_] Reply all with original (S W)
-[_#_] Mark
-"
-    ("s" gnus-summary-show-thread)
-    ("h" gnus-summary-hide-thread)
-    ("n" gnus-summary-insert-new-articles)
-    ("F" gnus-summary-mail-forward)
-    ("!" gnus-summary-tick-article-forward)
-    ("d" gnus-summary-put-mark-as-read-next)
-    ("c" gnus-summary-catchup-and-exit)
-    ("e" gnus-summary-resend-message-edit)
-    ("R" gnus-summary-reply-with-original)
-    ("r" gnus-summary-reply)
-    ("W" gnus-summary-wide-reply-with-original)
-    ("w" gnus-summary-wide-reply)
-    ("#" gnus-topic-mark-topic)
-    ("q" nil))
-
-  (defhydra user/hydra-gnus-article (:color blue)
-    "
-[_o_] Save attachment        [_F_] Forward
-[_v_] Play video/audio       [_r_] Reply
-[_d_] CLI to dowloand stream [_R_] Reply with original
-[_b_] Open external browser  [_w_] Reply all (S w)
-[_f_] Click link/button      [_W_] Reply all with original (S W)
-[_g_] Focus link/button
-"
-    ("F" gnus-summary-mail-forward)
-    ("r" gnus-article-reply)
-    ("R" gnus-article-reply-with-original)
-    ("w" gnus-article-wide-reply)
-    ("W" gnus-article-wide-reply-with-original)
-    ("o" gnus-mime-save-part)
-    ("v" w3mext-open-with-mplayer)
-    ("d" w3mext-download-rss-stream)
-    ("b" w3mext-open-link-or-image-or-url)
-    ("f" w3m-lnum-follow)
-    ("g" w3m-lnum-goto)
-    ("q" nil))
-
-  :general ;; ("C-x m" . #'gnus)
-  (:keymaps 'gnus-group-mode-map
-   "y" #'user/hydra-gnus-group/body
-   "o" #'gnus-group-list-all-groups)
-  (:keymaps 'gnus-summary-mode-map
-   "y" #'user/hydra-gnus-summary/body
-   ">" #'gnus-summary-show-thread
-   "<" #'gnus-summary-hide-thread)
-  (:keymaps 'gnus-article-mode-map
-   "y" #'user/hydra-gnus-article/body)
-
-  :init
-  (csetq gnus-init-file (expand-file-name "gnus.el" user-emacs-directory)))
-
-(use-package mu4e
-  :load-path "/usr/share/emacs/site-lisp/mu4e"
-  :defer t
-  ;; :general (("C-x m" . mu4e))
-  :init
-  (csetq message-kill-buffer-on-exit t)
-
-  (csetq mu4e-maildir (expand-file-name "~/.mail"))
-  (csetq mu4e-headers-auto-update t)
-  (csetq mu4e-view-show-images t)
-  (csetq mu4e-view-show-addresses t)
-  (csetq mu4e-update-interval 120)
-  (csetq mu4e-confirm-quit nil)
-  (csetq mu4e-attachment-dir (expand-file-name "~/Downloads"))
-  (csetq mu4e-change-filenames-when-moving t)
-  (csetq mu4e-context-policy 'pick-first)
-  (csetq mu4e-display-update-status-in-modeline t)
-  (csetq mu4e-use-fancy-chars t)
-  (csetq mu4e-save-multiple-attachments-without-asking t)
-  (csetq mu4e-compose-dont-reply-to-self t)
-  (csetq mu4e-headers-include-related t)
-  (csetq mu4e-completing-read-function 'completing-read)
-
-  (csetq mu4e-headers-unread-mark '("u" . "✉"))
-  ;; TODO mu4e-view-attachment-assoc
-
-  :config
-  (load-file (expand-file-name "mu4e.el" user-emacs-directory)))
 
 ;;
 ;; Debugging
@@ -1634,30 +1489,11 @@ _q_ quit            _c_ create          _p_ previous
 (use-package rmsbolt
   :commands rmsbolt-starter)
 
-
 ;;
 ;; Misc (user-defined)
 ;;
 
 (use-package user-advices :load-path "lisp")
-
-(use-package user-utils
-  :load-path "lisp"
-  :general
-  ("M-j" #'user/join-line)
-  ("<C-return>" #'user/open-line-above)
-  ("C-a" #'user/move-beginning-of-line)
-  ("C-w" #'user/kill-word-or-region)
-  ([remap backward-kill-word] #'user/backward-kill-word)
-  ("M-]" #'user/next-error)
-  ("M-[" #'user/prev-error)
-  ;; ([remap forward-paragraph] . #'user/forward-paragraph)
-  ;; ([remap backward-paragraph] . #'user/backward-paragraph)
-  ("C-`" #'user/open-terminal)
-  ([remap scroll-up-command] #'user/scroll-half-page-up)
-  ([remap scroll-down-command] #'user/scroll-half-page-down)
-  ("C-'" #'push-mark-no-activate)
-  ("M-'" #'jump-to-mark))
 
 (provide 'init)
 
