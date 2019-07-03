@@ -24,32 +24,8 @@
             ;; Don't just blindly set it to the old value, maybe someone decided to add something to it
             (csetq file-name-handler-alist (append file-name-handler-alist user/file-name-handler-alist))
 
-            (message "Time to load init file: %s"
-                     (emacs-init-time))
+            (message "Time to load init file: %s" (emacs-init-time))
             (garbage-collect)))
-
-(defun user/minibuffer-setup-hook ()
-  "Hook to run when entering the minibuffer."
-  (csetq gc-cons-threshold most-positive-fixnum)
-  (setq-local show-trailing-whitespace nil))
-
-(defun user/minibuffer-exit-hook ()
-  "Hook to run when exiting the minibuffer."
-  (csetq gc-cons-threshold user/gc-cons-threshold))
-
-(defun minibuffer-keyboard-quit ()
-  "Abort recursive edit.
-In Delete Selection mode, if the mark is active, just deactivate it;
-then it takes a second \\[keyboard-quit] to abort the minibuffer."
-  (interactive)
-  (if (and delete-selection-mode transient-mark-mode mark-active)
-      (setq deactivate-mark t)
-    (when (get-buffer "*Completions*") (delete-windows-on "*Completions*"))
-    (abort-recursive-edit)))
-
-;; Increase the memory while in the minibuffer
-(add-hook 'minibuffer-setup-hook #'user/minibuffer-setup-hook)
-(add-hook 'minibuffer-exit-hook #'user/minibuffer-exit-hook)
 
 (when (fboundp 'tool-bar-mode) (tool-bar-mode 0))
 (when (fboundp 'menu-bar-mode) (menu-bar-mode 0))
@@ -60,6 +36,11 @@ then it takes a second \\[keyboard-quit] to abort the minibuffer."
 
 (when (file-exists-p user/custom-file)
   (load-file user/custom-file))
+
+(csetq custom-file user/custom-file)
+(csetq custom-buffer-done-kill t)
+(csetq custom-unlispify-tag-names nil)
+(csetq custom-unlispify-menu-entries nil)
 
 (csetq load-prefer-newer t)
 
@@ -88,13 +69,6 @@ then it takes a second \\[keyboard-quit] to abort the minibuffer."
 
 (use-package general)
 
-(use-package use-package-chords
-  :init
-  (csetq key-chord-two-keys-delay 0.1)
-  (csetq key-chord-one-key-delay 0.2)
-  :config
-  (key-chord-mode t))
-
 (use-package minions
   :config
   (minions-mode t))
@@ -115,7 +89,9 @@ then it takes a second \\[keyboard-quit] to abort the minibuffer."
 
 (use-package no-littering)
 
+;; For now disabled, since I don't have any modifications to the $PATH
 (use-package exec-path-from-shell
+  :disabled
   :config
   (exec-path-from-shell-initialize))
 
@@ -132,8 +108,17 @@ then it takes a second \\[keyboard-quit] to abort the minibuffer."
 ;;
 ;; Some default settings that I like
 ;;
+(csetq initial-major-mode 'text-mode)
+(csetq initial-scratch-message "")
+(csetq inhibit-startup-buffer-menu t)
+(csetq inhibit-splash-screen t)
+(csetq inhibit-startup-echo-area-message t)
+(csetq inhibit-startup-message t)
+(fset 'display-startup-echo-area-message #'ignore)
 
 (defalias 'yes-or-no-p 'y-or-n-p)
+(defalias 'ff 'find-file)
+(defalias 'ffo 'find-file-other-window)
 
 (csetq enable-local-variables :safe)
 
@@ -143,6 +128,8 @@ then it takes a second \\[keyboard-quit] to abort the minibuffer."
 (set-selection-coding-system 'utf-8)
 (prefer-coding-system 'utf-8)
 (set-language-environment "UTF-8")
+
+(csetq system-time-locale "C")
 
 (csetq backup-by-copying t)
 (csetq view-read-only t)
@@ -186,25 +173,19 @@ then it takes a second \\[keyboard-quit] to abort the minibuffer."
 (csetq eval-expression-print-length nil)
 (csetq eval-expression-print-level nil)
 
+(csetq async-shell-command-display-buffer nil)
+(csetq async-shell-command-buffer 'new-buffer)
+
 (csetq read-file-name-completion-ignore-case t)
 
 (csetq column-number-indicator-zero-based nil)
 
 (csetq disabled-command-function nil)
 
-(csetq initial-major-mode 'text-mode)
-(csetq initial-scratch-message "")
-(csetq inhibit-startup-buffer-menu t)
-(csetq inhibit-splash-screen t)
-(csetq inhibit-startup-echo-area-message t)
-(csetq inhibit-startup-message t)
-(fset 'display-startup-echo-area-message #'ignore)
-
 ;; "Smooth" mouse scrolling, one line at a time
 (csetq mouse-wheel-scroll-amount '(1 ((shift) . 1)))
 (csetq scroll-conservatively 10000)
 (csetq scroll-preserve-screen-position t)
-(csetq scroll-margin 7)
 (csetq fast-but-imprecise-scrolling t)
 
 (when (eq system-type 'gnu/linux)
@@ -219,6 +200,7 @@ then it takes a second \\[keyboard-quit] to abort the minibuffer."
   (csetq tooltip-resize-echo-area t))
 
 (csetq tramp-default-method "ssh")
+(csetq tramp-verbose 2)
 
 (csetq uniquify-buffer-name-style 'post-forward)
 (csetq uniquify-separator ":")
@@ -227,14 +209,14 @@ then it takes a second \\[keyboard-quit] to abort the minibuffer."
 
 (csetq auto-revert-verbose nil)
 (csetq auto-revert-avoid-polling t)
-(global-auto-revert-mode)
+(csetq global-auto-revert-mode t)
 
 (csetq bookmark-save-flag t)
 
-(csetq custom-file user/custom-file)
-(csetq custom-buffer-done-kill t)
-(csetq custom-unlispify-tag-names nil)
-(csetq custom-unlispify-menu-entries nil)
+(csetq indicate-buffer-boundaries
+       '((top . right)
+         (bottom . right)
+         (t . nil)))
 
 (transient-mark-mode t)
 (delete-selection-mode t)
@@ -248,8 +230,8 @@ then it takes a second \\[keyboard-quit] to abort the minibuffer."
 (csetq window-combination-resize t)
 (csetq frame-title-format
        '(:eval (if (buffer-file-name)
-                    (abbreviate-file-name (buffer-file-name))
-                  "%b")))
+                   (abbreviate-file-name (buffer-file-name))
+                 "%b")))
 
 ;; Enable these functions
 (mapc (lambda (x) (put x 'disabled nil))
@@ -271,13 +253,6 @@ then it takes a second \\[keyboard-quit] to abort the minibuffer."
 ;; Some special file names
 (add-to-list 'auto-mode-alist '("\\.?bash.*" . shell-script-mode))
 
-;;
-;; Setup the gui appearance
-;;
-(when (fboundp 'tool-bar-mode) (tool-bar-mode 0))
-(when (fboundp 'menu-bar-mode) (menu-bar-mode 0))
-(when (fboundp 'scroll-bar-mode) (scroll-bar-mode 0))
-
 (set-face-attribute 'default nil
                     :family "IBM Plex Mono"
                     :height 105
@@ -285,7 +260,7 @@ then it takes a second \\[keyboard-quit] to abort the minibuffer."
 
 (set-face-attribute 'variable-pitch nil
                     :family "Fira Sans"
-                    :height 110
+                    :height 105
                     :weight 'normal)
 
 (when (member "Symbola" (font-family-list))
@@ -296,48 +271,37 @@ then it takes a second \\[keyboard-quit] to abort the minibuffer."
 (column-number-mode t)
 (csetq visible-cursor nil)
 
-;; (csetq display-buffer-alist
-;;        `((,(rx bos
-;;                (or "*Compile-Log*"
-;;                    "*Warnings*"
-;;                    "*compilation"
-;;                    "*rg*"
-;;                    "*grep*"
-;;                    "*ag search*"
-;;                    "*Occur*"
-;;                    "*xref*"
-;;                    "*Flymake diagnostics"
-;;                    "*Flycheck"
-;;                    "*ivy-"
-;;                    "*hgrep*"
-;;                    ))
-;;           (display-buffer-reuse-window
-;;            display-buffer-in-side-window)
-;;           (side            . bottom)
-;;           (reusable-frames . nil)
-;;           (window-height   . 0.25))
+(csetq display-buffer-alist
+       `((,(rx string-start
+               (or "*Compile-Log*"
+                   "*Warnings*"
+                   "*compilation"
+                   "*rg*"
+                   "*grep*"
+                   "*Occur*"
+                   "*xref*"
+                   "*Flymake diagnostics"
+                   "*Flycheck"
+                   "*ivy-"
+                   ))
+          (display-buffer-reuse-window
+           display-buffer-in-side-window)
+          (side            . bottom)
+          (reusable-frames . nil)
+          (window-height   . 0.25))
 
-;;          ;; Let `display-buffer' reuse visible frames for all buffers. This must be
-;;          ;; the last entry in `display-buffer-alist', because it overrides any later
-;;          ;; entry with more specific actions.
-;;          ("." nil (reusable-frames . nil))
-;;          ))
-
-;;; Global functions
-(defun show-trailing-whitespace()
-  (setq-local show-trailing-whitespace t))
-
-(defun hide-trailing-whitespace()
-  (setq-local show-trailing-whitespace nil))
-
-(defun user/results-buffer-hook ()
-  "Set various settings on results buffers (compilation, grep, etc.)."
-  (setq-local scroll-margin 0)
-  (show-trailing-whitespace))
+         ;; Show buffer only in the selected frame.
+         ("." nil (reusable-frames . nil))))
 
 ;;
 ;; Customization that doesn't require use-package
 ;;
+
+;; When creating new buffers, use `auto-mode-alist' to automatically set the major mode.
+(csetq major-mode (lambda ()
+                    (unless buffer-file-name
+                      (let ((buffer-file-name (buffer-name)))
+                        (set-auto-mode)))))
 
 (csetq diff-switches '("-u" "-p" "-w"))
 (add-hook 'diff-mode-hook #'diff-delete-empty-files)
@@ -354,20 +318,62 @@ then it takes a second \\[keyboard-quit] to abort the minibuffer."
 (csetq vc-git-diff-switches '("--ignore-space-change" "--ignore-all-space" "--no-ext-diff" "--stat" "--diff-algorithm=histogram"))
 (csetq vc-git-print-log-follow t)
 
-(csetq savehist-additional-variables '(search-ring regexp-search-ring compile-command))
+(csetq savehist-additional-variables '(search-ring regexp-search-ring compile-command calc-stack))
+(csetq savehist-ignored-variables '(tmm--history yes-or-no-p-history))
 (csetq savehist-autosave-interval 60)
 (csetq history-length 1000)
+(csetq history-delete-duplicates t)
 (savehist-mode t)
-
-(csetq flyspell-issue-message-flag nil)
 
 (csetq hexl-bits 8)
 
 (csetq dabbrev-case-replace nil)
 (csetq dabbrev-abbrev-skip-leading-regexp "[^ ]*[<>=*$]")
 
-(with-eval-after-load 'xref
-  (add-to-list 'xref-prompt-for-identifier 'xref-find-references t))
+(setq hippie-expand-try-functions-list
+      '(try-expand-dabbrev-visible
+        try-expand-dabbrev
+        try-expand-dabbrev-all-buffers
+        try-expand-dabbrev-from-kill
+        try-expand-list
+        try-expand-list-all-buffers
+        try-complete-file-name-partially
+        try-complete-file-name
+        try-expand-all-abbrevs))
+
+(csetq ispell-program-name (executable-find "aspell"))
+(csetq ispell-extra-args '("--sug-mode=normal" "--keyboard=standard"))
+
+(csetq flyspell-issue-welcome-flag nil)
+(csetq flyspell-issue-message-flag nil)
+(csetq flyspell-use-meta-tab nil)
+
+(defun minibuffer-keyboard-quit ()
+  "Abort recursive edit.
+In Delete Selection mode, if the mark is active, just deactivate it;
+then it takes a second \\[keyboard-quit] to abort the minibuffer."
+  (interactive)
+  (if (and delete-selection-mode transient-mark-mode mark-active)
+      (setq deactivate-mark t)
+    (when (get-buffer "*Completions*") (delete-windows-on "*Completions*"))
+    (abort-recursive-edit)))
+
+(defun hide-trailing-whitespace ()
+  (setq-local show-trailing-whitespace nil))
+
+(defun user/minibuffer-setup-hook ()
+  "Hook to run when entering the minibuffer."
+  (csetq gc-cons-threshold most-positive-fixnum))
+
+(defun user/minibuffer-exit-hook ()
+  "Hook to run when exiting the minibuffer."
+  (csetq gc-cons-threshold user/gc-cons-threshold))
+
+(add-hook 'minibuffer-setup-hook #'hide-trailing-whitespace)
+
+;; Increase the memory while in the minibuffer
+(add-hook 'minibuffer-setup-hook #'user/minibuffer-setup-hook)
+(add-hook 'minibuffer-exit-hook #'user/minibuffer-exit-hook)
 
 (general-define-key
  :keymaps '(minibuffer-local-map
@@ -376,6 +382,9 @@ then it takes a second \\[keyboard-quit] to abort the minibuffer."
             minibuffer-local-must-match-map
             minibuffer-local-isearch-map)
  "<escape>" #'minibuffer-keyboard-quit)
+
+(with-eval-after-load 'xref
+  (add-to-list 'xref-prompt-for-identifier 'xref-find-references t))
 
 ;; Thank you Fuco1
 (eval-after-load "lisp-mode"
@@ -449,60 +458,69 @@ Lisp function does not specify a special indentation."
                  (method
                   (funcall method indent-point state)))))))))
 
+(defun occur-at-point ()
+  "Just like `occur', but with the default value of symbol at point."
+  (interactive)
+  (let ((read-regexp-defaults-function 'find-tag-default-as-symbol-regexp))
+    (call-interactively #'occur)))
 
 ;;
-;; Some binds that doesn't require use-package (well, we could require simple & misc, but they will be autloaded anyway)
+;; Some binds & configs that doesn't require use-package (well, we could require simple & misc, but they will be autloaded anyway)
 ;;
 
 (general-unbind
+  "M-o"
   "C-x C-z"
   "C-x f"
-  "M-o"
   "C-x >"
   "C-x <"
   "<C-next>"
   "<C-prior>")
 
-(use-package simple
-  :ensure nil)
-
 (use-package user-utils
   :load-path "lisp"
   :general
-  ("M-j" #'user/join-line)
-  ("<C-return>" #'user/open-line-above)
-  ("C-a" #'user/move-beginning-of-line)
-  ("C-w" #'user/kill-word-or-region)
-  ([remap backward-kill-word] #'user/backward-kill-word)
   ("M-]" #'user/next-error)
   ("M-[" #'user/prev-error)
-  ;; ([remap forward-paragraph] . #'user/forward-paragraph)
-  ;; ([remap backward-paragraph] . #'user/backward-paragraph)
-  ("C-`" #'user/open-terminal)
+  ("M-j" #'user/join-line)
+  ([remap backward-kill-word] #'user/backward-kill-word)
   ([remap scroll-up-command] #'user/scroll-half-page-up)
   ([remap scroll-down-command] #'user/scroll-half-page-down)
-  ("C-'" #'push-mark-no-activate)
-  ("M-'" #'jump-to-mark))
+  ("C-w" #'user/kill-word-or-region)
+  ("<C-return>" #'user/open-line-above)
+  ("C-a" #'user/move-beginning-of-line)
+  ("C-e" #'move-end-of-line))
 
 (general-define-key "M-u" #'upcase-dwim)
 (general-define-key "M-l" #'downcase-dwim)
 (general-define-key "M-c" #'capitalize-dwim)
-(general-define-key "M-g" #'goto-line)
 (general-define-key "C-8" #'repeat-complex-command)
 (general-define-key "M-z" #'zap-up-to-char)
 (general-define-key "<C-right>" #'forward-to-word)
 (general-define-key [remap just-one-space] #'cycle-spacing)
 (general-define-key [remap newline] #'newline-and-indent)
+(general-define-key [remap isearch-forward] #'isearch-forward-regexp)
+(general-define-key [remap isearch-forward-regexp] #'isearch-forward)
+(general-define-key [remap isearch-backward] #'isearch-backward-regexp)
+(general-define-key [remap isearch-backward-regexp] #'isearch-backward)
+
+(general-define-key
+ :prefix "M-s"
+ "o" #'occur-at-point)
 
 (when (display-graphic-p)
   (define-key input-decode-map [?\C-m] [C-m])
   (define-key input-decode-map [?\C-\M-m] [C-M-m]))
 
-(general-define-key "C-c t d" #'toggle-debug-on-error)
-(general-define-key "C-c t q" #'toggle-debug-on-quit)
+(general-define-key
+ :prefix "C-c t"
+ "d" #'toggle-debug-on-error
+ "q" #'toggle-debug-on-quit)
 
-(key-chord-define-global "jj" #'switch-to-buffer)
-(key-chord-define-global "jf" #'find-file)
+
+;; (key-chord-define-global "jj" #'switch-to-buffer)
+;; (key-chord-define-global "jf" #'find-file)
+;; (key-chord-define-global "jg" #'find-file-other-window)
 
 ;;
 ;; Mostly built-in packages. No real order, they are not dependent on each other...
@@ -528,27 +546,30 @@ Lisp function does not specify a special indentation."
 
   :ghook 'prog-mode-hook
 
-  :init
-  (csetq whitespace-display-mappings
-         '((tab-mark ?\t [187 32 32 32 32 32 32 32])))
-  (csetq whitespace-style '(face tab-mark trailing)))
+  :custom
+  (whitespace-display-mappings
+   '((tab-mark ?\t [187 32 32 32 32 32 32 32])))
+  (whitespace-style '(face tab-mark trailing)))
 
 (use-package recentf :ensure nil
-  :init
-  (csetq recentf-auto-cleanup 'never)
-  (csetq recentf-exclude (list
-                          "/usr/share/emacs/.*\\'"
-                          "/elpa/.*\\'"          ; Package files
-                          "PKGBUILD"             ; ArchLinux aur
-                          "crontab.*"
-                          "/tmp/.*\\'"
-                          #'ignoramus-boring-p))
-  (csetq recentf-max-saved-items 500)
-  (csetq recentf-max-menu-items 100)
+  :custom
+  (recentf-auto-cleanup 'never)
+  (recentf-exclude (list
+                    "/usr/share/emacs/.*\\'"
+                    "/elpa/.*\\'"                 ; Package files
+                    "/.ccls-cache/.*\\'"          ; Package files
+                    "PKGBUILD"                    ; ArchLinux aur
+                    "crontab.*"
+                    "/tmp/.*\\'"
+                    #'ignoramus-boring-p))
+  (recentf-max-saved-items 500)
+  (recentf-max-menu-items 100)
 
   :config
-  (add-to-list 'recentf-exclude no-littering-var-directory)
-  (add-to-list 'recentf-exclude no-littering-etc-directory)
+  (when source-directory
+    (push (concat source-directory ".*\\'") recentf-exclude))
+  (push no-littering-var-directory recentf-exclude)
+  (push no-littering-etc-directory recentf-exclude)
 
   (recentf-mode t)
   (run-at-time (* 5 60) (* 5 60) #'recentf-save-list))
@@ -557,36 +578,34 @@ Lisp function does not specify a special indentation."
   :gfhook #'ibuffer-auto-mode
   :general
   ("C-x C-b" #'ibuffer)
-  :init
-  (csetq ibuffer-saved-filter-groups
-         '(("default"
+  :custom
+  (ibuffer-saved-filter-groups
+   '(("default"
 
-            ("Interactive" (or (mode . lisp-interaction-mode)
-                               (name . "\*Messages\*")
-                               (name . "\*Customize\*")))
+      ("Interactive" (or (mode . lisp-interaction-mode)
+                         (name . "\*Messages\*")
+                         (name . "\*Customize\*")))
 
-            ("Dired" (mode . dired-mode))
+      ("Dired" (mode . dired-mode))
 
-            ;; Need to be before "Programming" otherwise
-            ;; `emacs-lisp-mode' will match.
-            ("Emacs config" (filename . ".emacs.d"))
+      ;; Need to be before "Programming" otherwise
+      ;; `emacs-lisp-mode' will match.
+      ("Emacs config" (filename . ".emacs.d"))
 
-            ("Org-Mode" (mode . org-mode))
+      ("Org-Mode" (mode . org-mode))
 
-            ("Programming" (derived-mode . prog-mode))
+      ("Programming" (derived-mode . prog-mode))
 
-            ("Magit" (name . "\*magit"))
+      ("Magit" (name . "\*magit"))
 
-            ("Help" (or (name . "\*Help\*")
-                        (name . "\*Apropos\*")
-                        (name . "\*info\*")))
+      ("Help" (or (name . "\*Help\*")
+                  (name . "\*Apropos\*")
+                  (name . "\*info\*")))
 
-            ("Virtual" (name . "\*")))))
+      ("Virtual" (name . "\*")))))
+  (ibuffer-default-shrink-to-minimum-size t)
+  (ibuffer-show-empty-filter-groups nil))
 
-  (defalias 'list-buffers 'ibuffer)
-
-  (csetq ibuffer-default-shrink-to-minimum-size t)
-  (csetq ibuffer-show-empty-filter-groups nil))
 
 (use-package comint :ensure nil
   :general
@@ -596,18 +615,14 @@ Lisp function does not specify a special indentation."
    "C-n"    #'comint-next-input
    "C-p"    #'comint-previous-input
    "C-r"    #'comint-history-isearch-backward)
-  :init
-  (csetq comint-process-echoes t)
-  (csetq comint-prompt-read-only t)
-  (csetq comint-history-isearch t)
-  (csetq comint-ignore-dups t)
-  (add-hook 'comint-output-filter-functions #'comint-strip-ctrl-m))
+  :ghook ('comint-output-filter-functions #'comint-strip-ctrl-m)
+  :custom
+  (comint-process-echoes t)
+  (comint-prompt-read-only t)
+  (comint-history-isearch t)
+  (comint-ignore-dups t))
 
 (use-package compile :ensure nil
-  :chords (("jc" . compile-without-ask))
-  :general
-  ([remap comment-region] #'compile-without-ask)
-  ("C-c c" #'compile-without-ask)
   :preface
   (defun compile-without-ask (ask)
     (interactive "P")
@@ -619,24 +634,23 @@ Lisp function does not specify a special indentation."
   (defun user/switch-to-compilation-window (buffer _msg)
     (select-window (get-buffer-window buffer)))
 
-  :init
-  (csetq compilation-always-kill t)
-  (csetq compilation-ask-about-save nil)
-  (csetq compilation-auto-jump-to-first-error nil)
-  (csetq compilation-context-lines nil)
-  (csetq compilation-disable-input t)
-  (csetq compilation-scroll-output 'first-error)
+  :general
+  ([remap comment-region] #'compile-without-ask)
+  ("C-c c" #'compile-without-ask)
 
-  :config
-  (add-hook 'compilation-mode-hook #'user/results-buffer-hook)
-  (add-hook 'compilation-finish-functions #'user/switch-to-compilation-window))
+  :ghook
+  ('compilation-mode-hook #'hide-trailing-whitespace)
+  ('compilation-finish-functions #'user/switch-to-compilation-window)
+
+  :custom
+  (compilation-always-kill t)
+  (compilation-ask-about-save nil)
+  (compilation-auto-jump-to-first-error nil)
+  (compilation-context-lines nil)
+  (compilation-disable-input t)
+  (compilation-scroll-output 'first-error))
 
 (use-package dired-x :ensure nil
-  :general
-  (:keymaps 'dired-mode-map
-   "SPC" #'dired-mark
-   "<C-return>" #'user/open-in-external-app
-   "<tab>" #'user/dired-next-window)
   :preface
   (defun user/dired-next-window ()
     (interactive)
@@ -657,29 +671,35 @@ Lisp function does not specify a special indentation."
            (start-process "" nil "xdg-open" file-path)))
        file-list)))
 
-  :init
-  (csetq dired-auto-revert-buffer t)
-  (csetq dired-dwim-target t)
-  (csetq dired-hide-details-hide-information-lines nil)
-  (csetq dired-hide-details-hide-symlink-targets nil)
-  (csetq dired-listing-switches "-lFaGh1v --group-directories-first")
-  (csetq dired-ls-F-marks-symlinks t)
-  (csetq dired-recursive-copies 'always)
-  (csetq dired-omit-verbose nil))
+  :general
+  (:keymaps 'dired-mode-map
+   "SPC" #'dired-mark
+   "<C-return>" #'user/open-in-external-app
+   "<tab>" #'user/dired-next-window)
+
+  :custom
+  (dired-auto-revert-buffer t)
+  (dired-dwim-target t)
+  (dired-hide-details-hide-information-lines nil)
+  (dired-hide-details-hide-symlink-targets nil)
+  (dired-listing-switches "-lFaGh1v --group-directories-first")
+  (dired-ls-F-marks-symlinks t)
+  (dired-recursive-copies 'always)
+  (dired-omit-verbose nil))
 
 (use-package wdired :ensure nil
   :general
   (:keymaps 'dired-mode-map
    "C-c M-w" #'wdired-change-to-wdired-mode)
-  :init
-  (csetq wdired-create-parent-directories t)
-  (csetq wdired-allow-to-change-permissions t))
+  :custom
+  (wdired-create-parent-directories t)
+  (wdired-allow-to-change-permissions t))
 
 (use-package dired-du
   :commands dired-du-mode
-  :init
-  (csetq dired-du-size-format t)
-  (csetq dired-du-update-headers t))
+  :custom
+  (dired-du-size-format t)
+  (dired-du-update-headers t))
 
 (use-package dired-narrow
   :commands dired-narrow
@@ -695,112 +715,36 @@ Lisp function does not specify a special indentation."
   :general
   ("M-2" #'er/expand-region)
   ("M-1" #'er/contract-region)
-  ("M-@" #'er/contract-region)
-  :init
-  (csetq expand-region-fast-keys-enabled nil)
-  (csetq expand-region-autocopy-register "e"))
-
-(use-package easy-kill
-  :general
-  ([remap kill-ring-save] #'easy-kill)
-  ([remap mark-sexp] #'easy-mark))
+  :custom
+  (expand-region-fast-keys-enabled nil)
+  (expand-region-autocopy-register "e"))
 
 (use-package symbol-overlay
   :ghook 'text-mode-hook 'prog-mode-hook
   :general
-  ("M-*" #'symbol-overlay-put)
-  ("M-n" #'symbol-overlay-jump-next)
-  ("M-p" #'symbol-overlay-jump-prev)
-  ("M-8" #'symbol-overlay-toggle-in-scope)
-  :init
-  (csetq symbol-overlay-displayed-window t))
+  (:keymap 'symbol-overlay-map
+   "M-*" #'symbol-overlay-put
+   "M-n" #'symbol-overlay-jump-next
+   "M-p" #'symbol-overlay-jump-prev
+   "M-8" #'symbol-overlay-toggle-in-scope)
+  :custom-face
+  (symbol-overlay-default-face ((t (:inherit underline))))
+  :custom
+  (symbol-overlay-idle-time 0.25)
+  (symbol-overlay-displayed-window t))
+
+(use-package beginend
+  :config
+  (beginend-global-mode t))
+
+(use-package iedit
+  :general
+  ("C-;" #'iedit-mode))
 
 (use-package iy-go-to-char
   :general
   ("M-m" #'iy-go-to-char)
   ("M-M" #'iy-go-to-char-backward))
-
-(use-package smartparens
-  :demand t
-  :general
-  ("C-M-k"  #'sp-kill-sexp)
-  ("C-M-n"  #'sp-next-sexp)
-  ("C-M-p"  #'sp-previous-sexp)
-  ("C-M-f"  #'sp-forward-sexp)
-  ("C-M-b"  #'sp-backward-sexp)
-  ("C-M-u"  #'sp-backward-up-sexp)
-  ("C-M-d"  #'sp-down-sexp)
-  ("C-("    #'sp-wrap-round)
-  ("C-{"    #'sp-wrap-curly)
-  ("C-M-<right>" #'sp-forward-slurp-sexp)
-  ("C-M-<left>"  #'sp-forward-barf-sexp)
-
-  :preface
-  (defun user/open-block-c-mode (_id action _context)
-    (case action
-      ((insert) (let (should-indent)
-                  (save-excursion
-                    (goto-char (line-beginning-position))
-                    ;; if|when|for (expr) or just whitespace
-                    (setq should-indent (looking-at-p "\\s-+\\(\\(if\\|when\\|for\\).*\\)?{}$")))
-                  (when should-indent
-                    (indent-according-to-mode)
-                    (newline)
-                    (newline)
-                    (indent-according-to-mode)
-                    (forward-line -1)
-                    (indent-according-to-mode))))
-
-      ((wrap) (progn
-                (let* ((c (char-equal (char-before) ?{))
-                       (rb (if c (region-beginning) (1+ (region-beginning))))
-                       (re (if c (region-end) (1- (region-end))))
-                       (buf (buffer-substring rb re))
-                       (ret-line))
-                  (delete-region rb re)
-                  (when (not c)
-                    (backward-char))
-                  (newline)
-                  (newline)
-                  (forward-line -1)
-                  (setq ret-line (line-number-at-pos))
-                  (insert buf)
-                  (sp-forward-sexp)
-                  (sp-backward-sexp)
-                  (sp-mark-sexp)
-                  (indent-region (region-beginning) (region-end))
-                  (goto-char (point-min))
-                  (forward-line (1- ret-line)))))))
-
-  :ghook 'prog-mode-hook
-         ('minibuffer-setup-hook #'smartparens-strict-mode)
-
-  :init
-  (csetq sp-highlight-pair-overlay nil)
-  (csetq sp-highlight-wrap-overlay nil)
-  (csetq sp-highlight-wrap-tag-overlay nil)
-  (csetq sp-show-pair-from-inside t)
-  (csetq sp-cancel-autoskip-on-backward-movement nil)
-  (csetq sp-max-pair-length 4)
-  (csetq sp-max-prefix-length 50)
-  (csetq sp-escape-quotes-after-insert nil)
-
-  :config
-  (require 'smartparens-config)
-
-  (add-to-list 'sp--special-self-insert-commands #'c-electric-paren)
-  (add-to-list 'sp--special-self-insert-commands #'c-electric-brace)
-
-  (sp-local-pair 'c-mode "{" nil :post-handlers '(:add user/open-block-c-mode))
-  (sp-local-pair 'c++-mode "{" nil :post-handlers '(:add user/open-block-c-mode))
-
-  (sp-local-pair 'c-mode "'" nil :actions nil)
-  (sp-local-pair 'c++-mode "'" nil :actions nil)
-
-  (sp-local-pair 'emacs-lisp-mode "`" nil :actions nil)
-  (sp-local-pair 'emacs-lisp-mode "'" nil :actions nil)
-
-  (show-smartparens-global-mode t))
 
 (use-package multiple-cursors
   :general
@@ -860,38 +804,42 @@ Lisp function does not specify a special indentation."
   ("C-c C-r" #'ivy-resume)
   (:keymaps 'ivy-mode-map
    "<escape>" #'minibuffer-keyboard-quit)
-  :init
-  (csetq ivy-count-format "")
-  (csetq ivy-height 9)
-  (csetq ivy-use-virtual-buffers t)
-  (csetq ivy-virtual-abbreviate 'full)
-  (csetq ivy-wrap t)
+  :custom
+  (ivy-count-format "")
+  (ivy-height 9)
+  (ivy-use-virtual-buffers t)
+  (ivy-virtual-abbreviate 'full)
+  (ivy-wrap t)
+  :config
   (ivy-mode t))
 
 (use-package counsel
-  :init
-  (csetq counsel-describe-function-preselect 'ivy-function-called-at-point)
-  (csetq counsel-grep-post-action-hook '(recenter))
-  (csetq counsel-mode-override-describe-bindings t)
+  :general
+  (:prefix "M-s"
+   "c" #'counsel-rg
+   "g" #'counsel-git-grep
+   "s" #'swiper)
+  :custom
+  (counsel-describe-function-preselect 'ivy-function-called-at-point)
+  (counsel-grep-post-action-hook '(recenter))
+  (counsel-mode-override-describe-bindings t)
   :config
   (counsel-mode t))
 
 (use-package ivy-rich
-  :init
-  (csetq ivy-rich-switch-buffer-align-virtual-buffer t)
-  (csetq ivy-rich-path-style 'abbrev)
+  :custom
+  (ivy-rich-switch-buffer-align-virtual-buffer t)
+  (ivy-rich-path-style 'abbrev)
   :config
   (ivy-rich-mode t))
 
 (use-package ivy-posframe
-  :config
-  (csetq ivy-posframe-display-functions-alist
-         '((swiper . nil)
-           (t . ivy-posframe-display-at-point)))
-  (csetq ivy-posframe-parameters
-         '((left-fringe . 4)
-           (right-fringe . 4)))
+  :custom
+  (ivy-posframe-display-functions-alist
+   '((swiper . nil)
+     (t . ivy-posframe-display-at-point)))
 
+  :config
   (ivy-posframe-mode t))
 
 (use-package company
@@ -902,21 +850,25 @@ Lisp function does not specify a special indentation."
   :general
   (:keymaps 'company-active-map
    "ESC" #'company-abort
-   "C-l" #'company-show-location
    "C-n" #'company-select-next
    "C-p" #'company-select-previous
+   "C-u" #'company-previous-page
+   "C-d" #'company-next-page
    "C-w" nil)
+
+  :custom
+  (company-dabbrev-code-ignore-case t)
+  (company-dabbrev-downcase nil)
+  (company-dabbrev-ignore-case t)
+  (company-idle-delay 0)
+  (company-minimum-prefix-length 4)
+  (company-require-match nil)
+  (company-selection-wrap-around t)
+  (company-tooltip-align-annotations t)
+  (company-tooltip-flip-when-above t)
+  (company-transformers '(company-sort-by-occurrence))
+
   :init
-  (csetq company-dabbrev-code-ignore-case t)
-  (csetq company-dabbrev-downcase nil)
-  (csetq company-dabbrev-ignore-case t)
-  (csetq company-idle-delay 0)
-  (csetq company-minimum-prefix-length 4)
-  (csetq company-require-match nil)
-  (csetq company-selection-wrap-around t)
-  (csetq company-tooltip-align-annotations t)
-  (csetq company-tooltip-flip-when-above t)
-  (csetq company-transformers '(company-sort-by-occurrence))
   (global-company-mode t))
 
 (use-package eacl
@@ -942,20 +894,18 @@ Lisp function does not specify a special indentation."
   :general
   (:keymaps 'json-mode-map
    "M-q" #'json-reformat-region)
-  :init
-  (csetq json-reformat:indent-width 4)
-  (csetq json-reformat:pretty-string? t))
+  :custom
+  (json-reformat:indent-width 4)
+  (json-reformat:pretty-string? t))
 
 ;;
 ;; Searching
 ;;
 
-(use-package grep :ensure nil
-  :gfhook #'user/results-buffer-hook)
+(add-hook 'grep-mode-hook #'hide-trailing-whitespace)
 
 (use-package isearch :ensure nil
   :preface
-
   (defun isearch-delete-previous ()
     "Delete non-matching text or the last character.
 If it's a regexp delete only the last char but only if
@@ -990,45 +940,61 @@ That way we don't remove the whole regexp for a simple typo.
    "<tab>"          #'isearch-repeat-forward
    "<backtab>"      #'isearch-repeat-backward
    "<C-backspace>"  #'isearch-delete-previous)
-  :init
-  (csetq isearch-lazy-count t)
-  (csetq isearch-allow-scroll 'unlimited)
-  (csetq isearch-yank-on-move 'shift))
 
-(use-package ag
-  :defer t
-  :init
-  (csetq ag-reuse-buffers t)
-  (csetq ag-reuse-window t)
-
-  :config
-  (dolist (ign-file grep-find-ignored-files)
-    (add-to-list 'ag-ignore-list ign-file))
-
-  (dolist (ign-dir grep-find-ignored-directories)
-    (add-to-list 'ag-ignore-list ign-dir)))
+  :custom
+  (isearch-lazy-count t)
+  (lazy-highlight-initial-delay 0)
+  (isearch-allow-scroll 'unlimited)
+  (isearch-yank-on-move 'shift))
 
 (use-package rg
-  :init
-  (csetq rg-ignore-case 'smart)
-  (csetq rg-hide-command nil)
-  :config
-  (rg-enable-default-bindings))
+  :general
+  (:prefix "M-s"
+   "d" #'rg-dwim
+   "r" #'rg
+   "p" #'rg-project
+   "l" #'rg-literal)
+  :custom
+  (rg-ignore-case 'smart)
+  (rg-hide-command nil))
 
 (use-package wgrep
   :defer t
-  :init
-  (csetq wgrep-auto-save-buffer t))
-
-(use-package wgrep-ag)
+  :custom
+  (wgrep-auto-save-buffer t))
 
 ;;
 ;; Programming
 ;;
+(use-package prog-mode :ensure nil
+  :defer t
+  :gfhook
+  #'hide-trailing-whitespace
+  #'which-function-mode
+  #'hs-minor-mode
+  #'electric-indent-local-mode
+  #'electric-pair-local-mode)
 
-(add-hook 'prog-mode-hook #'show-trailing-whitespace)
-(add-hook 'prog-mode-hook #'which-function-mode)
-(add-hook 'prog-mode-hook #'hs-minor-mode)
+;; (use-package eldoc :ensure nil
+;;   :defer t
+;;   :custom
+;;   (eldoc-idle-delay 0.25)
+;;   )
+
+(use-package elisp-mode :ensure nil
+  :defer t
+  :ghook ('after-save-hook #'check-parens))
+
+(use-package lisp-mode :ensure nil
+  :defer t
+  :ghook ('after-save-hook #'check-parens))
+
+(use-package paren :ensure nil
+  :custom
+  (show-paren-delay 0)
+  (show-paren-when-point-inside-paren t)
+  :config
+  (show-paren-mode t))
 
 (use-package comment-dwim-2
   :general ("M-;" #'comment-dwim-2))
@@ -1037,11 +1003,9 @@ That way we don't remove the whole regexp for a simple typo.
 
 (use-package dumb-jump
   :defer t
-  :config
-  (general-add-hook 'dumb-jump-after-jump-hook #'recenter-top-bottom))
+  :ghook ('dumb-jump-after-jump-hook #'recenter-top-bottom))
 
 (use-package cc-mode :ensure nil
-  :ghook ('c-mode-common-hook #'user/c-mode-common-hook)
   :preface
   (defconst user/allman-style
     '((c-electric-pound-behavior     . (alignleft))
@@ -1094,12 +1058,19 @@ That way we don't remove the whole regexp for a simple typo.
 
   (defun user/c-mode-common-hook ()
     "Hook for C/C++ mode."
-    (c-toggle-electric-state t)
+    (c-toggle-auto-newline t)
     (c-toggle-syntactic-indentation t)
 
-    (when lsp-mode
-      (lsp-ui-doc-enable nil)
+    (setq-local c-hanging-semi&comma-criteria nil)
+
+    (modify-syntax-entry ?' ".")
+
+    (require 'ccls)
+
+    (with-eval-after-load 'lsp-mode
       (setq-local flymake-diagnostic-functions (remove #'flymake-cc flymake-diagnostic-functions))))
+
+  :ghook ('c-mode-common-hook #'user/c-mode-common-hook)
 
   :config
   (c-add-style "allman" user/allman-style)
@@ -1111,8 +1082,6 @@ That way we don't remove the whole regexp for a simple typo.
 
 (use-package ccls
   :after cc-mode
-  :demand t
-
   :preface
   (defun user/ccls-callee-hierarchy ()
     (interactive)
@@ -1127,15 +1096,13 @@ That way we don't remove the whole regexp for a simple typo.
     ("." lsp-ui-peek-find-references "references")
     ("s" lsp-ui-peek-find-workspace-symbol "symbol"))
 
-  :general
-  (:keymaps 'c-mode-base-map
-   "M-o" #'user/ccls-show/body)
-
-  :init
-  (csetq ccls-initialization-options '(:diagnostics (:onOpen 0 :opSave 0 :onChange -1 :spellChecking :json-false))))
+  :custom
+  (ccls-initialization-options
+   '(:diagnostics (:onOpen 0 :onSave 0 :onChange -1 :spellChecking :json-false)
+     :highlight (:largeFileSize 0))))
 
 (use-package python :ensure nil
-  :defer t
+  :commands python-mode
 
   :config
   (when (executable-find "ipython")
@@ -1151,11 +1118,10 @@ That way we don't remove the whole regexp for a simple typo.
 
 (use-package pipenv
   :ghook 'python-mode-hook
-  :init
-  (csetq pipenv-projectile-after-switch-function #'pipenv-projectile-after-switch-extended))
+  :custom
+  (pipenv-projectile-after-switch-function #'pipenv-projectile-after-switch-extended))
 
 (use-package pyvenv
-  :ghook ('python-mode-hook #'user/auto-virtualenv)
   :preface
   (defun user/auto-virtualenv ()
     (pyvenv-mode t)
@@ -1164,15 +1130,17 @@ That way we don't remove the whole regexp for a simple typo.
     ;; This also works with lsp-mode since it will use the python inside
     (let ((root (locate-dominating-file default-directory "venv")))
       (if (and root (file-exists-p root))
-          (pyvenv-activate (expand-file-name "venv" root))))))
+          (pyvenv-activate (expand-file-name "venv" root)))))
+
+  :ghook ('python-mode-hook #'user/auto-virtualenv))
 
 (use-package js2-mode
   :mode "\\.js\\'"
-  :init
-  (csetq js2-skip-preprocessor-directives t))
+  :custom
+  (js2-skip-preprocessor-directives t))
 
 (use-package web-mode
-  :gfhook #'turn-off-smartparens-mode
+  ;; :gfhook #'turn-off-smartparens-mode
   :mode
   (("\\.phtml\\'" . web-mode)
    ("\\.tpl\\.php\\'" . web-mode)
@@ -1183,68 +1151,96 @@ That way we don't remove the whole regexp for a simple typo.
    ("\\.djhtml\\'" . web-mode)
    ("\\.html?\\'" . web-mode)
    ("\\.jsx$\\'" . web-mode))
-  :init
-  (csetq web-mode-code-indent-offset 4)
-  (csetq web-mode-markup-indent-offset 2)
-  (csetq web-mode-css-indent-offset 2)
-  (csetq web-mode-sql-indent-offset 4)
-  (csetq web-mode-attr-indent-offset 2)
-  (csetq web-mode-attr-value-indent-offset 2)
+  :custom
+  (web-mode-code-indent-offset 4)
+  (web-mode-markup-indent-offset 2)
+  (web-mode-css-indent-offset 2)
+  (web-mode-sql-indent-offset 4)
+  (web-mode-attr-indent-offset 2)
+  (web-mode-attr-value-indent-offset 2)
 
-  (csetq web-mode-enable-current-column-highlight t)
-  (csetq web-mode-enable-current-element-highlight t)
-  (csetq web-mode-enable-element-content-fontification t)
-  (csetq web-mode-enable-element-tag-fontification t)
-  (csetq web-mode-enable-html-entities-fontification t)
-  (csetq web-mode-enable-inlays t)
-  (csetq web-mode-enable-sql-detection t)
-  (csetq web-mode-enable-block-face t)
-  (csetq web-mode-enable-part-face t)
+  (web-mode-enable-current-column-highlight t)
+  (web-mode-enable-current-element-highlight t)
+  (web-mode-enable-element-content-fontification t)
+  (web-mode-enable-element-tag-fontification t)
+  (web-mode-enable-html-entities-fontification t)
+  (web-mode-enable-inlays t)
+  (web-mode-enable-sql-detection t)
+  (web-mode-enable-block-face t)
+  (web-mode-enable-part-face t)
 
-  (csetq web-mode-engines-alist '(("django" . "\\.html\\'"))))
+  (web-mode-engines-alist '(("django" . "\\.html\\'"))))
+
+;; (use-package eglot
+;;   :ghook
+;;   ('c-mode-common-hook #'eglot-ensure)
+;;   :gfhook
+;;   ('eglot-server-initialized-hook #'company-eglot-setup)
+;;   :preface
+;;   (defun company-eglot-setup (_server)
+;;     (delq 'company-capf company-backends)
+;;     (push 'company-capf company-backends))
+;;   :init
+;;   (csetq eglot-ignored-server-capabilites '(:documentHighlightProvider))
+;;   :config
+;;   (push '((c++-mode c-mode)
+;;           "ccls" "--init={\"diagnostics\": {\"onChange\": -1, \"spellChecking\": false}, \"highlight\": {\"largeFileSize\": 0}}")
+;;         eglot-server-programs))
 
 ;; Define this after all the languages (lsp must be added first in lang-mode-hook)
 (use-package lsp-mode
   :commands (lsp lsp-mode)
+
   :ghook
-  ('c-mode-common-hook #'lsp)
+  ('c-mode-common-hook #'lsp t)
   ('python-mode-hook #'lsp)
-  :init
-  ;; performance reasons
-  (csetq lsp-enable-on-type-formatting nil)
-  (csetq lsp-enable-indentation nil)
-  (csetq lsp-before-save-edits nil)
+  ('lsp-after-open-hook #'lsp-enable-imenu)
 
-  (add-hook 'lsp-after-open-hook 'lsp-enable-imenu)
+  :custom
+  ;; performance reasons (and they're not really usefull for me)
+  (lsp-enable-on-type-formatting nil)
+  (lsp-enable-indentation nil)
+  (lsp-before-save-edits nil)
+  (lsp-enable-symbol-highlighting nil "`symbol-overlay' it's more usefull (for me).")
+  (lsp-auto-guess-root t "Sometimes it doesn't work, but it's ok")
+  (lsp-pyls-plugins-rope-completion-enabled nil "This is very very slow (we allow jedi only)")
 
-  (csetq lsp-auto-guess-root t)
+  ;; Enable this when things are slow
+  ;; (lsp-print-performance t)
 
   :config
+  (push "[/\\\\]\\.ccls-cache$" lsp-file-watch-ignored)
+  (push "[/\\\\]\\.vscode$" lsp-file-watch-ignored)
+  (push "[/\\\\]_build$" lsp-file-watch-ignored)
+
   (require 'lsp-clients)
 
   ;; Until I have a method of selecting the prefered lsp-client (per project or globally)
-  (remhash 'clangd lsp-clients)
+  (remhash 'clangd lsp-clients))
 
-  (use-package company-lsp
-    :commands company-lsp
-    :init
-    (csetq company-lsp-async t)
-    (csetq company-lsp-cache-candidates nil))
+(use-package lsp-ui
+  :commands lsp-ui-mode
+  :general
+  (:keymaps 'lsp-mode-map
+   :prefix "M-g"
+   "r" #'lsp-ui-peek-find-references
+   "d" #'lsp-ui-peek-find-definitions)
+  :custom
+  (lsp-ui-doc-enable nil "Enable it per file if really needed")
+  (lsp-ui-doc-include-signature t)
 
-  (use-package lsp-ui
-    :commands lsp-ui-mode
-    :init
-    (csetq lsp-ui-doc-enable t)
-    (csetq lsp-ui-doc-include-signature t)
+  (lsp-ui-peek-always-show t "Usefull for peeking definitions")
 
-    (csetq lsp-ui-peek-always-show t)
+  (lsp-ui-sideline-enable nil "Enable it per file if really needed")
+  (lsp-ui-sideline-show-hover nil)
+  (lsp-ui-sideline-show-symbol nil)
+  (lsp-ui-sideline-ignore-duplicate t))
 
-    (csetq lsp-ui-sideline-enable nil)
-    (csetq lsp-ui-sideline-show-hover nil)
-    (csetq lsp-ui-sideline-show-symbol nil)
-    (csetq lsp-ui-sideline-ignore-duplicate t)
-
-    (csetq lsp-eldoc-hook (delete #'lsp-document-highlight lsp-eldoc-hook))))
+(use-package company-lsp
+  :commands company-lsp
+  :custom
+  (company-lsp-async t "Really needed to be responsive")
+  (company-lsp-cache-candidates nil "Don't cache them, let the server handle it"))
 
 (use-package flymake :ensure nil
   :preface
@@ -1257,39 +1253,48 @@ That way we don't remove the whole regexp for a simple typo.
         (when text (message "%s" text)))))
 
   :general
-  (:prefix "C-c f"
-   "n" #'flymake-goto-next-error
-   "p" #'flymake-goto-prev-error
-   "s" #'flymake-start
-   "f" #'flymake-display-at-point)
-  :init
-  (csetq flymake-no-changes-timeout nil)
-  (csetq flymake-start-syntax-check-on-newline nil))
+  (:keymaps 'flymake-mode-map
+   :prefix "M-g"
+   "f n" #'flymake-goto-next-error
+   "f p" #'flymake-goto-prev-error
+   "f s" #'flymake-start
+   "f f" #'flymake-display-at-point)
+  :custom
+  (flymake-no-changes-timeout nil "Don't check after changes, only after save")
+  (flymake-start-syntax-check-on-newline nil "Don't check on newlines (I hate it)"))
 
 (use-package flymake-diagnostic-at-point
   :defer t
   :ghook 'flymake-mode-hook
-  :init
-  (csetq flymake-diagnostic-at-point-display-diagnostic-function
-         #'flymake-diagnostic-at-point-display-popup))
+  :custom
+  (flymake-diagnostic-at-point-display-diagnostic-function
+   #'flymake-diagnostic-at-point-display-popup
+   "Display a posframe with the diagnostic at point (echo is for eldoc)"))
 
 (use-package imenu :ensure nil
-  :general ("M-i" #'imenu)
+  :general
+  (:keymaps 'prog-mode-map
+   "M-i" #'imenu)
   :ghook ('imenu-after-jump-hook #'recenter-top-bottom)
-  :init
-  (csetq imenu-auto-rescan t)
-  (csetq imenu-auto-rescan-maxout (* 1024 1024)))
+  :custom
+  (imenu-auto-rescan t "Rescan before showing results")
+  (imenu-auto-rescan-maxout (* 1024 1024) "Ignore buffers bigger than this"))
 
 (use-package imenu-anywhere
-  :general ("M-I" #'imenu-anywhere))
+  :general
+  (:keymaps 'prog-mode-map
+   "M-I" #'imenu-anywhere))
 
 (use-package yasnippet
-  :init
-  (csetq yas-verbosity 1)
-  (csetq yas-triggers-in-field t)
-  (csetq yas-wrap-around-region t)
+  :commands yas-minor-mode
+  :ghook
+  ('(text-mode-hook prog-mode-hook) #'yas-minor-mode)
+  :custom
+  (yas-verbosity 1 "Only errors")
+  (yas-triggers-in-field t "Snippets inside snippets")
+  (yas-wrap-around-region t)
+  (yas-also-auto-indent-first-line t)
   :config
-  (yas-global-mode t)
   (yas-reload-all))
 
 
@@ -1298,10 +1303,11 @@ That way we don't remove the whole regexp for a simple typo.
 ;;
 
 (use-package undo-tree
-  :init
-  (csetq undo-tree-auto-save-history nil)
-  (csetq undo-tree-visualizer-diff t)
-  (csetq undo-tree-visualizer-timestamps t)
+  :custom
+  (undo-tree-auto-save-history nil)
+  (undo-tree-visualizer-diff t)
+  (undo-tree-visualizer-timestamps t)
+  (undo-tree-enable-undo-in-region nil)
 
   :config
   (global-undo-tree-mode t)
@@ -1319,8 +1325,8 @@ That way we don't remove the whole regexp for a simple typo.
       ad-do-it)))
 
 (use-package volatile-highlights
-  :init
-  (csetq Vhl/highlight-zero-width-ranges t)
+  :custom
+  (Vhl/highlight-zero-width-ranges t)
 
   :config
   (volatile-highlights-mode t)
@@ -1356,12 +1362,12 @@ _q_ quit            _c_ create          _p_ previous
     ("r" eyebrowse-rename-window-config)
     ("s" eyebrowse-switch-to-window-config))
 
-  :general ("C-c e" #'user/eyebrowse-hydra/body)
+  :general ("C-c w" #'user/eyebrowse-hydra/body)
 
-  :init
-  (csetq eyebrowse-new-workspace t)
-  (csetq eyebrowse-switch-back-and-forth t)
-  (csetq eyebrowse-wrap-around t)
+  :custom
+  (eyebrowse-new-workspace t)
+  (eyebrowse-switch-back-and-forth t)
+  (eyebrowse-wrap-around t)
 
   :config
   (eyebrowse-mode t))
@@ -1369,24 +1375,24 @@ _q_ quit            _c_ create          _p_ previous
 (use-package projectile
   :demand t
   :general ("C-c p" 'projectile-command-map)
-  :init
-  (csetq projectile-completion-system 'ivy)
-  (csetq projectile-enable-caching t)
-  (csetq projectile-sort-order 'recentf)
-  (csetq projectile-use-git-grep t)
+  :custom
+  (projectile-completion-system 'ivy)
+  (projectile-enable-caching t)
+  (projectile-sort-order 'recentf)
+  (projectile-use-git-grep t)
 
   :config
   (projectile-mode t)
 
-  (add-to-list 'projectile-globally-ignored-directories ".vscode")
-  (add-to-list 'projectile-globally-ignored-directories ".ccls-cache"))
+  (push ".vscode" projectile-globally-ignored-directories)
+  (push ".ccls-cache" projectile-globally-ignored-directories))
 
 (use-package which-key
-  :init
-  (csetq which-key-side-window-location 'right)
-  (csetq which-key-idle-delay 1)
-  (csetq which-key-sort-order 'which-key-prefix-then-key-order)
-  ;; (csetq which-key-show-transient-maps t)
+  :custom
+  (which-key-side-window-location 'right)
+  (which-key-idle-delay 0.75)
+  (which-key-sort-order 'which-key-prefix-then-key-order)
+  :config
   (which-key-mode t))
 
 ;;
@@ -1410,33 +1416,33 @@ _q_ quit            _c_ create          _p_ previous
             (push 'eshell-smart eshell-modules-list)
             (push 'eshell-xtra eshell-modules-list)
             (delq 'eshell-banner eshell-modules-list)))
-  :init
-  (csetq eshell-hist-ignoredups t)
-  (csetq eshell-history-size 50000)
-  (csetq eshell-ls-dired-initial-args (quote ("-h")))
-  (csetq eshell-ls-exclude-regexp "~\\'")
-  (csetq eshell-ls-initial-args "-hA")
-  (csetq eshell-stringify-t nil)
+  :custom
+  (eshell-hist-ignoredups t)
+  (eshell-history-size 50000)
+  (eshell-ls-dired-initial-args (quote ("-h")))
+  (eshell-ls-exclude-regexp "~\\'")
+  (eshell-ls-initial-args "-hA")
+  (eshell-stringify-t nil)
   :config
   (require 'esh-module))
 
-;; (use-package esh-module :ensure nil
-;;   :defer t)
-
 (use-package multi-term
   :if (eq system-type 'gnu/linux)
+
   :general
   ("C-z" #'multi-term-next)
   ("C-c z c" #'multi-term)
   ("C-c z d" #'multi-term-dedicated-toggle)
   ("C-c z n" #'multi-term-next)
   ("C-c z p" #'multi-term-prev)
+
   :gfhook #'shell-like-mode-hook
-  :init
-  ;; (csetq multi-term-program "screen")
-  ;; (csetq multi-term-program-switches "-DR")
-  (csetq multi-term-dedicated-select-after-open-p t)
-  (csetq multi-term-scroll-show-maximum-output t))
+
+  :custom
+  ;; (multi-term-program "screen")
+  ;; (multi-term-program-switches "-DR")
+  (multi-term-dedicated-select-after-open-p t)
+  (multi-term-scroll-show-maximum-output t))
 
 ;;
 ;; Debugging
@@ -1444,8 +1450,8 @@ _q_ quit            _c_ create          _p_ previous
 
 (use-package gud :ensure nil
   :gfhook #'disable-company-mode
-  :init
-  (csetq gdb-many-windows t))
+  :custom
+  (gdb-many-windows t))
 
 (use-package realgud
   :commands (realgud:bashdb realgud:gdb realgud:gub realgud:ipdb
@@ -1458,15 +1464,17 @@ _q_ quit            _c_ create          _p_ previous
 
 (use-package magit
   :general ("C-x g" #'magit-status)
+
   :ghook ('git-commit-mode-hook #'git-commit-turn-on-flyspell)
-  :init
-  (csetq magit-diff-arguments
-         '("--ignore-space-change" "--ignore-all-space"
-           "--no-ext-diff" "--stat" "--diff-algorithm=histogram"))
-  (csetq magit-diff-refine-hunk t)
-  (csetq magit-display-buffer-function #'magit-display-buffer-fullframe-status-v1)
-  (csetq magit-process-popup-time 20)
-  (csetq magit-refs-show-commit-count 'all))
+
+  :custom
+  (magit-diff-arguments
+   '("--ignore-space-change" "--ignore-all-space"
+     "--no-ext-diff" "--stat" "--diff-algorithm=histogram"))
+  (magit-diff-refine-hunk t)
+  (magit-display-buffer-function #'magit-display-buffer-fullframe-status-v1)
+  (magit-process-popup-time 20)
+  (magit-refs-show-commit-count 'all))
 
 (use-package magit-gitflow
   :ghook ('magit-mode-hook #'turn-on-magit-gitflow))
@@ -1477,8 +1485,8 @@ _q_ quit            _c_ create          _p_ previous
 
 (use-package daemons
   :commands (daemons daemons-start daemons-stop daemons-status)
-  :init
-  (csetq daemons-always-sudo t))
+  :custom
+  (daemons-always-sudo t))
 
 (use-package disk-usage
   :commands disk-usage)
@@ -1494,6 +1502,15 @@ _q_ quit            _c_ create          _p_ previous
 ;;
 
 (use-package user-advices :load-path "lisp")
+
+;;
+;; org. stuff
+;;
+(use-package calendar :ensure nil
+  :defer t
+  :custom
+  (calendar-week-start-day 1)
+  (calendar-date-style 'iso))
 
 (provide 'init)
 

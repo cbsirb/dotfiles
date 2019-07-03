@@ -52,6 +52,9 @@
     # ignore executable bit
     fileMode = false
 
+[diff]
+    algorithm = histogram
+
 ; [pull]
 ;     rebase = true
 

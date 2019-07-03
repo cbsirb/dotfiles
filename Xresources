@@ -1,10 +1,10 @@
 ! Xcursor.theme:  DMZ-White
 
-Xft.dpi: 96
+Xft.dpi: 94
 Xft.antialias:  1
-Xft.hinting:    0
-Xft.hintstyle:  hintfull
-Xft.lcdfilter:  lcddefault
+Xft.hinting:    1
+Xft.hintstyle:  hintslight
+! Xft.lcdfilter:  lcddefault
 Xft.rgba:       rgb
 
 URxvt.font:             xft:IBM Plex Mono Medium:size=10
