@@ -1,13 +1,11 @@
-! Xcursor.theme:  DMZ-White
-
-Xft.dpi: 94
+Xft.dpi: 96
 Xft.antialias:  1
 Xft.hinting:    1
 Xft.hintstyle:  hintslight
-! Xft.lcdfilter:  lcddefault
+/* Xft.lcdfilter:  lcddefault */
 Xft.rgba:       rgb
 
-URxvt.font:             xft:IBM Plex Mono Medium:size=10
+URxvt.font:             xft:IBM Plex Mono Medium:Style=Regular:size=10
 URxvt.italicFont:       xft:IBM Plex Mono Medium:size=10:italic
 URxvt.boldFont:         xft:IBM Plex Mono Medium:size=10:bold
 URxvt.boldItalicFont:   xft:IBM Plex Mono Medium:size=10:bold:italic
@@ -58,7 +56,8 @@ xterm*VT100.Translations: #override \
 ! URxvt config
 URxvt*depth: 32
 URxvt*buffered: true
-! URxvt*letterSpace: -1
+URxvt*letterSpace: -1
+URxvt*lineSpace: -1
 
 URxvt*iconFile: /usr/share/icons/Adwaita/scalable/apps/utilities-terminal-symbolic.svg
 URxvt*iconName: urxvt

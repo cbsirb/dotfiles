@@ -11,7 +11,7 @@
   "Set the VARIABLE to VALUE, but use `set-default' if needed."
   `(funcall (or (get ',variable 'custom-set) 'set-default) ',variable ,value))
 
-(defvar user/gc-cons-threshold (* 24 gc-cons-threshold))
+(defvar user/gc-cons-threshold (* 16 gc-cons-threshold))
 (csetq gc-cons-threshold most-positive-fixnum)
 
 (csetq user/file-name-handler-alist file-name-handler-alist)
@@ -26,6 +26,10 @@
 
             (message "Time to load init file: %s" (emacs-init-time))
             (garbage-collect)))
+
+;; (if (display-graphic-p)
+;;     (load-file (expand-file-name "exwm.el" user-emacs-directory))
+;;   (message "exwm not available if emacs started without gui..."))
 
 (when (fboundp 'tool-bar-mode) (tool-bar-mode 0))
 (when (fboundp 'menu-bar-mode) (menu-bar-mode 0))
@@ -69,15 +73,24 @@
 
 (use-package general)
 
-(use-package minions
-  :config
-  (minions-mode t))
-
 (use-package parchment-theme
+  :disabled
+  :if (display-graphic-p)
   :config
   (load-theme 'parchment t))
 
+(use-package eclipse-theme
+  :if (display-graphic-p)
+  :config
+  (load-theme 'eclipse t))
+
 ;; (set-background-color "honeydew")
+
+(use-package minions
+  :custom
+  (minions-mode-line-delimiters '("" . ""))
+  :config
+  (minions-mode t))
 
 (use-package hl-todo
   :config
@@ -207,9 +220,8 @@
 (csetq uniquify-ignore-buffers-re "^\\*")
 (csetq uniquify-after-kill-buffer-p t)
 
-(csetq auto-revert-verbose nil)
 (csetq auto-revert-avoid-polling t)
-(csetq global-auto-revert-mode t)
+(global-auto-revert-mode t)
 
 (csetq bookmark-save-flag t)
 
@@ -271,31 +283,32 @@
 (column-number-mode t)
 (csetq visible-cursor nil)
 
-(csetq display-buffer-alist
-       `((,(rx string-start
-               (or "*Compile-Log*"
-                   "*Warnings*"
-                   "*compilation"
-                   "*rg*"
-                   "*grep*"
-                   "*Occur*"
-                   "*xref*"
-                   "*Flymake diagnostics"
-                   "*Flycheck"
-                   "*ivy-"
-                   ))
-          (display-buffer-reuse-window
-           display-buffer-in-side-window)
-          (side            . bottom)
-          (reusable-frames . nil)
-          (window-height   . 0.25))
+;; (csetq display-buffer-alist
+;;        `((,(rx string-start
+;;                (or "*Compile-Log*"
+;;                    "*Warnings*"
+;;                    "*compilation"
+;;                    "*rg*"
+;;                    "*grep*"
+;;                    "*Occur*"
+;;                    "*xref*"
+;;                    "*Flymake diagnostics"
+;;                    "*Flycheck"
+;;                    "*ivy-"
+;;                    ))
+;;           (display-buffer-reuse-window
+;;            display-buffer-in-side-window)
+;;           (side            . bottom)
+;;           (reusable-frames . nil)
+;;           (window-height   . 0.25))
 
-         ;; Show buffer only in the selected frame.
-         ("." nil (reusable-frames . nil))))
+;;          ;; Show buffer only in the selected frame.
+;;          ("." nil (reusable-frames . nil))))
 
 ;;
 ;; Customization that doesn't require use-package
 ;;
+
 
 ;; When creating new buffers, use `auto-mode-alist' to automatically set the major mode.
 (csetq major-mode (lambda ()
@@ -361,6 +374,17 @@ then it takes a second \\[keyboard-quit] to abort the minibuffer."
 (defun hide-trailing-whitespace ()
   (setq-local show-trailing-whitespace nil))
 
+(defun user/garbage-collect ()
+  "Run `garbage-collect' and print stats about memory usage."
+  (interactive)
+  (message (cl-loop for (type size used free) in (garbage-collect)
+                    for used = (* used size)
+                    for free = (* (or free 0) size)
+                    for total = (file-size-human-readable (+ used free))
+                    for used = (file-size-human-readable used)
+                    for free = (file-size-human-readable free)
+                    concat (format "%s: %s + %s = %s\n" type used free total))))
+
 (defun user/minibuffer-setup-hook ()
   "Hook to run when entering the minibuffer."
   (csetq gc-cons-threshold most-positive-fixnum))
@@ -372,8 +396,8 @@ then it takes a second \\[keyboard-quit] to abort the minibuffer."
 (add-hook 'minibuffer-setup-hook #'hide-trailing-whitespace)
 
 ;; Increase the memory while in the minibuffer
-(add-hook 'minibuffer-setup-hook #'user/minibuffer-setup-hook)
-(add-hook 'minibuffer-exit-hook #'user/minibuffer-exit-hook)
+;; (add-hook 'minibuffer-setup-hook #'user/minibuffer-setup-hook)
+;; (add-hook 'minibuffer-exit-hook #'user/minibuffer-exit-hook)
 
 (general-define-key
  :keymaps '(minibuffer-local-map
@@ -486,10 +510,21 @@ Lisp function does not specify a special indentation."
   ([remap backward-kill-word] #'user/backward-kill-word)
   ([remap scroll-up-command] #'user/scroll-half-page-up)
   ([remap scroll-down-command] #'user/scroll-half-page-down)
+  ([remap split-window-below] #'user/split-window-below)
+  ([remap split-window-right] #'user/split-window-right)
   ("C-w" #'user/kill-word-or-region)
   ("<C-return>" #'user/open-line-above)
   ("C-a" #'user/move-beginning-of-line)
   ("C-e" #'move-end-of-line))
+
+(general-define-key
+ :keymaps 'completion-list-mode-map
+  "C-n" #'next-completion
+  "C-p" #'previous-completion
+  "n" #'next-completion
+  "p" #'previous-completion
+  "s" #'isearch-forward
+  "r" #'isearch-backward)
 
 (general-define-key "M-u" #'upcase-dwim)
 (general-define-key "M-l" #'downcase-dwim)
@@ -497,6 +532,7 @@ Lisp function does not specify a special indentation."
 (general-define-key "C-8" #'repeat-complex-command)
 (general-define-key "M-z" #'zap-up-to-char)
 (general-define-key "<C-right>" #'forward-to-word)
+(general-define-key "C-d" #'delete-forward-char)
 (general-define-key [remap just-one-space] #'cycle-spacing)
 (general-define-key [remap newline] #'newline-and-indent)
 (general-define-key [remap isearch-forward] #'isearch-forward-regexp)
@@ -525,7 +561,6 @@ Lisp function does not specify a special indentation."
 ;;
 ;; Mostly built-in packages. No real order, they are not dependent on each other...
 ;;
-
 (use-package whitespace :ensure nil
   :preface
   (defun normalize-file ()
@@ -556,10 +591,11 @@ Lisp function does not specify a special indentation."
   (recentf-auto-cleanup 'never)
   (recentf-exclude (list
                     "/usr/share/emacs/.*\\'"
-                    "/elpa/.*\\'"                 ; Package files
-                    "/.ccls-cache/.*\\'"          ; Package files
-                    "PKGBUILD"                    ; ArchLinux aur
+                    "/elpa/.*\\'"               ; Package files
+                    "/.ccls-cache/.*\\'"        ; Package files
+                    "PKGBUILD"                  ; ArchLinux aur
                     "crontab.*"
+                    "/usr/lib/python.*\\'"      ;
                     "/tmp/.*\\'"
                     #'ignoramus-boring-p))
   (recentf-max-saved-items 500)
@@ -575,16 +611,17 @@ Lisp function does not specify a special indentation."
   (run-at-time (* 5 60) (* 5 60) #'recentf-save-list))
 
 (use-package ibuffer :ensure nil
-  :gfhook #'ibuffer-auto-mode
+  :preface
+  (defun ibuffer-switch-to-filter ()
+    (ibuffer-switch-to-saved-filter-groups "default"))
+  :gfhook #'ibuffer-auto-mode #'ibuffer-switch-to-filter
   :general
   ("C-x C-b" #'ibuffer)
   :custom
   (ibuffer-saved-filter-groups
    '(("default"
 
-      ("Interactive" (or (mode . lisp-interaction-mode)
-                         (name . "\*Messages\*")
-                         (name . "\*Customize\*")))
+      ("X" (mode . exwm-mode))
 
       ("Dired" (mode . dired-mode))
 
@@ -596,16 +633,16 @@ Lisp function does not specify a special indentation."
 
       ("Programming" (derived-mode . prog-mode))
 
-      ("Magit" (name . "\*magit"))
+      ("Magit" (name . "magit"))
 
-      ("Help" (or (name . "\*Help\*")
-                  (name . "\*Apropos\*")
-                  (name . "\*info\*")))
+      ("Processes" (process))
+
+      ("Special" (or (name . "\*Messages\*")
+                     (name . "\*scratch\*")))
 
       ("Virtual" (name . "\*")))))
   (ibuffer-default-shrink-to-minimum-size t)
   (ibuffer-show-empty-filter-groups nil))
-
 
 (use-package comint :ensure nil
   :general
@@ -632,7 +669,9 @@ Lisp function does not specify a special indentation."
         (compile compile-command))))
 
   (defun user/switch-to-compilation-window (buffer _msg)
-    (select-window (get-buffer-window buffer)))
+    (let ((bufwin (get-buffer-window buffer)))
+      (when bufwin
+        (select-window bufwin))))
 
   :general
   ([remap comment-region] #'compile-without-ask)
@@ -738,8 +777,23 @@ Lisp function does not specify a special indentation."
   (beginend-global-mode t))
 
 (use-package iedit
+  :preface
+  (defun iedit-scoped (orig-fn)
+    "Call `iedit-mode' with function-local scope when in
+ prog-mode derived mode, or global scope if called with a
+ universal prefix."
+    (interactive)
+    (pcase-exhaustive current-prefix-arg
+      ('nil (if iedit-mode
+                (funcall orig-fn)
+              (if (derived-mode-p 'prog-mode)
+                  (funcall orig-fn '(0))
+                (funcall orig-fn))))
+      ('(4) (funcall orig-fn))))
   :general
-  ("C-;" #'iedit-mode))
+  ("C-;" #'iedit-mode)
+  :config
+  (advice-add #'iedit-mode :around #'iedit-scoped))
 
 (use-package iy-go-to-char
   :general
@@ -834,6 +888,7 @@ Lisp function does not specify a special indentation."
   (ivy-rich-mode t))
 
 (use-package ivy-posframe
+  :disabled
   :custom
   (ivy-posframe-display-functions-alist
    '((swiper . nil)
@@ -850,10 +905,9 @@ Lisp function does not specify a special indentation."
   :general
   (:keymaps 'company-active-map
    "ESC" #'company-abort
+   "<tab>" #'company-complete-selection
    "C-n" #'company-select-next
    "C-p" #'company-select-previous
-   "C-u" #'company-previous-page
-   "C-d" #'company-next-page
    "C-w" nil)
 
   :custom
@@ -861,11 +915,12 @@ Lisp function does not specify a special indentation."
   (company-dabbrev-downcase nil)
   (company-dabbrev-ignore-case t)
   (company-idle-delay 0)
-  (company-minimum-prefix-length 4)
+  (company-minimum-prefix-length 2)
   (company-require-match nil)
   (company-selection-wrap-around t)
   (company-tooltip-align-annotations t)
   (company-tooltip-flip-when-above t)
+  (company-occurrence-weight-function #'company-occurrence-prefer-any-closest)
   (company-transformers '(company-sort-by-occurrence))
 
   :init
@@ -888,6 +943,10 @@ Lisp function does not specify a special indentation."
 
 (use-package nasm-mode
   :mode "\\.asm\\'")
+
+(use-package log4j-mode
+  :mode "\\.log\\'"
+  :defer t)
 
 (use-package json-mode
   :mode "\\.json\\'"
@@ -970,16 +1029,10 @@ That way we don't remove the whole regexp for a simple typo.
   :defer t
   :gfhook
   #'hide-trailing-whitespace
-  #'which-function-mode
+  ;; #'which-function-mode
   #'hs-minor-mode
   #'electric-indent-local-mode
   #'electric-pair-local-mode)
-
-;; (use-package eldoc :ensure nil
-;;   :defer t
-;;   :custom
-;;   (eldoc-idle-delay 0.25)
-;;   )
 
 (use-package elisp-mode :ensure nil
   :defer t
@@ -1193,7 +1246,7 @@ That way we don't remove the whole regexp for a simple typo.
 
   :ghook
   ('c-mode-common-hook #'lsp t)
-  ('python-mode-hook #'lsp)
+  ('python-mode-hook #'lsp t)
   ('lsp-after-open-hook #'lsp-enable-imenu)
 
   :custom
@@ -1325,6 +1378,7 @@ That way we don't remove the whole regexp for a simple typo.
       ad-do-it)))
 
 (use-package volatile-highlights
+  :disabled
   :custom
   (Vhl/highlight-zero-width-ranges t)
 
@@ -1342,7 +1396,9 @@ That way we don't remove the whole regexp for a simple typo.
 
 (use-package eyebrowse
   :preface
-  (defhydra user/eyebrowse-hydra (:color pink)
+  (defhydra user/eyebrowse-hydra
+    (:color pink
+     :pre (eyebrowse-mode t))
     "
 ^
 ^Eyebrowse^         ^Do^                ^Switch^
@@ -1367,10 +1423,7 @@ _q_ quit            _c_ create          _p_ previous
   :custom
   (eyebrowse-new-workspace t)
   (eyebrowse-switch-back-and-forth t)
-  (eyebrowse-wrap-around t)
-
-  :config
-  (eyebrowse-mode t))
+  (eyebrowse-wrap-around t))
 
 (use-package projectile
   :demand t
@@ -1384,6 +1437,7 @@ _q_ quit            _c_ create          _p_ previous
   :config
   (projectile-mode t)
 
+  (push "_build" projectile-globally-ignored-directories)
   (push ".vscode" projectile-globally-ignored-directories)
   (push ".ccls-cache" projectile-globally-ignored-directories))
 
@@ -1423,6 +1477,8 @@ _q_ quit            _c_ create          _p_ previous
   (eshell-ls-exclude-regexp "~\\'")
   (eshell-ls-initial-args "-hA")
   (eshell-stringify-t nil)
+  (eshell-where-to-jump 'begin)
+  (eshell-smart-space-goes-to-end t)
   :config
   (require 'esh-module))
 
@@ -1443,6 +1499,11 @@ _q_ quit            _c_ create          _p_ previous
   ;; (multi-term-program-switches "-DR")
   (multi-term-dedicated-select-after-open-p t)
   (multi-term-scroll-show-maximum-output t))
+
+(use-package shell :ensure nil
+  :if (eq system-type 'gnu/linux)
+  :defer t
+  :ghook ('shell-mode-hook #'shell-like-mode-hook))
 
 ;;
 ;; Debugging
@@ -1511,6 +1572,92 @@ _q_ quit            _c_ create          _p_ previous
   :custom
   (calendar-week-start-day 1)
   (calendar-date-style 'iso))
+
+
+(use-package org
+  :general
+  ("C-c n" #'org-capture
+   "C-c a" #'org-agenda)
+  :pin manual
+  :custom
+  (org-capture-templates
+   '(("t" "Todo" entry (file+headline "~/org/todo.org" "Tasks")
+      "* TODO %?\n  %i\n  %a" :empty-lines 1)
+     ("n" "Note" entry (file "~/org/notes.org")
+      "* NOTE %? %^G\n%U" :empty-lines 1))))
+
+;;
+;; mail
+;;
+(use-package mu4e
+  :disabled
+  :load-path "/usr/share/emacs/site-lisp/mu4e"
+
+  :preface
+  (defun user/mu4e-boring-function (msg param)
+    (let ((value (or (mu4e-msg-field msg :subject) "")))
+      (or (string-prefix-p "[Bamboo]" value)
+          (and (string-prefix-p "[JIRA]" value)
+               (not (string-prefix-p "[JIRA] Created" value))))))
+
+  (defun mu4e-handle-boring-messages ()
+    (interactive)
+
+    (mu4e-headers-mark-for-each-if '(read . n) #'user/mu4e-boring-function)
+
+    (when (hash-table-count mu4e~mark-map)
+      (message "Marking %d boring messages as read..." (hash-table-count mu4e~mark-map))
+      (mu4e-mark-execute-all t)
+
+      (mu4e-headers-mark-for-each-if '(refile . y) #'user/mu4e-boring-function)
+
+       (message "Moving %d boring messages..." (hash-table-count mu4e~mark-map))
+       (mu4e-mark-execute-all t)))
+
+  (defun mu4e-refile-all ()
+    (interactive)
+    (mu4e-headers-for-each
+     (lambda (msg)
+       (mu4e-headers-mark-for-refile)))
+    (when mu4e~mark-map
+      (message "Moving %d messages..." (hash-table-count mu4e~mark-map))
+      (mu4e-mark-execute-all t)))
+
+  :general
+  ("C-x m" #'mu4e)
+  (:keymaps 'mu4e-headers-mode-map
+   "k" #'mu4e-handle-boring-messages
+   "o" #'mu4e-refile-all)
+
+  :custom
+  (message-kill-buffer-on-exit t)
+
+  (mu4e-maildir (expand-file-name "~/.mail"))
+  (mu4e-view-show-images t)
+  (mu4e-view-show-addresses t)
+  (mu4e-update-interval 120)
+  (mu4e-confirm-quit nil)
+  (mu4e-attachment-dir (expand-file-name "~/Downloads"))
+  (mu4e-change-filenames-when-moving t)
+  (mu4e-context-policy 'pick-first)
+  (mu4e-display-update-status-in-modeline t)
+  (mu4e-use-fancy-chars t)
+  (mu4e-save-multiple-attachments-without-asking t)
+  (mu4e-compose-dont-reply-to-self t)
+  (mu4e-compose-format-flowed t)
+  (mu4e-completing-read-function 'completing-read)
+
+  (mu4e-headers-include-related t)
+  (mu4e-headers-auto-update t)
+  (mu4e-headers-date-format "%d-%m-%Y %H:%M")
+  (mu4e-headers-fields '((:human-date . 16) (:flags . 8) (:from . 30) (:subject . nil)))
+
+  (mu4e-headers-unread-mark '("u" . "✉"))
+  ;; TODO mu4e-view-attachment-assoc
+
+  :config
+  (load-file (expand-file-name "mu4e.el" user-emacs-directory)))
+
 
 (provide 'init)
 

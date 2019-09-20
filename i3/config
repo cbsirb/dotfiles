@@ -5,17 +5,20 @@
 set $mod Mod4
 
 set $ws1 1
-set $ws2 2
+set $ws2 2: www
 set $ws3 3
 set $ws4 4
 set $ws5 5
 set $ws6 6
 set $ws7 7
 set $ws8 8
-set $ws9 9
-set $ws10 10
+set $ws9 9: music
+set $ws10 10: mail
 
 font pango: Fira Mono, Font Awesome 5, Symbola 10
+
+# Your preferred terminal emulator
+set $term alacritty
 
 # Use Mouse+$mod to drag floating windows to their wanted position
 floating_modifier $mod
@@ -23,14 +26,14 @@ floating_modifier $mod
 # start a terminal
 # bindsym $mod+Return exec xterm -geometry 112x30
 # bindsym $mod+Return exec kitty
-bindsym $mod+Return exec alacritty -d 112 30
+bindsym $mod+Return exec $term -d 112 30
 
 # kill focused window
 bindsym $mod+q kill
 
 bindsym $mod+Shift+p exec rofi -modi run -show run
 bindsym $mod+p exec rofi -show drun
-bindsym $mod+Tab exec rofi -modi window -show window
+bindsym Mod1+Tab exec rofi -modi window -show window
 
 # change focus
 bindsym $mod+h focus left
@@ -115,19 +118,19 @@ bindsym XF86AudioNext exec --no-startup-id playerctl next
 bindsym XF86AudioPrev exec --no-startup-id playerctl previous
 bindsym XF86AudioPlay exec --no-startup-id playerctl play-pause
 
-bindsym XF86AudioRaiseVolume exec --no-startup-id pactl set-sink-volume 0 +5%
-bindsym XF86AudioLowerVolume exec --no-startup-id pactl set-sink-volume 0 -5%
-bindsym XF86AudioMute exec --no-startup-id pactl set-sink-mute 0 toggle
+bindsym XF86AudioRaiseVolume exec --no-startup-id pactl set-sink-volume @DEFAULT_SINK@ +3%
+bindsym XF86AudioLowerVolume exec --no-startup-id pactl set-sink-volume @DEFAULT_SINK@ -3%
+bindsym XF86AudioMute exec --no-startup-id pactl set-sink-mute @DEFAULT_SINK@ toggle
 
-bindsym $mod+Ctrl+Up exec --no-startup-id pactl set-sink-volume 0 +5%
-bindsym $mod+Ctrl+Down exec --no-startup-id pactl set-sink-volume 0 -5%
+bindsym $mod+Ctrl+Up exec --no-startup-id pactl set-sink-volume @DEFAULT_SINK@ +5%
+bindsym $mod+Ctrl+Down exec --no-startup-id pactl set-sink-volume @DEFAULT_SINK@ -5%
 
 bindsym XF86MonBrightnessUp exec --no-startup-id xbacklight -inc 10
 bindsym XF86MonBrightnessDown exec --no-startup-id xbacklight -dec 10
 
 # F12 and F12+Fn on microsoft keyboard
-bindsym $mod+Ctrl+XF86TouchpadOff exec --no-startup-id xterm -class force_float -geometry 112x30
-bindsym F12 exec --no-startup-id xterm -class force_float -geometry 112x30
+bindsym $mod+Ctrl+XF86TouchpadOff exec --no-startup-id $term -t force_float -d 112 30
+bindsym F12 exec --no-startup-id $term -t force_float -d 112 30
 
 # bindsym $mod+j exec emacsclient --alternate-editor= -c
 
@@ -207,8 +210,4 @@ exec --no-startup-id xfce4-power-manager
 exec --no-startup-id xset r rate 400 44
 
 # Displays
-exec --no-startup-id autorandr --change
-
-# Wallpapers
-exec --no-startup-id xrandr | grep 'HDMI1 connected' && feh --bg-scale --no-xinerama ~/Pictures/Wallpapers/calvin.png
-exec --no-startup-id xrandr | grep 'HDMI1 disconnected' && feh --bg-scale ~/Pictures/Wallpapers/calvin-0.png
+exec_always --no-startup-id autorandr --change

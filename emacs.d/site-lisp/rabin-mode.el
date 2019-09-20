@@ -8,6 +8,7 @@
         (progn
           (delete-region (point-min) (point-max))
           (insert-file-contents (buffer-file-name))
+          (read-only-mode -1)
           (setq rabin-mode nil))
       (setq rabin-mode t)
       (delete-region (point-min) (point-max))

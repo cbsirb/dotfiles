@@ -331,6 +331,29 @@ This is the same as using \\[set-mark-command] with the prefix argument."
   (interactive)
   (user/scroll-half-page nil))
 
+;;;###autoload
+(defun user/split-window-right ()
+  "Does `split-window-right' and moves focus to the window."
+  (interactive)
+  (split-window-right)
+  (other-window 1))
+
+;;;###autoload
+(defun user/split-window-below ()
+  "Does `split-window-below' and moves focus to the window."
+  (interactive)
+  (split-window-below)
+  (other-window 1))
+
+;;;###autoload
+(defun user/yank-rectangle-as-newlines+ (&optional pos)
+  "Yank the rectangle, inserting new lines (as it should). Thanks to /u/clemera"
+  (interactive)
+  (let ((pos (or pos (point))))
+    (save-restriction
+      (narrow-to-region pos pos)
+      (yank-rectangle))))
+
 (provide 'user-utils)
 
 ;;; user-utils.el ends here
