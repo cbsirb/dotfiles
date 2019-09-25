@@ -410,77 +410,183 @@ then it takes a second \\[keyboard-quit] to abort the minibuffer."
 (with-eval-after-load 'xref
   (add-to-list 'xref-prompt-for-identifier 'xref-find-references t))
 
-;; Thank you Fuco1
-(eval-after-load "lisp-mode"
-  '(defun lisp-indent-function (indent-point state)
-     "This function is the normal value of the variable `lisp-indent-function'.
-The function `calculate-lisp-indent' calls this to determine
-if the arguments of a Lisp function call should be indented specially.
-INDENT-POINT is the position at which the line being indented begins.
-Point is located at the point to indent under (for default indentation);
-STATE is the `parse-partial-sexp' state for that position.
-If the current line is in a call to a Lisp function that has a non-nil
-property `lisp-indent-function' (or the deprecated `lisp-indent-hook'),
-it specifies how to indent.  The property value can be:
-* `defun', meaning indent `defun'-style
-  \(this is also the case if there is no property and the function
-  has a name that begins with \"def\", and three or more arguments);
- an integer N, meaning indent the first N arguments specially
-  (like ordinary function arguments), and then indent any further
-  arguments like a body;
-* a function to call that returns the indentation (or nil).
-  `lisp-indent-function' calls this function with the same two arguments
-  that it itself received.
-This function returns either the indentation to use, or nil if the
-Lisp function does not specify a special indentation."
-     (let ((normal-indent (current-column))
-           (orig-point (point)))
-       (goto-char (1+ (elt state 1)))
-       (parse-partial-sexp (point) calculate-lisp-indent-last-sexp 0 t)
-       (cond
-        ;; car of form doesn't seem to be a symbol, or is a keyword
-        ((and (elt state 2)
-              (or (not (looking-at "\\sw\\|\\s_"))
-                  (looking-at ":")))
-         (if (not (> (save-excursion (forward-line 1) (point))
-                     calculate-lisp-indent-last-sexp))
-             (progn (goto-char calculate-lisp-indent-last-sexp)
-                    (beginning-of-line)
-                    (parse-partial-sexp (point)
-                                        calculate-lisp-indent-last-sexp 0 t)))
-         ;; Indent under the list or under the first sexp on the same
-         ;; line as calculate-lisp-indent-last-sexp.  Note that first
-         ;; thing on that line has to be complete sexp since we are
-         ;; inside the innermost containing sexp.
-         (backward-prefix-chars)
-         (current-column))
-        ((and (save-excursion
-                (goto-char indent-point)
-                (skip-syntax-forward " ")
-                (not (looking-at ":")))
-              (save-excursion
-                (goto-char orig-point)
-                (looking-at ":")))
-         (save-excursion
-           (goto-char (+ 2 (elt state 1)))
-           (current-column)))
-        (t
-         (let ((function (buffer-substring (point)
-                                           (progn (forward-sexp 1) (point))))
-               method)
-           (setq method (or (function-get (intern-soft function)
-                                          'lisp-indent-function)
-                            (get (intern-soft function) 'lisp-indent-hook)))
-           (cond ((or (eq method 'defun)
-                      (and (null method)
-                           (> (length function) 3)
-                           (string-match "\\`def" function)))
-                  (lisp-indent-defform state indent-point))
-                 ((integerp method)
-                  (lisp-indent-specform method state
-                                        indent-point normal-indent))
-                 (method
-                  (funcall method indent-point state)))))))))
+;; Thank you u/ouroboroslisp
+(advice-add #'calculate-lisp-indent :override #'user/calculate-lisp-indent)
+
+(defun user/calculate-lisp-indent (&optional parse-start)
+  "Add better indentation for quoted and backquoted lists."
+  ;; This line because `calculate-lisp-indent-last-sexp` was defined with `defvar`
+  ;; with it's value ommited, marking it special and only defining it locally. So
+  ;; if you don't have this, you'll get a void variable error.
+  (defvar calculate-lisp-indent-last-sexp)
+  (save-excursion
+    (beginning-of-line)
+    (let ((indent-point (point))
+          state
+          ;; setting this to a number inhibits calling hook
+          (desired-indent nil)
+          (retry t)
+          calculate-lisp-indent-last-sexp containing-sexp)
+      (cond ((or (markerp parse-start) (integerp parse-start))
+             (goto-char parse-start))
+            ((null parse-start) (beginning-of-defun))
+            (t (setq state parse-start)))
+      (unless state
+        ;; Find outermost containing sexp
+        (while (< (point) indent-point)
+          (setq state (parse-partial-sexp (point) indent-point 0))))
+      ;; Find innermost containing sexp
+      (while (and retry
+                  state
+                  (> (elt state 0) 0))
+        (setq retry nil)
+        (setq calculate-lisp-indent-last-sexp (elt state 2))
+        (setq containing-sexp (elt state 1))
+        ;; Position following last unclosed open.
+        (goto-char (1+ containing-sexp))
+        ;; Is there a complete sexp since then?
+        (if (and calculate-lisp-indent-last-sexp
+                 (> calculate-lisp-indent-last-sexp (point)))
+            ;; Yes, but is there a containing sexp after that?
+            (let ((peek (parse-partial-sexp calculate-lisp-indent-last-sexp
+                                            indent-point 0)))
+              (if (setq retry (car (cdr peek))) (setq state peek)))))
+      (if retry
+          nil
+        ;; Innermost containing sexp found
+        (goto-char (1+ containing-sexp))
+        (if (not calculate-lisp-indent-last-sexp)
+            ;; indent-point immediately follows open paren.
+            ;; Don't call hook.
+            (setq desired-indent (current-column))
+          ;; Find the start of first element of containing sexp.
+          (parse-partial-sexp (point) calculate-lisp-indent-last-sexp 0 t)
+          (cond ((looking-at "\\s(")
+                 ;; First element of containing sexp is a list.
+                 ;; Indent under that list.
+                 )
+                ((> (save-excursion (forward-line 1) (point))
+                    calculate-lisp-indent-last-sexp)
+                 ;; This is the first line to start within the containing sexp.
+                 ;; It's almost certainly a function call.
+                 (if (or
+                      ;; Containing sexp has nothing before this line
+                      ;; except the first element. Indent under that element.
+                      (= (point) calculate-lisp-indent-last-sexp)
+
+                      ;; First sexp after `containing-sexp' is a keyword. This
+                      ;; condition is more debatable. It's so that I can have
+                      ;; unquoted plists in macros. It assumes that you won't
+                      ;; make a function whose name is a keyword.
+                      ;; (when-let (char-after (char-after (1+ containing-sexp)))
+                      ;;   (char-equal char-after ?:))
+
+                      ;; Check for quotes or backquotes around.
+                      (let* ((positions (elt state 9))
+                             (last (car (last positions)))
+                             (rest (reverse (butlast positions)))
+                             (any-quoted-p nil)
+                             (point nil))
+                        (or
+                         (when-let (char (char-before last))
+                           (or (char-equal char ?')
+                               (char-equal char ?`)))
+                         (progn
+                           (while (and rest (not any-quoted-p))
+                             (setq point (pop rest))
+                             (setq any-quoted-p
+                                   (or
+                                    (when-let (char (char-before point))
+                                      (or (char-equal char ?')
+                                          (char-equal char ?`)))
+                                    (save-excursion
+                                      (goto-char (1+ point))
+                                      (looking-at-p
+                                       "\\(?:back\\)?quote[\t\n\f\s]+(")))))
+                           any-quoted-p))))
+                     ;; Containing sexp has nothing before this line
+                     ;; except the first element.  Indent under that element.
+                     nil
+                   ;; Skip the first element, find start of second (the first
+                   ;; argument of the function call) and indent under.
+                   (progn (forward-sexp 1)
+                          (parse-partial-sexp (point)
+                                              calculate-lisp-indent-last-sexp
+                                              0 t)))
+                 (backward-prefix-chars))
+                (t
+                 ;; Indent beneath first sexp on same line as
+                 ;; `calculate-lisp-indent-last-sexp'.  Again, it's
+                 ;; almost certainly a function call.
+                 (goto-char calculate-lisp-indent-last-sexp)
+                 (beginning-of-line)
+                 (parse-partial-sexp (point) calculate-lisp-indent-last-sexp
+                                     0 t)
+                 (backward-prefix-chars)))))
+      ;; Point is at the point to indent under unless we are inside a string.
+      ;; Call indentation hook except when overridden by lisp-indent-offset
+      ;; or if the desired indentation has already been computed.
+      (let ((normal-indent (current-column)))
+        (cond ((elt state 3)
+               ;; Inside a string, don't change indentation.
+               nil)
+              ((and (integerp lisp-indent-offset) containing-sexp)
+               ;; Indent by constant offset
+               (goto-char containing-sexp)
+               (+ (current-column) lisp-indent-offset))
+              ;; in this case calculate-lisp-indent-last-sexp is not nil
+              (calculate-lisp-indent-last-sexp
+               (or
+                ;; try to align the parameters of a known function
+                (and lisp-indent-function
+                     (not retry)
+                     (funcall lisp-indent-function indent-point state))
+                ;; If the function has no special alignment
+                ;; or it does not apply to this argument,
+                ;; try to align a constant-symbol under the last
+                ;; preceding constant symbol, if there is such one of
+                ;; the last 2 preceding symbols, in the previous
+                ;; uncommented line.
+                (and (save-excursion
+                       (goto-char indent-point)
+                       (skip-chars-forward " \t")
+                       (looking-at ":"))
+                     ;; The last sexp may not be at the indentation
+                     ;; where it begins, so find that one, instead.
+                     (save-excursion
+                       (goto-char calculate-lisp-indent-last-sexp)
+                       ;; Handle prefix characters and whitespace
+                       ;; following an open paren.  (Bug#1012)
+                       (backward-prefix-chars)
+                       (while (not (or (looking-back "^[ \t]*\\|([ \t]+"
+                                                     (line-beginning-position))
+                                       (and containing-sexp
+                                            (>= (1+ containing-sexp) (point)))))
+                         (forward-sexp -1)
+                         (backward-prefix-chars))
+                       (setq calculate-lisp-indent-last-sexp (point)))
+                     (> calculate-lisp-indent-last-sexp
+                        (save-excursion
+                          (goto-char (1+ containing-sexp))
+                          (parse-partial-sexp (point) calculate-lisp-indent-last-sexp 0 t)
+                          (point)))
+                     (let ((parse-sexp-ignore-comments t)
+                           indent)
+                       (goto-char calculate-lisp-indent-last-sexp)
+                       (or (and (looking-at ":")
+                                (setq indent (current-column)))
+                           (and (< (line-beginning-position)
+                                   (prog2 (backward-sexp) (point)))
+                                (looking-at ":")
+                                (setq indent (current-column))))
+                       indent))
+                ;; another symbols or constants not preceded by a constant
+                ;; as defined above.
+                normal-indent))
+              ;; in this case calculate-lisp-indent-last-sexp is nil
+              (desired-indent)
+              (t
+               normal-indent))))))
 
 (defun occur-at-point ()
   "Just like `occur', but with the default value of symbol at point."
@@ -519,12 +625,12 @@ Lisp function does not specify a special indentation."
 
 (general-define-key
  :keymaps 'completion-list-mode-map
-  "C-n" #'next-completion
-  "C-p" #'previous-completion
-  "n" #'next-completion
-  "p" #'previous-completion
-  "s" #'isearch-forward
-  "r" #'isearch-backward)
+ "C-n" #'next-completion
+ "C-p" #'previous-completion
+ "n" #'next-completion
+ "p" #'previous-completion
+ "s" #'isearch-forward
+ "r" #'isearch-backward)
 
 (general-define-key "M-u" #'upcase-dwim)
 (general-define-key "M-l" #'downcase-dwim)
@@ -638,7 +744,7 @@ Lisp function does not specify a special indentation."
       ("Processes" (process))
 
       ("Special" (or (name . "\*Messages\*")
-                     (name . "\*scratch\*")))
+                  (name . "\*scratch\*")))
 
       ("Virtual" (name . "\*")))))
   (ibuffer-default-shrink-to-minimum-size t)
@@ -647,11 +753,11 @@ Lisp function does not specify a special indentation."
 (use-package comint :ensure nil
   :general
   (:keymaps 'comint-mode-map
-   "<down>" #'comint-next-input
-   "<up>"   #'comint-previous-input
-   "C-n"    #'comint-next-input
-   "C-p"    #'comint-previous-input
-   "C-r"    #'comint-history-isearch-backward)
+            "<down>" #'comint-next-input
+            "<up>"   #'comint-previous-input
+            "C-n"    #'comint-next-input
+            "C-p"    #'comint-previous-input
+            "C-r"    #'comint-history-isearch-backward)
   :ghook ('comint-output-filter-functions #'comint-strip-ctrl-m)
   :custom
   (comint-process-echoes t)
@@ -695,7 +801,7 @@ Lisp function does not specify a special indentation."
     (interactive)
     (let ((next (car (cl-remove-if-not #'(lambda (wind)
                                            (with-current-buffer (window-buffer wind)
-                                             (eq major-mode 'dired-mode)))
+                                            (eq major-mode 'dired-mode)))
                                        (cdr (window-list))))))
       (when next
         (select-window next))))
@@ -712,9 +818,9 @@ Lisp function does not specify a special indentation."
 
   :general
   (:keymaps 'dired-mode-map
-   "SPC" #'dired-mark
-   "<C-return>" #'user/open-in-external-app
-   "<tab>" #'user/dired-next-window)
+            "SPC" #'dired-mark
+            "<C-return>" #'user/open-in-external-app
+            "<tab>" #'user/dired-next-window)
 
   :custom
   (dired-auto-revert-buffer t)
@@ -729,7 +835,7 @@ Lisp function does not specify a special indentation."
 (use-package wdired :ensure nil
   :general
   (:keymaps 'dired-mode-map
-   "C-c M-w" #'wdired-change-to-wdired-mode)
+            "C-c M-w" #'wdired-change-to-wdired-mode)
   :custom
   (wdired-create-parent-directories t)
   (wdired-allow-to-change-permissions t))
@@ -744,7 +850,7 @@ Lisp function does not specify a special indentation."
   :commands dired-narrow
   :general
   (:keymaps 'dired-mode-map
-   "/" #'dired-narrow))
+            "/" #'dired-narrow))
 
 ;;
 ;; Editing & navigation
@@ -762,10 +868,10 @@ Lisp function does not specify a special indentation."
   :ghook 'text-mode-hook 'prog-mode-hook
   :general
   (:keymap 'symbol-overlay-map
-   "M-*" #'symbol-overlay-put
-   "M-n" #'symbol-overlay-jump-next
-   "M-p" #'symbol-overlay-jump-prev
-   "M-8" #'symbol-overlay-toggle-in-scope)
+           "M-*" #'symbol-overlay-put
+           "M-n" #'symbol-overlay-jump-next
+           "M-p" #'symbol-overlay-jump-prev
+           "M-8" #'symbol-overlay-toggle-in-scope)
   :custom-face
   (symbol-overlay-default-face ((t (:inherit underline))))
   :custom
@@ -809,34 +915,34 @@ Lisp function does not specify a special indentation."
   ("C-."         #'mc/mark-next-like-this)
   ("C-,"         #'mc/mark-previous-like-this)
   (:prefix "C-c m"
-   "^"     #'mc/edit-beginnings-of-lines
-   "`"     #'mc/edit-beginnings-of-lines
-   "$"     #'mc/edit-ends-of-lines
-   "'"     #'mc/edit-ends-of-lines
-   "R"     #'mc/reverse-regions
-   "S"     #'mc/sort-regions
-   "W"     #'mc/mark-all-words-like-this
-   "Y"     #'mc/mark-all-symbols-like-this
-   "a"     #'mc/mark-all-like-this-dwim
-   "c"     #'mc/mark-all-dwim
-   "l"     #'mc/insert-letters
-   "n"     #'mc/insert-numbers
-   "r"     #'mc/mark-all-in-region
-   "s"     #'set-rectangular-region-anchor
-   "%"     #'mc/mark-all-in-region-regexp
-   "t"     #'mc/mark-sgml-tag-pair
-   "w"     #'mc/mark-next-like-this-word
-   "x"     #'mc/mark-more-like-this-extended
-   "y"     #'mc/mark-next-like-this-symbol
-   "C-SPC" #'mc/mark-pop
-   "("     #'mc/mark-all-symbols-like-this-in-defun
-   "C-("   #'mc/mark-all-words-like-this-in-defun
-   "M-("   #'mc/mark-all-like-this-in-defun
-   "d"     #'mc/mark-all-symbols-like-this-in-defun
-   "C-d"   #'mc/mark-all-words-like-this-in-defun
-   "M-d"   #'mc/mark-all-like-this-in-defun
-   "["     #'mc/vertical-align-with-space
-   "{"     #'mc/vertical-align)
+           "^"     #'mc/edit-beginnings-of-lines
+           "`"     #'mc/edit-beginnings-of-lines
+           "$"     #'mc/edit-ends-of-lines
+           "'"     #'mc/edit-ends-of-lines
+           "R"     #'mc/reverse-regions
+           "S"     #'mc/sort-regions
+           "W"     #'mc/mark-all-words-like-this
+           "Y"     #'mc/mark-all-symbols-like-this
+           "a"     #'mc/mark-all-like-this-dwim
+           "c"     #'mc/mark-all-dwim
+           "l"     #'mc/insert-letters
+           "n"     #'mc/insert-numbers
+           "r"     #'mc/mark-all-in-region
+           "s"     #'set-rectangular-region-anchor
+           "%"     #'mc/mark-all-in-region-regexp
+           "t"     #'mc/mark-sgml-tag-pair
+           "w"     #'mc/mark-next-like-this-word
+           "x"     #'mc/mark-more-like-this-extended
+           "y"     #'mc/mark-next-like-this-symbol
+           "C-SPC" #'mc/mark-pop
+           "("     #'mc/mark-all-symbols-like-this-in-defun
+           "C-("   #'mc/mark-all-words-like-this-in-defun
+           "M-("   #'mc/mark-all-like-this-in-defun
+           "d"     #'mc/mark-all-symbols-like-this-in-defun
+           "C-d"   #'mc/mark-all-words-like-this-in-defun
+           "M-d"   #'mc/mark-all-like-this-in-defun
+           "["     #'mc/vertical-align-with-space
+           "{"     #'mc/vertical-align)
   :preface
   (defun mc-prompt-once-advice (fn &rest args)
     (setq mc--this-command (lambda () (interactive) (apply fn args)))
@@ -857,7 +963,7 @@ Lisp function does not specify a special indentation."
   :general
   ("C-c C-r" #'ivy-resume)
   (:keymaps 'ivy-mode-map
-   "<escape>" #'minibuffer-keyboard-quit)
+            "<escape>" #'minibuffer-keyboard-quit)
   :custom
   (ivy-count-format "")
   (ivy-height 9)
@@ -870,9 +976,9 @@ Lisp function does not specify a special indentation."
 (use-package counsel
   :general
   (:prefix "M-s"
-   "c" #'counsel-rg
-   "g" #'counsel-git-grep
-   "s" #'swiper)
+           "c" #'counsel-rg
+           "g" #'counsel-git-grep
+           "s" #'swiper)
   :custom
   (counsel-describe-function-preselect 'ivy-function-called-at-point)
   (counsel-grep-post-action-hook '(recenter))
@@ -904,11 +1010,11 @@ Lisp function does not specify a special indentation."
 
   :general
   (:keymaps 'company-active-map
-   "ESC" #'company-abort
-   "<tab>" #'company-complete-selection
-   "C-n" #'company-select-next
-   "C-p" #'company-select-previous
-   "C-w" nil)
+            "ESC" #'company-abort
+            "<tab>" #'company-complete-selection
+            "C-n" #'company-select-next
+            "C-p" #'company-select-previous
+            "C-w" nil)
 
   :custom
   (company-dabbrev-code-ignore-case t)
@@ -952,7 +1058,7 @@ Lisp function does not specify a special indentation."
   :mode "\\.json\\'"
   :general
   (:keymaps 'json-mode-map
-   "M-q" #'json-reformat-region)
+            "M-q" #'json-reformat-region)
   :custom
   (json-reformat:indent-width 4)
   (json-reformat:pretty-string? t))
@@ -995,10 +1101,10 @@ That way we don't remove the whole regexp for a simple typo.
 
   :general
   (:keymaps 'isearch-mode-map
-   "M-o"            #'isearch-occur
-   "<tab>"          #'isearch-repeat-forward
-   "<backtab>"      #'isearch-repeat-backward
-   "<C-backspace>"  #'isearch-delete-previous)
+            "M-o"            #'isearch-occur
+            "<tab>"          #'isearch-repeat-forward
+            "<backtab>"      #'isearch-repeat-backward
+            "<C-backspace>"  #'isearch-delete-previous)
 
   :custom
   (isearch-lazy-count t)
@@ -1009,10 +1115,10 @@ That way we don't remove the whole regexp for a simple typo.
 (use-package rg
   :general
   (:prefix "M-s"
-   "d" #'rg-dwim
-   "r" #'rg
-   "p" #'rg-project
-   "l" #'rg-literal)
+           "d" #'rg-dwim
+           "r" #'rg
+           "p" #'rg-project
+           "l" #'rg-literal)
   :custom
   (rg-ignore-case 'smart)
   (rg-hide-command nil))
@@ -1275,9 +1381,9 @@ That way we don't remove the whole regexp for a simple typo.
   :commands lsp-ui-mode
   :general
   (:keymaps 'lsp-mode-map
-   :prefix "M-g"
-   "r" #'lsp-ui-peek-find-references
-   "d" #'lsp-ui-peek-find-definitions)
+            :prefix "M-g"
+            "r" #'lsp-ui-peek-find-references
+            "d" #'lsp-ui-peek-find-definitions)
   :custom
   (lsp-ui-doc-enable nil "Enable it per file if really needed")
   (lsp-ui-doc-include-signature t)
@@ -1307,11 +1413,11 @@ That way we don't remove the whole regexp for a simple typo.
 
   :general
   (:keymaps 'flymake-mode-map
-   :prefix "M-g"
-   "f n" #'flymake-goto-next-error
-   "f p" #'flymake-goto-prev-error
-   "f s" #'flymake-start
-   "f f" #'flymake-display-at-point)
+            :prefix "M-g"
+            "f n" #'flymake-goto-next-error
+            "f p" #'flymake-goto-prev-error
+            "f s" #'flymake-start
+            "f f" #'flymake-display-at-point)
   :custom
   (flymake-no-changes-timeout nil "Don't check after changes, only after save")
   (flymake-start-syntax-check-on-newline nil "Don't check on newlines (I hate it)"))
@@ -1327,7 +1433,7 @@ That way we don't remove the whole regexp for a simple typo.
 (use-package imenu :ensure nil
   :general
   (:keymaps 'prog-mode-map
-   "M-i" #'imenu)
+            "M-i" #'imenu)
   :ghook ('imenu-after-jump-hook #'recenter-top-bottom)
   :custom
   (imenu-auto-rescan t "Rescan before showing results")
@@ -1336,7 +1442,7 @@ That way we don't remove the whole regexp for a simple typo.
 (use-package imenu-anywhere
   :general
   (:keymaps 'prog-mode-map
-   "M-I" #'imenu-anywhere))
+            "M-I" #'imenu-anywhere))
 
 (use-package yasnippet
   :commands yas-minor-mode
@@ -1398,7 +1504,7 @@ That way we don't remove the whole regexp for a simple typo.
   :preface
   (defhydra user/eyebrowse-hydra
     (:color pink
-     :pre (eyebrowse-mode t))
+            :pre (eyebrowse-mode t))
     "
 ^
 ^Eyebrowse^         ^Do^                ^Switch^
@@ -1516,8 +1622,8 @@ _q_ quit            _c_ create          _p_ previous
 
 (use-package realgud
   :commands (realgud:bashdb realgud:gdb realgud:gub realgud:ipdb
-             realgud:jdb realgud:kshdb realgud:nodejs realgud:pdb
-             realgud:perldb realgud:zshdb))
+                            realgud:jdb realgud:kshdb realgud:nodejs realgud:pdb
+                            realgud:perldb realgud:zshdb))
 
 ;;
 ;; Version Control
@@ -1611,8 +1717,8 @@ _q_ quit            _c_ create          _p_ previous
 
       (mu4e-headers-mark-for-each-if '(refile . y) #'user/mu4e-boring-function)
 
-       (message "Moving %d boring messages..." (hash-table-count mu4e~mark-map))
-       (mu4e-mark-execute-all t)))
+      (message "Moving %d boring messages..." (hash-table-count mu4e~mark-map))
+      (mu4e-mark-execute-all t)))
 
   (defun mu4e-refile-all ()
     (interactive)
@@ -1626,8 +1732,8 @@ _q_ quit            _c_ create          _p_ previous
   :general
   ("C-x m" #'mu4e)
   (:keymaps 'mu4e-headers-mode-map
-   "k" #'mu4e-handle-boring-messages
-   "o" #'mu4e-refile-all)
+            "k" #'mu4e-handle-boring-messages
+            "o" #'mu4e-refile-all)
 
   :custom
   (message-kill-buffer-on-exit t)
