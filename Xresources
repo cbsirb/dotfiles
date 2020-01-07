@@ -2,7 +2,7 @@ Xft.dpi: 96
 Xft.antialias:  1
 Xft.hinting:    1
 Xft.hintstyle:  hintslight
-/* Xft.lcdfilter:  lcddefault */
+Xft.lcdfilter:  lcddefault
 Xft.rgba:       rgb
 
 URxvt.font:             xft:IBM Plex Mono Medium:Style=Regular:size=10

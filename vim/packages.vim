@@ -38,8 +38,8 @@ call minpac#add('Rip-Rip/clang_complete')
 call minpac#add('elzr/vim-json')
 call minpac#add('Vimjas/vim-python-pep8-indent')
 
-call minpac#add('SirVer/ultisnips')
-call minpac#add('honza/vim-snippets')
+" call minpac#add('SirVer/ultisnips')
+" call minpac#add('honza/vim-snippets')
 
 call minpac#add('kana/vim-textobj-user')
 call minpac#add('kana/vim-textobj-indent')    " i

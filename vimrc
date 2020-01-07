@@ -1,7 +1,10 @@
 source ~/.vim/packages.vim
 
-unlet! skip_defaults_vim
-source $VIMRUNTIME/defaults.vim
+if !has('nvim')
+  unlet! skip_defaults_vim
+  source $VIMRUNTIME/defaults.vim
+endif
+
 packadd matchit
 
 set showmatch
@@ -81,8 +84,11 @@ set sessionoptions-=options
 
 set undofile
 
+if !has('nvim')
+  set viminfo+=n~/.vim/cache/viminfo
+endif
+
 set undodir=~/.vim/cache/undo
-set viminfo+=n~/.vim/cache/viminfo
 set backupdir=~/.vim/cache/backup
 set dir=~/.vim/cache/swap
 set viewdir=~/.vim/cache/view

@@ -27,21 +27,10 @@
             (message "Time to load init file: %s" (emacs-init-time))
             (garbage-collect)))
 
-;; (if (display-graphic-p)
-;;     (load-file (expand-file-name "exwm.el" user-emacs-directory))
-;;   (message "exwm not available if emacs started without gui..."))
-
 (when (fboundp 'tool-bar-mode) (tool-bar-mode 0))
 (when (fboundp 'menu-bar-mode) (menu-bar-mode 0))
 (when (fboundp 'scroll-bar-mode) (scroll-bar-mode 0))
 
-(defconst user/custom-file (expand-file-name "custom.el" user-emacs-directory)
-  "File used to store settings from Customization UI.")
-
-(when (file-exists-p user/custom-file)
-  (load-file user/custom-file))
-
-(csetq custom-file user/custom-file)
 (csetq custom-buffer-done-kill t)
 (csetq custom-unlispify-tag-names nil)
 (csetq custom-unlispify-menu-entries nil)
@@ -80,9 +69,24 @@
   (load-theme 'parchment t))
 
 (use-package eclipse-theme
+  :disabled
   :if (display-graphic-p)
   :config
   (load-theme 'eclipse t))
+
+(use-package modus-operandi-theme
+  :if (display-graphic-p)
+  :config
+  (load-theme 'modus-operandi t))
+
+(use-package modus-vivendi-theme
+  :if (display-graphic-p))
+
+;; Let it have the same background & foreground as the mode-line
+(when (fboundp #'tab-bar-mode)
+  (set-face-attribute 'tab-bar nil :foreground nil :background nil :inherit 'mode-line)
+  (set-face-attribute 'tab-bar-tab nil :box '(line-width 1))
+  (set-face-attribute 'tab-bar-tab-inactive nil :background nil :box nil :inherit 'tab-bar-tab))
 
 ;; (set-background-color "honeydew")
 
@@ -90,6 +94,8 @@
   :custom
   (minions-mode-line-delimiters '("" . ""))
   :config
+  (push 'flymake-mode minions-direct)
+  (push 'overwrite-mode minions-direct)
   (minions-mode t))
 
 (use-package hl-todo
@@ -230,6 +236,8 @@
          (bottom . right)
          (t . nil)))
 
+(csetq shell-command-prompt-show-cwd t)
+
 (transient-mark-mode t)
 (delete-selection-mode t)
 (winner-mode t)
@@ -281,7 +289,6 @@
 (size-indication-mode -1)
 (line-number-mode t)
 (column-number-mode t)
-(csetq visible-cursor nil)
 
 ;; (csetq display-buffer-alist
 ;;        `((,(rx string-start
@@ -304,6 +311,21 @@
 
 ;;          ;; Show buffer only in the selected frame.
 ;;          ("." nil (reusable-frames . nil))))
+
+;; Its value is
+;; (("\\`\\*compilation"
+;;   (display-buffer-reuse-window display-buffer-in-side-window)
+;;   (side . bottom)
+;;   (reusable-frames)
+;;   (window-height . 0.25)))
+
+(push `(,(rx string-start "*compilation")
+         (display-buffer-reuse-window
+          display-buffer-in-side-window)
+         (side            . bottom)
+         (reusable-frames . nil)
+         (window-height   . 0.25))
+      display-buffer-alist)
 
 ;;
 ;; Customization that doesn't require use-package
@@ -408,11 +430,10 @@ then it takes a second \\[keyboard-quit] to abort the minibuffer."
  "<escape>" #'minibuffer-keyboard-quit)
 
 (with-eval-after-load 'xref
-  (add-to-list 'xref-prompt-for-identifier 'xref-find-references t))
+  (add-to-list 'xref-prompt-for-identifier 'xref-find-references t)
+  (add-hook 'xref-after-return-hook #'recenter))
 
 ;; Thank you u/ouroboroslisp
-(advice-add #'calculate-lisp-indent :override #'user/calculate-lisp-indent)
-
 (defun user/calculate-lisp-indent (&optional parse-start)
   "Add better indentation for quoted and backquoted lists."
   ;; This line because `calculate-lisp-indent-last-sexp` was defined with `defvar`
@@ -588,6 +609,8 @@ then it takes a second \\[keyboard-quit] to abort the minibuffer."
               (t
                normal-indent))))))
 
+(advice-add #'calculate-lisp-indent :override #'user/calculate-lisp-indent)
+
 (defun occur-at-point ()
   "Just like `occur', but with the default value of symbol at point."
   (interactive)
@@ -659,11 +682,6 @@ then it takes a second \\[keyboard-quit] to abort the minibuffer."
  "d" #'toggle-debug-on-error
  "q" #'toggle-debug-on-quit)
 
-
-;; (key-chord-define-global "jj" #'switch-to-buffer)
-;; (key-chord-define-global "jf" #'find-file)
-;; (key-chord-define-global "jg" #'find-file-other-window)
-
 ;;
 ;; Mostly built-in packages. No real order, they are not dependent on each other...
 ;;
@@ -698,7 +716,8 @@ then it takes a second \\[keyboard-quit] to abort the minibuffer."
   (recentf-exclude (list
                     "/usr/share/emacs/.*\\'"
                     "/elpa/.*\\'"               ; Package files
-                    "/.ccls-cache/.*\\'"        ; Package files
+                    "/.ccls-cache/.*\\'"
+                    "/.clangd/.*\\'"
                     "PKGBUILD"                  ; ArchLinux aur
                     "crontab.*"
                     "/usr/lib/python.*\\'"      ;
@@ -777,7 +796,8 @@ then it takes a second \\[keyboard-quit] to abort the minibuffer."
   (defun user/switch-to-compilation-window (buffer _msg)
     (let ((bufwin (get-buffer-window buffer)))
       (when bufwin
-        (select-window bufwin))))
+        (select-window bufwin)
+        (local-set-key (kbd "q") 'kill-buffer-and-window))))
 
   :general
   ([remap comment-region] #'compile-without-ask)
@@ -852,6 +872,16 @@ then it takes a second \\[keyboard-quit] to abort the minibuffer."
   (:keymaps 'dired-mode-map
             "/" #'dired-narrow))
 
+(use-package diredfl
+  :after dired
+  :config
+  (diredfl-global-mode t))
+
+(use-package dired-git-info
+  :general
+  (:keymaps 'dired-mode-map
+            ")" #'dired-git-info-mode))
+
 ;;
 ;; Editing & navigation
 ;;
@@ -867,16 +897,15 @@ then it takes a second \\[keyboard-quit] to abort the minibuffer."
 (use-package symbol-overlay
   :ghook 'text-mode-hook 'prog-mode-hook
   :general
-  (:keymap 'symbol-overlay-map
-           "M-*" #'symbol-overlay-put
-           "M-n" #'symbol-overlay-jump-next
-           "M-p" #'symbol-overlay-jump-prev
-           "M-8" #'symbol-overlay-toggle-in-scope)
+  ("M-*" #'symbol-overlay-put)
+  ("M-n" #'symbol-overlay-jump-next)
+  ("M-p" #'symbol-overlay-jump-prev)
+  ("M-8" #'symbol-overlay-toggle-in-scope)
   :custom-face
   (symbol-overlay-default-face ((t (:inherit underline))))
   :custom
   (symbol-overlay-idle-time 0.25)
-  (symbol-overlay-displayed-window t))
+  (symbol-overlay-displayed-window nil))
 
 (use-package beginend
   :config
@@ -994,7 +1023,6 @@ then it takes a second \\[keyboard-quit] to abort the minibuffer."
   (ivy-rich-mode t))
 
 (use-package ivy-posframe
-  :disabled
   :custom
   (ivy-posframe-display-functions-alist
    '((swiper . nil)
@@ -1026,8 +1054,8 @@ then it takes a second \\[keyboard-quit] to abort the minibuffer."
   (company-selection-wrap-around t)
   (company-tooltip-align-annotations t)
   (company-tooltip-flip-when-above t)
-  (company-occurrence-weight-function #'company-occurrence-prefer-any-closest)
-  (company-transformers '(company-sort-by-occurrence))
+  ;; (company-occurrence-weight-function #'company-occurrence-prefer-any-closest)
+  ;; (company-transformers '(company-sort-by-occurrence))
 
   :init
   (global-company-mode t))
@@ -1041,6 +1069,8 @@ then it takes a second \\[keyboard-quit] to abort the minibuffer."
 ;;
 
 (use-package cmake-mode :defer t)
+
+(use-package yaml-mode :defer t)
 
 (use-package cmake-font-lock
   :ghook ('cmake-mode-hook #'cmake-font-lock-activate))
@@ -1140,13 +1170,28 @@ That way we don't remove the whole regexp for a simple typo.
   #'electric-indent-local-mode
   #'electric-pair-local-mode)
 
-(use-package elisp-mode :ensure nil
-  :defer t
-  :ghook ('after-save-hook #'check-parens))
+(defun validate-balance ()
+  "Check for unbalanced parentheses in the current buffer.
+More accurately, check the narrowed part of the buffer for unbalanced
+expressions (\"sexps\") in general.  This is done according to the
+current syntax table and will find unbalanced brackets or quotes as
+appropriate.  (See Info node `(emacs)Parentheses'.)  If imbalance is
+found, an error is signaled."
+  (interactive)
+  (condition-case data
+      ;; Buffer can't have more than (point-max) sexps.
+      (scan-sexps (point-min) (point-max))
+    (scan-error
+     ;; Could print (nth 1 data), which is either
+     ;; "Containing expression ends prematurely" or
+     ;; "Unbalanced parentheses", but those may not be so
+     ;; accurate/helpful, e.g. quotes may actually be
+     ;; mismatched.
+     (user-error
+      "Unmatched bracket or quote at line %d"
+      (line-number-at-pos (nth 2 data))))))
 
-(use-package lisp-mode :ensure nil
-  :defer t
-  :ghook ('after-save-hook #'check-parens))
+(add-hook 'after-save-hook #'validate-balance)
 
 (use-package paren :ensure nil
   :custom
@@ -1224,10 +1269,44 @@ That way we don't remove the whole regexp for a simple typo.
 
     (modify-syntax-entry ?' ".")
 
-    (require 'ccls)
-
     (with-eval-after-load 'lsp-mode
       (setq-local flymake-diagnostic-functions (remove #'flymake-cc flymake-diagnostic-functions))))
+
+  (defun user/c-mode-toggle-funcall ()
+    "Transpose multi-line call to one-line and vice-versa."
+    (interactive)
+    (let ((initial-pos (point))
+          (bosl) (eosl)
+          (bos) (eos))
+      (save-excursion
+        (c-end-of-statement)
+        (setq eos (point))
+        (setq eosl (line-number-at-pos))
+
+        (c-beginning-of-statement 1)
+        (setq bos (point))
+        (setq bosl (line-number-at-pos))
+
+        (save-restriction
+          (condition-case nil
+              (progn
+                (narrow-to-region bos eos)
+                (search-forward "(" eos t)
+                (while (< (point) (point-max))
+                  (if (= eosl bosl)
+                      (progn
+                        (re-search-forward "(\\|,\\|)\\|\"")
+                        (cl-case (char-before)
+                          (?\( (progn (backward-char) (forward-sexp)))
+                          (?\" (progn (backward-char) (forward-sexp)))
+                          (?, (newline-and-indent))))
+                    (re-search-forward "\n")
+                    (when (/= (point) (point-max))
+                      (backward-char)
+                      (join-line -1)))))
+            (error nil))))))
+
+  (general-define-key "C-=" #'user/c-mode-toggle-funcall)
 
   :ghook ('c-mode-common-hook #'user/c-mode-common-hook)
 
@@ -1238,6 +1317,10 @@ That way we don't remove the whole regexp for a simple typo.
   (csetq c-default-style '((java-mode . "java")
                            (awk-mode . "awk")
                            (other . "sane-k&r"))))
+
+(use-package modern-cpp-font-lock
+  :after cc-mode
+  :ghook ('c++-mode-hook #'modern-c++-font-lock-mode))
 
 (use-package ccls
   :after cc-mode
@@ -1330,22 +1413,6 @@ That way we don't remove the whole regexp for a simple typo.
 
   (web-mode-engines-alist '(("django" . "\\.html\\'"))))
 
-;; (use-package eglot
-;;   :ghook
-;;   ('c-mode-common-hook #'eglot-ensure)
-;;   :gfhook
-;;   ('eglot-server-initialized-hook #'company-eglot-setup)
-;;   :preface
-;;   (defun company-eglot-setup (_server)
-;;     (delq 'company-capf company-backends)
-;;     (push 'company-capf company-backends))
-;;   :init
-;;   (csetq eglot-ignored-server-capabilites '(:documentHighlightProvider))
-;;   :config
-;;   (push '((c++-mode c-mode)
-;;           "ccls" "--init={\"diagnostics\": {\"onChange\": -1, \"spellChecking\": false}, \"highlight\": {\"largeFileSize\": 0}}")
-;;         eglot-server-programs))
-
 ;; Define this after all the languages (lsp must be added first in lang-mode-hook)
 (use-package lsp-mode
   :commands (lsp lsp-mode)
@@ -1363,19 +1430,29 @@ That way we don't remove the whole regexp for a simple typo.
   (lsp-enable-symbol-highlighting nil "`symbol-overlay' it's more usefull (for me).")
   (lsp-auto-guess-root t "Sometimes it doesn't work, but it's ok")
   (lsp-pyls-plugins-rope-completion-enabled nil "This is very very slow (we allow jedi only)")
+  (lsp-file-watch-threshold 5000)
 
   ;; Enable this when things are slow
   ;; (lsp-print-performance t)
 
   :config
   (push "[/\\\\]\\.ccls-cache$" lsp-file-watch-ignored)
+  (push "[/\\\\]\\.clangd$" lsp-file-watch-ignored)
   (push "[/\\\\]\\.vscode$" lsp-file-watch-ignored)
   (push "[/\\\\]_build$" lsp-file-watch-ignored)
 
   (require 'lsp-clients)
-
-  ;; Until I have a method of selecting the prefered lsp-client (per project or globally)
-  (remhash 'clangd lsp-clients))
+  (csetq lsp-clients-clangd-args
+         '("-j=7"
+           "--all-scopes-completion"
+           "--completion-style=detailed"
+           "--header-insertion=never"
+           "--pch-storage=memory"
+           "--background-index"
+           "--clang-tidy"
+           "--suggest-missing-includes"
+           "--log=error"
+           )))
 
 (use-package lsp-ui
   :commands lsp-ui-mode
@@ -1500,37 +1577,6 @@ That way we don't remove the whole regexp for a simple typo.
 (use-package rainbow-mode
   :commands rainbow-mode)
 
-(use-package eyebrowse
-  :preface
-  (defhydra user/eyebrowse-hydra
-    (:color pink
-            :pre (eyebrowse-mode t))
-    "
-^
-^Eyebrowse^         ^Do^                ^Switch^
-^─────────^─────────^──^────────────────^──────^────────────
-_q_ quit            _c_ create          _p_ previous
-^^                  _k_ kill            _n_ next
-^^                  _r_ rename          _e_ last
-^^                  ^^                  _s_ switch
-^^                  ^^                  ^^
-"
-    ("q" nil)
-    ("p" eyebrowse-prev-window-config :color red)
-    ("n" eyebrowse-next-window-config :color red)
-    ("c" eyebrowse-create-window-config)
-    ("e" eyebrowse-last-window-config)
-    ("k" eyebrowse-close-window-config :color red)
-    ("r" eyebrowse-rename-window-config)
-    ("s" eyebrowse-switch-to-window-config))
-
-  :general ("C-c w" #'user/eyebrowse-hydra/body)
-
-  :custom
-  (eyebrowse-new-workspace t)
-  (eyebrowse-switch-back-and-forth t)
-  (eyebrowse-wrap-around t))
-
 (use-package projectile
   :demand t
   :general ("C-c p" 'projectile-command-map)
@@ -1545,11 +1591,13 @@ _q_ quit            _c_ create          _p_ previous
 
   (push "_build" projectile-globally-ignored-directories)
   (push ".vscode" projectile-globally-ignored-directories)
-  (push ".ccls-cache" projectile-globally-ignored-directories))
+  (push ".ccls-cache" projectile-globally-ignored-directories)
+  (push ".clangd" projectile-globally-ignored-directories)
+  )
 
 (use-package which-key
   :custom
-  (which-key-side-window-location 'right)
+  (which-key-side-window-location 'bottom)
   (which-key-idle-delay 0.75)
   (which-key-sort-order 'which-key-prefix-then-key-order)
   :config
@@ -1573,7 +1621,7 @@ _q_ quit            _c_ create          _p_ previous
           (lambda ()
             (push 'eshell-tramp eshell-modules-list)
             (push 'eshell-rebind eshell-modules-list)
-            (push 'eshell-smart eshell-modules-list)
+            ;; (push 'eshell-smart eshell-modules-list)
             (push 'eshell-xtra eshell-modules-list)
             (delq 'eshell-banner eshell-modules-list)))
   :custom
@@ -1646,6 +1694,14 @@ _q_ quit            _c_ create          _p_ previous
 (use-package magit-gitflow
   :ghook ('magit-mode-hook #'turn-on-magit-gitflow))
 
+(use-package git-timemachine
+  :commands (git-timemachine git-timemachine-toggle))
+
+(use-package vc-msg
+  :commands (vc-msg-show)
+  :custom
+  (vc-msg-git-show-commit-function #'magit-show-commit))
+
 ;;
 ;; System replacements
 ;;
@@ -1667,7 +1723,6 @@ _q_ quit            _c_ create          _p_ previous
 ;;
 ;; Misc (user-defined)
 ;;
-
 (use-package user-advices :load-path "lisp")
 
 ;;
@@ -1679,8 +1734,8 @@ _q_ quit            _c_ create          _p_ previous
   (calendar-week-start-day 1)
   (calendar-date-style 'iso))
 
-
 (use-package org
+  :defer t
   :general
   ("C-c n" #'org-capture
    "C-c a" #'org-agenda)
@@ -1693,78 +1748,203 @@ _q_ quit            _c_ create          _p_ previous
       "* NOTE %? %^G\n%U" :empty-lines 1))))
 
 ;;
-;; mail
+;; No category
 ;;
-(use-package mu4e
-  :disabled
-  :load-path "/usr/share/emacs/site-lisp/mu4e"
-
-  :preface
-  (defun user/mu4e-boring-function (msg param)
-    (let ((value (or (mu4e-msg-field msg :subject) "")))
-      (or (string-prefix-p "[Bamboo]" value)
-          (and (string-prefix-p "[JIRA]" value)
-               (not (string-prefix-p "[JIRA] Created" value))))))
-
-  (defun mu4e-handle-boring-messages ()
-    (interactive)
-
-    (mu4e-headers-mark-for-each-if '(read . n) #'user/mu4e-boring-function)
-
-    (when (hash-table-count mu4e~mark-map)
-      (message "Marking %d boring messages as read..." (hash-table-count mu4e~mark-map))
-      (mu4e-mark-execute-all t)
-
-      (mu4e-headers-mark-for-each-if '(refile . y) #'user/mu4e-boring-function)
-
-      (message "Moving %d boring messages..." (hash-table-count mu4e~mark-map))
-      (mu4e-mark-execute-all t)))
-
-  (defun mu4e-refile-all ()
-    (interactive)
-    (mu4e-headers-for-each
-     (lambda (msg)
-       (mu4e-headers-mark-for-refile)))
-    (when mu4e~mark-map
-      (message "Moving %d messages..." (hash-table-count mu4e~mark-map))
-      (mu4e-mark-execute-all t)))
-
-  :general
-  ("C-x m" #'mu4e)
-  (:keymaps 'mu4e-headers-mode-map
-            "k" #'mu4e-handle-boring-messages
-            "o" #'mu4e-refile-all)
-
+(use-package nov
+  :ghook ('nov-mode-hook #'turn-on-visual-line-mode)
+  :mode ("\\.epub\\'" . nov-mode)
   :custom
-  (message-kill-buffer-on-exit t)
-
-  (mu4e-maildir (expand-file-name "~/.mail"))
-  (mu4e-view-show-images t)
-  (mu4e-view-show-addresses t)
-  (mu4e-update-interval 120)
-  (mu4e-confirm-quit nil)
-  (mu4e-attachment-dir (expand-file-name "~/Downloads"))
-  (mu4e-change-filenames-when-moving t)
-  (mu4e-context-policy 'pick-first)
-  (mu4e-display-update-status-in-modeline t)
-  (mu4e-use-fancy-chars t)
-  (mu4e-save-multiple-attachments-without-asking t)
-  (mu4e-compose-dont-reply-to-self t)
-  (mu4e-compose-format-flowed t)
-  (mu4e-completing-read-function 'completing-read)
-
-  (mu4e-headers-include-related t)
-  (mu4e-headers-auto-update t)
-  (mu4e-headers-date-format "%d-%m-%Y %H:%M")
-  (mu4e-headers-fields '((:human-date . 16) (:flags . 8) (:from . 30) (:subject . nil)))
-
-  (mu4e-headers-unread-mark '("u" . "✉"))
-  ;; TODO mu4e-view-attachment-assoc
-
-  :config
-  (load-file (expand-file-name "mu4e.el" user-emacs-directory)))
-
+  (nov-text-width 80))
 
 (provide 'init)
 
 ;;; init.el ends here
+
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(calendar-date-style 'iso t)
+ '(calendar-week-start-day 1 t)
+ '(comint-history-isearch t)
+ '(comint-ignore-dups t t)
+ '(comint-process-echoes t)
+ '(comint-prompt-read-only t)
+ '(company-dabbrev-code-ignore-case t)
+ '(company-dabbrev-downcase nil)
+ '(company-dabbrev-ignore-case t)
+ '(company-idle-delay 0)
+ '(company-lsp-async t t)
+ '(company-lsp-cache-candidates nil t)
+ '(company-minimum-prefix-length 2)
+ '(company-require-match nil)
+ '(company-selection-wrap-around t)
+ '(company-tooltip-align-annotations t)
+ '(company-tooltip-flip-when-above t)
+ '(compilation-always-kill t)
+ '(compilation-ask-about-save nil)
+ '(compilation-auto-jump-to-first-error nil)
+ '(compilation-context-lines nil)
+ '(compilation-disable-input t)
+ '(compilation-scroll-output 'first-error)
+ '(counsel-describe-function-preselect 'ivy-function-called-at-point)
+ '(counsel-grep-post-action-hook '(recenter))
+ '(counsel-mode-override-describe-bindings t)
+ '(daemons-always-sudo t t)
+ '(dired-auto-revert-buffer t)
+ '(dired-du-size-format t t)
+ '(dired-du-update-headers t t)
+ '(dired-dwim-target t)
+ '(dired-hide-details-hide-information-lines nil)
+ '(dired-hide-details-hide-symlink-targets nil)
+ '(dired-listing-switches "-lFaGh1v --group-directories-first")
+ '(dired-ls-F-marks-symlinks t)
+ '(dired-omit-verbose nil t)
+ '(dired-recursive-copies 'always)
+ '(eshell-hist-ignoredups t t)
+ '(eshell-history-size 50000 t)
+ '(eshell-ls-dired-initial-args '("-h") t)
+ '(eshell-ls-exclude-regexp "~\\'" t)
+ '(eshell-ls-initial-args "-hA" t)
+ '(eshell-smart-space-goes-to-end t t)
+ '(eshell-stringify-t nil t)
+ '(eshell-where-to-jump 'begin t)
+ '(expand-region-autocopy-register "e")
+ '(expand-region-fast-keys-enabled nil)
+ '(flymake-diagnostic-at-point-display-diagnostic-function 'flymake-diagnostic-at-point-display-popup t)
+ '(flymake-no-changes-timeout nil t)
+ '(flymake-start-syntax-check-on-newline nil t)
+ '(gdb-many-windows t t)
+ '(ibuffer-default-shrink-to-minimum-size t)
+ '(ibuffer-saved-filter-groups
+   '(("default"
+      ("X"
+       (mode . exwm-mode))
+      ("Dired"
+       (mode . dired-mode))
+      ("Emacs config"
+       (filename . ".emacs.d"))
+      ("Org-Mode"
+       (mode . org-mode))
+      ("Programming"
+       (derived-mode . prog-mode))
+      ("Magit"
+       (name . "magit"))
+      ("Processes"
+       (process))
+      ("Special"
+       (or
+        (name . "*Messages*")
+        (name . "*scratch*")))
+      ("Virtual"
+       (name . "*")))))
+ '(ibuffer-show-empty-filter-groups nil)
+ '(imenu-auto-rescan t)
+ '(imenu-auto-rescan-maxout 1048576)
+ '(isearch-allow-scroll 'unlimited)
+ '(isearch-lazy-count t)
+ '(isearch-yank-on-move 'shift)
+ '(ivy-count-format "")
+ '(ivy-height 9)
+ '(ivy-posframe-display-functions-alist '((swiper) (t . ivy-posframe-display-at-point)))
+ '(ivy-rich-path-style 'abbrev)
+ '(ivy-rich-switch-buffer-align-virtual-buffer t)
+ '(ivy-use-virtual-buffers t)
+ '(ivy-virtual-abbreviate 'full)
+ '(ivy-wrap t)
+ '(js2-skip-preprocessor-directives t t)
+ '(json-reformat:indent-width 4 t)
+ '(json-reformat:pretty-string\? t t)
+ '(lazy-highlight-initial-delay 0)
+ '(lsp-auto-guess-root t t)
+ '(lsp-before-save-edits nil t)
+ '(lsp-enable-indentation nil t)
+ '(lsp-enable-on-type-formatting nil t)
+ '(lsp-enable-symbol-highlighting nil t)
+ '(lsp-file-watch-threshold 5000 t)
+ '(lsp-pyls-plugins-rope-completion-enabled nil t)
+ '(lsp-ui-doc-enable nil t)
+ '(lsp-ui-doc-include-signature t t)
+ '(lsp-ui-peek-always-show t t)
+ '(lsp-ui-sideline-enable nil t)
+ '(lsp-ui-sideline-ignore-duplicate t t)
+ '(lsp-ui-sideline-show-hover nil t)
+ '(lsp-ui-sideline-show-symbol nil t)
+ '(magit-diff-arguments
+   '("--ignore-space-change" "--ignore-all-space" "--no-ext-diff" "--stat" "--diff-algorithm=histogram") t)
+ '(magit-diff-refine-hunk t t)
+ '(magit-display-buffer-function 'magit-display-buffer-fullframe-status-v1 t)
+ '(magit-process-popup-time 20 t)
+ '(magit-refs-show-commit-count 'all t)
+ '(minions-mode-line-delimiters '("" . ""))
+ '(multi-term-dedicated-select-after-open-p t t)
+ '(multi-term-scroll-show-maximum-output t t)
+ '(nov-text-width 80 t)
+ '(org-capture-templates
+   '(("t" "Todo" entry
+      (file+headline "~/org/todo.org" "Tasks")
+      "* TODO %?
+  %i
+  %a" :empty-lines 1)
+     ("n" "Note" entry
+      (file "~/org/notes.org")
+      "* NOTE %? %^G
+%U" :empty-lines 1)) t)
+ '(package-selected-packages
+   '(modus-vivendi-theme modus-operandi-theme git-timemachine vc-msg nov yaml-mode ccls yasnippet which-key wgrep-ag web-mode volatile-highlights visual-fill-column use-package undo-tree symbol-overlay smex smartparens rmsbolt rg realgud rainbow-mode projectile pipenv parchment-theme org no-littering nasm-mode multiple-cursors multi-term modern-cpp-font-lock minions magit-gitflow lsp-ui log4j-mode js2-mode iy-go-to-char ivy-rich ivy-posframe imenu-anywhere ignoramus iedit hydra hl-todo general flymake-diagnostic-at-point expand-region exec-path-from-shell eclipse-theme eacl dumb-jump docker disk-usage diredfl dired-toggle dired-narrow dired-git-info dired-du diminish daemons cython-mode counsel-etags company-lsp comment-dwim-2 cmake-font-lock bug-hunter beginend))
+ '(pipenv-projectile-after-switch-function 'pipenv-projectile-after-switch-extended t)
+ '(projectile-completion-system 'ivy)
+ '(projectile-enable-caching t)
+ '(projectile-sort-order 'recentf)
+ '(projectile-use-git-grep t)
+ '(recentf-auto-cleanup 'never)
+ '(recentf-exclude
+   '("/usr/share/emacs/.*\\'" "/elpa/.*\\'" "/.ccls-cache/.*\\'" "/.clangd/.*\\'" "PKGBUILD" "crontab.*" "/usr/lib/python.*\\'" "/tmp/.*\\'" ignoramus-boring-p))
+ '(recentf-max-menu-items 100)
+ '(recentf-max-saved-items 500)
+ '(rg-hide-command nil t)
+ '(rg-ignore-case 'smart t)
+ '(show-paren-delay 0)
+ '(show-paren-when-point-inside-paren t)
+ '(symbol-overlay-displayed-window nil)
+ '(symbol-overlay-idle-time 0.25)
+ '(undo-tree-auto-save-history nil)
+ '(undo-tree-enable-undo-in-region nil)
+ '(undo-tree-visualizer-diff t)
+ '(undo-tree-visualizer-timestamps t)
+ '(vc-msg-git-show-commit-function 'magit-show-commit t)
+ '(wdired-allow-to-change-permissions t t)
+ '(wdired-create-parent-directories t t)
+ '(web-mode-attr-indent-offset 2 t)
+ '(web-mode-attr-value-indent-offset 2 t)
+ '(web-mode-code-indent-offset 4 t)
+ '(web-mode-css-indent-offset 2 t)
+ '(web-mode-enable-block-face t t)
+ '(web-mode-enable-current-column-highlight t t)
+ '(web-mode-enable-current-element-highlight t t)
+ '(web-mode-enable-element-content-fontification t t)
+ '(web-mode-enable-element-tag-fontification t t)
+ '(web-mode-enable-html-entities-fontification t t)
+ '(web-mode-enable-inlays t t)
+ '(web-mode-enable-part-face t t)
+ '(web-mode-enable-sql-detection t t)
+ '(web-mode-engines-alist '(("django" . "\\.html\\'")) t)
+ '(web-mode-markup-indent-offset 2 t)
+ '(web-mode-sql-indent-offset 4 t)
+ '(wgrep-auto-save-buffer t t)
+ '(which-key-idle-delay 0.75)
+ '(which-key-side-window-location 'bottom)
+ '(which-key-sort-order 'which-key-prefix-then-key-order)
+ '(whitespace-display-mappings '((tab-mark 9 [187 32 32 32 32 32 32 32])))
+ '(whitespace-style '(face tab-mark trailing))
+ '(yas-also-auto-indent-first-line t)
+ '(yas-triggers-in-field t)
+ '(yas-verbosity 1 t)
+ '(yas-wrap-around-region t))
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(symbol-overlay-default-face ((t (:inherit underline)))))
