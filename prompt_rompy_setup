@@ -1,0 +1,40 @@
+#
+# A monochrome theme that displays basic information.
+# put this in zprezto/modules/prompt/functions
+#
+
+function prompt_super_basic_precmd {
+  vcs_info
+}
+
+function prompt_super_basic_setup {
+  setopt LOCAL_OPTIONS
+  unsetopt XTRACE KSH_ARRAYS
+  prompt_opts=(cr percent sp subst)
+
+  # Load required functions.
+  autoload -Uz add-zsh-hook
+  autoload -Uz vcs_info
+
+  # Add hook for calling vcs_info before each command.
+  add-zsh-hook precmd prompt_super_basic_precmd
+
+  # Set vcs_info parameters (●)
+  zstyle ':vcs_info:*' enable git
+
+  # It's slowing down, and I can always run `gs` to see what's changed
+  zstyle ':vcs_info:*' check-for-changes false
+
+  # Set but not used sice check-changes is false
+  zstyle ':vcs_info:*' stagedstr '%F{green}+%f'
+  zstyle ':vcs_info:*' unstagedstr '%F{yellow}!%f'
+
+  zstyle ':vcs_info:*' formats ' [%b%m]'
+  zstyle ':vcs_info:*' actionformats " [%b%m|%F{cyan}%a%f]"
+
+  # Define prompts.
+  PROMPT='%5~${vcs_info_msg_0_} » '
+  RPROMPT=''
+}
+
+prompt_super_basic_setup "$@"

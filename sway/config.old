@@ -1,0 +1,227 @@
+set $mod Mod4
+
+set $left h
+set $down j
+set $up k
+set $right l
+
+set $term alacritty
+
+set $menu dmenu_path | dmenu | xargs swaymsg exec
+
+set $ws1 1
+set $ws2 2
+set $ws3 3
+set $ws4 4
+set $ws5 5
+set $ws6 6
+set $ws7 7
+set $ws8 8
+set $ws9 9
+set $ws10 10
+
+font pango: Fira Mono, Font Awesome 5, Symbola 10
+
+# Use Mouse+$mod to drag floating windows to their wanted position
+floating_modifier $mod
+
+# start a terminal
+# bindsym $mod+Return exec xterm -geometry 112x30
+# bindsym $mod+Return exec kitty
+# bindsym $mod+Return exec urxvt -geometry 112x30
+bindsym $mod+Return exec $term
+
+# kill focused window
+bindsym $mod+q kill
+
+# bindsym $mod+Shift+p exec rofi -modi run -show run
+# bindsym $mod+p exec rofi -show drun
+# bindsym $mod+Tab exec rofi -modi window -show window
+bindsym $mod+p exec $menu
+
+# change focus
+bindsym $mod+$left focus left
+bindsym $mod+$down focus down
+bindsym $mod+$up focus up
+bindsym $mod+$right focus right
+
+# move focused window
+bindsym $mod+Shift+$left move left
+bindsym $mod+Shift+$down move down
+bindsym $mod+Shift+$up move up
+bindsym $mod+Shift+$right move right
+
+bindsym $mod+f fullscreen toggle
+
+bindsym $mod+v split toggle
+bindsym $mod+s layout stacking
+bindsym $mod+w layout tabbed
+bindsym $mod+t layout toggle all
+
+bindsym $mod+space floating toggle
+bindsym $mod+Shift+space focus mode_toggle
+
+bindsym $mod+a focus parent
+bindsym $mod+Shift+a focus child
+
+bindsym $mod+1 workspace $ws1
+bindsym $mod+2 workspace $ws2
+bindsym $mod+3 workspace $ws3
+bindsym $mod+4 workspace $ws4
+bindsym $mod+5 workspace $ws5
+bindsym $mod+6 workspace $ws6
+bindsym $mod+7 workspace $ws7
+bindsym $mod+8 workspace $ws8
+bindsym $mod+9 workspace $ws9
+bindsym $mod+0 workspace $ws10
+
+bindsym $mod+Shift+1 move container to workspace $ws1
+bindsym $mod+Shift+2 move container to workspace $ws2
+bindsym $mod+Shift+3 move container to workspace $ws3
+bindsym $mod+Shift+4 move container to workspace $ws4
+bindsym $mod+Shift+5 move container to workspace $ws5
+bindsym $mod+Shift+6 move container to workspace $ws6
+bindsym $mod+Shift+7 move container to workspace $ws7
+bindsym $mod+Shift+8 move container to workspace $ws8
+bindsym $mod+Shift+9 move container to workspace $ws9
+bindsym $mod+Shift+0 move container to workspace $ws10
+
+bindsym $mod+Shift+greater move container to output left
+bindsym $mod+Shift+less move container to output right
+
+bindsym $mod+x move container to output right; focus output right
+bindsym $mod+Shift+x move workspace to output right
+
+bindsym $mod+o focus output right
+
+# workspace monitors
+# workspace "$ws1" output eDP1
+# workspace "$ws2" output DP2
+# workspace "$ws10" output DP2
+
+bindsym $mod+Shift+c reload
+bindsym $mod+Shift+r restart
+bindsym $mod+Shift+e exec swaynag -t warning -m 'You pressed the exit shortcut. Do you really want to exit sway? This will end your Wayland session.' -b 'Yes, exit sway' 'swaymsg exit'
+
+bindsym $mod+i [class="Emacs"] focus
+bindsym $mod+Shift+i [class="Nightly"] focus
+bindsym $mod+u [urgent=latest] focus
+bindsym $mod+Shift+minus move scratchpad
+bindsym $mod+minus scratchpad show
+
+bindsym $mod+Mod1+l exec --no-startup-id swaylock -t -f -i ~/Pictures/Wallpapers/portal.png
+bindsym Print exec --no-startup-id flameshot full -p ~/Pictures/Screenshots
+bindsym Ctrl+Print exec --no-startup-id flameshot gui -p ~/Pictures/Screenshots
+bindsym $mod+e exec dolphin
+
+# In case I use a keyboard without
+bindsym $mod+Ctrl+period exec --no-startup-id playerctl next
+bindsym $mod+Ctrl+comma exec --no-startup-id playerctl previous
+bindsym $mod+Ctrl+m exec --no-startup-id playerctl play-pause
+bindsym XF86AudioNext exec --no-startup-id playerctl next
+bindsym XF86AudioPrev exec --no-startup-id playerctl previous
+bindsym XF86AudioPlay exec --no-startup-id playerctl play-pause
+
+bindsym XF86AudioRaiseVolume exec --no-startup-id pactl set-sink-volume 1 +5%
+bindsym XF86AudioLowerVolume exec --no-startup-id pactl set-sink-volume 1 -5%
+bindsym XF86AudioMute exec --no-startup-id pactl set-sink-mute 1 toggle
+
+bindsym $mod+Ctrl+Up exec --no-startup-id pactl set-sink-volume 1 +5%
+bindsym $mod+Ctrl+Down exec --no-startup-id pactl set-sink-volume 1 -5%
+
+bindsym XF86MonBrightnessUp exec --no-startup-id xbacklight -inc 10
+bindsym XF86MonBrightnessDown exec --no-startup-id xbacklight -dec 10
+
+# F12 and F12+Fn on microsoft keyboard
+bindsym $mod+Ctrl+XF86TouchpadOff exec --no-startup-id xterm -class force_float -geometry 112x30
+bindsym F12 exec --no-startup-id xterm -class force_float -geometry 112x30
+
+# bindsym $mod+j exec emacsclient --alternate-editor= -c
+
+bindsym $mod+r mode "resize"
+mode "resize" {
+    bindsym h resize shrink width 10 px or 10 ppt
+    bindsym j resize grow height 10 px or 10 ppt
+    bindsym k resize shrink height 10 px or 10 ppt
+    bindsym l resize grow width 10 px or 10 ppt
+
+    bindsym Left resize shrink width 10 px or 10 ppt
+    bindsym Down resize grow height 10 px or 10 ppt
+    bindsym Up resize shrink height 10 px or 10 ppt
+    bindsym Right resize grow width 10 px or 10 ppt
+
+    # back to normal: Enter or Escape
+    bindsym Return mode "default"
+    bindsym Escape mode "default"
+}
+
+client.focused  #4c7899 #494844 #ffffff #2E9EF4 #f07746
+
+bar {
+    position top
+
+    swaybar_command waybar
+
+    colors {
+        statusline #ffffff
+        background #323232
+        inactive_workspace #32323200 #32323200 #5c5c5c
+    }
+}
+
+input 1102:4619:DLL07D1:01_044E:120B {
+    tap enabled
+}
+
+# Misc config
+new_window pixel 3
+popup_during_fullscreen smart
+force_focus_wrapping yes
+workspace_auto_back_and_forth yes
+force_display_urgency_hint 500 ms
+focus_on_window_activation smart
+focus_follows_mouse no
+show_marks yes
+
+default_border pixel 1
+hide_edge_borders smart
+
+# Where to put stuff
+assign [class="^Firefox$"] → $ws2
+assign [class="^Nightly$"] → $ws2
+assign [class="^Navigator$"] → $ws2
+assign [class="^kmail2$"] → $ws10
+assign [class="^Thunderbird$"] → $ws10
+assign [class="^Slack$"] → $ws9
+
+# Special windows
+for_window [window_role="pop-up"] floating enable
+for_window [window_role="About"] floating enable
+for_window [window_role="task_dialog"] floating enable
+for_window [class="Pavucontrol"] floating enable
+for_window [class="mpv"] floating enable
+for_window [class="Lxappearance"] floating enable
+for_window [class="^force_float$"] floating enable
+for_window [class="^Nm-connection-editor$"] floating enable
+for_window [class="^Pcmanfm$"] floating enable
+for_window [class="^Vncviewer$"] floating enable
+for_window [class="Spotify"] move to workspace $ws3
+for_window [class="Slack"] move to workspace $ws9
+
+# Some information
+exec --no-startup-id xrdb -merge $home/.xresources
+exec --no-startup-id python "$HOME/.config/sway/monitor-setup.py"
+
+# exec --no-startup-id nm-applet&
+# exec --no-startup-id xfce4-power-manager
+
+# exec --no-startup-id xset r rate 400 44
+
+# Displays
+# exec --no-startup-id autorandr --change
+
+# Wallpapers
+# exec --no-startup-id xrandr | grep 'HDMI1 connected' && feh --bg-scale --no-xinerama ~/Pictures/Wallpapers/calvin.png
+# exec --no-startup-id xrandr | grep 'HDMI1 disconnected' && feh --bg-scale ~/Pictures/Wallpapers/calvin-0.png
+
+include /etc/sway/config.d/*

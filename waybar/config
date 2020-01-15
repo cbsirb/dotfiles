@@ -1,0 +1,61 @@
+{
+    "layer": "bottom",
+    "modules-left": ["sway/workspaces", "sway/mode"],
+    "modules-center": ["sway/window"],
+    "modules-right": ["idle_inhibitor", "battery", "pulseaudio", "network", "clock", "tray"],
+    "position": "top",
+    "sway/mode": {
+        "tooltip": false,
+        "format": "<span style=\"italic\">{}</span>"
+    },
+    "sway/workspaces": {
+        "disable-scroll": true
+    },
+    "sway/window": {
+        "max-length": 128
+    },
+    "battery": {
+        "tooltip": false,
+        "states": {
+            "warning": 30,
+            "critical": 15
+        },
+        "format": "Battery: {capacity}%",
+        "format-full": ""
+    },
+    "clock": {
+        "on-click": "alacritty -t force_float -d 70 35 -e watch -n60 cal -y",
+        "format": "{:%m/%d %H:%M}"
+    },
+    "memory": {
+        "tooltip": false,
+        "states": {
+            "warning": 50,
+            "critical": 85
+        },
+        "format": "mem: {}%",
+        "on-click": "alacritty -t force_float -d 112 30 -e htop"
+    },
+    "pulseaudio": {
+        "tooltip": false,
+        "format": "{volume}%",
+        "format-bluetooth": "{volume}%",
+        "format-muted": "{volume}%",
+        "format-alt": "{volume}%",
+        "on-click": "pavucontrol"
+    },
+    "network": {
+        "tooltip": false,
+        "format-wifi": "{essid} ({signalStrength}%)",
+        "format-ethernet": "eth",
+        "format-disconnected": "⚠",
+        "on-click": "alacritty -t force_float -d 70 50 -e nmtui"
+    },
+    "idle_inhibitor": {
+        "format": "{icon}",
+        "format-icons": {
+            "activated": "",
+            "deactivated": ""
+        }
+    }
+}
