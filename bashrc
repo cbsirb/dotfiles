@@ -6,10 +6,6 @@ case "$-" in
   *) return;;
 esac
 
-# if [ -z "$DISPLAY" ] && [ "$(fgconsole)" -eq 1 ]; then
-#     exec startx
-# fi
-
 # don't put duplicate lines or lines starting with space in the history.
 export HISTCONTROL=ignoreboth:erasedups
 
@@ -65,11 +61,6 @@ fi
 export PROMPT_DIRTRIM=4
 PROMPT_COMMAND=_bash_history_sync
 
-# if [ -f /usr/share/git/completion/git-prompt.sh ]; then
-#     source /usr/share/git/completion/git-prompt.sh
-# elif [ -f /usr/share/git/git-prompt.sh ]; then
-#     source /usr/share/git/git-prompt.sh
-# fi
 if ! type -t __git_ps1 >/dev/null 2>&1; then
   function __git_ps1 {
     git branch 2> /dev/null | sed -e '/^[^*]/d' -e 's/* \(.*\)/ (\1)/'
@@ -90,12 +81,12 @@ if [ "$color_prompt" = yes ]; then
   case "$TERM" in
     xterm*|rxvt*|tmux*|screen*|eterm*|st*)
       if [ "$USERNAME" = root ]; then
-        export PS1="\[\033[38;5;1m\]\u\[$(tput sgr0)\] @ \[$(tput sgr0)\]"
+        export PS1="\[\033[38;5;1m\]\u\033[0;10m @ \033[0;10m"
       else
         export PS1=
       fi
 
-      export PS1=$PS1"\[\033[38;5;12m\]\w\[$(tput sgr0)\]\[\033[38;5;15m\]\[$(tput sgr0)\]\$(__git_ps1 ' (%s)')\[\033[38;5;1m\] >\[$(tput sgr0)\]\[\033[38;5;15m\] \[$(tput sgr0)\]"
+      export PS1=$PS1"\[\033[38;5;12m\]\w\033[0;10m\[\033[38;5;15m\]\033[0;10m\$(__git_ps1 ' (%s)')\[\033[38;5;1m\] >\033[0;10m\[\033[38;5;15m\] \033[0;10m"
 
       ;;
     *)
@@ -123,7 +114,9 @@ unset color_prompt force_color_prompt
 #     do
 #         . $f
 #     done
-#   elif [ -f /etc/bash_completion ]; then
+#   fi
+
+#   if [ -f /etc/bash_completion ]; then
 #     . /etc/bash_completion
 #   fi
 # fi
@@ -143,14 +136,13 @@ shopt -s dirspell
 # include . files in *
 shopt -s dotglob
 
-# fail if no glob matches
-# shopt -s failglob
-
 # ** pattern
 shopt -s globstar
 
 # [a-z] patterns
-shopt -s globasciiranges
+if shopt | grep -q globasciiranges ; then
+  shopt -s globasciiranges
+fi
 
 # pipe input to read
 shopt -s lastpipe
@@ -159,7 +151,9 @@ shopt -s lastpipe
 shopt -s no_empty_cmd_completion
 
 # Qute characters that are needed
-shopt -s complete_fullquote
+if shopt | grep -q complete_fullquote ; then
+  shopt -s complete_fullquote
+fi
 
 # check the window size after each command and, if necessary,
 # update the values of LINES and COLUMNS.

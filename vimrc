@@ -288,7 +288,7 @@ let g:qf_statusline        = {}
 let g:qf_statusline.before = '%<\ '
 let g:qf_statusline.after  = '\ %f%=%l\/%-6L\ %3c\ '
 
-let g:clang_library_path = '/usr/lib64/libclang.so'
+let g:clang_library_path = '/usr/lib/x86_64-linux-gnu/libclang-9.so'
 let g:clang_snippets     = 0
 
 let g:UltiSnipsEditSplit   = "vertical"
