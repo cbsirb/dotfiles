@@ -988,6 +988,8 @@ then it takes a second \\[keyboard-quit] to abort the minibuffer."
 ;; Completion-related
 ;;
 
+(use-package smex)
+
 (use-package ivy
   :general
   ("C-c C-r" #'ivy-resume)
