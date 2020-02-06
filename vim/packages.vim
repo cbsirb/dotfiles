@@ -29,7 +29,7 @@ call minpac#add('romainl/vim-tinyMRU')
 
 call minpac#add('tommcdo/vim-lion')
 
-call minpac#add('w0rp/ale')
+call minpac#add('dense-analysis/ale')
 call minpac#add('Rip-Rip/clang_complete')
 
 " When I start writing html again

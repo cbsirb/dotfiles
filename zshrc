@@ -27,6 +27,13 @@ alias gcm='git checkout master'
 alias gf='git flow'
 alias gd='git diff'
 
+# Apt stuff
+alias apti='sudo apt install'
+alias aptx='sudo apt remove'
+alias aptu='sudo apt update && sudo apt upgrade'
+alias apts='apt search'
+
+
 alias v='vim'
 
 alias down-mp3='youtube-dl --restrict-filenames -x -f bestaudio --audio-format mp3 --audio-quality 0 -o "%(title)s.%(ext)s" -i'

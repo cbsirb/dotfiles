@@ -1,4 +1,4 @@
-setlocal commentstring=//\ %s
+" setlocal commentstring=//\ %s
 
 setlocal cindent
 setlocal cinoptions=t0,:0,(0

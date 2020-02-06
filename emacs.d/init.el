@@ -274,7 +274,7 @@
 (add-to-list 'auto-mode-alist '("\\.?bash.*" . shell-script-mode))
 
 (set-face-attribute 'default nil
-                    :family "IBM Plex Mono"
+                    :family "Iosevka SS09 Extended"
                     :height 105
                     :weight 'normal)
 
@@ -663,7 +663,7 @@ then it takes a second \\[keyboard-quit] to abort the minibuffer."
 (general-define-key "<C-right>" #'forward-to-word)
 (general-define-key "C-d" #'delete-forward-char)
 (general-define-key [remap just-one-space] #'cycle-spacing)
-(general-define-key [remap newline] #'newline-and-indent)
+(general-define-key [remap newline] #'default-indent-new-line)
 (general-define-key [remap isearch-forward] #'isearch-forward-regexp)
 (general-define-key [remap isearch-forward-regexp] #'isearch-forward)
 (general-define-key [remap isearch-backward] #'isearch-backward-regexp)
@@ -707,7 +707,7 @@ then it takes a second \\[keyboard-quit] to abort the minibuffer."
 
   :custom
   (whitespace-display-mappings
-   '((tab-mark ?\t [187 32 32 32 32 32 32 32])))
+   '((tab-mark ?\t [187 ?\t])))
   (whitespace-style '(face tab-mark trailing)))
 
 (use-package recentf :ensure nil
@@ -788,16 +788,19 @@ then it takes a second \\[keyboard-quit] to abort the minibuffer."
   :preface
   (defun compile-without-ask (ask)
     (interactive "P")
-    (let ((compilation-read-command (if ask t nil)))
-      (if projectile-mode
-          (projectile-compile-project compilation-read-command)
-        (compile compile-command))))
+    (if ask
+        (call-interactively #'compile)
+      (compile compile-command)))
 
   (defun user/switch-to-compilation-window (buffer _msg)
     (let ((bufwin (get-buffer-window buffer)))
       (when bufwin
         (select-window bufwin)
         (local-set-key (kbd "q") 'kill-buffer-and-window))))
+
+  (defun colorize-compilation-buffer ()
+    (let ((inhibit-read-only t))
+      (ansi-color-apply-on-region (point-min) (point-max))))
 
   :general
   ([remap comment-region] #'compile-without-ask)
@@ -806,6 +809,7 @@ then it takes a second \\[keyboard-quit] to abort the minibuffer."
   :ghook
   ('compilation-mode-hook #'hide-trailing-whitespace)
   ('compilation-finish-functions #'user/switch-to-compilation-window)
+  ('compilation-filter-hook 'colorize-compilation-buffer)
 
   :custom
   (compilation-always-kill t)
@@ -1264,10 +1268,9 @@ found, an error is signaled."
 
   (defun user/c-mode-common-hook ()
     "Hook for C/C++ mode."
-    (c-toggle-auto-newline t)
+    ;; (c-toggle-hungry-state t)
+    ;; (c-toggle-auto-newline -1)
     (c-toggle-syntactic-indentation t)
-
-    (setq-local c-hanging-semi&comma-criteria nil)
 
     (modify-syntax-entry ?' ".")
 
@@ -1311,6 +1314,11 @@ found, an error is signaled."
   (general-define-key "C-=" #'user/c-mode-toggle-funcall)
 
   :ghook ('c-mode-common-hook #'user/c-mode-common-hook)
+
+  :custom
+  (c-tab-always-indent nil)
+  (c-backspace-function #'backward-delete-char)
+  (c-hanging-semi&comma-criteria nil)
 
   :config
   (c-add-style "allman" user/allman-style)
@@ -1430,9 +1438,9 @@ found, an error is signaled."
   (lsp-enable-indentation nil)
   (lsp-before-save-edits nil)
   (lsp-enable-symbol-highlighting nil "`symbol-overlay' it's more usefull (for me).")
-  (lsp-auto-guess-root t "Sometimes it doesn't work, but it's ok")
+  (lsp-auto-guess-root nil "Sometimes it doesn't work, but it's ok")
   (lsp-pyls-plugins-rope-completion-enabled nil "This is very very slow (we allow jedi only)")
-  (lsp-file-watch-threshold 5000)
+  (lsp-file-watch-threshold 9000)
 
   ;; Enable this when things are slow
   ;; (lsp-print-performance t)
@@ -1761,189 +1769,6 @@ found, an error is signaled."
 (provide 'init)
 
 ;;; init.el ends here
-
-(custom-set-variables
- ;; custom-set-variables was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(calendar-date-style 'iso)
- '(calendar-week-start-day 1)
- '(comint-history-isearch t)
- '(comint-ignore-dups t t)
- '(comint-process-echoes t)
- '(comint-prompt-read-only t)
- '(company-dabbrev-code-ignore-case t)
- '(company-dabbrev-downcase nil)
- '(company-dabbrev-ignore-case t)
- '(company-idle-delay 0)
- '(company-lsp-async t t)
- '(company-lsp-cache-candidates nil t)
- '(company-minimum-prefix-length 2)
- '(company-require-match nil)
- '(company-selection-wrap-around t)
- '(company-tooltip-align-annotations t)
- '(company-tooltip-flip-when-above t)
- '(compilation-always-kill t)
- '(compilation-ask-about-save nil)
- '(compilation-auto-jump-to-first-error nil)
- '(compilation-context-lines nil)
- '(compilation-disable-input t)
- '(compilation-scroll-output 'first-error)
- '(counsel-describe-function-preselect 'ivy-function-called-at-point)
- '(counsel-grep-post-action-hook '(recenter))
- '(counsel-mode-override-describe-bindings t)
- '(daemons-always-sudo t)
- '(dired-auto-revert-buffer t)
- '(dired-du-size-format t)
- '(dired-du-update-headers t)
- '(dired-dwim-target t)
- '(dired-hide-details-hide-information-lines nil)
- '(dired-hide-details-hide-symlink-targets nil)
- '(dired-listing-switches "-lFaGh1v --group-directories-first")
- '(dired-ls-F-marks-symlinks t)
- '(dired-omit-verbose nil t)
- '(dired-recursive-copies 'always)
- '(eshell-hist-ignoredups t t)
- '(eshell-history-size 50000 t)
- '(eshell-ls-dired-initial-args '("-h") t)
- '(eshell-ls-exclude-regexp "~\\'" t)
- '(eshell-ls-initial-args "-hA" t)
- '(eshell-smart-space-goes-to-end t t)
- '(eshell-stringify-t nil)
- '(eshell-where-to-jump 'begin t)
- '(expand-region-autocopy-register "e")
- '(expand-region-fast-keys-enabled nil)
- '(flymake-diagnostic-at-point-display-diagnostic-function 'flymake-diagnostic-at-point-display-popup t)
- '(flymake-no-changes-timeout nil)
- '(flymake-start-syntax-check-on-newline nil t)
- '(gdb-many-windows t t)
- '(ibuffer-default-shrink-to-minimum-size t)
- '(ibuffer-saved-filter-groups
-   '(("default"
-      ("X"
-       (mode . exwm-mode))
-      ("Dired"
-       (mode . dired-mode))
-      ("Emacs config"
-       (filename . ".emacs.d"))
-      ("Org-Mode"
-       (mode . org-mode))
-      ("Programming"
-       (derived-mode . prog-mode))
-      ("Magit"
-       (name . "magit"))
-      ("Processes"
-       (process))
-      ("Special"
-       (or
-        (name . "*Messages*")
-        (name . "*scratch*")))
-      ("Virtual"
-       (name . "*")))))
- '(ibuffer-show-empty-filter-groups nil)
- '(imenu-auto-rescan t)
- '(imenu-auto-rescan-maxout 1048576)
- '(isearch-allow-scroll 'unlimited)
- '(isearch-lazy-count t)
- '(isearch-yank-on-move 'shift)
- '(ivy-count-format "")
- '(ivy-height 9)
- '(ivy-posframe-display-functions-alist '((swiper) (t . ivy-posframe-display-at-point)))
- '(ivy-rich-path-style 'abbrev)
- '(ivy-rich-switch-buffer-align-virtual-buffer t)
- '(ivy-use-virtual-buffers t)
- '(ivy-virtual-abbreviate 'full)
- '(ivy-wrap t)
- '(js2-skip-preprocessor-directives t)
- '(json-reformat:indent-width 4)
- '(json-reformat:pretty-string\? t)
- '(lazy-highlight-initial-delay 0)
- '(lsp-auto-guess-root t)
- '(lsp-before-save-edits nil)
- '(lsp-enable-indentation nil)
- '(lsp-enable-on-type-formatting nil)
- '(lsp-enable-symbol-highlighting nil)
- '(lsp-file-watch-threshold 5000)
- '(lsp-pyls-plugins-rope-completion-enabled nil)
- '(lsp-ui-doc-enable nil)
- '(lsp-ui-doc-include-signature t)
- '(lsp-ui-peek-always-show t)
- '(lsp-ui-sideline-enable nil)
- '(lsp-ui-sideline-ignore-duplicate t)
- '(lsp-ui-sideline-show-hover nil)
- '(lsp-ui-sideline-show-symbol nil)
- '(magit-diff-arguments
-   '("--ignore-space-change" "--ignore-all-space" "--no-ext-diff" "--stat" "--diff-algorithm=histogram") t)
- '(magit-diff-refine-hunk t)
- '(magit-display-buffer-function 'magit-display-buffer-fullframe-status-v1)
- '(magit-process-popup-time 20)
- '(magit-refs-show-commit-count 'all)
- '(minions-mode-line-delimiters '("" . ""))
- '(multi-term-dedicated-select-after-open-p t t)
- '(multi-term-scroll-show-maximum-output t t)
- '(nov-text-width 80 t)
- '(org-capture-templates
-   '(("t" "Todo" entry
-      (file+headline "~/org/todo.org" "Tasks")
-      "* TODO %?
-  %i
-  %a" :empty-lines 1)
-     ("n" "Note" entry
-      (file "~/org/notes.org")
-      "* NOTE %? %^G
-%U" :empty-lines 1)) t)
- '(package-selected-packages
-   '(modus-vivendi-theme modus-operandi-theme git-timemachine vc-msg nov yaml-mode ccls yasnippet which-key wgrep-ag web-mode volatile-highlights visual-fill-column use-package undo-tree symbol-overlay smex smartparens rmsbolt rg realgud rainbow-mode projectile pipenv parchment-theme org no-littering nasm-mode multiple-cursors multi-term modern-cpp-font-lock minions magit-gitflow lsp-ui log4j-mode js2-mode iy-go-to-char ivy-rich ivy-posframe imenu-anywhere ignoramus iedit hydra hl-todo general flymake-diagnostic-at-point expand-region exec-path-from-shell eclipse-theme eacl dumb-jump docker disk-usage diredfl dired-toggle dired-narrow dired-git-info dired-du diminish daemons cython-mode counsel-etags company-lsp comment-dwim-2 cmake-font-lock bug-hunter beginend))
- '(pipenv-projectile-after-switch-function 'pipenv-projectile-after-switch-extended t)
- '(projectile-completion-system 'ivy)
- '(projectile-enable-caching t)
- '(projectile-sort-order 'recentf)
- '(projectile-use-git-grep t)
- '(recentf-auto-cleanup 'never)
- '(recentf-exclude
-   '("/usr/share/emacs/.*\\'" "/elpa/.*\\'" "/.ccls-cache/.*\\'" "/.clangd/.*\\'" "PKGBUILD" "crontab.*" "/usr/lib/python.*\\'" "/tmp/.*\\'" ignoramus-boring-p))
- '(recentf-max-menu-items 100)
- '(recentf-max-saved-items 500)
- '(rg-hide-command nil)
- '(rg-ignore-case 'smart t)
- '(show-paren-delay 0)
- '(show-paren-when-point-inside-paren t)
- '(symbol-overlay-displayed-window nil)
- '(symbol-overlay-idle-time 0.25)
- '(undo-tree-auto-save-history nil)
- '(undo-tree-enable-undo-in-region nil)
- '(undo-tree-visualizer-diff t)
- '(undo-tree-visualizer-timestamps t)
- '(vc-msg-git-show-commit-function 'magit-show-commit t)
- '(wdired-allow-to-change-permissions t t)
- '(wdired-create-parent-directories t t)
- '(web-mode-attr-indent-offset 2 t)
- '(web-mode-attr-value-indent-offset 2 t)
- '(web-mode-code-indent-offset 4 t)
- '(web-mode-css-indent-offset 2 t)
- '(web-mode-enable-block-face t t)
- '(web-mode-enable-current-column-highlight t t)
- '(web-mode-enable-current-element-highlight t t)
- '(web-mode-enable-element-content-fontification t t)
- '(web-mode-enable-element-tag-fontification t t)
- '(web-mode-enable-html-entities-fontification t t)
- '(web-mode-enable-inlays t t)
- '(web-mode-enable-part-face t t)
- '(web-mode-enable-sql-detection t t)
- '(web-mode-engines-alist '(("django" . "\\.html\\'")) t)
- '(web-mode-markup-indent-offset 2 t)
- '(web-mode-sql-indent-offset 4 t)
- '(wgrep-auto-save-buffer t)
- '(which-key-idle-delay 0.75)
- '(which-key-side-window-location 'bottom)
- '(which-key-sort-order 'which-key-prefix-then-key-order)
- '(whitespace-display-mappings '((tab-mark 9 [187 32 32 32 32 32 32 32])))
- '(whitespace-style '(face tab-mark trailing))
- '(yas-also-auto-indent-first-line t)
- '(yas-triggers-in-field t)
- '(yas-verbosity 1 t)
- '(yas-wrap-around-region t))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
