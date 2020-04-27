@@ -2,7 +2,7 @@
     "layer": "bottom",
     "modules-left": ["sway/workspaces", "sway/mode"],
     "modules-center": ["sway/window"],
-    "modules-right": ["idle_inhibitor", "battery", "pulseaudio", "network", "clock", "tray"],
+    "modules-right": ["idle_inhibitor", "battery", "pulseaudio", "network", "network#vpn", "clock", "tray"],
     "position": "top",
     "sway/mode": {
         "tooltip": false,
@@ -20,7 +20,7 @@
             "warning": 30,
             "critical": 15
         },
-        "format": "Battery: {capacity}%",
+        "format": "🔋{capacity}%",
         "format-full": ""
     },
     "clock": {
@@ -38,24 +38,30 @@
     },
     "pulseaudio": {
         "tooltip": false,
-        "format": "{volume}%",
-        "format-bluetooth": "{volume}%",
-        "format-muted": "{volume}%",
+        "format": "🔊{volume}%",
+        "format-bluetooth": "🔊{volume}%",
+        "format-muted": "🔇",
         "format-alt": "{volume}%",
-        "on-click": "pavucontrol"
+        "on-click": "pavucontrol-qt"
     },
     "network": {
         "tooltip": false,
-        "format-wifi": "{essid} ({signalStrength}%)",
-        "format-ethernet": "eth",
+        "format-wifi": "📶{essid} ({signalStrength}%)",
+        "format-ethernet": "🖧",
         "format-disconnected": "⚠",
         "on-click": "alacritty -t force_float -d 70 50 -e nmtui"
+    },
+    "network#vpn": {
+        "tooltip": false,
+        "interface": "gpd0",
+        "format-ethernet": "",
+        "format-disconnected": "(no vpn)"
     },
     "idle_inhibitor": {
         "format": "{icon}",
         "format-icons": {
-            "activated": "",
-            "deactivated": ""
+            "activated": "🔓",
+            "deactivated": "🔐"
         }
     }
 }

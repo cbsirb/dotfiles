@@ -494,7 +494,7 @@ search_engine_default_search_mode = 2
 ## depending on the ncurses version used.
 ##
 #
-colors_enabled = yes
+#colors_enabled = yes
 #
 #empty_tag_color = cyan
 #

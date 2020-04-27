@@ -11,6 +11,8 @@
 
 if [[ "$OSTYPE" == darwin* ]]; then
   export BROWSER='open'
+else
+  export BROWSER='firefox'
 fi
 
 #
@@ -45,6 +47,7 @@ typeset -gU cdpath fpath mailpath path
 # Set the list of directories that Zsh searches for programs.
 path=(
   /usr/local/{bin,sbin}
+  ~/.local/bin
   $path
 )
 
@@ -66,5 +69,8 @@ fi
 #
 # Other stuff
 #
-# export GTK_USE_PORTAL=1
-export _JAVA_AWT_WM_NONREPARENTING=1
+export GTK_USE_PORTAL=1
+# export _JAVA_AWT_WM_NONREPARENTING=1
+# export MOZ_ENABLE_WAYLAND=1
+# export QT_QPA_PLATFORMTHEME=qt5ct
+export LIBVA_DRIVER_NAME=iHD

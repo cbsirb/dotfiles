@@ -164,7 +164,7 @@ bar {
 
     # status_command $HOME/dotfiles/manual_bin/conky-i3bar.sh
     separator_symbol "|"
-    position top
+    position bottom
 }
 
 # Misc config

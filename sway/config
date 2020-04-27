@@ -22,13 +22,23 @@ set $ws7 7
 set $ws8 8
 set $ws9 9
 
-# Your preferred terminal emulator
-set $term alacritty
+# set $term alacritty
+# set $float_arg -t force_float
+# set $size_arg -d 112 30
+
+set $term konsole
+set $float_arg -p tabtitle=force_float
+set $size_arg -p TerminalRows=29 -p TerminalColumns=112
+
+set $term_cmd $term
+set $term_float_cmd $term $float_arg $size_arg
+
+set $lock_cmd swaylock
 
 # Your preferred application launcher
 # Note: it's recommended that you pass the final command to sway
-set $all_menu dmenu_path | bemenu -i -w -l 8 -p "Run:" | xargs swaymsg exec
-set $menu j4-dmenu-desktop --dmenu="bemenu -i -w -l6 -p 'Run application:'" --term="$term -t force_float -d 112 30" | xargs swaymsg exec
+set $all_menu wofi --show run --term="$term_float_cmd"
+set $menu wofi --show drun --term="$term_float_cmd"
 
 ### Output configuration
 #
@@ -40,32 +50,43 @@ output * bg /usr/share/backgrounds/sway/Sway_Wallpaper_Blue_1920x1080.png fill
 # output "Dell Inc. DELL U2415 7MT0181G290U" mode 1920x1200 position 0,0
 
 ### Idle configuration
-exec swayidle -w \
-         timeout 180 'swaylock --scaling center -f -i /usr/share/backgrounds/sway/lock-screen.jpg' \
-         before-sleep 'swaylock --scaling center -f -i /usr/share/backgrounds/sway/lock-screen.jpg'
-
-# exec ~/.config/sway/monitor-setup.py
-exec kanshi
-exec xrdb -merge $HOME/.Xresources
-exec swaymsg -- exec mako --default-timeout 5000
-exec swaymsg -- exec autocutsel -fork
-
 #
 # This will lock your screen after 180 seconds of inactivity, then turn off
 # your displays after another 180 seconds, and turn your screens back on when
 # resumed. It will also lock your screen before your computer goes to sleep.
+exec swayidle -w \
+         timeout 180 '$lock_cmd' \
+         before-sleep '$lock_cmd'
+
+# exec ~/.config/sway/monitor-setup.py
+exec xrdb -merge $HOME/.Xresources
+exec swaymsg -- exec dbus-daemon --session --address=unix:path=$XDG_RUNTIME_DIR/bus
+exec swaymsg -- exec autocutsel -fork
+exec swaymsg -- exec pulseeffects --gapplication-service
+
+# This is a hack actually, mako doesn't really work on it's own and I don't
+# have time to debug it
+exec swaymsg -- exec mako
+exec swaymsg -- exec dunst
+
+exec swaymsg -- exec kanshi
+
+exec_always {
+    gsettings set org.gnome.desktop.interface gtk-theme 'Arc-Darker'
+    gsettings set org.gnome.desktop.interface cursor-theme 'breeze_cursors'
+    gsettings set org.gnome.desktop.interface icon-theme 'breeze-dark'
+}
+
 
 ### Input configuration
 #
 # Read `man 5 sway-input` for more information about this section.
-input 1102:4619:DLL07D1:01_044E:120B {
+input 1267:32:Elan_Touchpad {
     tap enabled
     middle_emulation enabled
 }
 
-# 1118:1957:Microsoft_Microsoft®_Nano_Transceiver_v2.1
-# 1:1:AT_Translated_Set_2_keyboard
-input * {
+input type:keyboard {
     repeat_delay 250
     repeat_rate 40
     xkb_options ctrl:nocaps,grp:ctrls_toggle
@@ -78,7 +99,7 @@ input * {
 #
 
 # start a terminal
-bindsym $mod+Return exec swaymsg -- exec $term -d 112 30
+bindsym $mod+Return exec swaymsg -- exec $term $size_arg
 
 # kill focused window
 bindsym $mod+q kill
@@ -98,8 +119,20 @@ floating_modifier $mod normal
 bindsym $mod+Shift+c reload
 bindsym $mod+Shift+r exec ~/.config/sway/monitor-setup.py
 
-# exit sway (logs you out of your Wayland session)
-bindsym $mod+Shift+e exec swaynag -t warning -m 'You pressed the exit shortcut. Do you really want to exit sway? This will end your Wayland session.' -b 'Yes, exit sway' 'swaymsg exit'
+set $mode_system System: (l) lock, (e) logout, (s) suspend, (r) reboot, (p) shutdown, (R) UEFI
+mode "$mode_system" {
+    bindsym l exec $lock_cmd, mode "default"
+    bindsym e exit
+    bindsym s exec systemctl suspend, mode "default"
+    bindsym r exec systemctl reboot, mode "default"
+    bindsym p exec systemctl poweroff -i, mode "default"
+    bindsym Shift+r exec systemctl reboot --firmware-setup, mode "default"
+
+    # return to default mode
+    bindsym Return mode "default"
+    bindsym Escape mode "default"
+}
+bindsym $mod+Shift+e mode "$mode_system"
 
 #
 # Moving around:
@@ -166,9 +199,9 @@ bindsym $mod+Shift+0 move container to workspace $ws10
 bindsym $mod+b border toggle
 
 # Switch the current container between different layout styles
-bindsym $mod+comma layout stacking
-bindsym $mod+period layout tabbed
-bindsym $mod+slash layout toggle split
+bindsym $mod+bracketright layout stacking
+bindsym $mod+bracketleft layout tabbed
+bindsym $mod+backslash layout toggle split
 
 # Make the current focus fullscreen
 bindsym $mod+f fullscreen
@@ -237,9 +270,9 @@ bindsym $mod+u [urgent=latest] focus
 
 bindsym $mod+e exec dolphin
 
-bindsym $mod+Ctrl+period exec playerctl next
-bindsym $mod+Ctrl+comma exec playerctl previous
-bindsym $mod+Ctrl+m exec playerctl play-pause
+bindsym $mod+period exec playerctl next
+bindsym $mod+comma exec playerctl previous
+bindsym $mod+m exec playerctl play-pause
 bindsym XF86AudioNext exec playerctl next
 bindsym XF86AudioPrev exec playerctl previous
 bindsym XF86AudioPlay exec playerctl play-pause
@@ -250,16 +283,16 @@ bindsym XF86AudioMute exec pactl set-sink-mute @DEFAULT_SINK@ toggle
 bindsym $mod+Ctrl+Up exec pactl set-sink-volume @DEFAULT_SINK@ +3%
 bindsym $mod+Ctrl+Down exec pactl set-sink-volume @DEFAULT_SINK@ -3%
 
-bindsym XF86MonBrightnessUp exec xbacklight -inc 10
-bindsym XF86MonBrightnessDown exec xbacklight -dec 10
+bindsym XF86MonBrightnessUp exec sudo brightnessctl set 10%+
+bindsym XF86MonBrightnessDown exec sudo brightnessctl set 10%-
 
-bindsym $mod+Mod1+l exec swaylock --scaling center -f -i /usr/share/backgrounds/sway/lock-screen.jpg
+bindsym $mod+Mod1+l exec $lock_cmd
 
 bindsym Print exec grim -t png ~/Pictures/Screenshots/$(date +%Y-%m-%d_%H-%M-%S).png
 
 # F12 and F12+Fn on microsoft keyboard
-bindsym $mod+Ctrl+XF86TouchpadOff exec $term -t force_float -d 112 30
-bindsym F12 exec $term -t force_float -d 112 30
+bindsym $mod+Ctrl+XF86TouchpadOff exec $term_float_cmd
+bindsym F12 exec $term_float_cmd
 
 bindsym $mod+n exec makoctl dismiss
 bindsym $mod+Shift+n exec makoctl dismiss -a
@@ -272,7 +305,7 @@ bar {
     position top
 
     mode hide
-    hidden_state hide
+    # hidden_state hide
     modifier $mod
 
     swaybar_command waybar
@@ -290,28 +323,40 @@ bar {
 for_window [window_role="pop-up"] floating enable
 for_window [window_role="About"] floating enable
 for_window [window_role="task_dialog"] floating enable
-for_window [app_id="org.gnome.Nautilus"] floating enable
+for_window [window_type="dialog"] floating enable
+for_window [window_type="splash"] floating enable
 for_window [app_id="org.kde.kcalc"] floating enable
 for_window [app_id="pavucontrol"] floating enable
+for_window [app_id="pavucontrol"] floating enable
 for_window [app_id="mpv"] floating enable
+for_window [app_id="blueman-manager"] floating enable
+for_window [app_id="virt-manager"] floating enable
 for_window [class="^force_float$"] floating enable
-for_window [title="^force_float$"] floating enable
+for_window [title="^force_float"] floating enable
 for_window [app_id="^nm-connection-editor$"] floating enable
 for_window [class="^Vncviewer$"] floating enable
+for_window [app_id="firefox" title="^Picture-in-Picture$"] floating enable, sticky enable
 
 for_window [title=".*"] title_format %title
 
+#
+# Render stuff (still playing with it)
+#
+# output * max_render_time 5
+# for_window [app_id="^alacritty$"] max_render_time 1
 
 #
 # Colors:
 #
 
 client.focused  #4c7899 #494844 #ffffff #2E9EF4 #f07746
-font pango: IBM Plex Mono 9
+font pango: Iosevka SS10 Extended 10
 
 #
 # Misc:
 #
+smart_gaps on
+smart_borders on
 
 default_border pixel 3
 popup_during_fullscreen smart

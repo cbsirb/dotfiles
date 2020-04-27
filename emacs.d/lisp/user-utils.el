@@ -27,8 +27,7 @@ With N goes forward that many paragraphs."
            "\n[[:blank:]]*\\(\n[[:blank:]]*\\)+" nil t (cl-signum n))
           (goto-char (match-end 0))
         (goto-char (if (> n 0) (point-max) (point-min))))
-      )
-    ))
+      )))
 
 ;;;###autoload
 (defun user/backward-paragraph (&optional n)
@@ -215,12 +214,13 @@ Saves the position before.  You can skip typos you don't want to fix with
   (cond
    ((eq system-type 'gnu/linux)
     (let ((terminal (cond
+                     ((executable-find "x-terminal-emulator"))
                      ((executable-find "urxvt"))
                      ((executable-find "uxterm"))
                      ((executable-find "xterm"))
                      (t nil))))
       (when terminal
-        (start-process terminal nil terminal "-geometry" "102x28"))))
+        (start-process terminal nil "setsid" terminal))))
    ((eq system-type 'windows-nt)
     (message "Not supported for now!"))))
 

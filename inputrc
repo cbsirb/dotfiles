@@ -22,11 +22,3 @@ set completion-ignore-case
 "\e[1;5D": backward-word
 
 "\C-w": backward-kill-word
-
-"θ":""\C-b""
-"ω":"'\C-b'"
-"\e\C-l":"\C-e | less\C-m"
-"υ":">\C-b<"
-"σ":"}\C-b{"
-"φ":")\C-b("
-"ρ":"]\C-b["

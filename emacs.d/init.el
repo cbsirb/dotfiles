@@ -12,10 +12,12 @@
   `(funcall (or (get ',variable 'custom-set) 'set-default) ',variable ,value))
 
 (defvar user/gc-cons-threshold (* 16 gc-cons-threshold))
-(csetq gc-cons-threshold most-positive-fixnum)
+(defvar user/file-name-handler-alist file-name-handler-alist)
 
-(csetq user/file-name-handler-alist file-name-handler-alist)
-(csetq file-name-handler-alist '())
+(defun user/hide-load-messages (orig-fn file &optional noerror nomessage nosuffix must-suffix)
+  (apply orig-fn file (list noerror t nosuffix must-suffix)))
+
+(advice-add #'load :around #'user/hide-load-messages)
 
 (add-hook 'after-init-hook
           (lambda ()
@@ -24,21 +26,20 @@
             ;; Don't just blindly set it to the old value, maybe someone decided to add something to it
             (csetq file-name-handler-alist (append file-name-handler-alist user/file-name-handler-alist))
 
+            (advice-remove #'load #'user/hide-load-messages)
+
             (message "Time to load init file: %s" (emacs-init-time))
             (garbage-collect)))
 
-(when (fboundp 'tool-bar-mode) (tool-bar-mode 0))
-(when (fboundp 'menu-bar-mode) (menu-bar-mode 0))
-(when (fboundp 'scroll-bar-mode) (scroll-bar-mode 0))
-
-(csetq custom-buffer-done-kill t)
-(csetq custom-unlispify-tag-names nil)
-(csetq custom-unlispify-menu-entries nil)
-
+(csetq gc-cons-threshold most-positive-fixnum)
+(csetq file-name-handler-alist nil)
 (csetq load-prefer-newer t)
+(csetq package-user-dir (expand-file-name "elpa" user-emacs-directory))
 
 (when (< emacs-major-version 27)
-  (load-file (expand-file-name "early-init.el" user-emacs-directory))
+  (load-file (expand-file-name "early-init.el" user-emacs-directory)))
+
+(unless (bound-and-true-p package--initialized)
   (package-initialize))
 
 (add-to-list 'load-path (expand-file-name "lisp" user-emacs-directory))
@@ -52,7 +53,26 @@
 (csetq use-package-enable-imenu-support t)
 (csetq use-package-expand-minimally t)
 (csetq use-package-always-ensure t)
-(csetq use-package-compute-statistics t)
+(csetq use-package-compute-statistics nil)
+
+(defun package-update-now ()
+  "Update all the packages."
+
+  (interactive)
+
+  (split-window-below -10)
+  (other-window 1)
+
+  (package-list-packages-no-fetch)
+  (package-refresh-contents)
+  (package-menu-mark-upgrades)
+
+  (with-demoted-errors "Nothing to update! (%S)"
+    (package-menu-execute))
+
+  (when-let* ((buf (get-buffer "*Packages*")))
+    (switch-to-buffer buf)
+    (kill-buffer-and-window)))
 
 ;;
 ;; Packages needed no matter what, and usually others are depended on it
@@ -62,33 +82,22 @@
 
 (use-package general)
 
-(use-package parchment-theme
-  :disabled
-  :if (display-graphic-p)
-  :config
-  (load-theme 'parchment t))
-
-(use-package eclipse-theme
-  :disabled
-  :if (display-graphic-p)
-  :config
-  (load-theme 'eclipse t))
-
 (use-package modus-operandi-theme
   :if (display-graphic-p)
+  :custom
+  (modus-operandi-theme-visible-fringes nil)
+  (modus-operandi-theme-bold-constructs t)
+  (modus-operandi-theme-slanted-constructs nil)
+  (modus-operandi-theme-3d-modeline nil)
+  (modus-operandi-theme-proportional-fonts nil)
   :config
   (load-theme 'modus-operandi t))
 
 (use-package modus-vivendi-theme
-  :if (display-graphic-p))
-
-;; Let it have the same background & foreground as the mode-line
-(when (fboundp #'tab-bar-mode)
-  (set-face-attribute 'tab-bar nil :foreground nil :background nil :inherit 'mode-line)
-  (set-face-attribute 'tab-bar-tab nil :box '(line-width 1))
-  (set-face-attribute 'tab-bar-tab-inactive nil :background nil :box nil :inherit 'tab-bar-tab))
-
-;; (set-background-color "honeydew")
+  :disabled
+  :if (display-graphic-p)
+  :config
+  (load-theme 'modus-vivendi t))
 
 (use-package minions
   :custom
@@ -122,34 +131,34 @@
 ;; TBD
 ;; (use-package frog-menu)
 
-(use-package bug-hunter :defer t)
-
 ;;
 ;; Some default settings that I like
 ;;
-(csetq initial-major-mode 'text-mode)
-(csetq initial-scratch-message "")
-(csetq inhibit-startup-buffer-menu t)
-(csetq inhibit-splash-screen t)
-(csetq inhibit-startup-echo-area-message t)
-(csetq inhibit-startup-message t)
-(fset 'display-startup-echo-area-message #'ignore)
 
 (defalias 'yes-or-no-p 'y-or-n-p)
 (defalias 'ff 'find-file)
 (defalias 'ffo 'find-file-other-window)
 
-(csetq enable-local-variables :safe)
+;; startup.el
+(csetq initial-major-mode 'fundamental-mode)
+(csetq initial-scratch-message "")
+(csetq inhibit-startup-buffer-menu t)
+(csetq inhibit-splash-screen t)
+(csetq inhibit-startup-echo-area-message t)
+(csetq inhibit-startup-message t)
+(advice-add #'display-startup-echo-area-message :override #'ignore)
 
+;; mule.el
 (csetq locale-coding-system 'utf-8)
 (set-terminal-coding-system 'utf-8)
 (set-keyboard-coding-system 'utf-8)
 (set-selection-coding-system 'utf-8)
 (prefer-coding-system 'utf-8)
 (set-language-environment "UTF-8")
+(set-charset-priority 'unicode)
 
-(csetq system-time-locale "C")
-
+;; files.el
+(csetq enable-local-variables :safe)
 (csetq backup-by-copying t)
 (csetq view-read-only t)
 (csetq delete-old-versions t)
@@ -157,15 +166,16 @@
 (csetq auto-save-default nil)
 (csetq large-file-warning-threshold (* 50 1024 1024))
 (csetq directory-free-space-args "-kh")
+(csetq save-silently t)
+(csetq require-final-newline t)
+(file-name-shadow-mode t)
 
+;; C
 (csetq completion-ignore-case t)
-
-(csetq sentence-end-double-space nil)
-
-(csetq ad-redefinition-action 'accept)
-
+(csetq system-time-locale "C")
 (csetq auto-window-vscroll nil)
 (csetq use-dialog-box nil)
+(csetq minibuffer-electric-default-mode t)
 (csetq enable-recursive-minibuffers nil)
 (csetq echo-keystrokes 0.1)
 (csetq delete-by-moving-to-trash t)
@@ -178,32 +188,42 @@
 (csetq select-active-regions nil)
 (csetq display-raw-bytes-as-hex t)
 (csetq ring-bell-function 'ignore)
-(csetq save-silently t)
-
 (csetq undo-limit (* 10 undo-limit))
 (csetq undo-strong-limit (* 10 undo-strong-limit))
+(csetq inhibit-compacting-font-caches t)
+(csetq frame-resize-pixelwise t)
+(csetq window-combination-resize t)
+(csetq frame-title-format
+       '(:eval (if (buffer-file-name)
+                   (abbreviate-file-name (buffer-file-name))
+                 "%b")))
+(csetq indicate-buffer-boundaries
+       '((top . right)
+         (bottom . right)
+         (t . nil)))
 
-(csetq mark-ring-max 128)
-(csetq global-mark-ring-max 256)
-(csetq save-interprogram-paste-before-kill t)
-(csetq kill-ring-max 128)
-(csetq kill-do-not-save-duplicates t)
-(csetq read-quoted-char-radix 16)
-(csetq eval-expression-print-length nil)
-(csetq eval-expression-print-level nil)
+(csetq command-line-ns-option-alist nil)
 
-(csetq async-shell-command-display-buffer nil)
-(csetq async-shell-command-buffer 'new-buffer)
-
+;; misc stuff
 (csetq read-file-name-completion-ignore-case t)
-
+(csetq bookmark-save-flag t)
 (csetq column-number-indicator-zero-based nil)
-
 (csetq disabled-command-function nil)
+(csetq sentence-end-double-space nil)
+(csetq colon-double-space nil)
+(csetq ad-redefinition-action 'accept)
+(csetq woman-use-topic-at-point-default t)
+(csetq apropos-do-all t)
+(csetq idle-update-delay 1)
+(csetq custom-buffer-done-kill t)
 
 ;; "Smooth" mouse scrolling, one line at a time
-(csetq mouse-wheel-scroll-amount '(1 ((shift) . 1)))
-(csetq scroll-conservatively 10000)
+(csetq mouse-wheel-scroll-amount
+       '(1
+         ((shift) . 5)
+         ((meta) . 0.5)
+         ((control) . text-scale)))
+(csetq scroll-conservatively 101)
 (csetq scroll-preserve-screen-position t)
 (csetq fast-but-imprecise-scrolling t)
 
@@ -212,46 +232,72 @@
   (csetq x-stretch-cursor t)
   (csetq x-wait-for-event-timeout nil))
 
-(when (eq system-type 'windows-nt)
-  (csetq w32-pipe-read-delay 0))
+(csetq read-process-output-max (* read-process-output-max 8))
 
-(when (>= emacs-major-version 27)
-  (csetq tooltip-resize-echo-area t))
+(csetq tooltip-resize-echo-area t)
+(csetq tooltip-delay 0.5)
+(setq x-gtk-use-system-tooltips nil)
 
 (csetq tramp-default-method "ssh")
 (csetq tramp-verbose 2)
 
-(csetq uniquify-buffer-name-style 'post-forward)
-(csetq uniquify-separator ":")
-(csetq uniquify-ignore-buffers-re "^\\*")
+(csetq uniquify-buffer-name-style 'post-forward-angle-brackets)
 (csetq uniquify-after-kill-buffer-p t)
 
-(csetq auto-revert-avoid-polling t)
-(global-auto-revert-mode t)
 
-(csetq bookmark-save-flag t)
-
-(csetq indicate-buffer-boundaries
-       '((top . right)
-         (bottom . right)
-         (t . nil)))
-
+;; simple.el
+(csetq mark-ring-max 128)
+(csetq global-mark-ring-max 256)
+(csetq save-interprogram-paste-before-kill t)
+(csetq kill-ring-max 128)
+(csetq kill-do-not-save-duplicates t)
+(csetq read-quoted-char-radix 16)
+(csetq eval-expression-print-length nil)
+(csetq eval-expression-print-level nil)
+(csetq async-shell-command-display-buffer nil)
+(csetq async-shell-command-buffer 'new-buffer)
 (csetq shell-command-prompt-show-cwd t)
+(csetq set-mark-command-repeat-pop t)
 
 (transient-mark-mode t)
+(auto-save-mode -1)
 (delete-selection-mode t)
+(size-indication-mode -1)
+(line-number-mode t)
+(column-number-mode t)
+
 (winner-mode t)
 (minibuffer-depth-indicate-mode t)
 (blink-cursor-mode -1)
-(auto-save-mode -1)
 (save-place-mode t)
 
-(csetq frame-resize-pixelwise t)
-(csetq window-combination-resize t)
-(csetq frame-title-format
-       '(:eval (if (buffer-file-name)
-                   (abbreviate-file-name (buffer-file-name))
-                 "%b")))
+(use-package user-auto-revert
+  :load-path "lisp")
+
+(add-hook 'focus-out-hook #'garbage-collect)
+
+;;
+;; Mode-line
+;;
+(csetq mode-line-buffer-identification
+       '(:eval (format-mode-line
+                (propertized-buffer-identification
+                 (or (when-let* ((buffer-file-truename buffer-file-truename)
+                                 (prj (cdr-safe (project-current)))
+                                 (prj-parent (directory-file-name (expand-file-name prj))))
+                      (concat (file-relative-name (file-name-directory buffer-file-truename) prj-parent) (file-name-nondirectory buffer-file-truename)))
+                  "%b")))))
+
+(defun mode-line-vc ()
+  "Will returing the same thing as variable `vc-mode', but with a hard-coded max length."
+  (if vc-mode
+      (substring vc-mode 0 (min 30 (length vc-mode)))
+    ""))
+
+(csetq mode-line-format
+       '("%e" mode-line-front-space mode-line-mule-info mode-line-client mode-line-modified mode-line-remote mode-line-frame-identification mode-line-buffer-identification "   " mode-line-position
+         (:eval (mode-line-vc))
+         "  " minions-mode-line-modes mode-line-misc-info mode-line-end-spaces))
 
 ;; Enable these functions
 (mapc (lambda (x) (put x 'disabled nil))
@@ -264,31 +310,15 @@
 (csetq indent-tabs-mode nil)
 (csetq tab-always-indent nil)
 (csetq indicate-empty-lines t)
-(csetq require-final-newline t)
 (csetq fill-column 80)
-(csetq sh-basic-offset 2)
 
 (add-hook 'text-mode-hook #'auto-fill-mode)
 
 ;; Some special file names
 (add-to-list 'auto-mode-alist '("\\.?bash.*" . shell-script-mode))
 
-(set-face-attribute 'default nil
-                    :family "Iosevka SS09 Extended"
-                    :height 105
-                    :weight 'normal)
-
-(set-face-attribute 'variable-pitch nil
-                    :family "Fira Sans"
-                    :height 105
-                    :weight 'normal)
-
 (when (member "Symbola" (font-family-list))
   (set-fontset-font t 'unicode "Symbola" nil 'prepend))
-
-(size-indication-mode -1)
-(line-number-mode t)
-(column-number-mode t)
 
 ;; (csetq display-buffer-alist
 ;;        `((,(rx string-start
@@ -320,17 +350,16 @@
 ;;   (window-height . 0.25)))
 
 (push `(,(rx string-start "*compilation")
-         (display-buffer-reuse-window
-          display-buffer-in-side-window)
-         (side            . bottom)
-         (reusable-frames . nil)
-         (window-height   . 0.25))
+        (display-buffer-reuse-window
+         display-buffer-in-side-window)
+        (side            . bottom)
+        (reusable-frames . nil)
+        (window-height   . 0.25))
       display-buffer-alist)
 
 ;;
 ;; Customization that doesn't require use-package
 ;;
-
 
 ;; When creating new buffers, use `auto-mode-alist' to automatically set the major mode.
 (csetq major-mode (lambda ()
@@ -338,10 +367,13 @@
                       (let ((buffer-file-name (buffer-name)))
                         (set-auto-mode)))))
 
-(csetq diff-switches '("-u" "-p" "-w"))
-(add-hook 'diff-mode-hook #'diff-delete-empty-files)
-(add-hook 'diff-mode-hook #'diff-make-unified)
-(add-hook 'diff-mode-hook #'smerge-mode)
+(use-package diff :ensure nil
+  :commands diff-mode
+  :gfhook #'diff-delete-empty-files #'diff-make-unified #'smerge-mode
+  :custom
+  (diff-font-lock-prettify t)
+  (diff-font-lock-syntax 'hunk-also)
+  (diff-switches '("-u" "-p" "-w")))
 
 (csetq ediff-diff-options "-w")
 (csetq ediff-highlight-all-diffs nil)
@@ -353,12 +385,19 @@
 (csetq vc-git-diff-switches '("--ignore-space-change" "--ignore-all-space" "--no-ext-diff" "--stat" "--diff-algorithm=histogram"))
 (csetq vc-git-print-log-follow t)
 
-(csetq savehist-additional-variables '(search-ring regexp-search-ring compile-command calc-stack))
-(csetq savehist-ignored-variables '(tmm--history yes-or-no-p-history))
-(csetq savehist-autosave-interval 60)
-(csetq history-length 1000)
-(csetq history-delete-duplicates t)
-(savehist-mode t)
+(csetq tab-bar-close-button-show nil)
+(csetq tab-bar-show 1)
+
+(use-package savehist :ensure nil
+  :custom
+  (savehist-additional-variables '(search-ring regexp-search-ring compile-command calc-stack))
+  (savehist-ignored-variables '(tmm--history yes-or-no-p-history))
+  (savehist-autosave-interval 60)
+  (savehist-save-minibuffer-history t)
+  (history-length 3000)
+  (history-delete-duplicates t)
+  :config
+  (savehist-mode t))
 
 (csetq hexl-bits 8)
 
@@ -394,6 +433,7 @@ then it takes a second \\[keyboard-quit] to abort the minibuffer."
     (abort-recursive-edit)))
 
 (defun hide-trailing-whitespace ()
+  "Used for hooks to various modes."
   (setq-local show-trailing-whitespace nil))
 
 (defun user/garbage-collect ()
@@ -418,8 +458,8 @@ then it takes a second \\[keyboard-quit] to abort the minibuffer."
 (add-hook 'minibuffer-setup-hook #'hide-trailing-whitespace)
 
 ;; Increase the memory while in the minibuffer
-;; (add-hook 'minibuffer-setup-hook #'user/minibuffer-setup-hook)
-;; (add-hook 'minibuffer-exit-hook #'user/minibuffer-exit-hook)
+(add-hook 'minibuffer-setup-hook #'user/minibuffer-setup-hook)
+(add-hook 'minibuffer-exit-hook #'user/minibuffer-exit-hook)
 
 (general-define-key
  :keymaps '(minibuffer-local-map
@@ -435,7 +475,8 @@ then it takes a second \\[keyboard-quit] to abort the minibuffer."
 
 ;; Thank you u/ouroboroslisp
 (defun user/calculate-lisp-indent (&optional parse-start)
-  "Add better indentation for quoted and backquoted lists."
+  "Add better indentation for quoted and backquoted lists.
+PARSE-START indicates where the parsing should start in the file (point)."
   ;; This line because `calculate-lisp-indent-last-sexp` was defined with `defvar`
   ;; with it's value ommited, marking it special and only defining it locally. So
   ;; if you don't have this, you'll get a void variable error.
@@ -622,6 +663,7 @@ then it takes a second \\[keyboard-quit] to abort the minibuffer."
 ;;
 
 (general-unbind
+  "<f2>"
   "M-o"
   "C-x C-z"
   "C-x f"
@@ -633,6 +675,7 @@ then it takes a second \\[keyboard-quit] to abort the minibuffer."
 (use-package user-utils
   :load-path "lisp"
   :general
+  ("M-`" #'user/open-terminal)
   ("M-]" #'user/next-error)
   ("M-[" #'user/prev-error)
   ("M-j" #'user/join-line)
@@ -663,7 +706,7 @@ then it takes a second \\[keyboard-quit] to abort the minibuffer."
 (general-define-key "<C-right>" #'forward-to-word)
 (general-define-key "C-d" #'delete-forward-char)
 (general-define-key [remap just-one-space] #'cycle-spacing)
-(general-define-key [remap newline] #'default-indent-new-line)
+(general-define-key [remap newline] #'newline-and-indent)
 (general-define-key [remap isearch-forward] #'isearch-forward-regexp)
 (general-define-key [remap isearch-forward-regexp] #'isearch-forward)
 (general-define-key [remap isearch-backward] #'isearch-backward-regexp)
@@ -705,22 +748,23 @@ then it takes a second \\[keyboard-quit] to abort the minibuffer."
 
   :ghook 'prog-mode-hook
 
+  :custom-face
+  (whitespace-tab ((t (:background nil :foreground "light gray"))))
+
   :custom
   (whitespace-display-mappings
    '((tab-mark ?\t [187 ?\t])))
-  (whitespace-style '(face tab-mark trailing)))
+  (whitespace-style '(face tabs tab-mark trailing)))
 
 (use-package recentf :ensure nil
   :custom
   (recentf-auto-cleanup 'never)
   (recentf-exclude (list
-                    "/usr/share/emacs/.*\\'"
-                    "/elpa/.*\\'"               ; Package files
+                    "/elpa/.*\\'"
                     "/.ccls-cache/.*\\'"
                     "/.clangd/.*\\'"
-                    "PKGBUILD"                  ; ArchLinux aur
-                    "crontab.*"
-                    "/usr/lib/python.*\\'"      ;
+                    "PKGBUILD"
+                    "/usr/.*\\'"
                     "/tmp/.*\\'"
                     #'ignoramus-boring-p))
   (recentf-max-saved-items 500)
@@ -733,13 +777,13 @@ then it takes a second \\[keyboard-quit] to abort the minibuffer."
   (push no-littering-etc-directory recentf-exclude)
 
   (recentf-mode t)
-  (run-at-time (* 5 60) (* 5 60) #'recentf-save-list))
+  (run-at-time (* 1 60) (* 1 60) #'recentf-save-list))
 
 (use-package ibuffer :ensure nil
   :preface
   (defun ibuffer-switch-to-filter ()
     (ibuffer-switch-to-saved-filter-groups "default"))
-  :gfhook #'ibuffer-auto-mode #'ibuffer-switch-to-filter
+  :gfhook #'ibuffer-auto-mode #'ibuffer-switch-to-filter #'hl-line-mode
   :general
   ("C-x C-b" #'ibuffer)
   :custom
@@ -766,6 +810,7 @@ then it takes a second \\[keyboard-quit] to abort the minibuffer."
                   (name . "\*scratch\*")))
 
       ("Virtual" (name . "\*")))))
+  (ibuffer-display-summary nil)
   (ibuffer-default-shrink-to-minimum-size t)
   (ibuffer-show-empty-filter-groups nil))
 
@@ -847,6 +892,10 @@ then it takes a second \\[keyboard-quit] to abort the minibuffer."
             "<tab>" #'user/dired-next-window)
 
   :custom
+  (dired-x-hands-off-my-keys t)
+  (dired-isearch-filenames 'dwim)
+  (dired-create-destination-dirs 'ask)
+  (dired-vc-rename-file t)
   (dired-auto-revert-buffer t)
   (dired-dwim-target t)
   (dired-hide-details-hide-information-lines nil)
@@ -874,12 +923,13 @@ then it takes a second \\[keyboard-quit] to abort the minibuffer."
   :commands dired-narrow
   :general
   (:keymaps 'dired-mode-map
-            "/" #'dired-narrow))
+            "/" #'dired-narrow)
+  :custom
+  (dired-narrow-exit-when-one-left t))
 
 (use-package diredfl
-  :after dired
-  :config
-  (diredfl-global-mode t))
+  :defer t
+  :ghook ('dired-mode-hook #'diredfl-mode))
 
 (use-package dired-git-info
   :general
@@ -899,12 +949,16 @@ then it takes a second \\[keyboard-quit] to abort the minibuffer."
   (expand-region-autocopy-register "e"))
 
 (use-package symbol-overlay
-  :ghook 'text-mode-hook 'prog-mode-hook
+  :preface
+  (define-global-minor-mode global-symbol-overlay-mode symbol-overlay-mode
+    (lambda () (symbol-overlay-mode t)))
   :general
   ("M-*" #'symbol-overlay-put)
   ("M-n" #'symbol-overlay-jump-next)
   ("M-p" #'symbol-overlay-jump-prev)
   ("M-8" #'symbol-overlay-toggle-in-scope)
+  :init
+  (global-symbol-overlay-mode t)
   :custom-face
   (symbol-overlay-default-face ((t (:inherit underline))))
   :custom
@@ -1005,7 +1059,7 @@ then it takes a second \\[keyboard-quit] to abort the minibuffer."
   (ivy-use-virtual-buffers t)
   (ivy-virtual-abbreviate 'full)
   (ivy-wrap t)
-  :config
+  :init
   (ivy-mode t))
 
 (use-package counsel
@@ -1014,34 +1068,48 @@ then it takes a second \\[keyboard-quit] to abort the minibuffer."
            "c" #'counsel-rg
            "g" #'counsel-git-grep
            "s" #'swiper)
+  :preface
+  ;; http://xenodium.com/emacss-counsel-m-x-meets-multiple-cursors/index.html
+  (defun user/counsel-M-x-action (orig-fun &rest r)
+    "Additional support for multiple cursors."
+    (apply orig-fun r)
+    (let ((cmd (intern (counsel--string-trim-left (nth 0 r) "\\^"))))
+      (when (and (boundp 'multiple-cursors-mode)
+                 multiple-cursors-mode
+                 cmd
+                 (not (memq cmd mc--default-cmds-to-run-once))
+                 (not (memq cmd mc/cmds-to-run-once))
+                 (or mc/always-run-for-all
+                     (memq cmd mc--default-cmds-to-run-for-all)
+                     (memq cmd mc/cmds-to-run-for-all)
+                     (mc/prompt-for-inclusion-in-whitelist cmd)))
+        (mc/execute-command-for-all-fake-cursors cmd))))
   :custom
   (counsel-describe-function-preselect 'ivy-function-called-at-point)
   (counsel-grep-post-action-hook '(recenter))
   (counsel-mode-override-describe-bindings t)
-  :config
-  (counsel-mode t))
+  :init
+  (counsel-mode t)
+  (advice-add #'counsel-M-x-action :around #'user/counsel-M-x-action))
 
 (use-package ivy-rich
+  :after ivy
   :custom
   (ivy-rich-switch-buffer-align-virtual-buffer t)
   (ivy-rich-path-style 'abbrev)
-  :config
+  :init
   (ivy-rich-mode t))
 
 (use-package ivy-posframe
+  :after ivy
   :custom
   (ivy-posframe-display-functions-alist
    '((swiper . nil)
      (t . ivy-posframe-display-at-point)))
-
   :config
   (ivy-posframe-mode t))
 
 (use-package company
-  :preface
-  (defun disable-company-mode ()
-    (company-mode -1))
-
   :general
   (:keymaps 'company-active-map
             "ESC" #'company-abort
@@ -1049,8 +1117,8 @@ then it takes a second \\[keyboard-quit] to abort the minibuffer."
             "C-n" #'company-select-next
             "C-p" #'company-select-previous
             "C-w" nil)
-
   :custom
+  (company-global-modes '(not term-mode gud-mode shell-mode))
   (company-dabbrev-code-ignore-case t)
   (company-dabbrev-downcase nil)
   (company-dabbrev-ignore-case t)
@@ -1059,15 +1127,22 @@ then it takes a second \\[keyboard-quit] to abort the minibuffer."
   (company-require-match nil)
   (company-selection-wrap-around t)
   (company-tooltip-align-annotations t)
-  (company-tooltip-flip-when-above t)
+  (company-tooltip-flip-when-above nil)
   ;; (company-occurrence-weight-function #'company-occurrence-prefer-any-closest)
   ;; (company-transformers '(company-sort-by-occurrence))
-
   :init
   (global-company-mode t))
 
+(use-package company-posframe
+  :after company
+  :custom
+  (company-posframe-quickhelp-delay nil)
+  (company-posframe-show-indicator nil)
+  (company-posframe-show-metadata nil)
+  :config
+  (company-posframe-mode t))
+
 (use-package eacl
-  :commands eacl-complete-line
   :general ("C-x C-l" #'eacl-complete-line))
 
 ;;
@@ -1156,6 +1231,7 @@ That way we don't remove the whole regexp for a simple typo.
            "p" #'rg-project
            "l" #'rg-literal)
   :custom
+  (rg-custom-type-aliases nil)
   (rg-ignore-case 'smart)
   (rg-hide-command nil))
 
@@ -1203,8 +1279,13 @@ found, an error is signaled."
   :custom
   (show-paren-delay 0)
   (show-paren-when-point-inside-paren t)
-  :config
-  (show-paren-mode t))
+  (show-paren-when-point-in-periphery t)
+  :ghook ('after-init-hook #'show-paren-mode t))
+
+(use-package string-inflection)
+;; :general
+;; (:keymaps 'prog-mode-map
+;;           "C-M-j" #'string-inflection-all-cycle))
 
 (use-package comment-dwim-2
   :general ("M-;" #'comment-dwim-2))
@@ -1216,6 +1297,11 @@ found, an error is signaled."
   :ghook ('dumb-jump-after-jump-hook #'recenter-top-bottom))
 
 (use-package cc-mode :ensure nil
+  :general
+  (:keymaps 'c-mode-base-map
+            "C-=" #'user/c-mode-toggle-funcall
+            [remap newline] #'c-context-line-break
+            [remap open-line] #'c-context-open-line)
   :preface
   (defconst user/allman-style
     '((c-electric-pound-behavior     . (alignleft))
@@ -1311,8 +1397,6 @@ found, an error is signaled."
                       (join-line -1)))))
             (error nil))))))
 
-  (general-define-key "C-=" #'user/c-mode-toggle-funcall)
-
   :ghook ('c-mode-common-hook #'user/c-mode-common-hook)
 
   :custom
@@ -1349,6 +1433,7 @@ found, an error is signaled."
     ("s" lsp-ui-peek-find-workspace-symbol "symbol"))
 
   :custom
+  (ccls-sem-highlight-method 'font-lock)
   (ccls-initialization-options
    '(:diagnostics (:onOpen 0 :onSave 0 :onChange -1 :spellChecking :json-false)
      :highlight (:largeFileSize 0))))
@@ -1368,11 +1453,6 @@ found, an error is signaled."
     (csetq python-shell-completion-string-code
            "';'.join(get_ipython().Completer.all_completions('''%s'''), module_completion('''%s'''))\n")))
 
-(use-package pipenv
-  :ghook 'python-mode-hook
-  :custom
-  (pipenv-projectile-after-switch-function #'pipenv-projectile-after-switch-extended))
-
 (use-package pyvenv
   :preface
   (defun user/auto-virtualenv ()
@@ -1385,6 +1465,9 @@ found, an error is signaled."
           (pyvenv-activate (expand-file-name "venv" root)))))
 
   :ghook ('python-mode-hook #'user/auto-virtualenv))
+
+(use-package haskell-mode
+  :defer t)
 
 (use-package js2-mode
   :mode "\\.js\\'"
@@ -1435,12 +1518,19 @@ found, an error is signaled."
   :custom
   ;; performance reasons (and they're not really usefull for me)
   (lsp-enable-on-type-formatting nil)
+  (lsp-enable-folding nil)
   (lsp-enable-indentation nil)
   (lsp-before-save-edits nil)
-  (lsp-enable-symbol-highlighting nil "`symbol-overlay' it's more usefull (for me).")
-  (lsp-auto-guess-root nil "Sometimes it doesn't work, but it's ok")
+  (lsp-enable-symbol-highlighting nil)
+  (lsp-enable-semantic-highlighting nil)
+  (lsp-auto-guess-root nil)
+  (lsp-restart 'auto-restart)
   (lsp-pyls-plugins-rope-completion-enabled nil "This is very very slow (we allow jedi only)")
   (lsp-file-watch-threshold 9000)
+  (lsp-eldoc-render-all t)
+
+  ;; for now disable it since I have >50k per repo
+  (lsp-enable-file-watchers nil)
 
   ;; Enable this when things are slow
   ;; (lsp-print-performance t)
@@ -1507,7 +1597,7 @@ found, an error is signaled."
             "f f" #'flymake-display-at-point)
   :custom
   (flymake-no-changes-timeout nil "Don't check after changes, only after save")
-  (flymake-start-syntax-check-on-newline nil "Don't check on newlines (I hate it)"))
+  (flymake-start-syntax-check-on-newline nil "Don't check on newlines"))
 
 (use-package flymake-diagnostic-at-point
   :defer t
@@ -1532,17 +1622,14 @@ found, an error is signaled."
             "M-I" #'imenu-anywhere))
 
 (use-package yasnippet
-  :commands yas-minor-mode
-  :ghook
-  ('(text-mode-hook prog-mode-hook) #'yas-minor-mode)
   :custom
   (yas-verbosity 1 "Only errors")
   (yas-triggers-in-field t "Snippets inside snippets")
   (yas-wrap-around-region t)
   (yas-also-auto-indent-first-line t)
   :config
+  (yas-global-mode t)
   (yas-reload-all))
-
 
 ;;
 ;; Small emacs enhacements
@@ -1587,8 +1674,10 @@ found, an error is signaled."
 (use-package rainbow-mode
   :commands rainbow-mode)
 
+(use-package rainbow-delimiters
+  :commands rainbow-delimiters-mode)
+
 (use-package projectile
-  :demand t
   :general ("C-c p" 'projectile-command-map)
   :custom
   (projectile-completion-system 'ivy)
@@ -1596,14 +1685,16 @@ found, an error is signaled."
   (projectile-sort-order 'recentf)
   (projectile-use-git-grep t)
 
-  :config
+  (projectile-project-root-files '())
+  (projectile-project-root-files-top-down-recurring '("Makefile"))
+
+  :init
   (projectile-mode t)
 
   (push "_build" projectile-globally-ignored-directories)
   (push ".vscode" projectile-globally-ignored-directories)
   (push ".ccls-cache" projectile-globally-ignored-directories)
-  (push ".clangd" projectile-globally-ignored-directories)
-  )
+  (push ".clangd" projectile-globally-ignored-directories))
 
 (use-package which-key
   :custom
@@ -1617,16 +1708,8 @@ found, an error is signaled."
 ;; Shell and Terminals
 ;;
 
-(defun shell-like-mode-hook ()
-  (disable-company-mode)
-  (setq-local scroll-margin 0))
-
-(add-hook 'term-mode-hook #'shell-like-mode-hook)
-
 (use-package eshell :ensure nil
-  :defer t
-  :gfhook #'shell-like-mode-hook
-
+  :commands eshell
   :ghook ('eshell-load-hook
           (lambda ()
             (push 'eshell-tramp eshell-modules-list)
@@ -1656,25 +1739,18 @@ found, an error is signaled."
   ("C-c z n" #'multi-term-next)
   ("C-c z p" #'multi-term-prev)
 
-  :gfhook #'shell-like-mode-hook
-
   :custom
   ;; (multi-term-program "screen")
   ;; (multi-term-program-switches "-DR")
+  (term-buffer-maximum-size 0)
   (multi-term-dedicated-select-after-open-p t)
   (multi-term-scroll-show-maximum-output t))
-
-(use-package shell :ensure nil
-  :if (eq system-type 'gnu/linux)
-  :defer t
-  :ghook ('shell-mode-hook #'shell-like-mode-hook))
 
 ;;
 ;; Debugging
 ;;
 
 (use-package gud :ensure nil
-  :gfhook #'disable-company-mode
   :custom
   (gdb-many-windows t))
 
@@ -1689,13 +1765,13 @@ found, an error is signaled."
 
 (use-package magit
   :general ("C-x g" #'magit-status)
-
   :ghook ('git-commit-mode-hook #'git-commit-turn-on-flyspell)
 
   :custom
   (magit-diff-arguments
    '("--ignore-space-change" "--ignore-all-space"
      "--no-ext-diff" "--stat" "--diff-algorithm=histogram"))
+  (git-commit-style-convention-checks '(non-empty-second-line overlong-summary-line))
   (magit-diff-refine-hunk t)
   (magit-display-buffer-function #'magit-display-buffer-fullframe-status-v1)
   (magit-process-popup-time 20)
@@ -1712,20 +1788,13 @@ found, an error is signaled."
   :custom
   (vc-msg-git-show-commit-function #'magit-show-commit))
 
-;;
-;; System replacements
-;;
-
-(use-package daemons
-  :commands (daemons daemons-start daemons-stop daemons-status)
+(use-package diff-hl
+  :after vc
   :custom
-  (daemons-always-sudo t))
-
-(use-package disk-usage
-  :commands disk-usage)
-
-(use-package docker
-  :commands docker)
+  (diff-hl-draw-borders t)
+  (diff-hl-side 'right)
+  :config
+  (global-diff-hl-mode t))
 
 (use-package rmsbolt
   :commands rmsbolt-starter)
@@ -1766,6 +1835,101 @@ found, an error is signaled."
   :custom
   (nov-text-width 80))
 
+(use-package elfeed
+  :commands (elfeed elfeed-update)
+  :preface
+  (defun user/elfeed-visual-line-toggle ()
+    (interactive)
+    (setq-local fill-column 120)
+    (visual-fill-column-mode 'toggle)
+    (visual-line-mode 'toggle))
+
+  :general
+  ("C-x w" #'elfeed)
+  (:keymaps 'elfeed-show-mode-map
+            "v" #'user/elfeed-visual-line-toggle
+            "w" #'elfeed-show-visit)
+  (:keymaps 'elfeed-search-mode-map
+            "U" #'elfeed-update)
+
+  :init
+  (csetq elfeed-search-title-max-width 100)
+  (csetq elfeed-search-title-min-width 30)
+  (csetq elfeed-search-filter "@1-weeks-ago")
+  (csetq elfeed-feeds
+         '(("https://www.youtube.com/feeds/videos.xml?channel_id=UC3ts8coMP645hZw9JSD3pqQ" tech)        ;; Andreas Kling
+           ("https://www.youtube.com/feeds/videos.xml?channel_id=UC7S6EpMQ5QNGRg7uJmJWXNw" tech)        ;; QueueQueueHack
+           ("https://www.youtube.com/feeds/videos.xml?channel_id=UCBa659QWEk1AI4Tg--mrJ2A" tech)        ;; Tom Scott
+           ("https://www.youtube.com/feeds/videos.xml?channel_id=UCKTehwyGCKF-b2wo0RKwrcg" tech)        ;; Bisqwit
+           ("https://www.youtube.com/feeds/videos.xml?channel_id=UCbfYPyITQ-7l4upoX8nvctg" tech)        ;; Two Minute Papers
+           ("https://www.youtube.com/feeds/videos.xml?channel_id=UCS0N5baNlQWJCUrhCEo8WlA" tech)        ;; Ben Eater
+           ("https://www.youtube.com/feeds/videos.xml?channel_id=UCxHAlbZQNFU2LgEtiqd2Maw" tech)        ;; Jason Turner
+
+           ("https://www.youtube.com/feeds/videos.xml?channel_id=UCNf56PUyMI0wUyZ8KRhg2AQ" cinema)      ;; Cinema Nippon
+           ("https://www.youtube.com/feeds/videos.xml?channel_id=UC7GV-3hrA9kDKrren0QMKMg" cinema)      ;; CinemaTyler
+           ("https://www.youtube.com/feeds/videos.xml?channel_id=UCAGkSxTlleqxRauEqupyVPw" cinema)      ;; The Cinema Cartography
+           ("https://www.youtube.com/feeds/videos.xml?channel_id=UCErSSa3CaP_GJxmFpdjG9Jw" cinema)      ;; Lessons from the Screenplay
+           ("https://www.youtube.com/feeds/videos.xml?channel_id=UCKlnkrjfJKGpuZ3-kkhiaXQ" cinema)      ;; Film Histories
+           ("https://www.youtube.com/feeds/videos.xml?channel_id=UCbphDfwSJmxk1Ny_3Oicrng" cinema)      ;; Storytellers
+           ("https://www.youtube.com/feeds/videos.xml?channel_id=UCx0L2ZdYfiq-tsAXb8IXpQg" cinema)      ;; JustWrite
+           ("https://www.youtube.com/feeds/videos.xml?channel_id=UCxO_ya-RmAXCXJCU54AxYFw" cinema)      ;; New Frame Plus
+           ("https://www.youtube.com/feeds/videos.xml?channel_id=UCCVmAQ9b63_oxitZ9Zgh8nA" cinema)      ;; Lucas Gravey
+           ("https://www.youtube.com/feeds/videos.xml?channel_id=UCZ7g7HfH1gWmhgxW47IcW7Q" cinema)      ;; Beyond the Frame
+           ("https://www.youtube.com/feeds/videos.xml?channel_id=UCI9DUIgtRGHNH_HmSTcfUbA" cinema)      ;; The Closer Look
+           ("https://www.youtube.com/feeds/videos.xml?channel_id=UCL5kBJmBUVFLYBDiSiK1VDw" cinema)      ;; Criswell
+           ("https://www.youtube.com/feeds/videos.xml?channel_id=UCWTFGPpNQ0Ms6afXhaWDiRw" cinema)      ;; Now You See It
+           ("https://www.youtube.com/feeds/videos.xml?channel_id=UCf29Sq6-XxLQG_XuJwMHaFg" cinema)      ;; Nando v Movies
+
+           ("https://www.youtube.com/feeds/videos.xml?channel_id=UCxTdWpLJurbGlFMWOwXWG_A" history)     ;; Step Back History
+           ("https://www.youtube.com/feeds/videos.xml?channel_id=UCQD-0MjUbDBwm2UTVYr0Dag" history)     ;; Suibhne
+           ("https://www.youtube.com/feeds/videos.xml?channel_id=UCKMnl27hDMKvch--noWe5CA" history)     ;; Cogito
+
+           ("https://www.youtube.com/feeds/videos.xml?channel_id=UCO6nDCimkF79NZRRb8YiDcA" art)         ;; Storied (Monstrum)
+           ("https://www.youtube.com/feeds/videos.xml?channel_id=UCmQThz1OLYt8mb2PU540LOA" art)         ;; The Art Assignment
+
+           ("https://www.youtube.com/feeds/videos.xml?channel_id=UCoW-z7WLeh9IAcr85tnDG6Q" literature)  ;; Malazan
+
+           ("https://www.youtube.com/feeds/videos.xml?channel_id=UCsXVk37bltHxD1rDPwtNM8Q" science)     ;; Kurzgesagt
+           ("https://www.youtube.com/feeds/videos.xml?channel_id=UC-3SbfTPJsL8fJAPKiVqBLg" science)     ;; "Deep Look"
+           ("https://www.youtube.com/feeds/videos.xml?channel_id=UCotwjyJnb-4KW7bmsOoLfkg" science)     ;; "Art of the Problem"
+           ("https://www.youtube.com/feeds/videos.xml?channel_id=UCzR-rom72PHN9Zg7RML9EbA" science)     ;; "PBS Eons"
+           ("https://www.youtube.com/feeds/videos.xml?channel_id=UCdJ9oJ2GUF8Vmb-G63ldGWg" science)     ;; "Reactions"
+           ("https://www.youtube.com/feeds/videos.xml?channel_id=UCgRBRE1DUP2w7HTH9j_L4OQ" science)     ;; "Medlife Crisis"
+           ("https://www.youtube.com/feeds/videos.xml?channel_id=UC7_gcs09iThXybpVgjHZ_7g" science)     ;; "PBS Space Time"
+           ("https://www.youtube.com/feeds/videos.xml?channel_id=UCSIvk78tK2TiviLQn4fSHaw" science)     ;; "Up and Atom"
+           ("https://www.youtube.com/feeds/videos.xml?channel_id=UCMk_WSPy3EE16aK5HLzCJzw" science)     ;; "NativLang"
+
+           ("https://www.youtube.com/feeds/videos.xml?channel_id=UC8XjmAEDVZSCQjI150cb4QA" pop)         ;; Knowing Better
+           ("https://www.youtube.com/feeds/videos.xml?channel_id=UCSriLWQC2J6wNeWXOGlIV4w" pop)         ;; Corporis
+           ("https://www.youtube.com/feeds/videos.xml?channel_id=UC2C_jShtL725hvbm1arSV9w" pop)         ;; GCP Grey
+           ("https://www.youtube.com/feeds/videos.xml?channel_id=UCuPgdqQKpq4T4zeqmTelnFg" pop)         ;; kaptainkristian
+           ("https://www.youtube.com/feeds/videos.xml?channel_id=UC-gjznzViwMols6dz89qLbg" pop)         ;; Entertain The Elk
+           ("https://www.youtube.com/feeds/videos.xml?channel_id=UCHiwtz2tCEfS17N9A-WoSSw" pop)         ;; Pop Culture Detective
+           ("https://www.youtube.com/feeds/videos.xml?channel_id=UCqJ-Xo29CKyLTjn6z2XwYAw" pop)         ;; Game Maker's Toolkit
+           ("https://www.youtube.com/feeds/videos.xml?channel_id=UCaPRCWnFAzeI3_tr--Qw5qg" pop)         ;; Human Interests
+           ("https://www.youtube.com/feeds/videos.xml?channel_id=UCiB8h9jD2Mlxx96ZFnGDSJw" pop)         ;; Origin Of Everything
+           ("https://www.youtube.com/feeds/videos.xml?channel_id=UCs_bV79AmugXVvjaASibPnw" pop)         ;; KhAnubis
+           ("https://www.youtube.com/feeds/videos.xml?channel_id=UCXkNod_JcH7PleOjwK_8rYQ" pop)         ;; Polyphonic
+           ("https://www.youtube.com/feeds/videos.xml?channel_id=UC9RM-iSvTu1uPJb8X5yp3EQ" pop)         ;; Wendover
+
+           ("https://www.youtube.com/feeds/videos.xml?channel_id=UCct9aR7HC79Cv2g-9oDOTLw" religion)    ;; ReligionForBreakfast
+           ("https://www.youtube.com/feeds/videos.xml?channel_id=UCtCTSf3UwRU14nYWr_xm-dQ" religion)    ;; Jonathan Pageau
+
+           ("https://fabiensanglard.net/rss.xml" tech)
+           ("https://danluu.com/atom.xml" tech)
+           ("https://trofi.github.io/feed/atom.xml" tech)
+           ("https://planet.emacslife.com/atom.xml" emacs)
+           ("https://www.phoronix.com/rss.php" linux phoronix)
+           ("https://xkcd.com/atom.xml" comic)
+           ))
+  :config
+  (add-hook 'elfeed-new-entry-hook
+            (elfeed-make-tagger :feed-url "youtube\\.com"
+                                :add '(video youtube)))
+  (add-hook 'elfeed-new-entry-hook
+            (elfeed-make-tagger :before "1 months ago"
+                                :remove 'unread)))
+
 (provide 'init)
 
 ;;; init.el ends here
@@ -1774,4 +1938,18 @@ found, an error is signaled."
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(symbol-overlay-default-face ((t (:inherit underline)))))
+ '(symbol-overlay-default-face ((t (:inherit underline))))
+ '(whitespace-tab ((t (:background nil :foreground "light gray")))))
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(modus-operandi-theme-3d-modeline nil)
+ '(modus-operandi-theme-bold-constructs t)
+ '(modus-operandi-theme-proportional-fonts nil)
+ '(modus-operandi-theme-slanted-constructs nil)
+ '(modus-operandi-theme-visible-fringes nil)
+ '(package-selected-packages
+   '(beginend ccls cmake-font-lock cmake-mode comment-dwim-2 company company-lsp company-posframe counsel counsel-etags cython-mode diff-hl dired-du dired-git-info dired-narrow diredfl dumb-jump eacl elfeed expand-region flymake-diagnostic-at-point general git-timemachine haskell-mode hl-todo hydra iedit ignoramus imenu-anywhere ivy ivy-posframe ivy-rich iy-go-to-char js2-mode json-mode log4j-mode lsp-mode lsp-ui magit magit-gitflow minions modern-cpp-font-lock modus-operandi-theme modus-vivendi-theme multi-term multiple-cursors nasm-mode no-littering nov projectile pyvenv rainbow-delimiters rainbow-mode realgud rg rmsbolt smex string-inflection swiper symbol-overlay undo-tree use-package vc-msg visual-fill-column web-mode wgrep which-key yaml-mode yasnippet)))
+

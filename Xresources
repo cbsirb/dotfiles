@@ -5,10 +5,10 @@ Xft.hintstyle:  hintslight
 Xft.lcdfilter:  lcddefault
 Xft.rgba:       rgb
 
-URxvt.font:             xft:IBM Plex Mono Medium:Style=Regular:size=10
-URxvt.italicFont:       xft:IBM Plex Mono Medium:size=10:italic
-URxvt.boldFont:         xft:IBM Plex Mono Medium:size=10:bold
-URxvt.boldItalicFont:   xft:IBM Plex Mono Medium:size=10:bold:italic
+URxvt.font:             xft:Iosevka Fixed SS10 Extended:size=11:style=Regular
+URxvt.italicFont:       xft:Iosevka Fixed SS10 Extended:size=11:italic
+URxvt.boldFont:         xft:Iosevka Fixed SS10 Extended:size=11:bold
+URxvt.boldItalicFont:   xft:Iosevka Fixed SS10 Extended:size=11:bold:italic
 
 xterm*saveLines: 100000
 
@@ -18,7 +18,7 @@ xterm*termName: xterm-256color
 xterm*locale: true
 xterm*metaSendsEscape: true
 xterm*eightBitInput: false
-xterm*faceName: xft:IBM Plex Mono Medium:style=Regular:size=10
+xterm*faceName: xft:Iosevka Fixed SS10 Extended:style=Regular:size=10
 
 xterm*multiScroll: true
 xterm*jumpScroll: true
@@ -67,8 +67,8 @@ URxvt*iso14755:     false
 URxvt*iso14755_52:  false
 
 ! This is nice-looking
-URxvt*scrollBar: false
-! URxvt*scrollBar_right: true
+URxvt*scrollBar: true
+URxvt*scrollBar_right: true
 URxvt*scrollstyle: plain
 
 ! Do not scroll with output
@@ -94,27 +94,79 @@ URxvt*perl-ext-common:
 ! *background: #000000
 ! *foreground: #ffffff
 
-*background:            #ffffea
-*foreground:            #000000
-xterm*background:       #ffffea
-xterm*foreground:       #000000
+! special
+*foreground:   #000000
+*background:   #ffffff
+*cursorColor:  #000000
 
-*color0:                #000000
-*color1:                #880000
-*color2:                #005500
-*color3:                #663311
-*color4:                #004488
-*color5:                #770077
-*color6:                #007777
-*color7:                #eeeecc
-*color8:                #eaeaea
-*color9:                #ffeaea
-*color10:               #eaffea
-*color11:               #eeee9e
-*color12:               #cceeff
-*color13:               #ffeaff
-*color14:               #eaffff
-*color15:               #ffffea
+! black
+*color0:       #000000
+*color8:       #000000
 
-URxvt*intensityStyles:  false
+! red
+*color1:       #a80000
+*color9:       #b60000
+
+! green
+*color2:       #005200
+*color10:      #006800
+
+! yellow
+*color3:       #8b3800
+*color11:      #904200
+
+! blue
+*color4:       #005589
+*color12:      #1111ee
+
+! magenta
+*color5:       #721045
+*color13:      #7000e0
+
+! cyan
+*color6:       #5e8d87
+*color14:      #205b93
+
+! white
+*color7:       #ffffff
+*color15:      #ffffff
+
+URxvt*intensityStyles:  true
 XTerm*boldColors:       false
+
+! special
+xterm*foreground:   #000000
+xterm*background:   #ffffff
+xterm*cursorColor:  #000000
+
+! black
+xterm*color0:       #000000
+xterm*color8:       #000000
+
+! red
+xterm*color1:       #a80000
+xterm*color9:       #b60000
+
+! green
+xterm*color2:       #005200
+xterm*color10:      #006800
+
+! yellow
+xterm*color3:       #8b3800
+xterm*color11:      #904200
+
+! blue
+xterm*color4:       #005589
+xterm*color12:      #1111ee
+
+! magenta
+xterm*color5:       #721045
+xterm*color13:      #7000e0
+
+! cyan
+xterm*color6:       #5e8d87
+xterm*color14:      #205b93
+
+! white
+xterm*color7:       #ffffff
+xterm*color15:      #ffffff

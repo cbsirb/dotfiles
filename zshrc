@@ -29,14 +29,17 @@ alias gd='git diff'
 
 # Apt stuff
 alias apti='sudo apt install'
-alias aptx='sudo apt remove'
+alias aptx='sudo apt autoremove'
 alias aptu='sudo apt update && sudo apt upgrade'
 alias apts='apt search'
+alias apt-purge-orphans="sudo apt-get purge \$(dpkg -l | grep '^rc' | awk '{print \$2}')"
+alias apt-clean='sudo apt autoremove; sudo apt autoclean'
 
+alias path='echo -e ${PATH//:/\\n}'
 
 alias v='vim'
 
-alias down-mp3='youtube-dl --restrict-filenames -x -f bestaudio --audio-format mp3 --audio-quality 0 -o "%(title)s.%(ext)s" -i'
-alias down-list='youtube-dl --restrict-filenames -x -f bestaudio --audio-format mp3 --audio-quality 0 -o "%(playlist)s/%(playlist_index)s - %(title)s.%(ext)s" -i'
+alias down-mp3='youtube-dl -x -f bestaudio --audio-format mp3 --audio-quality 0 --add-metadata --metadata-from-title "%(artist)s - %(title)s" -o "%(title)s.%(ext)s" -i'
+alias down-list='youtube-dl -x -f bestaudio --audio-format mp3 --audio-quality 0 --add-metadata --metadata-from-title "%(artist)s - %(title)s" -o "%(playlist)s/%(playlist_index)s - %(title)s.%(ext)s" -i'
 
 alias temps="paste <(cat /sys/class/thermal/thermal_zone*/type) <(cat /sys/class/thermal/thermal_zone*/temp) | column -s $'\t' -t | sed 's/...$/.0°C/'"

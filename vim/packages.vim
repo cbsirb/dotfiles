@@ -29,8 +29,8 @@ call minpac#add('romainl/vim-tinyMRU')
 
 call minpac#add('tommcdo/vim-lion')
 
-call minpac#add('dense-analysis/ale')
-call minpac#add('Rip-Rip/clang_complete')
+" call minpac#add('dense-analysis/ale')
+" call minpac#add('Rip-Rip/clang_complete')
 
 " When I start writing html again
 " Plug 'rstacruz/sparkup'
@@ -49,6 +49,9 @@ call minpac#add('junegunn/fzf')
 
 call minpac#add('prabirshrestha/async.vim')
 call minpac#add('prabirshrestha/vim-lsp')
+" call minpac#add('prabirshrestha/asyncomplete.vim')
+" call minpac#add('prabirshrestha/asyncomplete-lsp.vim')
+" call minpac#add('mattn/vim-lsp-settings')
 
 " Colorschemes
 call minpac#add('robertmeta/nofrils', {'type':'opt'})

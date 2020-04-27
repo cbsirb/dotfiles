@@ -1,12 +1,10 @@
 set guioptions=egc "-TmLr
 
+autocmd ColorScheme * if &background == 'dark' | set guioptions+=d | else | set guioptions-=d | endif
+
 set lines=45 columns=125
 
 set guiheadroom=0
 
-if has('win32')
-  set guifont=Iosevka:h11
-else
-  set guifont=IBM\ Plex\ Mono\ 10
-endif
+set guifont=Iosevka\ Fixed\ SS10\ Extended\ 11
 

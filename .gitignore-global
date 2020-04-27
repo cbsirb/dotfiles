@@ -1,0 +1,15 @@
+syntax: glob
+
+.ccls-cache/
+.clangd/
+.vscode/
+tags
+TAGS
+.ccls
+.clang
+.clang_complete
+.projectile
+.dir-locals.el
+.vimrc
+.ycm_extra_conf.py
+compile_commands.json*

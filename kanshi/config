@@ -1,5 +1,10 @@
 {
-    output "Dell Inc. DELL U2415 7MT0181G12DU" mode 1920x1200 position 1920,0
-    output "Dell Inc. DELL U2415 7MT0181G290U" mode 1920x1200 position 0,0
+    output "Lenovo Group Limited LEN T24i-10 VNA2KLM4" mode 1920x1080 position 1920,0
+    output "Lenovo Group Limited LEN T24i-10 VNA2KL65" mode 1920x1080 position 0,0
     output eDP-1 disable
+}
+
+{
+    output "Ancor Communications Inc ASUS VS229 EALMQS093186" mode 1920x1080 position 1920,0
+    output eDP-1 mode 1920x1080 position 0,0
 }

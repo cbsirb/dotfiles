@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import sys
 import json
@@ -8,8 +8,8 @@ import subprocess
 DISPLAY_CONFIGS = [
     [
         {"name": "eDP-1", "cmd": "output {} disable"},
-        {"serial": "7MT0181G12DU", "cmd": "output {} mode 1920x1200 position 1920 0 subpixel rgb"},
-        {"serial": "7MT0181G290U", "cmd": "output {} mode 1920x1200 position 0 0 subpixel rgb"},
+        {"serial": "VNA2KLM4", "cmd": "output {} mode 1920x1200 position 1920 0"},
+        {"serial": "VNA2KL65", "cmd": "output {} mode 1920x1200 position 0 0"},
     ]
 ]
 

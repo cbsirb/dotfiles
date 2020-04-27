@@ -84,12 +84,11 @@ set undofile
 
 if !has('nvim')
   set viminfo+=n~/.vim/cache/viminfo
+  set undodir=~/.vim/cache/undo
+  set backupdir=~/.vim/cache/backup
+  set dir=~/.vim/cache/swap
+  set viewdir=~/.vim/cache/view
 endif
-
-set undodir=~/.vim/cache/undo
-set backupdir=~/.vim/cache/backup
-set dir=~/.vim/cache/swap
-set viewdir=~/.vim/cache/view
 
 set colorcolumn=+1
 set cursorline
@@ -104,7 +103,7 @@ if !has('gui_running') && has('termguicolors')
 endif
 
 if executable("rg")
-  set grepprg=rg\ -H\ --no-heading\ --vimgrep\ -g\ '!{.git,node_modules,vendor}/*'\ -g\ '!tags'\ -g\ '!TAGS'
+  set grepprg=rg\ -H\ --no-heading\ --vimgrep\ -g\ '!{.git,node_modules,vendor,.ccls-cache,.clangd,.vscode}/*'\ -g\ '!tags'\ -g\ '!TAGS'
   set grepformat=%f:%l:%c:%m,%f:%l:%m
 elseif executable("ag")
   set grepprg=ag\ --ignore\ tags\ --ignore\ TAGS\ --vimgrep
@@ -114,7 +113,7 @@ endif
 augroup VIMRC
   autocmd!
 
-  autocmd VimEnter * colorscheme apprentice
+  " autocmd VimEnter * colorscheme apprentice
 
   autocmd VimEnter,GUIEnter * set visualbell t_vb=
 
@@ -245,19 +244,6 @@ nnoremap <space>F :FZF <C-R>=fnameescape(expand('%:p:h'))<CR><CR>
 nmap <space>q <Plug>(qf_qf_toggle)
 nmap <space>l <Plug>(qf_loc_toggle)
 
-" Keep unimpaired convention
-nmap <silent> [W <Plug>(ale_first)
-nmap <silent> [w <Plug>(ale_previous)
-nmap <silent> ]w <Plug>(ale_next)
-nmap <silent> ]W <Plug>(ale_last)
-
-" Lsp stuff
-nnoremap gd :LspDefinition<CR>
-nnoremap gr :LspReferences<CR>
-nnoremap <Space>i :LspDocumentSymbol<CR>
-nnoremap <Space>I :LspWorkspaceSymbol<CR>
-
-
 """"""""""""""""""""""""""""""""""
 " Built-in plugins configuration "
 """"""""""""""""""""""""""""""""""
@@ -288,26 +274,12 @@ let g:qf_statusline        = {}
 let g:qf_statusline.before = '%<\ '
 let g:qf_statusline.after  = '\ %f%=%l\/%-6L\ %3c\ '
 
-let g:clang_library_path = '/usr/lib/x86_64-linux-gnu/libclang-9.so'
-let g:clang_snippets     = 0
-
 let g:UltiSnipsEditSplit   = "vertical"
 let g:UltiSnipsSnippetsDir = '~/.vim'
 
 let g:vim_json_syntax_conceal = 1
 
 let g:pymode_indent = 0
-
-let g:ale_lint_on_text_changed = "never"
-let g:ale_lint_on_insert_leave = 0
-let g:ale_lint_on_save         = 1
-
-let g:ale_statusline_format = ["\u2717 %d", "\u271a %d", "\u2713 ok"]
-let g:ale_echo_msg_format   = '[%linter%] %s [%severity%]'
-
-let g:ale_python_pylint_executable = 'pylint'
-let g:ale_python_auto_pipenv = 1
-let g:ale_python_pylint_auto_pipenv = 1
 
 let g:ale_linters = {
       \ 'cpp': ['gcc'],
@@ -323,6 +295,7 @@ if executable('ccls')
       \ 'cmd': {server_info->['ccls']},
       \ 'root_uri': {server_info->lsp#utils#path_to_uri(lsp#utils#find_nearest_parent_file_directory(lsp#utils#get_buffer_path(), 'compile_commands.json'))},
       \ 'whitelist': ['c', 'ch', 'cpp', 'objc', 'objcpp', 'cc'],
+      \ 'initialization_options': {'diagnostics': {'onOpen': 0, 'onChange': -1, 'spellChecking': v:false}},
       \ })
 endif
 
@@ -340,29 +313,43 @@ let g:lsp_signs_error = {'text': '✗'}
 let g:lsp_signs_warning = {'text': '‼'}
 let g:lsp_async_completion = 1
 
-function! LspEnablePerBuffer() abort
-  ALEDisableBuffer
+let g:lsp_diagnostics_echo_delay = 200
+let g:lsp_diagnostics_float_delay = 200
+let g:lsp_diagnostics_float_cursor = 1
+let g:lsp_virtual_text_enabled = 0
+
+let g:lsp_highlight_references_enabled = 1
+let g:lsp_semantic_enabled = 1
+
+let g:asyncomplete_auto_popup = 1
+
+let g:lsp_fold_enabled = 1
+
+function! s:lsp_buffer_enabled() abort
   nnoremap <buffer> <Space>r :LspRename<CR>
+
+  " Keep unimpaired convention
+  nmap <buffer> <silent> [w :LspPreviousDiagnostic<CR>
+  nmap <buffer> <silent> ]w :LspNextDiagnostic<CR>
+
+  nnoremap <buffer> gd :LspDefinition<CR>
+  nnoremap <buffer> gr :LspReferences<CR>
+  nnoremap <buffer> <Space>i :LspDocumentSymbol<CR>
+  nnoremap <buffer> <Space>I :LspWorkspaceSymbol<CR>
+
+  nnoremap <silent> <buffer> <C-n> :LspNextReference<CR>
+  nnoremap <silent> <buffer> <C-p> :LspPreviousReference<CR>
+
+  nnoremap <silent> <buffer> <F3> :LspPeekDefinition<CR>
+  nnoremap <silent> <buffer> <F4> :LspPeekTypeDefinition<CR>
+
   setlocal omnifunc=lsp#complete
-endfunction
-
-function! LspPerBuffer() abort
-  let l:servers = lsp#get_whitelisted_servers()
-
-  if 0 == len(l:servers)
-      return
-  endif
-
-  for l:server in l:servers
-    if lsp#get_server_status(l:server) == 'running'
-      call LspEnablePerBuffer()
-      break
-    endif
-  endfor
+  setlocal foldmethod=expr
+  setlocal foldexpr=lsp#ui#vim#folding#foldexpr()
+  setlocal foldtext=lsp#ui#vim#folding#foldtext()
 endfunction
 
 augroup LSP
   autocmd!
-  autocmd User lsp_server_init call LspEnablePerBuffer()
-  autocmd BufWinEnter * call LspPerBuffer()
+  autocmd User lsp_buffer_enabled call s:lsp_buffer_enabled()
 augroup END

@@ -40,6 +40,7 @@
 [core]
     # ignore executable bit
     fileMode = false
+    excludesfile = ~/dotfiles/.gitignore-global
 
 [diff]
     algorithm = histogram
@@ -53,3 +54,7 @@
 ;     fsckobjects = true
 ; [receive]
 ;     fsckObjects = true
+[help]
+	autocorrect = 1
+[pull]
+	rebase = true
