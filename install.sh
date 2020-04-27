@@ -67,6 +67,9 @@ install_dotfile "bash_logout"
 install_dotfile "bash_profile"
 install_dotfile "bashrc"
 install_dotfile "inputrc"
+install_dotfile "zshrc"
+install_dotfile "zprofile"
+install_dotfile "zpreztorc"
 
 install_dotfile "gitconfig"
 
@@ -90,13 +93,3 @@ for xfile in bin/*
 do
     install_executable $xfile
 done
-
-# install_config_dir "i3"
-# install_config_dir "conky"
-# install_config_dir "ncmpcpp"
-# install_config_dir "mpd"
-# if [ ! -d "$HOME/.config/mpd/playlists" ]; then
-#     mkdir "$HOME/.config/mpd/playlists"
-# fi
-
-
