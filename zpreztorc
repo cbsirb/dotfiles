@@ -32,21 +32,23 @@ zstyle ':prezto:load' pmodule \
   'editor' \
   'history' \
   'archive' \
+  'syntax-highlighting' \
   'history-substring-search' \
   'directory' \
   'spectrum' \
   'utility' \
   'completion' \
   'prompt' \
-  'pacman' \
-  'fasd'
+  'fasd' \
+  'autosuggestions'
 
 #
 # Autosuggestions
 #
 
 # Set the query found color.
-# zstyle ':prezto:module:autosuggestions:color' found ''
+zstyle ':prezto:module:autosuggestions' color 'yes'
+zstyle ':prezto:module:autosuggestions:color' found 'blue'
 
 #
 # Completions
@@ -99,13 +101,6 @@ zstyle ':prezto:module:git:status:ignore' submodules 'all'
 zstyle ':prezto:module:history-substring-search' color 'yes'
 
 #
-# macOS
-#
-
-# Set the keyword used by `mand` to open man pages in Dash.app
-# zstyle ':prezto:module:osx:man' dash-keyword 'manpages'
-
-#
 # Pacman
 #
 
@@ -128,7 +123,7 @@ zstyle ':prezto:module:prompt' pwd-length 'short'
 
 # Set the prompt to display the return code along with an indicator for non-zero
 # return codes. This is not supported by all prompts.
-# zstyle ':prezto:module:prompt' show-return-val 'yes'
+zstyle ':prezto:module:prompt' show-return-val 'yes'
 
 #
 # Python
@@ -175,14 +170,13 @@ zstyle ':prezto:module:syntax-highlighting' highlighters \
   'brackets' \
   'pattern' \
   'line' \
-  'cursor' \
   'root'
 
 # Set syntax highlighting styles.
 zstyle ':prezto:module:syntax-highlighting' styles \
-  'builtin' 'bg=blue' \
-  'command' 'bg=blue' \
-  'function' 'bg=blue'
+  'builtin' 'fg=green' \
+  'command' 'fg=blue' \
+  'function' 'fg=yellow'
 
 # Set syntax pattern styles.
 zstyle ':prezto:module:syntax-highlighting' pattern \
