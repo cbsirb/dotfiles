@@ -422,16 +422,6 @@
 (csetq flyspell-issue-message-flag nil)
 (csetq flyspell-use-meta-tab nil)
 
-(defun minibuffer-keyboard-quit ()
-  "Abort recursive edit.
-In Delete Selection mode, if the mark is active, just deactivate it;
-then it takes a second \\[keyboard-quit] to abort the minibuffer."
-  (interactive)
-  (if (and delete-selection-mode transient-mark-mode mark-active)
-      (setq deactivate-mark t)
-    (when (get-buffer "*Completions*") (delete-windows-on "*Completions*"))
-    (abort-recursive-edit)))
-
 (defun hide-trailing-whitespace ()
   "Used for hooks to various modes."
   (setq-local show-trailing-whitespace nil))
@@ -455,19 +445,9 @@ then it takes a second \\[keyboard-quit] to abort the minibuffer."
   "Hook to run when exiting the minibuffer."
   (csetq gc-cons-threshold user/gc-cons-threshold))
 
-(add-hook 'minibuffer-setup-hook #'hide-trailing-whitespace)
-
 ;; Increase the memory while in the minibuffer
 (add-hook 'minibuffer-setup-hook #'user/minibuffer-setup-hook)
 (add-hook 'minibuffer-exit-hook #'user/minibuffer-exit-hook)
-
-(general-define-key
- :keymaps '(minibuffer-local-map
-            minibuffer-local-ns-map
-            minibuffer-local-completion-map
-            minibuffer-local-must-match-map
-            minibuffer-local-isearch-map)
- "<escape>" #'minibuffer-keyboard-quit)
 
 (with-eval-after-load 'xref
   (add-to-list 'xref-prompt-for-identifier 'xref-find-references t)
@@ -689,6 +669,37 @@ PARSE-START indicates where the parsing should start in the file (point)."
   ("C-a" #'user/move-beginning-of-line)
   ("C-e" #'move-end-of-line))
 
+(defun keyboard-quit-context+ ()
+  "Quit current context.
+
+This function is a combination of `keyboard-quit' and
+`keyboard-escape-quit' with some parts omitted and some custom
+behavior added."
+  (interactive)
+  (cond ((region-active-p)
+         ;; Avoid adding the region to the window selection.
+         (setq saved-region-selection nil)
+         (let (select-active-regions)
+           (deactivate-mark)))
+        ((eq last-command 'mode-exited) nil)
+        (current-prefix-arg
+         nil)
+        (defining-kbd-macro
+          (message
+           (substitute-command-keys
+            "Quit is ignored during macro defintion, use \\[kmacro-end-macro] if you want to stop macro definition"))
+          (cancel-kbd-macro-events))
+        ((active-minibuffer-window)
+         (when (get-buffer-window "*Completions*")
+           ;; hide completions first so point stays in active window when
+           ;; outside the minibuffer
+           (minibuffer-hide-completions))
+         (abort-recursive-edit))
+        (t
+         ;; if we got this far just use the default so we don't miss
+         ;; any upstream changes
+         (keyboard-quit))))
+
 (general-define-key
  :keymaps 'completion-list-mode-map
  "C-n" #'next-completion
@@ -711,6 +722,8 @@ PARSE-START indicates where the parsing should start in the file (point)."
 (general-define-key [remap isearch-forward-regexp] #'isearch-forward)
 (general-define-key [remap isearch-backward] #'isearch-backward-regexp)
 (general-define-key [remap isearch-backward-regexp] #'isearch-backward)
+(general-define-key [remap keyboard-quit] #'keyboard-quit-context+)
+(general-define-key [remap minibuffer-keyboard-quit] #'keyboard-quit-context+)
 
 (general-define-key
  :prefix "M-s"
@@ -1052,7 +1065,7 @@ PARSE-START indicates where the parsing should start in the file (point)."
   :general
   ("C-c C-r" #'ivy-resume)
   (:keymaps 'ivy-mode-map
-            "<escape>" #'minibuffer-keyboard-quit)
+            "<escape>" #'keyboard-quit-context+)
   :custom
   (ivy-count-format "")
   (ivy-height 9)
