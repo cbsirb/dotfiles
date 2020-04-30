@@ -45,6 +45,11 @@
 (add-to-list 'load-path (expand-file-name "lisp" user-emacs-directory))
 (add-to-list 'load-path (expand-file-name "site-lisp" user-emacs-directory))
 
+(dolist (dir (directory-files (expand-file-name "site-lisp" user-emacs-directory)))
+  (when (and (not (string-suffix-p "." dir))
+             (file-directory-p dir))
+    (add-to-list 'load-path (expand-file-name dir (expand-file-name "site-lisp" user-emacs-directory)))))
+
 ;; Install use-package if needed
 (unless (package-installed-p 'use-package)
   (package-refresh-contents)
@@ -1246,6 +1251,10 @@ That way we don't remove the whole regexp for a simple typo.
   (isearch-allow-scroll 'unlimited)
   (isearch-yank-on-move 'shift))
 
+(push ".ccls-cache" grep-find-ignored-directories)
+(push ".vscode" grep-find-ignored-directories)
+(push ".clangd" grep-find-ignored-directories)
+
 (use-package rg
   :general
   (:prefix "M-s"
@@ -1440,6 +1449,7 @@ found, an error is signaled."
   :ghook ('c++-mode-hook #'modern-c++-font-lock-mode))
 
 (use-package ccls
+  :load-path "site-lisp/ccls" ;; ccls requires projectile (and doesn't use it at all)
   :after cc-mode
   :preface
   (defun user/ccls-callee-hierarchy ()
@@ -1459,7 +1469,9 @@ found, an error is signaled."
   (ccls-sem-highlight-method 'font-lock)
   (ccls-initialization-options
    '(:diagnostics (:onOpen 0 :onSave 0 :onChange -1 :spellChecking :json-false)
-     :highlight (:largeFileSize 0))))
+     :highlight (:largeFileSize 0)))
+  :config
+  (push "compile_commands.json" ccls-root-files))
 
 (use-package python :ensure nil
   :commands python-mode
@@ -1699,24 +1711,6 @@ found, an error is signaled."
 (use-package rainbow-delimiters
   :commands rainbow-delimiters-mode)
 
-(use-package projectile
-  :general ("C-c p" 'projectile-command-map)
-  :custom
-  (projectile-completion-system 'ivy)
-  (projectile-enable-caching t)
-  (projectile-sort-order 'recentf)
-  (projectile-use-git-grep t)
-
-  (projectile-project-root-files '())
-  (projectile-project-root-files-top-down-recurring '("Makefile"))
-
-  :init
-  (projectile-mode t)
-
-  (push ".vscode" projectile-globally-ignored-directories)
-  (push ".ccls-cache" projectile-globally-ignored-directories)
-  (push ".clangd" projectile-globally-ignored-directories))
-
 (use-package which-key
   :custom
   (which-key-side-window-location 'bottom)
@@ -1804,6 +1798,33 @@ found, an error is signaled."
 
 (use-package git-timemachine
   :commands (git-timemachine git-timemachine-toggle))
+
+(use-package project
+  :ensure nil
+  :general ("C-c p f" 'project-find-file)
+  :preface
+  (defvar user/project-roots '("compile_commands.json" "requirements.txt" "pyproject.toml")
+    "Files or directories that mark the root of a project.")
+
+  (defun user/project-find-root (path)
+    "Search (recursive) for root markers in PATH."
+
+    (unless (file-directory-p path)
+      (setq path (file-name-directory path)))
+
+    (catch 'done
+      (dolist (proot user/project-roots)
+        (if-let ((root (locate-dominating-file path proot)))
+            (throw 'done (cons 'transient root))
+          nil))))
+  :config
+  (push #'user/project-find-root project-find-functions))
+
+(use-package vc :ensure nil
+  :config
+  (push ".ccls-cache" vc-directory-exclusion-list)
+  (push ".vscode" vc-directory-exclusion-list)
+  (push ".clangd" vc-directory-exclusion-list))
 
 (use-package vc-msg
   :commands (vc-msg-show)
@@ -1973,5 +1994,5 @@ found, an error is signaled."
  '(modus-operandi-theme-slanted-constructs nil)
  '(modus-operandi-theme-visible-fringes nil)
  '(package-selected-packages
-   '(beginend ccls cmake-font-lock cmake-mode comment-dwim-2 company company-lsp company-posframe counsel counsel-etags cython-mode diff-hl dired-du dired-git-info dired-narrow diredfl dumb-jump eacl elfeed expand-region flymake-diagnostic-at-point general git-timemachine haskell-mode hl-todo hydra iedit ignoramus imenu-anywhere ivy ivy-posframe ivy-rich iy-go-to-char js2-mode json-mode log4j-mode lsp-mode lsp-ui magit magit-gitflow minions modern-cpp-font-lock modus-operandi-theme modus-vivendi-theme multi-term multiple-cursors nasm-mode no-littering nov projectile pyvenv rainbow-delimiters rainbow-mode realgud rg rmsbolt smex string-inflection swiper symbol-overlay undo-tree use-package vc-msg visual-fill-column web-mode wgrep which-key yaml-mode yasnippet)))
+   '(beginend cmake-font-lock cmake-mode comment-dwim-2 company company-lsp company-posframe counsel counsel-etags cython-mode diff-hl dired-du dired-git-info dired-narrow diredfl dumb-jump eacl elfeed expand-region flymake-diagnostic-at-point general git-timemachine haskell-mode hl-todo hydra iedit ignoramus imenu-anywhere ivy ivy-posframe ivy-rich iy-go-to-char js2-mode json-mode log4j-mode lsp-mode lsp-ui magit magit-gitflow minions modern-cpp-font-lock modus-operandi-theme modus-vivendi-theme multi-term multiple-cursors nasm-mode no-littering nov pyvenv rainbow-delimiters rainbow-mode realgud rg rmsbolt smex string-inflection swiper symbol-overlay undo-tree use-package vc-msg visual-fill-column web-mode wgrep which-key yaml-mode yasnippet)))
 
