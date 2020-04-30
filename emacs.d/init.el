@@ -57,7 +57,6 @@
 
 (defun package-update-now ()
   "Update all the packages."
-
   (interactive)
 
   (split-window-below -10)
@@ -73,6 +72,12 @@
   (when-let* ((buf (get-buffer "*Packages*")))
     (switch-to-buffer buf)
     (kill-buffer-and-window)))
+
+(defun package-rebuild-all ()
+  "Rebuild all the packages."
+  (interactive)
+
+  (byte-recompile-directory package-user-dir nil 'force))
 
 ;;
 ;; Packages needed no matter what, and usually others are depended on it
@@ -156,6 +161,8 @@
 (prefer-coding-system 'utf-8)
 (set-language-environment "UTF-8")
 (set-charset-priority 'unicode)
+(when (display-graphic-p)
+  (csetq x-select-request-type '(UTF8_STRING COMPOUND_TEXT TEXT STRING)))
 
 ;; files.el
 (csetq enable-local-variables :safe)
@@ -202,6 +209,9 @@
          (bottom . right)
          (t . nil)))
 
+(csetq display-line-numbers-grow-only t)
+(csetq display-line-numbers-width-start t)
+
 (csetq command-line-ns-option-alist nil)
 
 ;; misc stuff
@@ -236,14 +246,13 @@
 
 (csetq tooltip-resize-echo-area t)
 (csetq tooltip-delay 0.5)
-(setq x-gtk-use-system-tooltips nil)
+(csetq x-gtk-use-system-tooltips nil)
 
 (csetq tramp-default-method "ssh")
 (csetq tramp-verbose 2)
 
 (csetq uniquify-buffer-name-style 'post-forward-angle-brackets)
 (csetq uniquify-after-kill-buffer-p t)
-
 
 ;; simple.el
 (csetq mark-ring-max 128)
@@ -1086,7 +1095,7 @@ behavior added."
   (defun user/counsel-M-x-action (orig-fun &rest r)
     "Additional support for multiple cursors."
     (apply orig-fun r)
-    (let ((cmd (intern (counsel--string-trim-left (nth 0 r) "\\^"))))
+    (let ((cmd (intern (string-trim-left (nth 0 r) "\\^"))))
       (when (and (boundp 'multiple-cursors-mode)
                  multiple-cursors-mode
                  cmd
@@ -1119,6 +1128,7 @@ behavior added."
   (ivy-posframe-display-functions-alist
    '((swiper . nil)
      (t . ivy-posframe-display-at-point)))
+  (ivy-posframe-parameters '((internal-border-width . 3)))
   :config
   (ivy-posframe-mode t))
 
@@ -1538,7 +1548,7 @@ found, an error is signaled."
   (lsp-enable-semantic-highlighting nil)
   (lsp-auto-guess-root nil)
   (lsp-restart 'auto-restart)
-  (lsp-pyls-plugins-rope-completion-enabled nil "This is very very slow (we allow jedi only)")
+  (lsp-pyls-plugins-rope-completion-enabled nil "This is very very slow (allow only jedi completions)")
   (lsp-file-watch-threshold 9000)
   (lsp-eldoc-render-all t)
 
@@ -1552,7 +1562,6 @@ found, an error is signaled."
   (push "[/\\\\]\\.ccls-cache$" lsp-file-watch-ignored)
   (push "[/\\\\]\\.clangd$" lsp-file-watch-ignored)
   (push "[/\\\\]\\.vscode$" lsp-file-watch-ignored)
-  (push "[/\\\\]_build$" lsp-file-watch-ignored)
 
   (require 'lsp-clients)
   (csetq lsp-clients-clangd-args
@@ -1704,7 +1713,6 @@ found, an error is signaled."
   :init
   (projectile-mode t)
 
-  (push "_build" projectile-globally-ignored-directories)
   (push ".vscode" projectile-globally-ignored-directories)
   (push ".ccls-cache" projectile-globally-ignored-directories)
   (push ".clangd" projectile-globally-ignored-directories))
@@ -1786,6 +1794,7 @@ found, an error is signaled."
      "--no-ext-diff" "--stat" "--diff-algorithm=histogram"))
   (git-commit-style-convention-checks '(non-empty-second-line overlong-summary-line))
   (magit-diff-refine-hunk t)
+  (magit-ediff-dwim-show-on-hunks t)
   (magit-display-buffer-function #'magit-display-buffer-fullframe-status-v1)
   (magit-process-popup-time 20)
   (magit-refs-show-commit-count 'all))
