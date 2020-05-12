@@ -23,8 +23,7 @@ set noswapfile
 set nobackup
 set nofoldenable
 
-" Dangerous but usefull
-set exrc
+set exrc              " Dangerous but usefull
 
 set autoindent
 set smartindent
@@ -68,7 +67,7 @@ set tabpagemax=50
 
 set clipboard^=unnamedplus
 
-set diffopt+=algorithm:patience
+set diffopt+=algorithm:histogram
 
 set linebreak
 set breakindent
@@ -136,15 +135,13 @@ command! -nargs=+ -complete=file_in_path -bar LGrep silent! lgrep! <args> | redr
 
 command! -nargs=+ Silent execute 'silent <args>' | redraw!
 
-command! SC vnew | setlocal nobuflisted buftype=nofile bufhidden=wipe noswapfile
-
 command! SS echo map(synstack(line('.'), col('.')), 'synIDattr(v:val, "name")')
 
 command! -nargs=* -bang ReplaceSymbolInFunction silent call func#replace_symbol_in_function(<f-args>, '<bang>')
 
-command! -range=% TR let b:wv = winsaveview() |
-            \ keeppattern <line1>,<line2>s/\s\+$// |
-            \ call winrestview(b:wv)
+command! -range=% WhitespaceCleanup let b:wv = winsaveview() |
+      \ keeppattern <line1>,<line2>s/\s\+$// |
+      \ call winrestview(b:wv)
 
 """"""""""""
 " Mappings "
@@ -237,7 +234,6 @@ nnoremap <Space>r :ReplaceSymbolInFunction <C-R><C-W>
 """""""""""""""""""
 " Plugin mappings "
 """""""""""""""""""
-" I'm not using this enough :sigh:
 nnoremap <space>f :FZF<cr>
 nnoremap <space>F :FZF <C-R>=fnameescape(expand('%:p:h'))<CR><CR>
 
@@ -324,6 +320,13 @@ let g:lsp_semantic_enabled = 1
 let g:asyncomplete_auto_popup = 1
 
 let g:lsp_fold_enabled = 1
+
+let g:sleuth_automatic = 0
+
+augroup user_sleuth
+  autocmd!
+  autocmd FileType * if &buftype != "popup" | :Sleuth | endif
+augroup END
 
 function! s:lsp_buffer_enabled() abort
   nnoremap <buffer> <Space>r :LspRename<CR>
