@@ -6,6 +6,15 @@
 #
 
 #
+# nix
+#
+if [ -e /home/csirb/.nix-profile/etc/profile.d/nix.sh ]; then
+  . /home/csirb/.nix-profile/etc/profile.d/nix.sh;
+
+  # export XDG_DATA_DIRS=$XDG_DATA_DIRS:$HOME/.nix-profile/share
+fi
+
+#
 # Browser
 #
 

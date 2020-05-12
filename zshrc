@@ -29,11 +29,19 @@ alias gd='git diff'
 
 # Apt stuff
 alias apti='sudo apt install'
-alias aptx='sudo apt autoremove'
+alias aptx='sudo apt autoremove --purge'
 alias aptu='sudo apt update && sudo apt upgrade'
 alias apts='apt search'
 alias apt-purge-orphans="sudo apt-get purge \$(dpkg -l | grep '^rc' | awk '{print \$2}')"
 alias apt-clean='sudo apt autoremove; sudo apt autoclean'
+
+# nix stuff
+alias nix-update='nix-channel --update; nix-env -iA nixpkgs.nix'
+alias nix-clean='nix-collect-garbage -d'
+alias nixs='nix-env -qas'
+alias nixi='nix-env -i'
+alias nixe='nix-env -e'
+alias nixu='nix-env -u'
 
 alias path='echo -e ${PATH//:/\\n}'
 
