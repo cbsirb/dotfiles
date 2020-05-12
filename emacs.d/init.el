@@ -247,7 +247,7 @@
   (csetq x-stretch-cursor t)
   (csetq x-wait-for-event-timeout nil))
 
-(csetq read-process-output-max (* read-process-output-max 8))
+(csetq read-process-output-max (* read-process-output-max 16))
 
 (csetq tooltip-resize-echo-area t)
 (csetq tooltip-delay 0.5)
@@ -864,11 +864,16 @@ behavior added."
         (call-interactively #'compile)
       (compile compile-command)))
 
-  (defun user/switch-to-compilation-window (buffer _msg)
-    (let ((bufwin (get-buffer-window buffer)))
-      (when bufwin
-        (select-window bufwin)
-        (local-set-key (kbd "q") 'kill-buffer-and-window))))
+  (defun user/compilation-done (buffer msg)
+    (let ((bufwin (get-buffer-window buffer))
+          (abnormal (or (string-match-p "abnormally" msg)
+                        (> 0 (+ compilation-num-errors-found compilation-num-warnings-found))))
+          (interrupted (string-match-p "interrupt" msg)))
+      (when (and bufwin (string-equal (buffer-name buffer) "*compilation*"))
+        (if interrupted
+            (delete-window bufwin)
+          (unless abnormal
+            (run-with-timer 1 nil #'delete-window bufwin))))))
 
   (defun colorize-compilation-buffer ()
     (let ((inhibit-read-only t))
@@ -877,10 +882,12 @@ behavior added."
   :general
   ([remap comment-region] #'compile-without-ask)
   ("C-c c" #'compile-without-ask)
+  (:keymaps 'compilation-mode-map
+            "q" #'kill-buffer-and-window)
 
   :ghook
   ('compilation-mode-hook #'hide-trailing-whitespace)
-  ('compilation-finish-functions #'user/switch-to-compilation-window)
+  ('compilation-finish-functions #'user/compilation-done)
   ('compilation-filter-hook 'colorize-compilation-buffer)
 
   :custom
@@ -978,7 +985,11 @@ behavior added."
 (use-package symbol-overlay
   :preface
   (define-global-minor-mode global-symbol-overlay-mode symbol-overlay-mode
-    (lambda () (symbol-overlay-mode t)))
+    (lambda ()
+      (if (< (buffer-size) (* 1024 1024))
+          (symbol-overlay-mode t)
+        (symbol-overlay-mode -1)
+        (message "Disable symbol overlay in big file"))))
   :general
   ("M-*" #'symbol-overlay-put)
   ("M-n" #'symbol-overlay-jump-next)
@@ -1314,6 +1325,8 @@ found, an error is signaled."
   (show-paren-when-point-in-periphery t)
   :ghook ('after-init-hook #'show-paren-mode t))
 
+(use-package geiser)
+
 (use-package string-inflection)
 ;; :general
 ;; (:keymaps 'prog-mode-map
@@ -1384,6 +1397,24 @@ found, an error is signaled."
                           (label . 0)
                           (statement-cont . +)))))
 
+  (defconst user/webkit-style
+    '((c-basic-offset . 8)
+      (indent-tabs-mode . t)
+      (c-comment-only-line-offset . 0)
+      (c-offsets-alist . ((arglist-close           .  8)
+                          (label                   . -8)
+                          (access-label            . -8)
+                          (substatement-open       .  0)
+                          (statement-case-intro    .  8)
+                          (statement-block-intro   .  8)
+                          (case-label              .  0)
+                          (block-open              .  0)
+                          (inline-open             .  0)
+                          (topmost-intro-cont      .  0)
+                          (knr-argdecl-intro       . -8)
+                          (brace-list-open         .  0)
+                          (brace-list-intro        .  8)))))
+
   (defun user/c-mode-common-hook ()
     "Hook for C/C++ mode."
     ;; (c-toggle-hungry-state t)
@@ -1435,13 +1466,19 @@ found, an error is signaled."
   (c-tab-always-indent nil)
   (c-backspace-function #'backward-delete-char)
   (c-hanging-semi&comma-criteria nil)
+  (c-doc-comment-style '((java-mode . javadoc)
+                         (pike-mode . autodoc)
+                         (c-mode . doxygen)
+                         (c++-mode . doxygen)))
 
   :config
   (c-add-style "allman" user/allman-style)
   (c-add-style "sane-k&r" user/k&r-style)
+  (c-add-style "webkit" user/webkit-style)
 
   (csetq c-default-style '((java-mode . "java")
                            (awk-mode . "awk")
+                           (c++-mode . "webkit")
                            (other . "sane-k&r"))))
 
 (use-package modern-cpp-font-lock
@@ -1545,10 +1582,16 @@ found, an error is signaled."
 (use-package lsp-mode
   :commands (lsp lsp-mode)
 
+  :preface
+  (defun user-setup-lsp-completion ()
+    (setq-local company-backends (remove 'company-capf company-backends))
+    (push 'company-capf company-backends))
+
   :ghook
   ('c-mode-common-hook #'lsp t)
   ('python-mode-hook #'lsp t)
-  ('lsp-after-open-hook #'lsp-enable-imenu)
+  ('lsp-after-open-hook #'user-setup-lsp-completion)
+  ('lsp-mode-hook #'lsp-enable-which-key-integration)
 
   :custom
   ;; performance reasons (and they're not really usefull for me)
@@ -1558,13 +1601,16 @@ found, an error is signaled."
   (lsp-before-save-edits nil)
   (lsp-enable-symbol-highlighting nil)
   (lsp-enable-semantic-highlighting nil)
+  (lsp-enable-imenu t)
   (lsp-auto-guess-root nil)
   (lsp-restart 'auto-restart)
   (lsp-pyls-plugins-rope-completion-enabled nil "This is very very slow (allow only jedi completions)")
-  (lsp-file-watch-threshold 9000)
   (lsp-eldoc-render-all t)
+  (lsp-prefer-capf t)
+  (lsp-keymap-prefix "<C-m>")
 
   ;; for now disable it since I have >50k per repo
+  (lsp-file-watch-threshold 9000)
   (lsp-enable-file-watchers nil)
 
   ;; Enable this when things are slow
@@ -1605,12 +1651,6 @@ found, an error is signaled."
   (lsp-ui-sideline-show-hover nil)
   (lsp-ui-sideline-show-symbol nil)
   (lsp-ui-sideline-ignore-duplicate t))
-
-(use-package company-lsp
-  :commands company-lsp
-  :custom
-  (company-lsp-async t "Really needed to be responsive")
-  (company-lsp-cache-candidates nil "Don't cache them, let the server handle it"))
 
 (use-package flymake :ensure nil
   :preface
@@ -1674,7 +1714,7 @@ found, an error is signaled."
   (undo-tree-auto-save-history nil)
   (undo-tree-visualizer-diff t)
   (undo-tree-visualizer-timestamps t)
-  (undo-tree-enable-undo-in-region nil)
+  (undo-tree-enable-undo-in-region t)
 
   :config
   (global-undo-tree-mode t)
@@ -1831,6 +1871,9 @@ found, an error is signaled."
   :custom
   (vc-msg-git-show-commit-function #'magit-show-commit))
 
+;;
+;; Misc
+;;
 (use-package diff-hl
   :after vc
   :custom
@@ -1907,6 +1950,7 @@ found, an error is signaled."
            ("https://www.youtube.com/feeds/videos.xml?channel_id=UCbfYPyITQ-7l4upoX8nvctg" tech)        ;; Two Minute Papers
            ("https://www.youtube.com/feeds/videos.xml?channel_id=UCS0N5baNlQWJCUrhCEo8WlA" tech)        ;; Ben Eater
            ("https://www.youtube.com/feeds/videos.xml?channel_id=UCxHAlbZQNFU2LgEtiqd2Maw" tech)        ;; Jason Turner
+           ("https://www.youtube.com/feeds/videos.xml?channel_id=UCG7yIWtVwcENg_ZS-nahg5g" tech)        ;; CNLohr
 
            ("https://www.youtube.com/feeds/videos.xml?channel_id=UCNf56PUyMI0wUyZ8KRhg2AQ" cinema)      ;; Cinema Nippon
            ("https://www.youtube.com/feeds/videos.xml?channel_id=UC7GV-3hrA9kDKrren0QMKMg" cinema)      ;; CinemaTyler
@@ -1958,6 +2002,7 @@ found, an error is signaled."
            ("https://www.youtube.com/feeds/videos.xml?channel_id=UCct9aR7HC79Cv2g-9oDOTLw" religion)    ;; ReligionForBreakfast
            ("https://www.youtube.com/feeds/videos.xml?channel_id=UCtCTSf3UwRU14nYWr_xm-dQ" religion)    ;; Jonathan Pageau
 
+           ("https://andreyorst.gitlab.io/feed.xml" tech)
            ("https://fabiensanglard.net/rss.xml" tech)
            ("https://danluu.com/atom.xml" tech)
            ("https://trofi.github.io/feed/atom.xml" tech)
@@ -1974,8 +2019,8 @@ found, an error is signaled."
                                 :remove 'unread)))
 
 (provide 'init)
-
 ;;; init.el ends here
+
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -1994,5 +2039,5 @@ found, an error is signaled."
  '(modus-operandi-theme-slanted-constructs nil)
  '(modus-operandi-theme-visible-fringes nil)
  '(package-selected-packages
-   '(beginend cmake-font-lock cmake-mode comment-dwim-2 company company-lsp company-posframe counsel counsel-etags cython-mode diff-hl dired-du dired-git-info dired-narrow diredfl dumb-jump eacl elfeed expand-region flymake-diagnostic-at-point general git-timemachine haskell-mode hl-todo hydra iedit ignoramus imenu-anywhere ivy ivy-posframe ivy-rich iy-go-to-char js2-mode json-mode log4j-mode lsp-mode lsp-ui magit magit-gitflow minions modern-cpp-font-lock modus-operandi-theme modus-vivendi-theme multi-term multiple-cursors nasm-mode no-littering nov pyvenv rainbow-delimiters rainbow-mode realgud rg rmsbolt smex string-inflection swiper symbol-overlay undo-tree use-package vc-msg visual-fill-column web-mode wgrep which-key yaml-mode yasnippet)))
+   '(beginend cmake-font-lock cmake-mode comment-dwim-2 company company-posframe counsel counsel-etags cython-mode diff-hl dired-du dired-git-info dired-narrow diredfl dumb-jump eacl elfeed expand-region flymake-diagnostic-at-point geiser general git-timemachine haskell-mode hl-todo hydra iedit ignoramus imenu-anywhere ivy ivy-posframe ivy-rich iy-go-to-char js2-mode json-mode log4j-mode lsp-mode lsp-ui magit magit-gitflow minions modern-cpp-font-lock modus-operandi-theme modus-vivendi-theme multi-term multiple-cursors nasm-mode no-littering nov pyvenv rainbow-delimiters rainbow-mode realgud rg rmsbolt smex string-inflection swiper symbol-overlay undo-tree use-package vc-msg visual-fill-column web-mode wgrep which-key yaml-mode yasnippet)))
 
