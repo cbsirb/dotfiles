@@ -21,10 +21,10 @@
 
 (set-face-attribute 'default nil
                     :family "Iosevka Fixed SS10 Extended"
-                    :height 105
+                    :height 100
                     :weight 'normal)
 
 (set-face-attribute 'variable-pitch nil
                     :family "Fira Sans"
-                    :height 105
+                    :height 100
                     :weight 'normal)

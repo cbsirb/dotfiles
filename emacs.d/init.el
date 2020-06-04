@@ -305,7 +305,8 @@
 (defun mode-line-vc ()
   "Will returing the same thing as variable `vc-mode', but with a hard-coded max length."
   (if vc-mode
-      (substring vc-mode 0 (min 30 (length vc-mode)))
+      (let ((backend (vc-backend buffer-file-name))) ;; vc-backend returns nil if given a non-string
+        (substring vc-mode (+ 2 (if (eq backend 'Hg) 2 3)) (min 30 (length vc-mode))))
     ""))
 
 (csetq mode-line-format
@@ -873,11 +874,11 @@ behavior added."
         (if interrupted
             (delete-window bufwin)
           (unless abnormal
-            (run-with-timer 1 nil #'delete-window bufwin))))))
+            (run-with-timer 0.5 nil #'delete-window bufwin))))))
 
   (defun colorize-compilation-buffer ()
     (let ((inhibit-read-only t))
-      (ansi-color-apply-on-region (point-min) (point-max))))
+      (ansi-color-apply-on-region compilation-filter-start (point-max))))
 
   :general
   ([remap comment-region] #'compile-without-ask)
@@ -1001,11 +1002,16 @@ behavior added."
   (symbol-overlay-default-face ((t (:inherit underline))))
   :custom
   (symbol-overlay-idle-time 0.25)
-  (symbol-overlay-displayed-window nil))
+  (symbol-overlay-displayed-window t))
 
 (use-package beginend
+  :preface
+  (defun user/recenter-after-beginend-jump ()
+    (recenter))
   :config
-  (beginend-global-mode t))
+  (beginend-global-mode t)
+  :config
+  (advice-add #'beginend-prog-mode-goto-beginning :after #'user/recenter-after-beginend-jump))
 
 (use-package iedit
   :preface
@@ -1590,7 +1596,7 @@ found, an error is signaled."
   :ghook
   ('c-mode-common-hook #'lsp t)
   ('python-mode-hook #'lsp t)
-  ('lsp-after-open-hook #'user-setup-lsp-completion)
+  ('lsp-managed-mode-hook #'user-setup-lsp-completion)
   ('lsp-mode-hook #'lsp-enable-which-key-integration)
 
   :custom
@@ -1951,6 +1957,8 @@ found, an error is signaled."
            ("https://www.youtube.com/feeds/videos.xml?channel_id=UCS0N5baNlQWJCUrhCEo8WlA" tech)        ;; Ben Eater
            ("https://www.youtube.com/feeds/videos.xml?channel_id=UCxHAlbZQNFU2LgEtiqd2Maw" tech)        ;; Jason Turner
            ("https://www.youtube.com/feeds/videos.xml?channel_id=UCG7yIWtVwcENg_ZS-nahg5g" tech)        ;; CNLohr
+           ("https://www.youtube.com/feeds/videos.xml?channel_id=UCRDQEDxAVuxcsyeEoOpSoRA" tech)        ;; Mark Furneaux
+           ("https://www.youtube.com/feeds/videos.xml?channel_id=UCkf4VIqu3Acnfzuk3kRIFwA" tech)        ;; gotbletu
 
            ("https://www.youtube.com/feeds/videos.xml?channel_id=UCNf56PUyMI0wUyZ8KRhg2AQ" cinema)      ;; Cinema Nippon
            ("https://www.youtube.com/feeds/videos.xml?channel_id=UC7GV-3hrA9kDKrren0QMKMg" cinema)      ;; CinemaTyler

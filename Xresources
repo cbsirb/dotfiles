@@ -1,14 +1,14 @@
-Xft.dpi: 96
+Xft.dpi: 102
 Xft.antialias:  1
 Xft.hinting:    1
 Xft.hintstyle:  hintslight
 Xft.lcdfilter:  lcddefault
 Xft.rgba:       rgb
 
-URxvt.font:             xft:Iosevka Fixed SS10 Extended:size=11:style=Regular
-URxvt.italicFont:       xft:Iosevka Fixed SS10 Extended:size=11:italic
-URxvt.boldFont:         xft:Iosevka Fixed SS10 Extended:size=11:bold
-URxvt.boldItalicFont:   xft:Iosevka Fixed SS10 Extended:size=11:bold:italic
+URxvt.font:             xft:Iosevka Fixed SS10 Extended:size=10:style=Regular
+URxvt.italicFont:       xft:Iosevka Fixed SS10 Extended:size=10:italic
+URxvt.boldFont:         xft:Iosevka Fixed SS10 Extended:size=10:bold
+URxvt.boldItalicFont:   xft:Iosevka Fixed SS10 Extended:size=10:bold:italic
 
 xterm*saveLines: 100000
 
