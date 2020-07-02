@@ -106,6 +106,12 @@
 (use-package modus-vivendi-theme
   :disabled
   :if (display-graphic-p)
+  :custom
+  (modus-vivendi-theme-visible-fringes nil)
+  (modus-vivendi-theme-bold-constructs t)
+  (modus-vivendi-theme-slanted-constructs nil)
+  (modus-vivendi-theme-3d-modeline nil)
+  (modus-vivendi-theme-proportional-fonts nil)
   :config
   (load-theme 'modus-vivendi t))
 
@@ -334,35 +340,6 @@
 
 (when (member "Symbola" (font-family-list))
   (set-fontset-font t 'unicode "Symbola" nil 'prepend))
-
-;; (csetq display-buffer-alist
-;;        `((,(rx string-start
-;;                (or "*Compile-Log*"
-;;                    "*Warnings*"
-;;                    "*compilation"
-;;                    "*rg*"
-;;                    "*grep*"
-;;                    "*Occur*"
-;;                    "*xref*"
-;;                    "*Flymake diagnostics"
-;;                    "*Flycheck"
-;;                    "*ivy-"
-;;                    ))
-;;           (display-buffer-reuse-window
-;;            display-buffer-in-side-window)
-;;           (side            . bottom)
-;;           (reusable-frames . nil)
-;;           (window-height   . 0.25))
-
-;;          ;; Show buffer only in the selected frame.
-;;          ("." nil (reusable-frames . nil))))
-
-;; Its value is
-;; (("\\`\\*compilation"
-;;   (display-buffer-reuse-window display-buffer-in-side-window)
-;;   (side . bottom)
-;;   (reusable-frames)
-;;   (window-height . 0.25)))
 
 (push `(,(rx string-start "*compilation")
         (display-buffer-reuse-window
@@ -1002,7 +979,7 @@ behavior added."
   (symbol-overlay-default-face ((t (:inherit underline))))
   :custom
   (symbol-overlay-idle-time 0.25)
-  (symbol-overlay-displayed-window t))
+  (symbol-overlay-displayed-window nil))
 
 (use-package beginend
   :preface
@@ -1516,6 +1493,12 @@ found, an error is signaled."
   :config
   (push "compile_commands.json" ccls-root-files))
 
+(use-package rust-mode
+  :commands rust-mode
+  :general
+  (:keymaps 'rust-mode-map
+            "C-c C-c" #'rust-compile))
+
 (use-package python :ensure nil
   :commands python-mode
 
@@ -1596,6 +1579,7 @@ found, an error is signaled."
   :ghook
   ('c-mode-common-hook #'lsp t)
   ('python-mode-hook #'lsp t)
+  ('rust-mode-hook #'lsp t)
   ('lsp-managed-mode-hook #'user-setup-lsp-completion)
   ('lsp-mode-hook #'lsp-enable-which-key-integration)
 
@@ -1694,7 +1678,7 @@ found, an error is signaled."
   :ghook ('imenu-after-jump-hook #'recenter-top-bottom)
   :custom
   (imenu-auto-rescan t "Rescan before showing results")
-  (imenu-auto-rescan-maxout (* 1024 1024) "Ignore buffers bigger than this"))
+  (imenu-auto-rescan-maxout (* 2 1024 1024) "Ignore buffers bigger than this"))
 
 (use-package imenu-anywhere
   :general
@@ -1847,7 +1831,9 @@ found, an error is signaled."
 
 (use-package project
   :ensure nil
-  :general ("C-c p f" 'project-find-file)
+  :general
+  ("C-c p f" 'project-find-file)
+  ("C-c p a" 'ff-find-other-file)
   :preface
   (defvar user/project-roots '("compile_commands.json" "requirements.txt" "pyproject.toml")
     "Files or directories that mark the root of a project.")
@@ -1959,6 +1945,8 @@ found, an error is signaled."
            ("https://www.youtube.com/feeds/videos.xml?channel_id=UCG7yIWtVwcENg_ZS-nahg5g" tech)        ;; CNLohr
            ("https://www.youtube.com/feeds/videos.xml?channel_id=UCRDQEDxAVuxcsyeEoOpSoRA" tech)        ;; Mark Furneaux
            ("https://www.youtube.com/feeds/videos.xml?channel_id=UCkf4VIqu3Acnfzuk3kRIFwA" tech)        ;; gotbletu
+           ("https://www.youtube.com/feeds/videos.xml?channel_id=UCUQo7nzH1sXVpzL92VesANw" tech)        ;; DIY Perks
+           ("https://www.youtube.com/feeds/videos.xml?channel_id=UCy0tKL1T7wFoYcxCe0xjN6Q" tech)        ;; Technology Connections
 
            ("https://www.youtube.com/feeds/videos.xml?channel_id=UCNf56PUyMI0wUyZ8KRhg2AQ" cinema)      ;; Cinema Nippon
            ("https://www.youtube.com/feeds/videos.xml?channel_id=UC7GV-3hrA9kDKrren0QMKMg" cinema)      ;; CinemaTyler
@@ -2047,5 +2035,5 @@ found, an error is signaled."
  '(modus-operandi-theme-slanted-constructs nil)
  '(modus-operandi-theme-visible-fringes nil)
  '(package-selected-packages
-   '(beginend cmake-font-lock cmake-mode comment-dwim-2 company company-posframe counsel counsel-etags cython-mode diff-hl dired-du dired-git-info dired-narrow diredfl dumb-jump eacl elfeed expand-region flymake-diagnostic-at-point geiser general git-timemachine haskell-mode hl-todo hydra iedit ignoramus imenu-anywhere ivy ivy-posframe ivy-rich iy-go-to-char js2-mode json-mode log4j-mode lsp-mode lsp-ui magit magit-gitflow minions modern-cpp-font-lock modus-operandi-theme modus-vivendi-theme multi-term multiple-cursors nasm-mode no-littering nov pyvenv rainbow-delimiters rainbow-mode realgud rg rmsbolt smex string-inflection swiper symbol-overlay undo-tree use-package vc-msg visual-fill-column web-mode wgrep which-key yaml-mode yasnippet)))
+   '(beginend cmake-font-lock cmake-mode comment-dwim-2 company company-posframe counsel counsel-etags cython-mode diff-hl dired-du dired-git-info dired-narrow diredfl dumb-jump eacl elfeed expand-region flymake-diagnostic-at-point geiser general git-timemachine haskell-mode hl-todo hydra iedit ignoramus imenu-anywhere ivy ivy-posframe ivy-rich iy-go-to-char js2-mode json-mode log4j-mode lsp-mode lsp-ui magit magit-gitflow minions modern-cpp-font-lock modus-operandi-theme modus-vivendi-theme multi-term multiple-cursors nasm-mode no-littering nov pyvenv rainbow-delimiters rainbow-mode realgud rg rmsbolt rust-mode smex string-inflection swiper symbol-overlay undo-tree use-package vc-msg visual-fill-column web-mode wgrep which-key yaml-mode yasnippet)))
 

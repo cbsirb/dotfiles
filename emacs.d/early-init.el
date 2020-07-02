@@ -14,17 +14,17 @@
         (scroll-bar-mode . -1)
         (menu-bar-mode . -1)
         (tool-bar-mode . -1)
-        (width . 90)
-        (height . 45)))
+        (width . 110)
+        (height . 50)))
 
 (setq frame-inhibit-implied-resize t)
 
 (set-face-attribute 'default nil
                     :family "Iosevka Fixed SS10 Extended"
-                    :height 100
+                    :height 105
                     :weight 'normal)
 
 (set-face-attribute 'variable-pitch nil
                     :family "Fira Sans"
-                    :height 100
+                    :height 105
                     :weight 'normal)

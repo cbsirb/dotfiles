@@ -83,3 +83,5 @@ export GTK_USE_PORTAL=1
 # export MOZ_ENABLE_WAYLAND=1
 # export QT_QPA_PLATFORMTHEME=qt5ct
 export LIBVA_DRIVER_NAME=iHD
+
+export PATH="$HOME/.cargo/bin:$PATH"
