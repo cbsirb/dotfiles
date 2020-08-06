@@ -36,6 +36,9 @@
 (csetq load-prefer-newer t)
 (csetq package-user-dir (expand-file-name "elpa" user-emacs-directory))
 
+(when (fboundp 'native-compile-async)
+  (csetq comp-deferred-compilation t))
+
 (when (< emacs-major-version 27)
   (load-file (expand-file-name "early-init.el" user-emacs-directory)))
 
