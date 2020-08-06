@@ -841,9 +841,13 @@ behavior added."
   :preface
   (defun compile-without-ask (ask)
     (interactive "P")
+    (let (compile-fn)
+      (if (project-current)
+          (setq compile-fn #'project-compile)
+        (setq compile-fn #'compile))
     (if ask
-        (call-interactively #'compile)
-      (compile compile-command)))
+        (call-interactively compile-fn)
+      (funcall compile-fn compile-command))))
 
   (defun user/compilation-done (buffer msg)
     (let ((bufwin (get-buffer-window buffer))
