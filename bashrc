@@ -23,7 +23,7 @@ HISTSIZE=10000
 HISTFILESIZE=20000
 
 # Ignore the ls command as well
-export HISTIGNORE=$'[ \t]*:&:[fb]g:exit:ls:cd'
+export HISTIGNORE=$'[ \t]*:&:[fb]g:exit:ls:cd:ll:pwd:bg:fg:history'
 
 _bash_history_sync() {
   # Append the command just entered to history file
