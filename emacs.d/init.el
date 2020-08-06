@@ -1472,7 +1472,6 @@ found, an error is signaled."
   :ghook ('c++-mode-hook #'modern-c++-font-lock-mode))
 
 (use-package ccls
-  :load-path "site-lisp/ccls" ;; ccls requires projectile (and doesn't use it at all)
   :after cc-mode
   :preface
   (defun user/ccls-callee-hierarchy ()
@@ -2038,5 +2037,5 @@ found, an error is signaled."
  '(modus-operandi-theme-slanted-constructs nil)
  '(modus-operandi-theme-visible-fringes nil)
  '(package-selected-packages
-   '(beginend cmake-font-lock cmake-mode comment-dwim-2 company company-posframe counsel counsel-etags cython-mode diff-hl dired-du dired-git-info dired-narrow diredfl dumb-jump eacl elfeed expand-region flymake-diagnostic-at-point geiser general git-timemachine haskell-mode hl-todo hydra iedit ignoramus imenu-anywhere ivy ivy-posframe ivy-rich iy-go-to-char js2-mode json-mode log4j-mode lsp-mode lsp-ui magit magit-gitflow minions modern-cpp-font-lock modus-operandi-theme modus-vivendi-theme multi-term multiple-cursors nasm-mode no-littering nov pyvenv rainbow-delimiters rainbow-mode realgud rg rmsbolt rust-mode smex string-inflection swiper symbol-overlay undo-tree use-package vc-msg visual-fill-column web-mode wgrep which-key yaml-mode yasnippet)))
+   '(ccls beginend cmake-font-lock cmake-mode comment-dwim-2 company company-posframe counsel counsel-etags cython-mode diff-hl dired-du dired-git-info dired-narrow diredfl dumb-jump eacl elfeed expand-region flymake-diagnostic-at-point geiser general git-timemachine haskell-mode hl-todo hydra iedit ignoramus imenu-anywhere ivy ivy-posframe ivy-rich iy-go-to-char js2-mode json-mode log4j-mode lsp-mode lsp-ui magit magit-gitflow minions modern-cpp-font-lock modus-operandi-theme modus-vivendi-theme multi-term multiple-cursors nasm-mode no-littering nov pyvenv rainbow-delimiters rainbow-mode realgud rg rmsbolt rust-mode smex string-inflection swiper symbol-overlay undo-tree use-package vc-msg visual-fill-column web-mode wgrep which-key yaml-mode yasnippet)))
 
