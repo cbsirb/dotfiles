@@ -1965,7 +1965,6 @@ found, an error is signaled."
            ("https://www.youtube.com/feeds/videos.xml?channel_id=UCWTFGPpNQ0Ms6afXhaWDiRw" cinema)      ;; Now You See It
            ("https://www.youtube.com/feeds/videos.xml?channel_id=UCf29Sq6-XxLQG_XuJwMHaFg" cinema)      ;; Nando v Movies
 
-           ("https://www.youtube.com/feeds/videos.xml?channel_id=UCxTdWpLJurbGlFMWOwXWG_A" history)     ;; Step Back History
            ("https://www.youtube.com/feeds/videos.xml?channel_id=UCQD-0MjUbDBwm2UTVYr0Dag" history)     ;; Suibhne
            ("https://www.youtube.com/feeds/videos.xml?channel_id=UCKMnl27hDMKvch--noWe5CA" history)     ;; Cogito
 
@@ -1978,7 +1977,6 @@ found, an error is signaled."
            ("https://www.youtube.com/feeds/videos.xml?channel_id=UC-3SbfTPJsL8fJAPKiVqBLg" science)     ;; "Deep Look"
            ("https://www.youtube.com/feeds/videos.xml?channel_id=UCotwjyJnb-4KW7bmsOoLfkg" science)     ;; "Art of the Problem"
            ("https://www.youtube.com/feeds/videos.xml?channel_id=UCzR-rom72PHN9Zg7RML9EbA" science)     ;; "PBS Eons"
-           ("https://www.youtube.com/feeds/videos.xml?channel_id=UCdJ9oJ2GUF8Vmb-G63ldGWg" science)     ;; "Reactions"
            ("https://www.youtube.com/feeds/videos.xml?channel_id=UCgRBRE1DUP2w7HTH9j_L4OQ" science)     ;; "Medlife Crisis"
            ("https://www.youtube.com/feeds/videos.xml?channel_id=UC7_gcs09iThXybpVgjHZ_7g" science)     ;; "PBS Space Time"
            ("https://www.youtube.com/feeds/videos.xml?channel_id=UCSIvk78tK2TiviLQn4fSHaw" science)     ;; "Up and Atom"
@@ -1998,7 +1996,6 @@ found, an error is signaled."
            ("https://www.youtube.com/feeds/videos.xml?channel_id=UC9RM-iSvTu1uPJb8X5yp3EQ" pop)         ;; Wendover
 
            ("https://www.youtube.com/feeds/videos.xml?channel_id=UCct9aR7HC79Cv2g-9oDOTLw" religion)    ;; ReligionForBreakfast
-           ("https://www.youtube.com/feeds/videos.xml?channel_id=UCtCTSf3UwRU14nYWr_xm-dQ" religion)    ;; Jonathan Pageau
 
            ("https://andreyorst.gitlab.io/feed.xml" tech)
            ("https://fabiensanglard.net/rss.xml" tech)
