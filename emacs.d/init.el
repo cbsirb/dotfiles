@@ -970,8 +970,7 @@ behavior added."
     (lambda ()
       (if (< (buffer-size) (* 1024 1024))
           (symbol-overlay-mode t)
-        (symbol-overlay-mode -1)
-        (message "Disable symbol overlay in big file"))))
+        (symbol-overlay-mode -1))))
   :general
   ("M-*" #'symbol-overlay-put)
   ("M-n" #'symbol-overlay-jump-next)
