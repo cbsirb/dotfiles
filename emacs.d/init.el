@@ -2000,6 +2000,7 @@ found, an error is signaled."
            ("https://andreyorst.gitlab.io/feed.xml" tech)
            ("https://fabiensanglard.net/rss.xml" tech)
            ("https://danluu.com/atom.xml" tech)
+           ("https://rachelbythebay.com/w/atom.xml" tech)
            ("https://trofi.github.io/feed/atom.xml" tech)
            ("https://planet.emacslife.com/atom.xml" emacs)
            ("https://www.phoronix.com/rss.php" linux phoronix)
