@@ -1914,6 +1914,13 @@ found, an error is signaled."
   :custom
   (nov-text-width 80))
 
+(use-package pdf-tools
+  :mode ("\\.pdf\\'" . pdf-view-mode)
+  :ghook ('pdf-view-mode-hook #'pdf-tools-enable-minor-modes)
+  :custom
+  (pdf-view-display-size 'fit-page)
+  (pdf-view-resize-factor 1.1))
+
 (use-package elfeed
   :commands (elfeed elfeed-update)
   :preface
@@ -2030,9 +2037,9 @@ found, an error is signaled."
  ;; If there is more than one, they won't work right.
  '(modus-operandi-theme-3d-modeline nil)
  '(modus-operandi-theme-bold-constructs t)
- '(modus-operandi-theme-proportional-fonts nil)
+ '(modus-operandi-theme-fringes nil)
  '(modus-operandi-theme-slanted-constructs nil)
- '(modus-operandi-theme-visible-fringes nil)
+ '(modus-operandi-theme-variable-pitch-headings nil)
  '(package-selected-packages
-   '(ccls beginend cmake-font-lock cmake-mode comment-dwim-2 company company-posframe counsel counsel-etags cython-mode diff-hl dired-du dired-git-info dired-narrow diredfl dumb-jump eacl elfeed expand-region flymake-diagnostic-at-point geiser general git-timemachine haskell-mode hl-todo hydra iedit ignoramus imenu-anywhere ivy ivy-posframe ivy-rich iy-go-to-char js2-mode json-mode log4j-mode lsp-mode lsp-ui magit magit-gitflow minions modern-cpp-font-lock modus-operandi-theme modus-vivendi-theme multi-term multiple-cursors nasm-mode no-littering nov pyvenv rainbow-delimiters rainbow-mode realgud rg rmsbolt rust-mode smex string-inflection swiper symbol-overlay undo-tree use-package vc-msg visual-fill-column web-mode wgrep which-key yaml-mode yasnippet)))
+   '(beginend ccls cmake-font-lock cmake-mode comment-dwim-2 company company-posframe counsel counsel-etags cython-mode diff-hl dired-du dired-git-info dired-narrow diredfl dumb-jump eacl elfeed expand-region flymake-diagnostic-at-point geiser general git-timemachine haskell-mode hl-todo hydra iedit ignoramus imenu-anywhere ivy ivy-posframe ivy-rich iy-go-to-char js2-mode json-mode log4j-mode lsp-mode lsp-ui magit magit-gitflow minions modern-cpp-font-lock modus-operandi-theme modus-vivendi-theme multi-term multiple-cursors nasm-mode no-littering nov pdf-tools pyvenv rainbow-delimiters rainbow-mode realgud rg rmsbolt rust-mode smex string-inflection swiper symbol-overlay undo-tree use-package vc-msg visual-fill-column web-mode wgrep which-key yaml-mode yasnippet)))
 
