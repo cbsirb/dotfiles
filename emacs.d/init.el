@@ -1963,7 +1963,7 @@ found, an error is signaled."
            ("https://www.youtube.com/feeds/videos.xml?channel_id=UCI9DUIgtRGHNH_HmSTcfUbA" cinema)      ;; The Closer Look
            ("https://www.youtube.com/feeds/videos.xml?channel_id=UCL5kBJmBUVFLYBDiSiK1VDw" cinema)      ;; Criswell
            ("https://www.youtube.com/feeds/videos.xml?channel_id=UCWTFGPpNQ0Ms6afXhaWDiRw" cinema)      ;; Now You See It
-           ("https://www.youtube.com/feeds/videos.xml?channel_id=UCf29Sq6-XxLQG_XuJwMHaFg" cinema)      ;; Nando v Movies
+           ("https://www.youtube.com/feeds/videos.xml?channel_id=UCUFoQUaVRt3MVFxqwPUMLCQ" cinema)      ;; StudioBinder
 
            ("https://www.youtube.com/feeds/videos.xml?channel_id=UCQD-0MjUbDBwm2UTVYr0Dag" history)     ;; Suibhne
            ("https://www.youtube.com/feeds/videos.xml?channel_id=UCKMnl27hDMKvch--noWe5CA" history)     ;; Cogito
