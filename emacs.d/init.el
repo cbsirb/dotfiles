@@ -1613,7 +1613,6 @@ found, an error is signaled."
   (push "[/\\\\]\\.clangd$" lsp-file-watch-ignored)
   (push "[/\\\\]\\.vscode$" lsp-file-watch-ignored)
 
-  (require 'lsp-clients)
   (csetq lsp-clients-clangd-args
          '("-j=7"
            "--all-scopes-completion"
