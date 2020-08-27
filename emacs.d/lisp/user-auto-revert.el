@@ -52,8 +52,8 @@
   (advice-add fn :around #'run-switch-buffer-hooks))
 
 (add-hook 'buffer-list-update-hook #'run-switch-window-hooks)
-(add-hook 'focus-in-hook #'auto-revert-buffer)
 (add-hook 'switch-buffer-hooks #'auto-revert-buffer)
 (add-hook 'switch-window-hooks #'auto-revert-buffer)
+(add-function :after after-focus-change-function #'auto-revert-buffer)
 
 (provide 'user-auto-revert)
