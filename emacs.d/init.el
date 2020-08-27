@@ -84,6 +84,13 @@
 
   (byte-recompile-directory package-user-dir nil 'force))
 
+(defun user-gc-on-last-frame-out-of-focus ()
+  "GC if all frames are inactive."
+  (if (seq-every-p #'null (mapcar #'frame-focus-state (frame-list)))
+      (garbage-collect)))
+
+(add-function :after after-focus-change-function #'user-gc-on-last-frame-out-of-focus)
+
 ;;
 ;; Packages needed no matter what, and usually others are depended on it
 ;;
@@ -293,8 +300,6 @@
 
 (use-package user-auto-revert
   :load-path "lisp")
-
-(add-hook 'focus-out-hook #'garbage-collect)
 
 ;;
 ;; Mode-line
