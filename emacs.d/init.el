@@ -1960,6 +1960,7 @@ found, an error is signaled."
            ("https://www.youtube.com/feeds/videos.xml?channel_id=UCkf4VIqu3Acnfzuk3kRIFwA" tech)        ;; gotbletu
            ("https://www.youtube.com/feeds/videos.xml?channel_id=UCUQo7nzH1sXVpzL92VesANw" tech)        ;; DIY Perks
            ("https://www.youtube.com/feeds/videos.xml?channel_id=UCy0tKL1T7wFoYcxCe0xjN6Q" tech)        ;; Technology Connections
+           ("https://www.youtube.com/feeds/videos.xml?channel_id=UCS4FAVeYW_IaZqAbqhlvxlA" tech)        ;; ContextFree
 
            ("https://www.youtube.com/feeds/videos.xml?channel_id=UCNf56PUyMI0wUyZ8KRhg2AQ" cinema)      ;; Cinema Nippon
            ("https://www.youtube.com/feeds/videos.xml?channel_id=UC7GV-3hrA9kDKrren0QMKMg" cinema)      ;; CinemaTyler
@@ -1975,6 +1976,7 @@ found, an error is signaled."
            ("https://www.youtube.com/feeds/videos.xml?channel_id=UCL5kBJmBUVFLYBDiSiK1VDw" cinema)      ;; Criswell
            ("https://www.youtube.com/feeds/videos.xml?channel_id=UCWTFGPpNQ0Ms6afXhaWDiRw" cinema)      ;; Now You See It
            ("https://www.youtube.com/feeds/videos.xml?channel_id=UCUFoQUaVRt3MVFxqwPUMLCQ" cinema)      ;; StudioBinder
+           ("https://www.youtube.com/feeds/videos.xml?channel_id=UChcSRqitXAm2BXtxTzP1azQ" cinema)      ;; kubricklynch
 
            ("https://www.youtube.com/feeds/videos.xml?channel_id=UCQD-0MjUbDBwm2UTVYr0Dag" history)     ;; Suibhne
            ("https://www.youtube.com/feeds/videos.xml?channel_id=UCKMnl27hDMKvch--noWe5CA" history)     ;; Cogito
