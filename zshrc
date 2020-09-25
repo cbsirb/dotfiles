@@ -30,6 +30,7 @@ alias ls='ls -hAF --group-directories-first -v --color=auto'
 alias tmux="tmux -2"
 alias gdb='gdb -q'
 alias cls='printf "\033c"'
+alias fd='fdfind -HL'
 
 # Own git
 alias g='git'

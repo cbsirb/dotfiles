@@ -8,3 +8,12 @@
     output "Ancor Communications Inc ASUS VS229 EALMQS093186" mode 1920x1080 position 1920,0
     output eDP-1 mode 1920x1080 position 0,0
 }
+
+{
+    output "Philips Consumer Electronics Company PHL 272B8Q UK01948018974" mode 2560x1440 position 0,0
+    output eDP-1 disable
+}
+
+{
+    output eDP-1 mode 1920x1080 position 0,0
+}

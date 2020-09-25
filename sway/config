@@ -11,16 +11,16 @@ set $down j
 set $up k
 set $right l
 
-set $ws10 10
+set $ws10 10: music
 set $ws1 1
-set $ws2 2
+set $ws2 2: www
 set $ws3 3
 set $ws4 4
 set $ws5 5
 set $ws6 6
 set $ws7 7
 set $ws8 8
-set $ws9 9
+set $ws9 9: slack
 
 # set $term alacritty
 # set $float_arg -t force_float
@@ -37,17 +37,15 @@ set $lock_cmd swaylock
 
 # Your preferred application launcher
 # Note: it's recommended that you pass the final command to sway
-set $all_menu wofi --show run --term="$term_float_cmd"
-set $menu wofi --show drun --term="$term_float_cmd"
+# set $all_menu wofi --show run --term="$term_float_cmd"
+# set $menu wofi --show drun --term="$term_float_cmd"
+set $all_menu rofi -show run -terminal "$term_float_cmd"
+set $menu rofi -show drun -terminal "$term_float_cmd"
 
 ### Output configuration
 #
 # Default wallpaper (more resolutions are available in /usr/share/backgrounds/sway/)
 output * bg /usr/share/backgrounds/sway/Sway_Wallpaper_Blue_1920x1080.png fill
-
-# output eDP-1 disable
-# output "Dell Inc. DELL U2415 7MT0181G12DU" mode 1920x1200 position 1920,0
-# output "Dell Inc. DELL U2415 7MT0181G290U" mode 1920x1200 position 0,0
 
 ### Idle configuration
 #
@@ -55,26 +53,26 @@ output * bg /usr/share/backgrounds/sway/Sway_Wallpaper_Blue_1920x1080.png fill
 # your displays after another 180 seconds, and turn your screens back on when
 # resumed. It will also lock your screen before your computer goes to sleep.
 exec swayidle -w \
-         timeout 180 '$lock_cmd' \
+         timeout 300 'swaymsg "output * dpms off"' \
+         resume 'swaymsg "output * dpms on"' \
          before-sleep '$lock_cmd'
 
 # exec ~/.config/sway/monitor-setup.py
 exec xrdb -merge $HOME/.Xresources
-exec swaymsg -- exec dbus-daemon --session --address=unix:path=$XDG_RUNTIME_DIR/bus
+# exec swaymsg -- exec dbus-daemon --session --address=unix:path=$XDG_RUNTIME_DIR/bus
 exec swaymsg -- exec autocutsel -fork
-exec swaymsg -- exec pulseeffects --gapplication-service
+# exec swaymsg -- exec pulseeffects --gapplication-service
 
 # This is a hack actually, mako doesn't really work on it's own and I don't
 # have time to debug it
 exec swaymsg -- exec mako
-exec swaymsg -- exec dunst
-
+# exec swaymsg -- exec dunst
 exec swaymsg -- exec kanshi
 
 exec_always {
-    gsettings set org.gnome.desktop.interface gtk-theme 'Arc-Darker'
+    gsettings set org.gnome.desktop.interface gtk-theme 'Breeze'
     gsettings set org.gnome.desktop.interface cursor-theme 'breeze_cursors'
-    gsettings set org.gnome.desktop.interface icon-theme 'breeze-dark'
+    gsettings set org.gnome.desktop.interface icon-theme 'Papirus'
 }
 
 
@@ -117,7 +115,7 @@ floating_modifier $mod normal
 
 # reload the configuration file
 bindsym $mod+Shift+c reload
-bindsym $mod+Shift+r exec ~/.config/sway/monitor-setup.py
+bindsym $mod+Shift+r exec "pkill kanshi; kanshi"
 
 set $mode_system System: (l) lock, (e) logout, (s) suspend, (r) reboot, (p) shutdown, (R) UEFI
 mode "$mode_system" {
@@ -132,7 +130,9 @@ mode "$mode_system" {
     bindsym Return mode "default"
     bindsym Escape mode "default"
 }
-bindsym $mod+Shift+e mode "$mode_system"
+
+# bindsym $mod+Shift+e mode "$mode_system"
+bindsym $mod+Shift+e exec nwgbar
 
 #
 # Moving around:
@@ -280,6 +280,7 @@ bindsym XF86AudioPlay exec playerctl play-pause
 bindsym XF86AudioRaiseVolume exec pactl set-sink-volume @DEFAULT_SINK@ +3%
 bindsym XF86AudioLowerVolume exec pactl set-sink-volume @DEFAULT_SINK@ -3%
 bindsym XF86AudioMute exec pactl set-sink-mute @DEFAULT_SINK@ toggle
+bindsym XF86AudioMicMute exec pactl set-source-mute @DEFAULT_SOURCE@ toggle
 bindsym $mod+Ctrl+Up exec pactl set-sink-volume @DEFAULT_SINK@ +3%
 bindsym $mod+Ctrl+Down exec pactl set-sink-volume @DEFAULT_SINK@ -3%
 
@@ -331,6 +332,7 @@ for_window [app_id="pavucontrol"] floating enable
 for_window [app_id="mpv"] floating enable
 for_window [app_id="blueman-manager"] floating enable
 for_window [app_id="virt-manager"] floating enable
+for_window [class="^zoom$"] floating enable
 for_window [class="^force_float$"] floating enable
 for_window [title="^force_float"] floating enable
 for_window [app_id="^nm-connection-editor$"] floating enable

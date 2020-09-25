@@ -1,8 +1,9 @@
 {
-    "layer": "bottom",
+    "layer": "top",
+    "height": 24,
     "modules-left": ["sway/workspaces", "sway/mode"],
     "modules-center": ["sway/window"],
-    "modules-right": ["idle_inhibitor", "battery", "pulseaudio", "network", "network#vpn", "clock", "tray"],
+    "modules-right": ["idle_inhibitor", "battery", "pulseaudio", "network", "clock", "tray"],
     "position": "top",
     "sway/mode": {
         "tooltip": false,
@@ -25,7 +26,8 @@
     },
     "clock": {
         "on-click": "alacritty -t force_float -d 70 35 -e watch -n60 cal -y",
-        "format": "{:%m/%d %H:%M}"
+        "format": "{:%d %b, %H:%M}",
+        "tooltip": false
     },
     "memory": {
         "tooltip": false,
@@ -38,17 +40,17 @@
     },
     "pulseaudio": {
         "tooltip": false,
-        "format": "🔊{volume}%",
-        "format-bluetooth": "🔊{volume}%",
+        "format": "🔊 {volume}%",
+        "format-bluetooth": "🔊 {volume}%",
         "format-muted": "🔇",
         "format-alt": "{volume}%",
-        "on-click": "pavucontrol-qt"
+        "on-click": "pavucontrol"
     },
     "network": {
         "tooltip": false,
         "format-wifi": "📶{essid} ({signalStrength}%)",
-        "format-ethernet": "🖧",
-        "format-disconnected": "⚠",
+        "format-ethernet": "lan",
+        "format-disconnected": "(no network)",
         "on-click": "alacritty -t force_float -d 70 50 -e nmtui"
     },
     "network#vpn": {

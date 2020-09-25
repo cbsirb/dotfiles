@@ -78,10 +78,17 @@ fi
 #
 # Other stuff
 #
-export GTK_USE_PORTAL=1
-# export _JAVA_AWT_WM_NONREPARENTING=1
-# export MOZ_ENABLE_WAYLAND=1
-# export QT_QPA_PLATFORMTHEME=qt5ct
+# Disable this on wayland, causes jagged fonts on GTK apps
+# export GTK_USE_PORTAL=1
+
+# Enable for proper wayland support
+export _JAVA_AWT_WM_NONREPARENTING=1
+export MOZ_ENABLE_WAYLAND=1
+# export XDG_CURRENT_DESKTOP=Unity
+export QT_QPA_PLATFORM=wayland
+export QT_WAYLAND_DISABLE_WINDOWDECORATION="1"
+export QT_QPA_PLATFORMTHEME=qt5ct
+
 # export LIBVA_DRIVER_NAME=iHD
 export LIBVA_DRIVER_NAME=i965
 
