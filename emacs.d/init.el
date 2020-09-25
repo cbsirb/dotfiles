@@ -1967,6 +1967,7 @@ found, an error is signaled."
            ("https://www.youtube.com/feeds/videos.xml?channel_id=UCguWV1bZg1QiWbY32vGnOLw" tech)        ;; Bitwise
            ("https://www.youtube.com/feeds/videos.xml?channel_id=UCrUL8K81R4VBzm-KOYwrcxQ" tech)        ;; Engineer Man
            ("https://www.youtube.com/feeds/videos.xml?channel_id=UCJ0-OtVpF0wOKEqT2Z1HEtA" tech)        ;; ElectroBOOM
+           ("https://www.youtube.com/feeds/videos.xml?channel_id=UCRPdsCVuH53rcbTcEkuY4uQ" tech)        ;; Moores Law Is Dead
 
            ("https://www.youtube.com/feeds/videos.xml?channel_id=UCNf56PUyMI0wUyZ8KRhg2AQ" cinema)      ;; Cinema Nippon
            ("https://www.youtube.com/feeds/videos.xml?channel_id=UC7GV-3hrA9kDKrren0QMKMg" cinema)      ;; CinemaTyler
@@ -2022,6 +2023,10 @@ found, an error is signaled."
            ("https://danluu.com/atom.xml" tech)
            ("https://rachelbythebay.com/w/atom.xml" tech)
            ("https://trofi.github.io/feed/atom.xml" tech)
+           ("https://virtuallyfun.com/wordpress/feed" tech)
+           ("https://stopa.io/feed.rss" tech)
+           ("https://kliu.io/index.xml" tech)
+           ("https://obscuritory.com/feed/" pop)
            ("https://planet.emacslife.com/atom.xml" emacs)
            ("https://www.phoronix.com/rss.php" linux phoronix)
            ("https://xkcd.com/atom.xml" comic)
