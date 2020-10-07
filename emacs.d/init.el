@@ -1854,22 +1854,33 @@ found, an error is signaled."
   ("C-c p f" 'project-find-file)
   ("C-c p a" 'ff-find-other-file)
   :preface
-  (defvar user/project-roots '("compile_commands.json" "requirements.txt" "pyproject.toml")
+  (defvar user/project-roots '("compile_commands.json" "requirements.txt" "pyproject.toml" ".git" ".svn" ".hg")
     "Files or directories that mark the root of a project.")
+
+  (defvar user/project-root nil
+    "The project for this current buffer. Keep this cached so we
+    won't call `locate-dominating-file' each time.")
+  (make-variable-buffer-local 'user/project-root)
 
   (defun user/project-find-root (path)
     "Search (recursive) for root markers in PATH."
 
-    (unless (file-directory-p path)
-      (setq path (file-name-directory path)))
+    (if user/project-root
+        (cons 'transient user/project-root)
 
-    (catch 'done
-      (dolist (proot user/project-roots)
-        (if-let ((root (locate-dominating-file path proot)))
-            (throw 'done (cons 'transient root))
-          nil))))
-  :config
-  (push #'user/project-find-root project-find-functions))
+      (unless (file-directory-p path)
+        (setq path (file-name-directory path)))
+
+      (catch 'done
+        (dolist (proot user/project-roots)
+          (if-let ((root (locate-dominating-file path proot)))
+              (progn
+                (setq-local user/project-root root)
+                (throw 'done (cons 'transient root)))
+            nil)))))
+
+  :custom
+  (project-find-functions (list #'user/project-find-root)))
 
 (use-package vc :ensure nil
   :config
