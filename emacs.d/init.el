@@ -1992,6 +1992,7 @@ found, an error is signaled."
            ("https://www.youtube.com/feeds/videos.xml?channel_id=UCrUL8K81R4VBzm-KOYwrcxQ" tech)        ;; Engineer Man
            ("https://www.youtube.com/feeds/videos.xml?channel_id=UCJ0-OtVpF0wOKEqT2Z1HEtA" tech)        ;; ElectroBOOM
            ("https://www.youtube.com/feeds/videos.xml?channel_id=UCRPdsCVuH53rcbTcEkuY4uQ" tech)        ;; Moores Law Is Dead
+           ("https://www.youtube.com/feeds/videos.xml?channel_id=UC3azLjQuz9s5qk76KEXaTvA" tech)        ;; suckerpinch
 
            ("https://www.youtube.com/feeds/videos.xml?channel_id=UCNf56PUyMI0wUyZ8KRhg2AQ" cinema)      ;; Cinema Nippon
            ("https://www.youtube.com/feeds/videos.xml?channel_id=UC7GV-3hrA9kDKrren0QMKMg" cinema)      ;; CinemaTyler
@@ -2039,6 +2040,8 @@ found, an error is signaled."
            ("https://www.youtube.com/feeds/videos.xml?channel_id=UCXkNod_JcH7PleOjwK_8rYQ" pop)         ;; Polyphonic
            ("https://www.youtube.com/feeds/videos.xml?channel_id=UC9RM-iSvTu1uPJb8X5yp3EQ" pop)         ;; Wendover
            ("https://www.youtube.com/feeds/videos.xml?channel_id=UCdN4aXTrHAtfgbVG9HjBmxQ" pop)         ;; Kay & Peele
+           ("https://www.youtube.com/feeds/videos.xml?channel_id=UCi7l9chXMljpUft67vw78qw" pop)         ;; Sideways
+           ("https://www.youtube.com/feeds/videos.xml?channel_id=UCyNtlmLB73-7gtlBz00XOQQ" pop)         ;; Folding Ideas
 
            ("https://www.youtube.com/feeds/videos.xml?channel_id=UCct9aR7HC79Cv2g-9oDOTLw" religion)    ;; ReligionForBreakfast
 
