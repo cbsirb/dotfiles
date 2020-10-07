@@ -323,13 +323,15 @@ This is the same as using \\[set-mark-command] with the prefix argument."
 (defun user/scroll-half-page-down ()
   "Scrolls exactly half page down keeping cursor/point position."
   (interactive)
-  (user/scroll-half-page t))
+  (line-move (- (/ (window-body-height) 2)))
+  (recenter))
 
 ;;;###autoload
 (defun user/scroll-half-page-up ()
   "Scrolls exactly half page up keeping cursor/point position."
   (interactive)
-  (user/scroll-half-page nil))
+  (line-move (/ (window-body-height) 2))
+  (recenter))
 
 ;;;###autoload
 (defun user/split-window-right ()
