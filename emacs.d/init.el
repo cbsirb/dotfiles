@@ -301,8 +301,10 @@
 (minibuffer-depth-indicate-mode t)
 (blink-cursor-mode -1)
 (save-place-mode t)
+(global-auto-revert-mode t)
 
 (use-package user-auto-revert
+  :disabled
   :load-path "lisp")
 
 ;;
