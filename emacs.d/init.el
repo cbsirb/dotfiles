@@ -245,6 +245,10 @@
 (csetq idle-update-delay 1)
 (csetq custom-buffer-done-kill t)
 
+;; Some bidi stuff
+(csetq bidi-paragraph-direction 'left-to-right)
+(csetq bidi-inhibit-bpa t)
+
 ;; "Smooth" mouse scrolling, one line at a time
 (csetq mouse-wheel-scroll-amount
        '(1
