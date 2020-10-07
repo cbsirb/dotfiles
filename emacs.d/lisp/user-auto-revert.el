@@ -10,6 +10,11 @@
   (unless (or (bound-and-true-p auto-revert-mode) (active-minibuffer-window))
     (auto-revert-handler)))
 
+(defun auto-revert-after-buffer-changed (_buf)
+  "Auto revert current buffer, if necessary."
+  (unless (or (bound-and-true-p auto-revert-mode) (active-minibuffer-window))
+    (auto-revert-handler)))
+
 (defvar switch-buffer-hooks '()
   "Hooks to run when switching buffers.")
 
@@ -28,7 +33,7 @@
         (with-current-buffer (if (windowp buffer)
                                  (window-buffer buffer)
                                buffer)
-          (run-hooks 'switch-buffer-hooks))
+          (run-hook-with-args 'switch-buffer-hooks buffer))
         buffer))))
 
 (defun run-switch-to-next-prev-buffer-hooks (orig-fn &rest args)
@@ -52,7 +57,7 @@
   (advice-add fn :around #'run-switch-buffer-hooks))
 
 (add-hook 'buffer-list-update-hook #'run-switch-window-hooks)
-(add-hook 'switch-buffer-hooks #'auto-revert-buffer)
+(add-hook 'switch-buffer-hooks #'auto-revert-after-buffer-changed)
 (add-hook 'switch-window-hooks #'auto-revert-buffer)
 (add-function :after after-focus-change-function #'auto-revert-buffer)
 
