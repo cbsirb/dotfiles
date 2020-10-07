@@ -1967,7 +1967,7 @@ found, an error is signaled."
   :init
   (csetq elfeed-search-title-max-width 100)
   (csetq elfeed-search-title-min-width 30)
-  (csetq elfeed-search-filter "@1-weeks-ago")
+  (csetq elfeed-search-filter "+unread")
   (csetq elfeed-feeds
          '(("https://www.youtube.com/feeds/videos.xml?channel_id=UC3ts8coMP645hZw9JSD3pqQ" tech)        ;; Andreas Kling
            ("https://www.youtube.com/feeds/videos.xml?channel_id=UC7S6EpMQ5QNGRg7uJmJWXNw" tech)        ;; QueueQueueHack
