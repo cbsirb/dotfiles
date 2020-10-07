@@ -728,6 +728,13 @@ behavior added."
 (general-define-key [remap keyboard-quit] #'keyboard-quit-context+)
 (general-define-key [remap minibuffer-keyboard-quit] #'keyboard-quit-context+)
 
+(defun user-profiler-start ()
+  (interactive)
+  (profiler-start 'cpu+mem))
+
+(general-define-key "<f8>" #'user-profiler-start)
+(general-define-key "<f9>" #'profiler-stop)
+
 (general-define-key
  :prefix "M-s"
  "o" #'occur-at-point)
