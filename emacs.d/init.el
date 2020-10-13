@@ -2061,6 +2061,7 @@ found, an error is signaled."
            ("https://virtuallyfun.com/wordpress/feed" tech)
            ("https://stopa.io/feed.rss" tech)
            ("https://kliu.io/index.xml" tech)
+           ("https://drewdevault.com/blog/index.xml" tech)
            ("https://obscuritory.com/feed/" pop)
            ("https://planet.emacslife.com/atom.xml" emacs)
            ("https://www.phoronix.com/rss.php" linux phoronix)
