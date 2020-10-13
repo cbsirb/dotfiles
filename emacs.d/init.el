@@ -103,10 +103,14 @@
   :if (display-graphic-p)
   :custom
   (modus-operandi-theme-visible-fringes nil)
+  (modus-operandi-theme-fringes 'subtle)
   (modus-operandi-theme-bold-constructs t)
   (modus-operandi-theme-slanted-constructs nil)
   (modus-operandi-theme-3d-modeline nil)
+  (modus-operandi-theme-intense-paren-match t)
   (modus-operandi-theme-proportional-fonts nil)
+  (modus-operandi-theme-section-headings t)
+  (modus-operandi-theme-completions 'opinionated)
   :config
   (load-theme 'modus-operandi t))
 
@@ -115,10 +119,14 @@
   :if (display-graphic-p)
   :custom
   (modus-vivendi-theme-visible-fringes nil)
+  (modus-vivendi-theme-fringes 'subtle)
   (modus-vivendi-theme-bold-constructs t)
   (modus-vivendi-theme-slanted-constructs nil)
   (modus-vivendi-theme-3d-modeline nil)
+  (modus-vivendi-theme-intense-paren-match t)
   (modus-vivendi-theme-proportional-fonts nil)
+  (modus-vivendi-theme-section-headings t)
+  (modus-vivendi-theme-completions 'opinionated)
   :config
   (load-theme 'modus-vivendi t))
 
