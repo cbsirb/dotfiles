@@ -65,5 +65,6 @@ alias v='vim'
 
 alias down-mp3='youtube-dl -x -f bestaudio --audio-format mp3 --audio-quality 0 --add-metadata --metadata-from-title "%(artist)s - %(title)s" -o "%(title)s.%(ext)s" -i'
 alias down-list='youtube-dl -x -f bestaudio --audio-format mp3 --audio-quality 0 --add-metadata --metadata-from-title "%(artist)s - %(title)s" -o "%(playlist)s/%(playlist_index)s - %(title)s.%(ext)s" -i'
+alias dlna-restart='sudo systemctl stop minidlna.service; sudo minidlnad -R; sleep 5; sudo pkill minidlnad; sudo systemctl start minidlna.service'
 
 alias temps="paste <(cat /sys/class/thermal/thermal_zone*/type) <(cat /sys/class/thermal/thermal_zone*/temp) | column -s $'\t' -t | sed 's/...$/.0°C/'"
