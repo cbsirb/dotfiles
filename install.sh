@@ -70,6 +70,7 @@ install_dotfile "inputrc"
 install_dotfile "zshrc"
 install_dotfile "zprofile"
 install_dotfile "zpreztorc"
+install_dotfile "p10k.zsh"
 
 install_dotfile "gitconfig"
 
