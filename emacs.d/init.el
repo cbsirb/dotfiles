@@ -1802,6 +1802,7 @@ found, an error is signaled."
   (require 'esh-module))
 
 (use-package multi-term
+  :disabled
   :if (eq system-type 'gnu/linux)
 
   :general
@@ -1817,6 +1818,21 @@ found, an error is signaled."
   (term-buffer-maximum-size 0)
   (multi-term-dedicated-select-after-open-p t)
   (multi-term-scroll-show-maximum-output t))
+
+(use-package multi-vterm
+  :if (eq system-type 'gnu/linux)
+  :general
+  ("C-z" #'multi-vterm-next)
+  ("C-c z c" #'multi-vterm)
+  ("C-c z d" #'multi-vterm-dedicated-toggle)
+  ("C-c z n" #'multi-vterm-next)
+  ("C-c z p" #'multi-vterm-prev)
+  (:keymaps
+   'vterm-mode-map
+   "<C-backspace>" #'vterm-send-C-w
+   "C-u" #'vterm-send-C-u)
+  :custom
+  (vterm-max-scrollback 100000))
 
 ;;
 ;; Debugging
