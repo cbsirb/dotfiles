@@ -2020,6 +2020,7 @@ found, an error is signaled."
            ("https://www.youtube.com/feeds/videos.xml?channel_id=UCJ0-OtVpF0wOKEqT2Z1HEtA" tech)        ;; ElectroBOOM
            ("https://www.youtube.com/feeds/videos.xml?channel_id=UCRPdsCVuH53rcbTcEkuY4uQ" tech)        ;; Moores Law Is Dead
            ("https://www.youtube.com/feeds/videos.xml?channel_id=UC3azLjQuz9s5qk76KEXaTvA" tech)        ;; suckerpinch
+           ("https://www.youtube.com/feeds/videos.xml?channel_id=UCq7dxy_qYNEBcHqQVCbc20w" tech)        ;; WhatsACreel
 
            ("https://www.youtube.com/feeds/videos.xml?channel_id=UCNf56PUyMI0wUyZ8KRhg2AQ" cinema)      ;; Cinema Nippon
            ("https://www.youtube.com/feeds/videos.xml?channel_id=UC7GV-3hrA9kDKrren0QMKMg" cinema)      ;; CinemaTyler
