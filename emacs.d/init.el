@@ -1152,7 +1152,9 @@ behavior added."
   :after ivy
   :custom
   (ivy-posframe-display-functions-alist
-   '((swiper . nil)
+   '((swiper . ivy-display-function-fallback)
+     (swiper-isearch . ivy-display-function-fallback)
+     (swiper-isearch-backward . ivy-display-function-fallback)
      (t . ivy-posframe-display-at-point)))
   (ivy-posframe-parameters '((internal-border-width . 3)))
   :config
