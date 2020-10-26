@@ -100,7 +100,6 @@
 (use-package general)
 
 (use-package modus-operandi-theme
-  :if (display-graphic-p)
   :custom
   (modus-operandi-theme-visible-fringes nil)
   (modus-operandi-theme-fringes 'subtle)
@@ -116,7 +115,6 @@
 
 (use-package modus-vivendi-theme
   :disabled
-  :if (display-graphic-p)
   :custom
   (modus-vivendi-theme-visible-fringes nil)
   (modus-vivendi-theme-fringes 'subtle)
