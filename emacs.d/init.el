@@ -1150,6 +1150,17 @@ behavior added."
 
 (use-package ivy-posframe
   :after ivy
+  :preface
+  (defun user/ivy-posframe-get-size ()
+    (list
+     :height ivy-posframe-height
+     :width ivy-posframe-width
+     :min-height (or ivy-posframe-min-height
+                     (let ((height (+ ivy-height 1)))
+                       (min height (or ivy-posframe-height height))))
+     :min-width (or ivy-posframe-min-width
+                    (let ((width (round (* (frame-width) 0.4))))
+                      (min width (or ivy-posframe-width width))))))
   :custom
   (ivy-posframe-display-functions-alist
    '((swiper . ivy-display-function-fallback)
@@ -1157,6 +1168,7 @@ behavior added."
      (swiper-isearch-backward . ivy-display-function-fallback)
      (t . ivy-posframe-display-at-point)))
   (ivy-posframe-parameters '((internal-border-width . 3)))
+  (ivy-posframe-size-function #'user/ivy-posframe-get-size)
   :config
   (ivy-posframe-mode t))
 
