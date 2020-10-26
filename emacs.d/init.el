@@ -727,10 +727,10 @@ behavior added."
 (general-define-key "C-d" #'delete-forward-char)
 (general-define-key [remap just-one-space] #'cycle-spacing)
 (general-define-key [remap newline] #'newline-and-indent)
-(general-define-key [remap isearch-forward] #'isearch-forward-regexp)
-(general-define-key [remap isearch-forward-regexp] #'isearch-forward)
-(general-define-key [remap isearch-backward] #'isearch-backward-regexp)
-(general-define-key [remap isearch-backward-regexp] #'isearch-backward)
+;; (general-define-key [remap isearch-forward] #'isearch-forward-regexp)
+;; (general-define-key [remap isearch-forward-regexp] #'isearch-forward)
+;; (general-define-key [remap isearch-backward] #'isearch-backward-regexp)
+;; (general-define-key [remap isearch-backward-regexp] #'isearch-backward)
 (general-define-key [remap keyboard-quit] #'keyboard-quit-context+)
 (general-define-key [remap minibuffer-keyboard-quit] #'keyboard-quit-context+)
 
@@ -1109,6 +1109,28 @@ behavior added."
   (ivy-wrap t)
   :init
   (ivy-mode t))
+
+(use-package swiper
+  :preface
+  (defun swiper-C-r (&optional arg)
+    "Move cursor vertically up ARG candidates.
+If the input is empty, select the previous history element instead."
+    (interactive "p")
+    (if (string= ivy-text "")
+        (ivy-previous-history-element 1)
+      (ivy-previous-line arg)))
+
+  (defun swiper-isearch-with-count (orig-func &rest args)
+    (let ((ivy-count-format (if (> (length ivy-count-format) 0) ivy-count-format "%d/%d ")))
+      (apply orig-func args)))
+
+  :general
+  ("C-s" #'swiper-isearch)
+  ("C-r" #'swiper-isearch-backward)
+  (:keymaps 'swiper-map
+            "C-r" #'swiper-C-r)
+  :init
+  (advice-add 'swiper-isearch :around #'swiper-isearch-with-count))
 
 (use-package counsel
   :general
