@@ -1130,7 +1130,10 @@ If the input is empty, select the previous history element instead."
   ("C-s" #'swiper-isearch)
   ("C-r" #'swiper-isearch-backward)
   (:keymaps 'swiper-map
-            "C-r" #'swiper-C-r)
+            "C-r" #'swiper-C-r
+            "M-s" #'swiper-isearch-toggle)
+  (:keymaps 'isearch-mode-map
+            "M-s" #'swiper-isearch-toggle)
   :init
   (advice-add 'swiper-isearch :around #'swiper-isearch-with-count))
 
