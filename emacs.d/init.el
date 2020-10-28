@@ -1094,7 +1094,9 @@ behavior added."
 ;; Completion-related
 ;;
 
-(use-package smex)
+(use-package smex
+  :custom
+  (smex-history-length 16))
 
 (use-package ivy
   :general
