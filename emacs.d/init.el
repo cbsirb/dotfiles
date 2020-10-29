@@ -84,12 +84,12 @@
 
   (byte-recompile-directory package-user-dir nil 'force))
 
-(defun user-gc-on-last-frame-out-of-focus ()
+(defun user/gc-on-last-frame-out-of-focus ()
   "GC if all frames are inactive."
   (if (seq-every-p #'null (mapcar #'frame-focus-state (frame-list)))
       (garbage-collect)))
 
-(add-function :after after-focus-change-function #'user-gc-on-last-frame-out-of-focus)
+(add-function :after after-focus-change-function #'user/gc-on-last-frame-out-of-focus)
 
 ;;
 ;; Packages needed no matter what, and usually others are depended on it
@@ -734,11 +734,11 @@ behavior added."
 (general-define-key [remap keyboard-quit] #'keyboard-quit-context+)
 (general-define-key [remap minibuffer-keyboard-quit] #'keyboard-quit-context+)
 
-(defun user-profiler-start ()
+(defun user/profiler-start ()
   (interactive)
   (profiler-start 'cpu+mem))
 
-(general-define-key "<f8>" #'user-profiler-start)
+(general-define-key "<f8>" #'user/profiler-start)
 (general-define-key "<f9>" #'profiler-stop)
 
 (general-define-key
@@ -1639,7 +1639,7 @@ found, an error is signaled."
   :commands (lsp lsp-mode)
 
   :preface
-  (defun user-setup-lsp-completion ()
+  (defun user/setup-lsp-completion ()
     (setq-local company-backends (remove 'company-capf company-backends))
     (push 'company-capf company-backends))
 
@@ -1647,7 +1647,7 @@ found, an error is signaled."
   ('c-mode-common-hook #'lsp t)
   ('python-mode-hook #'lsp t)
   ('rust-mode-hook #'lsp t)
-  ('lsp-managed-mode-hook #'user-setup-lsp-completion)
+  ('lsp-managed-mode-hook #'user/setup-lsp-completion)
   ('lsp-mode-hook #'lsp-enable-which-key-integration)
 
   :custom
