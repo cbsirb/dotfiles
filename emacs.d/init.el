@@ -1925,25 +1925,34 @@ found, an error is signaled."
 
   (defvar user/project-root nil
     "The project for this current buffer. Keep this cached so we
-    won't call `locate-dominating-file' each time.")
+    won't call `locate-dominating-file' each time. The special
+    value of `'no-project' means that this file does not belong
+    to a project.")
   (make-variable-buffer-local 'user/project-root)
 
   (defun user/project-find-root (path)
     "Search (recursive) for root markers in PATH."
 
-    (if user/project-root
+    (if (stringp user/project-root)
         (cons 'transient user/project-root)
 
-      (unless (file-directory-p path)
-        (setq path (file-name-directory path)))
+      (if user/project-root
+          nil
+        (unless (file-directory-p path)
+          (setq path (file-name-directory path)))
 
-      (catch 'done
-        (dolist (proot user/project-roots)
-          (if-let ((root (locate-dominating-file path proot)))
-              (progn
-                (setq-local user/project-root root)
-                (throw 'done (cons 'transient root)))
-            nil)))))
+        (let ((found-project (catch 'done
+                               (dolist (proot user/project-roots)
+                                 (if-let ((root (locate-dominating-file path proot)))
+                                     (progn
+                                       (setq-local user/project-root root)
+                                       (throw 'done root))
+                                   nil)))))
+          (if found-project
+              (cond 'transient found-project)
+            (setq-local user/project-root 'no-project)
+            nil)
+          ))))
 
   :custom
   (project-find-functions (list #'user/project-find-root)))
