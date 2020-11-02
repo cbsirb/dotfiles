@@ -2045,6 +2045,10 @@ found, an error is signaled."
   (csetq elfeed-search-filter "+unread")
   (csetq elfeed-feeds
          '(("https://www.youtube.com/feeds/videos.xml?channel_id=UC3ts8coMP645hZw9JSD3pqQ" tech)        ;; Andreas Kling
+           ("https://www.youtube.com/feeds/videos.xml?channel_id=UCgWip0vxtqu34rZrFeCpUow" tech)        ;; Tim Morgan
+           ("https://www.youtube.com/feeds/videos.xml?channel_id=UCUICU6mgcyGy61pojwuWyHA" tech)        ;; Andrew Kelly
+           ("https://www.youtube.com/feeds/videos.xml?channel_id=UC-_ZS52_S34Spofk4-lAedA" tech)        ;; Valtteri Koskivuori
+           ("https://www.youtube.com/feeds/videos.xml?channel_id=UC3KNgU1jlleVcn8f7DY9bdg" tech)        ;; Dimitriy Kubyshkin
            ("https://www.youtube.com/feeds/videos.xml?channel_id=UC7S6EpMQ5QNGRg7uJmJWXNw" tech)        ;; QueueQueueHack
            ("https://www.youtube.com/feeds/videos.xml?channel_id=UCBa659QWEk1AI4Tg--mrJ2A" tech)        ;; Tom Scott
            ("https://www.youtube.com/feeds/videos.xml?channel_id=UCKTehwyGCKF-b2wo0RKwrcg" tech)        ;; Bisqwit
