@@ -352,7 +352,7 @@ for_window [title=".*"] title_format %title
 #
 
 client.focused  #4c7899 #494844 #ffffff #2E9EF4 #f07746
-font pango: Iosevka SS10 Extended 10
+font pango: Iosevka Extended 10
 
 #
 # Misc:

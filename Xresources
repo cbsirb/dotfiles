@@ -5,10 +5,10 @@ Xft.hintstyle:  hintslight
 Xft.lcdfilter:  lcddefault
 Xft.rgba:       rgb
 
-URxvt.font:             xft:Iosevka Fixed SS10 Extended:size=10:style=Regular
-URxvt.italicFont:       xft:Iosevka Fixed SS10 Extended:size=10:italic
-URxvt.boldFont:         xft:Iosevka Fixed SS10 Extended:size=10:bold
-URxvt.boldItalicFont:   xft:Iosevka Fixed SS10 Extended:size=10:bold:italic
+URxvt.font:             xft:Iosevka Fixed Extended:size=10:style=Regular
+URxvt.italicFont:       xft:Iosevka Fixed Extended:size=10:italic
+URxvt.boldFont:         xft:Iosevka Fixed Extended:size=10:bold
+URxvt.boldItalicFont:   xft:Iosevka Fixed Extended:size=10:bold:italic
 
 xterm*saveLines: 100000
 
@@ -18,7 +18,7 @@ xterm*termName: xterm-256color
 xterm*locale: true
 xterm*metaSendsEscape: true
 xterm*eightBitInput: false
-xterm*faceName: xft:Iosevka Fixed SS10 Extended:style=Regular:size=10
+xterm*faceName: xft:Iosevka Fixed Extended:style=Regular:size=10.5
 
 xterm*multiScroll: true
 xterm*jumpScroll: true

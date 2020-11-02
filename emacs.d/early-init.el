@@ -20,12 +20,12 @@
 (setq frame-inhibit-implied-resize t)
 
 (set-face-attribute 'default nil
-                    :family "Iosevka Fixed SS10 Extended"
+                    :family "Iosevka Fixed Extended"
                     :height 105
                     :weight 'normal)
 
 (set-face-attribute 'fixed-pitch nil
-                    :family "Iosevka Fixed SS10 Extended"
+                    :family "Iosevka Fixed Extended"
                     :weight 'normal)
 
 (set-face-attribute 'variable-pitch nil
