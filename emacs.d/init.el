@@ -413,16 +413,17 @@
 (csetq dabbrev-case-replace nil)
 (csetq dabbrev-abbrev-skip-leading-regexp "[^ ]*[<>=*$]")
 
-(setq hippie-expand-try-functions-list
-      '(try-expand-dabbrev-visible
-        try-expand-dabbrev
-        try-expand-dabbrev-all-buffers
-        try-expand-dabbrev-from-kill
-        try-expand-list
-        try-expand-list-all-buffers
-        try-complete-file-name-partially
-        try-complete-file-name
-        try-expand-all-abbrevs))
+(csetq hippie-expand-try-functions-list
+       '(try-expand-dabbrev-visible
+         try-expand-dabbrev
+         try-expand-dabbrev-all-buffers
+         try-expand-dabbrev-from-kill
+         try-expand-list
+         try-expand-list-all-buffers
+         try-complete-file-name-partially
+         try-complete-file-name
+         try-expand-all-abbrevs))
+(csetq hippie-expand-verbose nil)
 
 (csetq ispell-program-name (executable-find "aspell"))
 (csetq ispell-extra-args '("--sug-mode=normal" "--keyboard=standard"))
@@ -733,6 +734,7 @@ behavior added."
 ;; (general-define-key [remap isearch-backward-regexp] #'isearch-backward)
 (general-define-key [remap keyboard-quit] #'keyboard-quit-context+)
 (general-define-key [remap minibuffer-keyboard-quit] #'keyboard-quit-context+)
+(general-define-key [remap dabbrev-expand] #'hippie-expand)
 
 (defun user/profiler-start ()
   (interactive)
