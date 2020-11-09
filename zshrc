@@ -30,7 +30,7 @@ vterm_printf(){
     fi
 }
 
-HISTORY_IGNORE="(ls|pwd|exit|cd|ll|bg|fg)"
+HISTORY_IGNORE="(ls|pwd|exit|cd|ll|bg|fg|history)"
 
 # Customize to your needs...
 alias ls='ls -hAF --group-directories-first -v --color=auto'
