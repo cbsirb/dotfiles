@@ -1843,7 +1843,6 @@ found, an error is signaled."
   (require 'esh-module))
 
 (use-package multi-term
-  :disabled
   :if (eq system-type 'gnu/linux)
 
   :general
@@ -1860,20 +1859,8 @@ found, an error is signaled."
   (multi-term-dedicated-select-after-open-p t)
   (multi-term-scroll-show-maximum-output t))
 
-(use-package multi-vterm
-  :if (eq system-type 'gnu/linux)
-  :general
-  ("C-z" #'multi-vterm-next)
-  ("C-c z c" #'multi-vterm)
-  ("C-c z d" #'multi-vterm-dedicated-toggle)
-  ("C-c z n" #'multi-vterm-next)
-  ("C-c z p" #'multi-vterm-prev)
-  (:keymaps
-   'vterm-mode-map
-   "<C-backspace>" #'vterm-send-C-w
-   "C-u" #'vterm-send-C-u)
-  :custom
-  (vterm-max-scrollback 100000))
+(use-package eterm-256color
+  :ghook ('term-mode-hook #'eterm-256color-mode))
 
 ;;
 ;; Debugging
@@ -1951,7 +1938,7 @@ found, an error is signaled."
                                        (throw 'done root))
                                    nil)))))
           (if found-project
-              (cond 'transient found-project)
+              (cons 'transient found-project)
             (setq-local user/project-root 'no-project)
             nil)
           ))))
@@ -2170,17 +2157,19 @@ found, an error is signaled."
  '(modus-operandi-theme-slanted-constructs nil)
  '(modus-operandi-theme-variable-pitch-headings nil)
  '(package-selected-packages
-   '(beginend ccls cmake-font-lock
-     cmake-mode comment-dwim-2 company company-posframe counsel counsel-etags
-     cython-mode diff-hl dired-du dired-git-info dired-narrow diredfl
-     dumb-jump eacl elfeed expand-region flymake-diagnostic-at-point geiser
-     general git-timemachine haskell-mode hl-todo hydra iedit ignoramus
-     imenu-anywhere ivy ivy-posframe ivy-rich iy-go-to-char
-     js2-mode json-mode log4j-mode lsp-mode lsp-ui magit magit-gitflow
-     magit-libgit minions modern-cpp-font-lock modus-operandi-theme
-     modus-vivendi-theme multi-term multi-vterm multiple-cursors nasm-mode
-     no-littering nov pdf-tools pyvenv rainbow-delimiters rainbow-mode realgud
-     rg rust-mode smex string-inflection swiper symbol-overlay undo-tree
-     use-package vc-msg visual-fill-column web-mode wgrep which-key yaml-mode
-     yasnippet)))
+   '(beginend ccls cmake-font-lock cmake-mode comment-dwim-2
+   company company-posframe counsel counsel-etags cython-mode
+   diff-hl dired-du dired-git-info dired-narrow diredfl dumb-jump
+   eacl elfeed expand-region eterm-256color
+   flymake-diagnostic-at-point geiser general git-timemachine
+   haskell-mode hl-todo hydra iedit ignoramus imenu-anywhere ivy
+   ivy-posframe ivy-rich iy-go-to-char js2-mode json-mode
+   log4j-mode lsp-mode lsp-ui magit magit-gitflow magit-libgit
+   minions modern-cpp-font-lock modus-operandi-theme
+   modus-vivendi-theme multi-term multiple-cursors nasm-mode
+   no-littering nov pdf-tools pyvenv rainbow-delimiters
+   rainbow-mode realgud rg rust-mode smex string-inflection
+   swiper symbol-overlay tree-sitter tree-sitter-langs undo-tree
+   use-package vc-msg visual-fill-column web-mode wgrep which-key
+   yaml-mode yasnippet)))
 
