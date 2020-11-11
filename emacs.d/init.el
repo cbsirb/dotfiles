@@ -2176,8 +2176,8 @@ found, an error is signaled."
    ivy-posframe ivy-rich iy-go-to-char js2-mode json-mode
    log4j-mode lsp-mode lsp-ui magit magit-gitflow magit-libgit
    minions modern-cpp-font-lock modus-operandi-theme
-   modus-vivendi-theme multi-term multi-vterm multiple-cursors
-   nasm-mode no-littering nov pdf-tools pyvenv rainbow-delimiters
+   modus-vivendi-theme multi-term multiple-cursors nasm-mode
+   no-littering nov pdf-tools pyvenv rainbow-delimiters
    rainbow-mode realgud rg rust-mode smex string-inflection
    swiper symbol-overlay tree-sitter tree-sitter-langs undo-tree
    use-package vc-msg visual-fill-column web-mode wgrep which-key
