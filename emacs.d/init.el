@@ -1995,7 +1995,7 @@ found, an error is signaled."
   (:keymaps 'org-mode-map
             "RET" #'user/org-return-maybe-indent)
 
-  :pin manual
+  :pin org
 
   :custom
   (org-capture-templates
@@ -2177,7 +2177,7 @@ found, an error is signaled."
    log4j-mode lsp-mode lsp-ui magit magit-gitflow magit-libgit
    minions modern-cpp-font-lock modus-operandi-theme
    modus-vivendi-theme multi-term multiple-cursors nasm-mode
-   no-littering nov pdf-tools pyvenv rainbow-delimiters
+   no-littering nov org pdf-tools pyvenv rainbow-delimiters
    rainbow-mode realgud rg rust-mode smex string-inflection
    swiper symbol-overlay tree-sitter tree-sitter-langs undo-tree
    use-package vc-msg visual-fill-column web-mode wgrep which-key
