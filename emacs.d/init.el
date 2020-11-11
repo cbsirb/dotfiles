@@ -2097,13 +2097,14 @@ found, an error is signaled."
            ("https://www.youtube.com/feeds/videos.xml?channel_id=UCoW-z7WLeh9IAcr85tnDG6Q" literature)  ;; Malazan
 
            ("https://www.youtube.com/feeds/videos.xml?channel_id=UCsXVk37bltHxD1rDPwtNM8Q" science)     ;; Kurzgesagt
-           ("https://www.youtube.com/feeds/videos.xml?channel_id=UC-3SbfTPJsL8fJAPKiVqBLg" science)     ;; "Deep Look"
-           ("https://www.youtube.com/feeds/videos.xml?channel_id=UCotwjyJnb-4KW7bmsOoLfkg" science)     ;; "Art of the Problem"
-           ("https://www.youtube.com/feeds/videos.xml?channel_id=UCzR-rom72PHN9Zg7RML9EbA" science)     ;; "PBS Eons"
-           ("https://www.youtube.com/feeds/videos.xml?channel_id=UCgRBRE1DUP2w7HTH9j_L4OQ" science)     ;; "Medlife Crisis"
-           ("https://www.youtube.com/feeds/videos.xml?channel_id=UC7_gcs09iThXybpVgjHZ_7g" science)     ;; "PBS Space Time"
-           ("https://www.youtube.com/feeds/videos.xml?channel_id=UCSIvk78tK2TiviLQn4fSHaw" science)     ;; "Up and Atom"
-           ("https://www.youtube.com/feeds/videos.xml?channel_id=UCMk_WSPy3EE16aK5HLzCJzw" science)     ;; "NativLang"
+           ("https://www.youtube.com/feeds/videos.xml?channel_id=UC-3SbfTPJsL8fJAPKiVqBLg" science)     ;; Deep Look
+           ("https://www.youtube.com/feeds/videos.xml?channel_id=UCotwjyJnb-4KW7bmsOoLfkg" science)     ;; Art of the Problem
+           ("https://www.youtube.com/feeds/videos.xml?channel_id=UCzR-rom72PHN9Zg7RML9EbA" science)     ;; PBS Eons
+           ("https://www.youtube.com/feeds/videos.xml?channel_id=UC9Lp_AA5M2cMGrlvnnIns-g" science)     ;; Bizarre Beasts
+           ("https://www.youtube.com/feeds/videos.xml?channel_id=UCgRBRE1DUP2w7HTH9j_L4OQ" science)     ;; Medlife Crisis
+           ("https://www.youtube.com/feeds/videos.xml?channel_id=UC7_gcs09iThXybpVgjHZ_7g" science)     ;; PBS Space Time
+           ("https://www.youtube.com/feeds/videos.xml?channel_id=UCSIvk78tK2TiviLQn4fSHaw" science)     ;; Up and Atom
+           ("https://www.youtube.com/feeds/videos.xml?channel_id=UCMk_WSPy3EE16aK5HLzCJzw" science)     ;; NativLang
 
            ("https://www.youtube.com/feeds/videos.xml?channel_id=UC8XjmAEDVZSCQjI150cb4QA" pop)         ;; Knowing Better
            ("https://www.youtube.com/feeds/videos.xml?channel_id=UCSriLWQC2J6wNeWXOGlIV4w" pop)         ;; Corporis
