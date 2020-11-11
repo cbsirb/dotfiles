@@ -2169,14 +2169,14 @@ found, an error is signaled."
    '(beginend ccls cmake-font-lock cmake-mode comment-dwim-2
    company company-posframe counsel counsel-etags cython-mode
    diff-hl dired-du dired-git-info dired-narrow diredfl dumb-jump
-   eacl elfeed expand-region eterm-256color
+   eacl elfeed eterm-256color eterm-256color-mode expand-region
    flymake-diagnostic-at-point geiser general git-timemachine
    haskell-mode hl-todo hydra iedit ignoramus imenu-anywhere ivy
    ivy-posframe ivy-rich iy-go-to-char js2-mode json-mode
    log4j-mode lsp-mode lsp-ui magit magit-gitflow magit-libgit
    minions modern-cpp-font-lock modus-operandi-theme
-   modus-vivendi-theme multi-term multiple-cursors nasm-mode
-   no-littering nov pdf-tools pyvenv rainbow-delimiters
+   modus-vivendi-theme multi-term multi-vterm multiple-cursors
+   nasm-mode no-littering nov pdf-tools pyvenv rainbow-delimiters
    rainbow-mode realgud rg rust-mode smex string-inflection
    swiper symbol-overlay tree-sitter tree-sitter-langs undo-tree
    use-package vc-msg visual-fill-column web-mode wgrep which-key
