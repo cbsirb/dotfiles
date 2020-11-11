@@ -209,20 +209,9 @@ Saves the position before.  You can skip typos you don't want to fix with
 
 ;;;###autoload
 (defun user/open-terminal ()
-  "Opens a urxvt/uxterm/xterm in the current directory."
+  "Opens a terminal in the current directory."
   (interactive)
-  (cond
-   ((eq system-type 'gnu/linux)
-    (let ((terminal (cond
-                     ((executable-find "x-terminal-emulator"))
-                     ((executable-find "urxvt"))
-                     ((executable-find "uxterm"))
-                     ((executable-find "xterm"))
-                     (t nil))))
-      (when terminal
-        (start-process terminal nil "setsid" terminal))))
-   ((eq system-type 'windows-nt)
-    (message "Not supported for now!"))))
+  (start-process "konsole" nil "setsid" "konsole" default-directory))
 
 (defun user/get-indentation-chars ()
   "Helper function to return the number of spaces at the begining of line."
