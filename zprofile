@@ -21,7 +21,7 @@ fi
 if [[ "$OSTYPE" == darwin* ]]; then
   export BROWSER='open'
 else
-  export BROWSER='firefox'
+  export BROWSER='firefox-trunk'
 fi
 
 #
@@ -30,7 +30,7 @@ fi
 
 export GIT_EDITOR='vim'
 export EDITOR='vim'
-export VISUAL='vim'
+export VISUAL='emacs'
 export PAGER='less'
 
 #
@@ -87,6 +87,7 @@ export GTK_USE_PORTAL=1
 # export QT_QPA_PLATFORM=wayland
 # export QT_WAYLAND_DISABLE_WINDOWDECORATION="1"
 # export QT_QPA_PLATFORMTHEME=qt5ct
+# export XDG_CURRENT_DESKTOP=sway
 
 # export LIBVA_DRIVER_NAME=iHD
 export LIBVA_DRIVER_NAME=i965

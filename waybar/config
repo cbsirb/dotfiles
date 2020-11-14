@@ -1,9 +1,9 @@
 {
     "layer": "top",
     "height": 24,
-    "modules-left": ["sway/workspaces", "sway/mode"],
+    "modules-left": ["sway/workspaces", "sway/mode", "wlr/taskbar"],
     "modules-center": ["sway/window"],
-    "modules-right": ["idle_inhibitor", "battery", "pulseaudio", "network", "clock", "tray"],
+    "modules-right": ["tray", "idle_inhibitor", "battery", "pulseaudio", "network", "network#vpn", "custom/clock"],
     "position": "top",
     "sway/mode": {
         "tooltip": false,
@@ -15,18 +15,29 @@
     "sway/window": {
         "max-length": 128
     },
+    "wlr/taskbar": {
+        "on-click": "activate",
+        "on-click-middle": "close"
+    },
+    "tray": {
+        "icon-size": 18,
+        "spacing": 8
+    },
     "battery": {
-        "tooltip": false,
+        "tooltip-format": "{time}",
         "states": {
+            "full": 99,
             "warning": 30,
             "critical": 15
         },
-        "format": "🔋{capacity}%",
-        "format-full": ""
+        "format": "{icon} {capacity}%",
+        "format-full": "",
+        "format-icons": ["", "", "", "", ""]
     },
-    "clock": {
+    "custom/clock": {
+        "interval": 5,
+        "exec": "date +'%d %b, %H:%M'",
         "on-click": "alacritty -t force_float -d 70 35 -e watch -n60 cal -y",
-        "format": "{:%d %b, %H:%M}",
         "tooltip": false
     },
     "memory": {
@@ -39,31 +50,36 @@
         "on-click": "alacritty -t force_float -d 112 30 -e htop"
     },
     "pulseaudio": {
-        "tooltip": false,
-        "format": "🔊 {volume}%",
-        "format-bluetooth": "🔊 {volume}%",
-        "format-muted": "🔇",
-        "format-alt": "{volume}%",
+        "tooltip-format": "{format_source}",
+        "format": "{icon} {volume}%",
+        "format-bluetooth": "{icon}  {volume}%",
+        "format-icons": {
+            "headphone": "",
+            "default": ["", ""]
+        },
+        "format-muted": "",
         "on-click": "pavucontrol"
     },
     "network": {
-        "tooltip": false,
-        "format-wifi": "📶{essid} ({signalStrength}%)",
-        "format-ethernet": "lan",
+        "tooltip-format-ethernet": "{ifname} {ipaddr}",
+        "tooltip-format-wifi": "{ifname} {ipaddr}",
+        "format-wifi": "  {essid} ({signalStrength}%)",
+        "format-ethernet": " lan",
         "format-disconnected": "(no network)",
         "on-click": "alacritty -t force_float -d 70 50 -e nmtui"
     },
     "network#vpn": {
-        "tooltip": false,
-        "interface": "gpd0",
+        "interface": "tun0",
+        "tooltip-format": "{ifname} {ipaddr}",
+        "tooltip-format-disconnected": "not connected",
         "format-ethernet": "",
         "format-disconnected": "(no vpn)"
     },
     "idle_inhibitor": {
         "format": "{icon}",
         "format-icons": {
-            "activated": "🔓",
-            "deactivated": "🔐"
+            "activated": "",
+            "deactivated": ""
         }
     }
 }
