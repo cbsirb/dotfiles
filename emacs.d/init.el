@@ -1444,10 +1444,13 @@ found, an error is signaled."
                                         (access-label . (after))
                                         (access-key . (after))
                                         (member-init-intro . (after))))
-      (c-cleanup-list                . (scope-operator
+      (c-cleanup-list                . (brace-else-brace
+                                        brace-elseif-brace
+                                        brace-catch-brace
                                         list-close-comma
                                         defun-close-semi
-                                        compact-empty-funcall))
+                                        empty-defun-braces
+                                        scope-operator))
       (c-offsets-alist               . ((arglist-close           .  4)
                                         (label                   . -4)
                                         (access-label            . -4)
@@ -1471,7 +1474,15 @@ found, an error is signaled."
                           (substatement-open . 0)
                           (substatement-label . 0)
                           (label . 0)
-                          (statement-cont . +)))))
+                          (statement-cont . +)))
+      (c-cleanup-list  . (brace-else-brace
+                          brace-elseif-brace
+                          brace-catch-brace
+                          list-close-comma
+                          defun-close-semi
+                          empty-defun-braces
+                          scope-operator
+                          compact-empty-funcall))))
 
   (defconst user/webkit-style
     '((c-basic-offset . 4)
@@ -1489,12 +1500,19 @@ found, an error is signaled."
                           (topmost-intro-cont      .  0)
                           (knr-argdecl-intro       . -4)
                           (brace-list-open         .  0)
-                          (brace-list-intro        .  4)))))
+                          (brace-list-intro        .  4)))
+      (c-cleanup-list  . (brace-else-brace
+                          brace-elseif-brace
+                          brace-catch-brace
+                          list-close-comma
+                          defun-close-semi
+                          empty-defun-braces
+                          scope-operator
+                          compact-empty-funcall))))
 
   (defun user/c-mode-common-hook ()
     "Hook for C/C++ mode."
-    ;; (c-toggle-hungry-state t)
-    ;; (c-toggle-auto-newline -1)
+    (c-toggle-auto-newline t)
     (c-toggle-syntactic-indentation t)
 
     (modify-syntax-entry ?' ".")
@@ -1536,6 +1554,18 @@ found, an error is signaled."
                       (join-line -1)))))
             (error nil))))))
 
+  (defun user/cleanup-empty-lines (orig-func &rest args)
+    (when (eq last-input-event ?})
+      (save-mark-and-excursion
+        (when (looking-at-p "\\([[:space:]]*\n\\)+")
+          (delete-horizontal-space)
+          (delete-blank-lines)
+
+          (when (looking-at-p "^[[:space:]]*\n")
+            (kill-line)))))
+
+    (apply orig-func args))
+
   :ghook ('c-mode-common-hook #'user/c-mode-common-hook)
 
   :custom
@@ -1551,6 +1581,8 @@ found, an error is signaled."
   (c-add-style "allman" user/allman-style)
   (c-add-style "sane-k&r" user/k&r-style)
   (c-add-style "webkit" user/webkit-style)
+
+  (advice-add 'c-electric-brace :around #'user/cleanup-empty-lines)
 
   (csetq c-default-style '((java-mode . "java")
                            (awk-mode . "awk")
