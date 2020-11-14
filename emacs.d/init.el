@@ -36,6 +36,24 @@
 (csetq load-prefer-newer t)
 (csetq package-user-dir (expand-file-name "elpa" user-emacs-directory))
 
+(csetq
+ package-selected-packages
+ '(beginend ccls cmake-font-lock cmake-mode comment-dwim-2
+   company company-posframe counsel counsel-etags cython-mode
+   diff-hl dired-du dired-git-info dired-narrow diredfl dumb-jump
+   eacl elfeed eterm-256color eterm-256color-mode expand-region
+   flymake-diagnostic-at-point geiser general git-timemachine
+   haskell-mode hl-todo hydra iedit ignoramus imenu-anywhere ivy
+   ivy-posframe ivy-rich iy-go-to-char js2-mode json-mode
+   log4j-mode lsp-mode lsp-ui magit magit-gitflow magit-libgit
+   minions modern-cpp-font-lock modus-operandi-theme
+   modus-vivendi-theme multi-term multiple-cursors nasm-mode
+   no-littering nov org pdf-tools pyvenv rainbow-delimiters
+   rainbow-mode realgud rg rust-mode smex string-inflection
+   swiper symbol-overlay tree-sitter tree-sitter-langs undo-tree
+   use-package vc-msg visual-fill-column web-mode wgrep which-key
+   yaml-mode yasnippet))
+
 (when (< emacs-major-version 27)
   (load-file (expand-file-name "early-init.el" user-emacs-directory)))
 
@@ -98,6 +116,11 @@
   (require 'use-package))
 
 (use-package general)
+
+(use-package cus-edit+ :ensure nil
+  :defer t
+  :custom
+  (custom-file null-device "Don't store customizations"))
 
 (use-package modus-operandi-theme
   :custom
@@ -2148,38 +2171,3 @@ found, an error is signaled."
 
 (provide 'init)
 ;;; init.el ends here
-
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(symbol-overlay-default-face ((t (:inherit underline))))
- '(whitespace-tab ((t (:background nil :foreground "light gray")))))
-(custom-set-variables
- ;; custom-set-variables was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(modus-operandi-theme-3d-modeline nil)
- '(modus-operandi-theme-bold-constructs t)
- '(modus-operandi-theme-fringes nil)
- '(modus-operandi-theme-slanted-constructs nil)
- '(modus-operandi-theme-variable-pitch-headings nil)
- '(package-selected-packages
-   '(beginend ccls cmake-font-lock cmake-mode comment-dwim-2
-   company company-posframe counsel counsel-etags cython-mode
-   diff-hl dired-du dired-git-info dired-narrow diredfl dumb-jump
-   eacl elfeed eterm-256color eterm-256color-mode expand-region
-   flymake-diagnostic-at-point geiser general git-timemachine
-   haskell-mode hl-todo hydra iedit ignoramus imenu-anywhere ivy
-   ivy-posframe ivy-rich iy-go-to-char js2-mode json-mode
-   log4j-mode lsp-mode lsp-ui magit magit-gitflow magit-libgit
-   minions modern-cpp-font-lock modus-operandi-theme
-   modus-vivendi-theme multi-term multiple-cursors nasm-mode
-   no-littering nov org pdf-tools pyvenv rainbow-delimiters
-   rainbow-mode realgud rg rust-mode smex string-inflection
-   swiper symbol-overlay tree-sitter tree-sitter-langs undo-tree
-   use-package vc-msg visual-fill-column web-mode wgrep which-key
-   yaml-mode yasnippet)))
-
