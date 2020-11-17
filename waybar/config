@@ -63,7 +63,7 @@
     "network": {
         "tooltip-format-ethernet": "{ifname} {ipaddr}",
         "tooltip-format-wifi": "{ifname} {ipaddr}",
-        "format-wifi": "  {essid} ({signalStrength}%)",
+        "format-wifi": "  {essid:.8} ({signalStrength}%)",
         "format-ethernet": " lan",
         "format-disconnected": "(no network)",
         "on-click": "alacritty -t force_float -d 70 50 -e nmtui"
@@ -71,9 +71,9 @@
     "network#vpn": {
         "interface": "tun0",
         "tooltip-format": "{ifname} {ipaddr}",
-        "tooltip-format-disconnected": "not connected",
+        "tooltip-format-disconnected": "",
         "format-ethernet": "",
-        "format-disconnected": "(no vpn)"
+        "format-disconnected": ""
     },
     "idle_inhibitor": {
         "format": "{icon}",

@@ -11,16 +11,16 @@ set $down j
 set $up k
 set $right l
 
-set $ws10 10: music
 set $ws1 1
 set $ws2 2: www
 set $ws3 3
-set $ws4 4
+set $ws4 4: music
 set $ws5 5
 set $ws6 6
 set $ws7 7
 set $ws8 8
 set $ws9 9
+set $ws10 10
 
 # set $term alacritty
 # set $float_arg -t force_float
@@ -36,6 +36,7 @@ set $term_float_cmd $term $float_arg $size_arg
 set $lock_cmd swaylock
 
 set $laptop eDP-1
+set $main_display "Philips Consumer Electronics Company PHL 272B8Q UK01948018974"
 
 # Your preferred application launcher
 # Note: it's recommended that you pass the final command to sway
@@ -52,7 +53,7 @@ output $laptop {
     position 2560 0
 }
 
-output "Philips Consumer Electronics Company PHL 272B8Q UK01948018974" {
+output $main_display {
     background /usr/share/backgrounds/sway/Sway_Wallpaper_Blue_1920x1080.png fill
     resolution 2560x1440
     position 0 0
@@ -109,7 +110,7 @@ bindsym $mod+Return exec swaymsg -- exec $term $size_arg
 bindsym $mod+q kill
 
 # start your launcher
-bindsym $mod+p exec $menu
+bindsym $mod+p exec swaymsg -- exec $menu
 bindsym $mod+Shift+p exec $all_menu
 
 # Drag floating windows by holding down $mod and left mouse button.
@@ -338,8 +339,14 @@ for_window [app_id="mpv"]               floating enable
 for_window [app_id="blueman-manager"]   floating enable
 for_window [app_id="virt-manager"]      floating enable
 
-for_window [app_id="firefox" title="^Picture-in-Picture$"]          floating enable, sticky enable
-for_window [app_id="firefox-trunk" title="^Picture-in-Picture$"]    floating enable, sticky enable
+for_window [app_id="firefox" title="^Picture-in-Picture$"]                  floating enable, sticky enable
+for_window [app_id="firefox-trunk" title="^Picture-in-Picture$"]            floating enable, sticky enable
+for_window [app_id="firefox" title="^Downloading.*Mozilla Firefox"]         floating enable
+for_window [app_id="firefox-trunk" title="^Downloading.*Mozilla Firefox"]   floating enable
+
+for_window [app_id="thunderbird" title="^Edit Event:"]      floating enable
+for_window [app_id="thunderbird" title="^Address Book"]     floating enable
+
 
 
 for_window [class="^zoom$"]         floating enable
