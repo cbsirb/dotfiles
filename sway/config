@@ -1,11 +1,5 @@
-# Read `man 5 sway` for a complete reference.
-
-### Variables
-
-# Logo key. Use Mod1 for Alt.
 set $mod Mod4
 
-# Home row direction keys, like vim
 set $left h
 set $down j
 set $up k
@@ -14,36 +8,31 @@ set $right l
 set $ws1 1
 set $ws2 2: www
 set $ws3 3
-set $ws4 4: music
+set $ws4 4
 set $ws5 5
 set $ws6 6
 set $ws7 7
 set $ws8 8
-set $ws9 9
-set $ws10 10
+set $ws9 9: music
+set $ws10 10: mail
 
 # set $term alacritty
 # set $float_arg -t force_float
 # set $size_arg -d 112 30
 
 set $term konsole
-set $float_arg -p tabtitle=force_float
-set $size_arg -p TerminalRows=29 -p TerminalColumns=112
 
 set $term_cmd $term
-set $term_float_cmd $term $float_arg $size_arg
+set $float_arg -p tabtitle=force_float
+set $term_float_cmd $term $float_arg
 
 set $lock_cmd swaylock
 
 set $laptop eDP-1
 set $main_display "Philips Consumer Electronics Company PHL 272B8Q UK01948018974"
 
-# Your preferred application launcher
-# Note: it's recommended that you pass the final command to sway
-# set $all_menu wofi --show run --term="$term_float_cmd"
-# set $menu wofi --show drun --term="$term_float_cmd"
-set $all_menu rofi -show run -terminal "$term_float_cmd"
-set $menu rofi -show drun -terminal "$term_float_cmd"
+set $all_menu wofi --show run --no-actions
+set $menu wofi --show drun --no-actions
 
 ### Output configuration
 
@@ -68,12 +57,9 @@ exec swayidle -w \
          resume 'swaymsg "output * dpms on"' \
          before-sleep '$lock_cmd'
 
-# With .Xdefaults this shouldn't be necessary anymore
-# exec xrdb -merge $HOME/.Xresources
-
 exec swaymsg -- exec autocutsel -fork
 exec swaymsg -- exec mako
-# exec_always "pkill kanshi; kanshi"
+exec swaymsg -- exec autotiling
 
 exec_always {
     gsettings set org.gnome.desktop.interface gtk-theme 'Breeze'
@@ -84,10 +70,10 @@ exec_always {
 seat seat0 xcursor_theme breeze_cursors 24
 
 ### Input configuration
-#
-# Read `man 5 sway-input` for more information about this section.
+
 input type:touchpad {
     tap enabled
+    dwt enabled
     middle_emulation enabled
 }
 
@@ -99,29 +85,15 @@ input type:keyboard {
 }
 
 ### Key bindings
-#
-# Basics:
-#
 
-# start a terminal
-bindsym $mod+Return exec swaymsg -- exec $term $size_arg
+bindsym $mod+Return exec swaymsg -- exec $term
 
-# kill focused window
-bindsym $mod+q kill
-
-# start your launcher
 bindsym $mod+p exec swaymsg -- exec $menu
 bindsym $mod+Shift+p exec $all_menu
 
-# Drag floating windows by holding down $mod and left mouse button.
-# Resize them with right mouse button + $mod.
-# Despite the name, also works for non-floating windows.
-# Change normal to inverse to use left mouse button for resizing and right
-# mouse button for dragging.
 floating_modifier $mod normal
 
 bindsym $mod+Shift+c reload
-# bindsym $mod+Shift+r exec "pkill kanshi; kanshi"
 
 set $mode_system System: (l) lock, (e) logout, (s) suspend, (r) reboot, (p) shutdown, (R) UEFI
 mode "$mode_system" {
@@ -140,27 +112,21 @@ mode "$mode_system" {
 # bindsym $mod+Shift+e mode "$mode_system"
 bindsym $mod+Shift+e exec nwgbar
 
-#
-# Moving around:
-#
-# Move your focus around
 bindsym $mod+$left focus left
 bindsym $mod+$down focus down
 bindsym $mod+$up focus up
 bindsym $mod+$right focus right
 
-# or use $mod+[up|down|left|right]
 bindsym $mod+Left focus left
 bindsym $mod+Down focus down
 bindsym $mod+Up focus up
 bindsym $mod+Right focus right
 
-# _move_ the focused window with the same, but add Shift
 bindsym $mod+Shift+$left move left
 bindsym $mod+Shift+$down move down
 bindsym $mod+Shift+$up move up
 bindsym $mod+Shift+$right move right
-# ditto, with arrow keys
+
 bindsym $mod+Shift+Left move left
 bindsym $mod+Shift+Down move down
 bindsym $mod+Shift+Up move up
@@ -168,10 +134,6 @@ bindsym $mod+Shift+Right move right
 
 bindsym $mod+g focus next
 bindsym $mod+Shift+g focus prev
-
-#
-# Workspaces:
-#
 
 bindsym $mod+1 workspace $ws1
 bindsym $mod+2 workspace $ws2
@@ -195,86 +157,55 @@ bindsym $mod+Shift+8 move container to workspace $ws8
 bindsym $mod+Shift+9 move container to workspace $ws9
 bindsym $mod+Shift+0 move container to workspace $ws10
 
-#
-# Layout stuff:
-#
-
-# You can "split" the current object of your focus with
-# $mod+b or $mod+v, for horizontal and vertical splits
-# respectively.
-bindsym $mod+b border toggle
 
 # Switch the current container between different layout styles
 bindsym $mod+bracketright layout stacking
 bindsym $mod+bracketleft layout tabbed
 bindsym $mod+backslash layout toggle split
+bindsym $mod+slash split toggle
 
-# Make the current focus fullscreen
+bindsym $mod+q kill
 bindsym $mod+f fullscreen
-
-# Toggle the current focus between tiling and floating mode
+bindsym $mod+s sticky toggle
+bindsym $mod+b border toggle
 bindsym $mod+space floating toggle
-
-# Swap focus between the tiling area and the floating area
 bindsym $mod+Shift+space focus mode_toggle
 
-# move focus to the parent container
+bindsym $mod+z opacity minus 0.1
+bindsym $mod+Shift+z opacity plus 0.1
+
 bindsym $mod+a focus parent
+bindsym $mod+Shift+a focus child
 
-# move window to the right monitor (wraps around), and focus it
 bindsym $mod+x move container to output right; focus output right
-
-# move whole workspace to the right monitor (wraps around), and focus it
 bindsym $mod+Shift+x move workspace to output right
 
 bindsym $mod+o focus output right
 
-#
-# Scratchpad:
-# Sway has a "scratchpad", which is a bag of holding for windows.
-# You can send windows there and get them back later.
-#
+bindsym $mod+Shift+grave move scratchpad
+bindsym $mod+grave scratchpad show
 
-# Move the currently focused window to the scratchpad
-bindsym $mod+Shift+minus move scratchpad
-
-# Show the next scratchpad window or hide the focused scratchpad window.
-# If there are multiple scratchpad windows, this command cycles through them.
-bindsym $mod+minus scratchpad show
-
-#
-# Resizing containers:
-#
 mode "resize" {
-    # left will shrink the containers width
-    # right will grow the containers width
-    # up will shrink the containers height
-    # down will grow the containers height
     bindsym $left   resize shrink width 10px
     bindsym $down   resize grow height 10px
     bindsym $up     resize shrink height 10px
     bindsym $right  resize grow width 10px
 
-    # ditto, with arrow keys
-    bindsym Left    resize shrink width 10px
+    bindsym Left    resize shrink width 10pxx
     bindsym Down    resize grow height 10px
     bindsym Up      resize shrink height 10px
     bindsym Right   resize grow width 10px
 
-    # return to default mode
     bindsym Return mode "default"
     bindsym Escape mode "default"
 }
 bindsym $mod+r mode "resize"
 
-#
-# Misc bindings:
-#
-bindsym $mod+w [title=".*Firefox Nightly$"] focus
+bindsym $mod+w [app_id="firefox"] focus
 bindsym $mod+i exec emacs
-bindsym $mod+u [urgent=latest] focus
-
 bindsym $mod+e exec dolphin
+
+bindsym $mod+u [urgent=latest] focus
 
 bindsym --locked $mod+period     exec playerctl next
 bindsym --locked $mod+comma      exec playerctl previous
@@ -295,7 +226,7 @@ bindsym --locked XF86MonBrightnessDown   exec sudo brightnessctl set 10%-
 
 bindsym $mod+Mod1+l exec $lock_cmd
 
-bindsym Print exec grim -t png ~/Pictures/Screenshots/$(date +%Y-%m-%d_%H-%M-%S).png
+bindsym --locked Print exec grim -t png ~/Pictures/Screenshots/$(date +%Y-%m-%d_%H-%M-%S).png
 
 # F12 and F12+Fn on microsoft keyboard
 bindsym $mod+Ctrl+XF86TouchpadOff       exec $term_float_cmd
@@ -304,10 +235,6 @@ bindsym F12                             exec $term_float_cmd
 bindsym $mod+n          exec makoctl dismiss
 bindsym $mod+Shift+n    exec makoctl dismiss -a
 
-#
-# Status Bar:
-#
-# Read `man 5 sway-bar` for more information about this section.
 bar {
     position top
 
@@ -324,9 +251,8 @@ bar {
     }
 }
 
-#
-# Windows:
-#
+### Windows
+
 for_window [window_role="pop-up"]       floating enable
 for_window [window_role="About"]        floating enable
 for_window [window_role="task_dialog"]  floating enable
@@ -339,24 +265,24 @@ for_window [app_id="mpv"]               floating enable
 for_window [app_id="blueman-manager"]   floating enable
 for_window [app_id="virt-manager"]      floating enable
 
-for_window [app_id="firefox" title="^Picture-in-Picture$"]                  floating enable, sticky enable
-for_window [app_id="firefox-trunk" title="^Picture-in-Picture$"]            floating enable, sticky enable
-for_window [app_id="firefox" title="^Downloading.*Mozilla Firefox"]         floating enable
-for_window [app_id="firefox-trunk" title="^Downloading.*Mozilla Firefox"]   floating enable
+# On the www destkop everything is floating, except firefox main window itself
+for_window [workspace="$ws2"]                                   floating enable
+for_window [app_id="firefox" title="^Picture-in-Picture$"]      sticky enable
+for_window [app_id="firefox"]                                   floating enable
+for_window [app_id="firefox" title="— Firefox"]                 floating disable
+for_window [app_id="firefox" title="^Firefox"]                  floating disable
 
-for_window [app_id="thunderbird" title="^Edit Event:"]      floating enable
-for_window [app_id="thunderbird" title="^Address Book"]     floating enable
-
-
+# On the mail desktop everything is floating, except thunderbird main window itself
+# Every thunderbird window (reminders, events, etc.) is floating everywhere, except the main one
+for_window [workspace="$ws10"]                                      floating enable
+for_window [app_id="thunderbird"]                                   floating enable
+for_window [app_id="thunderbird" title="- Mozilla Thunderbird$"]    floating disable
 
 for_window [class="^zoom$"]         floating enable
 for_window [class="^Slack$"]        floating enable
 for_window [class="^force_float$"]  floating enable
-for_window [class="^Vncviewer$"]    floating enable
 
 for_window [title="^force_float"]   floating enable
-
-for_window [title=".*"] title_format %title
 
 #
 # Render stuff (still playing with it)
@@ -364,20 +290,17 @@ for_window [title=".*"] title_format %title
 # output * max_render_time 5
 # for_window [app_id="^alacritty$"] max_render_time 1
 
-#
-# Colors:
-#
+### Colors
 
-client.focused  #4c7899 #494844 #ffffff #2E9EF4 #f07746
+client.focused  #4c7899 #494844 #ffffff #2e9ef4 #f07746
 font pango: Iosevka Extended 10
 
-#
-# Misc:
-#
-smart_gaps on
-smart_borders on
+## Configuration
 
-default_border pixel 3
+gaps inner 3
+gaps outer -3
+
+# smart_borders off
 popup_during_fullscreen smart
 focus_wrapping yes
 workspace_auto_back_and_forth yes
@@ -388,7 +311,9 @@ show_marks yes
 
 titlebar_padding 3 1
 default_border pixel 2
-hide_edge_borders smart
+hide_edge_borders none
+
+### Other files 
 
 include /etc/sway/config.d/*
 include ~/.config/sway/config.d/*
