@@ -1,6 +1,6 @@
 {
     "layer": "top",
-    "height": 24,
+    "height": 28,
     "modules-left": ["sway/workspaces", "sway/mode", "wlr/taskbar"],
     "modules-center": ["sway/window"],
     "modules-right": ["tray", "idle_inhibitor", "battery", "pulseaudio", "network", "network#vpn", "custom/clock"],
@@ -13,7 +13,9 @@
         "disable-scroll": true
     },
     "sway/window": {
-        "max-length": 128
+        "max-length": 128,
+        "on-click-middle": "swaymsg kill",
+        "on-click-right": "swaymsg floating toggle"
     },
     "wlr/taskbar": {
         "on-click": "activate",
@@ -31,7 +33,6 @@
             "critical": 15
         },
         "format": "{icon} {capacity}%",
-        "format-full": "",
         "format-icons": ["", "", "", "", ""]
     },
     "custom/clock": {
@@ -66,7 +67,7 @@
         "format-wifi": "  {essid:.8} ({signalStrength}%)",
         "format-ethernet": " lan",
         "format-disconnected": "(no network)",
-        "on-click": "alacritty -t force_float -d 70 50 -e nmtui"
+        "on-click": "alacritty -t force_float -d 70 50 -e nmtui-connect"
     },
     "network#vpn": {
         "interface": "tun0",
