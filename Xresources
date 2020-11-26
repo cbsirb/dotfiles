@@ -5,10 +5,10 @@ Xft.hintstyle:  hintslight
 Xft.lcdfilter:  lcddefault
 Xft.rgba:       rgb
 
-URxvt.font:             xft:Iosevka Fixed Extended:size=10:style=Regular
-URxvt.italicFont:       xft:Iosevka Fixed Extended:size=10:italic
-URxvt.boldFont:         xft:Iosevka Fixed Extended:size=10:bold
-URxvt.boldItalicFont:   xft:Iosevka Fixed Extended:size=10:bold:italic
+URxvt.font:             xft:Iosevka Fixed Extended:size=10.5:style=Regular
+URxvt.italicFont:       xft:Iosevka Fixed Extended:size=10.5:italic
+URxvt.boldFont:         xft:Iosevka Fixed Extended:size=10.5:bold
+URxvt.boldItalicFont:   xft:Iosevka Fixed Extended:size=10.5:bold:italic
 
 xterm*saveLines: 100000
 
