@@ -6,5 +6,5 @@ set lines=45 columns=125
 
 set guiheadroom=0
 
-set guifont=Iosevka\ Fixed\ Extended\ 11
+set guifont=Iosevka\ Extended\ 11
 

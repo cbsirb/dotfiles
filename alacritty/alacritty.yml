@@ -32,14 +32,14 @@ scrolling:
 # Font configuration (changes require restart)
 font:
   normal:
-    family: Iosevka Fixed Extended
+    family: Iosevka Extended
 
   bold:
-    family: Iosevka Fixed Extended
+    family: Iosevka Extended
     style: Bold
 
   italic:
-    family: Iosevka Fixed Extended
+    family: Iosevka Extended
     style: Italic
 
   size: 10.5

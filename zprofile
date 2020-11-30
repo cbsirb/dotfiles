@@ -77,10 +77,14 @@ export USE_WAYLAND=1
 if [[ -n "$USE_WAYLAND" ]]; then
     export _JAVA_AWT_WM_NONREPARENTING=1
     export MOZ_ENABLE_WAYLAND=1
-    export QT_QPA_PLATFORM=wayland
-    export QT_WAYLAND_DISABLE_WINDOWDECORATION="1"
-    export QT_QPA_PLATFORMTHEME=qt5ct
-    export XDG_CURRENT_DESKTOP=sway
+
+    export USE_SWAY=1
+    if [[ -n "$USE_SWAY" ]]; then
+        export QT_QPA_PLATFORM=wayland
+        export QT_WAYLAND_DISABLE_WINDOWDECORATION="1"
+        export QT_QPA_PLATFORMTHEME=qt5ct
+        export XDG_CURRENT_DESKTOP=sway
+    fi
 else
     # Disable this on wayland, causes jagged fonts on GTK apps
     export GTK_USE_PORTAL=1
