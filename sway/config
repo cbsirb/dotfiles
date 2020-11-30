@@ -60,6 +60,7 @@ exec swayidle -w \
 exec swaymsg -- exec autocutsel -fork
 exec swaymsg -- exec mako
 exec swaymsg -- exec autotiling
+exec swaymsg -- exec krunner -d
 
 exec_always {
     gsettings set org.gnome.desktop.interface gtk-theme 'Breeze'
@@ -79,7 +80,7 @@ input type:touchpad {
 
 input type:keyboard {
     repeat_delay 250
-    repeat_rate 40
+    repeat_rate 50
     xkb_options ctrl:nocaps,grp:ctrls_toggle
     xkb_layout us,ro(std)
 }
@@ -88,8 +89,9 @@ input type:keyboard {
 
 bindsym $mod+Return exec swaymsg -- exec $term
 
-bindsym $mod+p exec swaymsg -- exec $menu
-bindsym $mod+Shift+p exec $all_menu
+# bindsym $mod+p exec swaymsg -- exec $menu
+# bindsym $mod+Shift+p exec $all_menu
+bindsym $mod+p exec swaymsg -- exec krunner
 
 floating_modifier $mod normal
 
@@ -109,8 +111,8 @@ mode "$mode_system" {
     bindsym Escape mode "default"
 }
 
-# bindsym $mod+Shift+e mode "$mode_system"
-bindsym $mod+Shift+e exec nwgbar
+bindsym $mod+Shift+e mode "$mode_system"
+# bindsym $mod+Shift+e exec nwgbar
 
 bindsym $mod+$left focus left
 bindsym $mod+$down focus down
@@ -253,13 +255,21 @@ bar {
 
 ### Windows
 
+assign [app_id="firefox" title="— Firefox"] $ws2
+assign [app_id="firefox" title="^Firefox"]   $ws2
+
+assign [app_id="thunderbird" title="- Mozilla Thunderbird$"] $ws10
+
+assign [class="^Spotify$"] $ws9
+assign [title="Spotify Premium"] $ws9
+
 for_window [window_role="pop-up"]       floating enable
 for_window [window_role="About"]        floating enable
 for_window [window_role="task_dialog"]  floating enable
 for_window [window_type="dialog"]       floating enable
 for_window [window_type="splash"]       floating enable
 
-for_window [app_id="org.kde.kcalc"]     floating enable
+for_window [app_id="org.kde.kcalc"]     floating enable, border pixel
 for_window [app_id="pavucontrol"]       floating enable
 for_window [app_id="mpv"]               floating enable
 for_window [app_id="blueman-manager"]   floating enable
@@ -269,7 +279,7 @@ for_window [app_id="virt-manager"]      floating enable
 for_window [workspace="$ws2"]                                   floating enable
 for_window [app_id="firefox" title="^Picture-in-Picture$"]      sticky enable
 for_window [app_id="firefox"]                                   floating enable
-for_window [app_id="firefox" title="— Firefox"]                 floating disable
+for_window [app_id="firefox" title="— Firefox"]                floating disable
 for_window [app_id="firefox" title="^Firefox"]                  floating disable
 
 # On the mail desktop everything is floating, except thunderbird main window itself
@@ -278,10 +288,12 @@ for_window [workspace="$ws10"]                                      floating ena
 for_window [app_id="thunderbird"]                                   floating enable
 for_window [app_id="thunderbird" title="- Mozilla Thunderbird$"]    floating disable
 
+for_window [app_id="org.kde.krunner"] border pixel
+
 for_window [class="^zoom$"]         floating enable
 for_window [class="^Slack$"]        floating enable
-for_window [class="^force_float$"]  floating enable
 
+for_window [class="^force_float$"]  floating enable
 for_window [title="^force_float"]   floating enable
 
 #

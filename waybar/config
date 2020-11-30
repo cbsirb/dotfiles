@@ -1,7 +1,7 @@
 {
     "layer": "top",
     "height": 28,
-    "modules-left": ["sway/workspaces", "sway/mode", "wlr/taskbar"],
+    "modules-left": ["sway/workspaces", "sway/mode"],
     "modules-center": ["sway/window"],
     "modules-right": ["tray", "idle_inhibitor", "battery", "pulseaudio", "network", "network#vpn", "custom/clock"],
     "position": "top",
