@@ -1931,9 +1931,6 @@ found, an error is signaled."
   (magit-process-popup-time 20)
   (magit-refs-show-commit-count 'all))
 
-(use-package magit-libgit
-  :after magit)
-
 (use-package magit-gitflow
   :ghook ('magit-mode-hook #'turn-on-magit-gitflow))
 
