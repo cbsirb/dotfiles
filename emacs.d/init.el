@@ -1062,6 +1062,7 @@ behavior added."
   (advice-add #'iedit-mode :around #'iedit-scoped))
 
 (use-package iy-go-to-char
+  :disabled
   :general
   ("M-m" #'iy-go-to-char)
   ("M-M" #'iy-go-to-char-backward))
