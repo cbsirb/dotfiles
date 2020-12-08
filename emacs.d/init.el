@@ -1661,7 +1661,6 @@ found, an error is signaled."
   (js2-skip-preprocessor-directives t))
 
 (use-package web-mode
-  ;; :gfhook #'turn-off-smartparens-mode
   :mode
   (("\\.phtml\\'" . web-mode)
    ("\\.tpl\\.php\\'" . web-mode)
