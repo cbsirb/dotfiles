@@ -913,7 +913,7 @@ behavior added."
   :general
   ([remap comment-region] #'compile-without-ask)
   ("C-c c" #'compile-without-ask)
-  (:keymaps 'compilation-mode-map
+  (:keymaps '(compilation-mode-map comint-mode-map)
             "q" #'kill-buffer-and-window)
 
   :ghook
