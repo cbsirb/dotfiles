@@ -1194,6 +1194,7 @@ If the input is empty, select the previous history element instead."
   (advice-add #'counsel-M-x-action :around #'user/counsel-M-x-action))
 
 (use-package ivy-rich
+  :disabled
   :after ivy
   :custom
   (ivy-rich-switch-buffer-align-virtual-buffer t)
