@@ -39,20 +39,20 @@
 (csetq
  package-selected-packages
  '(beginend ccls cmake-font-lock cmake-mode comment-dwim-2
-   company company-posframe counsel counsel-etags cython-mode
-   diff-hl dired-du dired-git-info dired-narrow diredfl dumb-jump
-   eacl elfeed eterm-256color eterm-256color-mode expand-region
-   flymake-diagnostic-at-point geiser general git-timemachine
-   haskell-mode hl-todo hydra iedit ignoramus imenu-anywhere ivy
-   ivy-posframe ivy-rich iy-go-to-char js2-mode json-mode
-   log4j-mode lsp-mode lsp-ui magit magit-gitflow magit-libgit
-   minions modern-cpp-font-lock modus-operandi-theme
-   modus-vivendi-theme multi-term multiple-cursors nasm-mode
-   no-littering nov org pdf-tools pyvenv rainbow-delimiters
-   rainbow-mode realgud rg rust-mode smex string-inflection
-   swiper symbol-overlay tree-sitter tree-sitter-langs undo-tree
-   use-package vc-msg visual-fill-column web-mode wgrep which-key
-   yaml-mode yasnippet))
+   company counsel counsel-etags cython-mode diff-hl dired-du
+   dired-git-info dired-narrow diredfl dumb-jump eacl elfeed
+   eterm-256color eterm-256color-mode expand-region flycheck
+   flycheck-pos-tip geiser general git-timemachine haskell-mode
+   hl-todo hydra iedit ignoramus imenu-anywhere ivy ivy-posframe
+   ivy-rich iy-go-to-char js2-mode json-mode log4j-mode lsp-mode
+   lsp-ui magit magit-gitflow minions modern-cpp-font-lock
+   modus-operandi-theme modus-vivendi-theme multi-term
+   multiple-cursors nasm-mode no-littering nov org pdf-tools
+   pyvenv rainbow-delimiters rainbow-mode realgud rg rust-mode
+   smex string-inflection swiper symbol-overlay tree-sitter
+   tree-sitter-langs undo-tree use-package vc-msg
+   visual-fill-column web-mode wgrep which-key yaml-mode
+   yasnippet))
 
 (when (< emacs-major-version 27)
   (load-file (expand-file-name "early-init.el" user-emacs-directory)))
@@ -155,7 +155,7 @@
   :custom
   (minions-mode-line-delimiters '("" . ""))
   :config
-  (push 'flymake-mode minions-direct)
+  (push 'flycheck-mode minions-direct)
   (push 'overwrite-mode minions-direct)
   (minions-mode t))
 
@@ -381,7 +381,7 @@
 (when (member "Symbola" (font-family-list))
   (set-fontset-font t 'unicode "Symbola" nil 'prepend))
 
-(push `(,(rx string-start "*compilation")
+(push `(,(rx string-start "*" (or "Fly" "compilation" "Warnings"))
         (display-buffer-reuse-window
          display-buffer-in-side-window)
         (side            . bottom)
@@ -1515,10 +1515,7 @@ found, an error is signaled."
     (c-toggle-auto-newline t)
     (c-toggle-syntactic-indentation t)
 
-    (modify-syntax-entry ?' ".")
-
-    (with-eval-after-load 'lsp-mode
-      (setq-local flymake-diagnostic-functions (remove #'flymake-cc flymake-diagnostic-functions))))
+    (modify-syntax-entry ?' "."))
 
   (defun user/c-mode-toggle-funcall ()
     "Transpose multi-line call to one-line and vice-versa."
@@ -1765,34 +1762,16 @@ found, an error is signaled."
   (lsp-ui-sideline-show-symbol nil)
   (lsp-ui-sideline-ignore-duplicate t))
 
-(use-package flymake :ensure nil
-  :preface
-  (defun flymake-display-at-point ()
-    "Display the flymake diagnostic text for the thing at point."
-    (interactive)
-    (when (and flymake-mode
-               (get-char-property (point) 'flymake-diagnostic))
-      (let ((text (flymake--diag-text (get-char-property (point) 'flymake-diagnostic))))
-        (when text (message "%s" text)))))
-
-  :general
-  (:keymaps 'flymake-mode-map
-            :prefix "M-g"
-            "f n" #'flymake-goto-next-error
-            "f p" #'flymake-goto-prev-error
-            "f s" #'flymake-start
-            "f f" #'flymake-display-at-point)
+(use-package flycheck
+  :ghook ('after-init-hook #'global-flycheck-mode)
   :custom
-  (flymake-no-changes-timeout nil "Don't check after changes, only after save")
-  (flymake-start-syntax-check-on-newline nil "Don't check on newlines"))
+  (flycheck-keymap-prefix (kbd "M-'"))
+  (flycheck-check-syntax-automatically '(save idle-buffer-switch mode-enabled))
+  (flycheck-idle-buffer-switch-delay 0.1))
 
-(use-package flymake-diagnostic-at-point
-  :defer t
-  :ghook 'flymake-mode-hook
-  :custom
-  (flymake-diagnostic-at-point-display-diagnostic-function
-   #'flymake-diagnostic-at-point-display-popup
-   "Display a posframe with the diagnostic at point (echo is for eldoc)"))
+(use-package flycheck-pos-tip
+  :after flycheck
+  :ghook ('global-flycheck-mode-hook #'flycheck-pos-tip-mode))
 
 (use-package imenu :ensure nil
   :general
