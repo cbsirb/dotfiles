@@ -2017,17 +2017,11 @@ found, an error is signaled."
   (calendar-date-style 'iso))
 
 (use-package org
-  :preface
-  (defun user/org-return-maybe-indent ()
-    "Same as `org-return' but calls it with INDENT as t."
-    (interactive)
-    (org-return t))
-
   :general
   ("C-c n" #'org-capture
    "C-c a" #'org-agenda)
   (:keymaps 'org-mode-map
-            "RET" #'user/org-return-maybe-indent)
+            "RET" #'org-return-indent)
 
   :pin org
 
