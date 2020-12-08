@@ -58,6 +58,22 @@ alias nixi='nix-env -i'
 alias nixe='nix-env -e'
 alias nixu='nix-env -u'
 
+# pacman/pikaur
+alias paci="sudo pacman -S"
+alias piki="pikaur -S"
+alias pacI="sudo pacman -U"
+alias pacx="sudo pacman -Rns"
+alias pacq="pacman -Si"
+alias pikq="pikaur -Si"
+alias pacQ="pacman -Qi"
+alias pacs="pacman -Ss"
+alias piks="pikaur -Ss"
+alias pacS="pacman -Qs"
+alias pacl="pacman -Ql"
+alias pacman-list-orphans="pacman --query --deps --unrequired"
+alias pacman-clean="sudo pacman -Rns $(pacman --quiet --query --deps --unrequired)"
+alias pacu="pikaur -Syu"
+
 alias path='echo -e ${PATH//:/\\n}'
 
 alias v='vim'
