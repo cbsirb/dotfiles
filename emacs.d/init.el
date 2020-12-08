@@ -1251,6 +1251,7 @@ If the input is empty, select the previous history element instead."
   (global-company-mode t))
 
 (use-package company-posframe
+  :disabled
   :after company
   :custom
   (company-posframe-quickhelp-delay nil)
