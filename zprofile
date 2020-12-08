@@ -72,7 +72,7 @@ if (( $#commands[(i)lesspipe(|.sh)] )); then
 fi
 
 # Enable for proper wayland support
-export USE_WAYLAND=1
+# export USE_WAYLAND=1
 
 if [[ -n "$USE_WAYLAND" ]]; then
     export _JAVA_AWT_WM_NONREPARENTING=1
@@ -88,6 +88,8 @@ if [[ -n "$USE_WAYLAND" ]]; then
 else
     # Disable this on wayland, causes jagged fonts on GTK apps
     export GTK_USE_PORTAL=1
+
+    export MOZ_X11_EGL=1
 fi
 
 #
