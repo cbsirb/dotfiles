@@ -288,6 +288,9 @@ for_window [workspace="$ws10"]                                      floating ena
 for_window [app_id="thunderbird"]                                   floating enable
 for_window [app_id="thunderbird" title="- Mozilla Thunderbird$"]    floating disable
 
+for_window [workspace="$ws9"]                           floating enable
+for_window [workspace="$ws9" class="^Spotify$"]         floating disable
+
 for_window [app_id="org.kde.krunner"] border pixel
 
 for_window [class="^zoom$"]         floating enable
