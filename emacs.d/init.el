@@ -1595,6 +1595,7 @@ found, an error is signaled."
 
 (use-package ccls
   :after cc-mode
+  :when (executable-find "ccls")
   :preface
   (defun user/ccls-callee-hierarchy ()
     (interactive)
