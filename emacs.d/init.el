@@ -202,10 +202,11 @@
 
 ;; mule.el
 (csetq locale-coding-system 'utf-8)
+(prefer-coding-system 'utf-8)
 (set-terminal-coding-system 'utf-8)
 (set-keyboard-coding-system 'utf-8)
 (set-selection-coding-system 'utf-8)
-(prefer-coding-system 'utf-8)
+(set-default-coding-systems 'utf-8)
 (set-language-environment "UTF-8")
 (set-charset-priority 'unicode)
 (when (display-graphic-p)
@@ -751,19 +752,17 @@ behavior added."
 (general-define-key "C-d" #'delete-forward-char)
 (general-define-key [remap just-one-space] #'cycle-spacing)
 (general-define-key [remap newline] #'newline-and-indent)
+
 ;; (general-define-key [remap isearch-forward] #'isearch-forward-regexp)
 ;; (general-define-key [remap isearch-forward-regexp] #'isearch-forward)
 ;; (general-define-key [remap isearch-backward] #'isearch-backward-regexp)
 ;; (general-define-key [remap isearch-backward-regexp] #'isearch-backward)
+
 (general-define-key [remap keyboard-quit] #'keyboard-quit-context+)
 (general-define-key [remap minibuffer-keyboard-quit] #'keyboard-quit-context+)
 (general-define-key [remap dabbrev-expand] #'hippie-expand)
 
-(defun user/profiler-start ()
-  (interactive)
-  (profiler-start 'cpu+mem))
-
-(general-define-key "<f8>" #'user/profiler-start)
+(general-define-key "<f8>" #'profiler-start)
 (general-define-key "<f9>" #'profiler-stop)
 
 (general-define-key
