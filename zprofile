@@ -73,12 +73,12 @@ fi
 
 # Enable for proper wayland support
 # export USE_WAYLAND=1
+# export USE_SWAY=1
 
 if [[ -n "$USE_WAYLAND" ]]; then
     export _JAVA_AWT_WM_NONREPARENTING=1
     export MOZ_ENABLE_WAYLAND=1
 
-    export USE_SWAY=1
     if [[ -n "$USE_SWAY" ]]; then
         export QT_QPA_PLATFORM=wayland
         export QT_WAYLAND_DISABLE_WINDOWDECORATION="1"
