@@ -1,9 +1,7 @@
 command! PackUpdate packadd minpac | source $MYVIMRC | redraw | call minpac#update()
 command! PackClean  packadd minpac | source $MYVIMRC | call minpac#clean()
 
-if !exists('*minpac#init')
-  finish
-endif
+packadd minpac
 
 call minpac#init()
 
@@ -41,17 +39,16 @@ call minpac#add('Vimjas/vim-python-pep8-indent')
 " call minpac#add('SirVer/ultisnips')
 " call minpac#add('honza/vim-snippets')
 
+call minpac#add('hrsh7th/vim-vsnip')
+call minpac#add('hrsh7th/vim-vsnip-integ')
+
 call minpac#add('kana/vim-textobj-user')
 call minpac#add('kana/vim-textobj-indent')    " i
 call minpac#add('sgur/vim-textobj-parameter') " ,
 
 call minpac#add('junegunn/fzf')
 
-call minpac#add('prabirshrestha/async.vim')
-call minpac#add('prabirshrestha/vim-lsp')
-" call minpac#add('prabirshrestha/asyncomplete.vim')
-" call minpac#add('prabirshrestha/asyncomplete-lsp.vim')
-" call minpac#add('mattn/vim-lsp-settings')
+call minpac#add('natebosch/vim-lsc')
 
 " Colorschemes
 call minpac#add('robertmeta/nofrils', {'type':'opt'})

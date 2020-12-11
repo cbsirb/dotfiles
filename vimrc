@@ -59,7 +59,7 @@ set splitbelow
 set splitright
 
 set complete-=i
-set completeopt=menuone
+set completeopt=menu,menuone,noinsert
 set formatoptions=tcrqnl1j
 
 set history=1000
@@ -71,7 +71,7 @@ set diffopt+=algorithm:histogram
 
 set linebreak
 set breakindent
-set showbreak=...\ 
+set showbreak=...\
 let &listchars = "tab:\u00bb\ ,trail:\u2022,extends:\u203a,precedes:\u2039,nbsp:\u00ba"
 set list
 
@@ -90,7 +90,7 @@ if !has('nvim')
 endif
 
 set colorcolumn=+1
-set cursorline
+set nocursorline
 
 if !has('gui_running') && has('termguicolors')
   if $TERM =~# '-256color' && $TERM !~# 'rxvt'
@@ -121,10 +121,12 @@ augroup VIMRC
   autocmd BufLeave * if !&diff | let b:winview = winsaveview() | endif
   autocmd BufEnter * if exists('b:winview') && !&diff | call winrestview(b:winview) | unlet! b:winview | endif
 
-  autocmd VimEnter,WinEnter,BufWinEnter,FocusGained,CmdwinEnter * setlocal cursorline
-  autocmd WinLeave,FocusLost,CmdwinLeave * setlocal nocursorline
+  " autocmd VimEnter,WinEnter,BufWinEnter,FocusGained,CmdwinEnter * setlocal cursorline
+  " autocmd WinLeave,FocusLost,CmdwinLeave * setlocal nocursorline
 
   autocmd CmdlineEnter /,\? :set hlsearch
+
+  autocmd CompleteDone * silent! pclose
 augroup END
 
 """"""""""""
@@ -229,7 +231,7 @@ inoremap <silent> <F4> <C-o>:pclose<CR>
 nnoremap <silent> <F4> :pclose<CR>
 
 nnoremap <Space>% :%s/\<<C-r>=expand('<cword>')<CR>\>/
-nnoremap <Space>r :ReplaceSymbolInFunction <C-R><C-W> 
+nnoremap <Space>r :ReplaceSymbolInFunction <C-R><C-W>
 
 """""""""""""""""""
 " Plugin mappings "
@@ -239,6 +241,32 @@ nnoremap <space>F :FZF <C-R>=fnameescape(expand('%:p:h'))<CR><CR>
 
 nmap <space>q <Plug>(qf_qf_toggle)
 nmap <space>l <Plug>(qf_loc_toggle)
+
+" Jump forward or backward
+imap <expr> <Tab>   vsnip#jumpable(1)   ? '<Plug>(vsnip-jump-next)'      : '<Tab>'
+smap <expr> <Tab>   vsnip#jumpable(1)   ? '<Plug>(vsnip-jump-next)'      : '<Tab>'
+imap <expr> <S-Tab> vsnip#jumpable(-1)  ? '<Plug>(vsnip-jump-prev)'      : '<S-Tab>'
+smap <expr> <S-Tab> vsnip#jumpable(-1)  ? '<Plug>(vsnip-jump-prev)'      : '<S-Tab>'
+
+" CR should complete current item (or not if there are no completions)
+" let g:endwise_no_mappings = v:true
+
+" function! SendCY()
+"   call feedkeys("\<C-Y>", "t")
+"   return ""
+" endfunction
+
+" function! SendCYCR()
+"   call feedkeys("\<C-y>\<CR>", "t")
+"   return ""
+" endfunction
+
+" function! SendCR()
+"   call feedkeys("\<CR>\<Plug>EndwiseDiscretionary", "n")
+"   return ""
+" endfunction
+
+" imap <silent> <CR> <C-R>=(pumvisible() ? (complete_info().selected == -1 ? SendCYCR() : SendCY()) : SendCR())<CR>
 
 """"""""""""""""""""""""""""""""""
 " Built-in plugins configuration "
@@ -270,9 +298,6 @@ let g:qf_statusline        = {}
 let g:qf_statusline.before = '%<\ '
 let g:qf_statusline.after  = '\ %f%=%l\/%-6L\ %3c\ '
 
-let g:UltiSnipsEditSplit   = "vertical"
-let g:UltiSnipsSnippetsDir = '~/.vim'
-
 let g:vim_json_syntax_conceal = 1
 
 let g:pymode_indent = 0
@@ -285,42 +310,6 @@ let g:ale_linters = {
 
 let g:fzf_layout = { 'down': '~20%' }
 
-if executable('ccls')
-   au User lsp_setup call lsp#register_server({
-      \ 'name': 'ccls',
-      \ 'cmd': {server_info->['ccls']},
-      \ 'root_uri': {server_info->lsp#utils#path_to_uri(lsp#utils#find_nearest_parent_file_directory(lsp#utils#get_buffer_path(), 'compile_commands.json'))},
-      \ 'whitelist': ['c', 'ch', 'cpp', 'objc', 'objcpp', 'cc'],
-      \ 'initialization_options': {'diagnostics': {'onOpen': 0, 'onChange': -1, 'spellChecking': v:false}},
-      \ })
-endif
-
-if executable('pyls')
-    au User lsp_setup call lsp#register_server({
-        \ 'name': 'pyls',
-        \ 'cmd': {server_info->['pyls']},
-        \ 'whitelist': ['python'],
-        \ })
-endif
-
-let g:lsp_signs_enabled = 1
-let g:lsp_diagnostics_echo_cursor = 1
-let g:lsp_signs_error = {'text': '✗'}
-let g:lsp_signs_warning = {'text': '‼'}
-let g:lsp_async_completion = 1
-
-let g:lsp_diagnostics_echo_delay = 200
-let g:lsp_diagnostics_float_delay = 200
-let g:lsp_diagnostics_float_cursor = 1
-let g:lsp_virtual_text_enabled = 0
-
-let g:lsp_highlight_references_enabled = 1
-let g:lsp_semantic_enabled = 1
-
-let g:asyncomplete_auto_popup = 1
-
-let g:lsp_fold_enabled = 1
-
 let g:sleuth_automatic = 0
 
 augroup user_sleuth
@@ -328,31 +317,63 @@ augroup user_sleuth
   autocmd FileType * if &buftype != "popup" | :Sleuth | endif
 augroup END
 
-function! s:lsp_buffer_enabled() abort
-  nnoremap <buffer> <Space>r :LspRename<CR>
+let g:lsc_server_commands = {
+    \ 'c': {
+    \     'name': 'ccls',
+    \     'command': 'ccls',
+    \     'suppress_stderr': v:true,
+    \     'message_hooks': {
+    \         'initialize': {
+    \             'initializationOptions': {
+    \                 'diagnostics': {
+    \                     'onOpen': 0,
+    \                     'onSave': 0,
+    \                     'onChange': -1,
+    \                     'spellChecking': v:false,
+    \                 },
+    \                 'highlight': { 'largeFileSize': 0 },
+    \             },
+    \         },
+    \     },
+    \ },
+    \ 'cpp': {
+    \     'name': 'ccls',
+    \     'command': 'ccls',
+    \     'suppress_stderr': v:true,
+    \     'message_hooks': {
+    \         'initialize': {
+    \             'initializationOptions': {
+    \                 'diagnostics': {
+    \                     'onOpen': 0,
+    \                     'onSave': 0,
+    \                     'onChange': -1,
+    \                     'spellChecking': v:false,
+    \                 },
+    \                 'highlight': { 'largeFileSize': 0 },
+    \             },
+    \         },
+    \     },
+    \ },
+    \ 'python' : 'pyls',
+    \ 'sh': 'bash-language-server start',
+    \}
 
-  " Keep unimpaired convention
-  nmap <buffer> <silent> [w :LspPreviousDiagnostic<CR>
-  nmap <buffer> <silent> ]w :LspNextDiagnostic<CR>
+let g:lsc_auto_map = {
+    \  'defaults': v:true,
+    \  'GoToDefinition': 'gd',
+    \  'FindReferences': 'gr',
+    \  'Rename': 'gR',
+    \  'ShowHover': 'K',
+    \  'FindCodeActions': 'ga',
+    \  'Completion': 'omnifunc',
+    \}
 
-  nnoremap <buffer> gd :LspDefinition<CR>
-  nnoremap <buffer> gr :LspReferences<CR>
-  nnoremap <buffer> <Space>i :LspDocumentSymbol<CR>
-  nnoremap <buffer> <Space>I :LspWorkspaceSymbol<CR>
+let g:lsc_enable_autocomplete    = v:true
+let g:lsc_enable_diagnostics     = v:true
+let g:lsc_reference_highlights   = v:true
+let g:lsc_enable_apply_edit      = v:false
+let g:lsc_trace_level            = 'off'
+let g:lsc_autocomplete_length    = 3
+let g:lsc_complete_timeout       = 0.5
 
-  nnoremap <silent> <buffer> <C-n> :LspNextReference<CR>
-  nnoremap <silent> <buffer> <C-p> :LspPreviousReference<CR>
-
-  nnoremap <silent> <buffer> <F3> :LspPeekDefinition<CR>
-  nnoremap <silent> <buffer> <F4> :LspPeekTypeDefinition<CR>
-
-  setlocal omnifunc=lsp#complete
-  setlocal foldmethod=expr
-  setlocal foldexpr=lsp#ui#vim#folding#foldexpr()
-  setlocal foldtext=lsp#ui#vim#folding#foldtext()
-endfunction
-
-augroup LSP
-  autocmd!
-  autocmd User lsp_buffer_enabled call s:lsp_buffer_enabled()
-augroup END
+let g:lsc_auto_completeopt = v:false
