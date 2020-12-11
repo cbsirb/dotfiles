@@ -1777,16 +1777,15 @@ found, an error is signaled."
           (set-marker m nil))
       ad-do-it)))
 
-(use-package volatile-highlights
-  :disabled
+(use-package goggles
   :custom
-  (Vhl/highlight-zero-width-ranges t)
-
+  (goggles-pulse t)
+  :init
+  (goggles-mode t)
   :config
-  (volatile-highlights-mode t)
-
-  (vhl/define-extension 'vhl-undo-tree #'undo-tree-move #'undo-tree-undo #'undo-tree-redo #'undo)
-  (vhl/install-extension 'vhl-undo-tree))
+  ;; Disable kill/delete since it will pulse on any kill-word/company-complete
+  (goggles-kill t)
+  (goggles-delete t))
 
 (use-package visual-fill-column
   :commands (visual-fill-column-mode global-visual-fill-column-mode))
