@@ -14,7 +14,9 @@
 (defvar user/gc-cons-threshold (* 16 gc-cons-threshold))
 (defvar user/file-name-handler-alist file-name-handler-alist)
 
-(defun user/hide-load-messages (orig-fn file &optional noerror nomessage nosuffix must-suffix)
+(defun user/hide-load-messages (orig-fn file &optional noerror _nomessage nosuffix must-suffix)
+  "Will hide the load messages.
+See `load' for ORIG-FN FILE NOERROR NOMESSAGE NOSUFFIX MUST-SUFFIX."
   (apply orig-fn file (list noerror t nosuffix must-suffix)))
 
 (advice-add #'load :around #'user/hide-load-messages)
@@ -38,21 +40,17 @@
 
 (csetq
  package-selected-packages
- '(beginend ccls cmake-font-lock cmake-mode comment-dwim-2
-   company counsel counsel-etags cython-mode diff-hl dired-du
-   dired-git-info dired-narrow diredfl dumb-jump eacl elfeed
-   eterm-256color eterm-256color-mode expand-region flycheck
-   flycheck-pos-tip geiser general git-timemachine haskell-mode
-   hl-todo hydra iedit ignoramus imenu-anywhere ivy ivy-posframe
-   ivy-rich iy-go-to-char js2-mode json-mode log4j-mode lsp-mode
-   lsp-ui magit magit-gitflow minions modern-cpp-font-lock
-   modus-operandi-theme modus-vivendi-theme multi-term
-   multiple-cursors nasm-mode no-littering nov org pdf-tools
-   pyvenv rainbow-delimiters rainbow-mode realgud rg rust-mode
-   smex string-inflection swiper symbol-overlay tree-sitter
-   tree-sitter-langs undo-tree use-package vc-msg
-   visual-fill-column web-mode wgrep which-key yaml-mode
-   yasnippet))
+ '(beginend cmake-font-lock cmake-mode comment-dwim-2 company consult
+   cython-mode diff-hl dired-du dired-git-info dired-narrow diredfl dumb-jump
+   eacl elfeed eterm-256color eterm-256color-mode expand-region flycheck
+   flycheck-pos-tip geiser general git-timemachine helpful haskell-mode hl-todo
+   hydra iedit iy-go-to-char js2-mode json-mode log4j-mode lsp-mode lsp-ui magit
+   magit-gitflow marginalia minions modern-cpp-font-lock modus-operandi-theme
+   modus-vivendi-theme multi-term multiple-cursors nasm-mode no-littering nov
+   org pdf-tools pyvenv rainbow-delimiters rainbow-mode realgud rg rust-mode
+   selectrum-prescient smex string-inflection symbol-overlay tree-sitter
+   tree-sitter-langs undo-tree use-package vc-msg visual-fill-column web-mode
+   wgrep which-key yaml-mode yasnippet))
 
 (when (< emacs-major-version 27)
   (load-file (expand-file-name "early-init.el" user-emacs-directory)))
@@ -63,7 +61,7 @@
 (add-to-list 'load-path (expand-file-name "lisp" user-emacs-directory))
 (add-to-list 'load-path (expand-file-name "site-lisp" user-emacs-directory))
 
-(dolist (dir (directory-files (expand-file-name "site-lisp" user-emacs-directory)))
+(dolist (dir (directory-files (expand-file-name "site-lisp" user-emacs-directory) t))
   (when (and (not (string-suffix-p "." dir))
              (file-directory-p dir))
     (add-to-list 'load-path (expand-file-name dir (expand-file-name "site-lisp" user-emacs-directory)))))
@@ -163,7 +161,7 @@
   :config
   (global-hl-todo-mode t))
 
-(use-package ignoramus
+(use-package ignoramus :ensure nil
   :config
   (ignoramus-setup))
 
@@ -382,12 +380,30 @@
 (when (member "Symbola" (font-family-list))
   (set-fontset-font t 'unicode "Symbola" nil 'prepend))
 
-(push `(,(rx string-start "*" (or "Fly" "compilation" "Warnings"))
+(push `(,(rx string-start "*" (or "Fly" "compilation"))
         (display-buffer-reuse-window
          display-buffer-in-side-window)
         (side            . bottom)
         (reusable-frames . nil)
-        (window-height   . 0.25))
+        (window-height   . 0.25)
+        (slot . -1))
+      display-buffer-alist)
+
+(push `(,(rx string-start "*" (or "[Hh]elp" "helpful" "Backtrace" "Warnings" "Compile-Log"))
+        (display-buffer-reuse-window
+         display-buffer-in-side-window)
+        (side            . bottom)
+        (reusable-frames . nil)
+        (window-height   . 0.33)
+        (slot . 0))
+      display-buffer-alist)
+
+(push `(,(rx "*Completions*")
+        (display-buffer-use-some-window
+         display-buffer-pop-up-window)
+	(window-height 0.25)
+        (reusable-frames . nil)
+        (inhibit-same-window . t))
       display-buffer-alist)
 
 ;;
@@ -484,8 +500,7 @@
 (add-hook 'minibuffer-exit-hook #'user/minibuffer-exit-hook)
 
 (with-eval-after-load 'xref
-  (add-to-list 'xref-prompt-for-identifier 'xref-find-references t)
-  (add-hook 'xref-after-return-hook #'recenter))
+  (add-to-list 'xref-prompt-for-identifier 'xref-find-references t))
 
 ;; Thank you u/ouroboroslisp
 (defun user/calculate-lisp-indent (&optional parse-start)
@@ -681,6 +696,7 @@ PARSE-START indicates where the parsing should start in the file (point)."
   "M-o"
   "C-x C-z"
   "C-x f"
+  "C-x m"
   "C-x >"
   "C-x <"
   "<C-next>"
@@ -698,6 +714,10 @@ PARSE-START indicates where the parsing should start in the file (point)."
   ([remap scroll-down-command] #'user/scroll-half-page-down)
   ([remap split-window-below] #'user/split-window-below)
   ([remap split-window-right] #'user/split-window-right)
+  ("M-3" #'user/split-window-right)
+  ("M-0" #'delete-window)
+  ("M-1" #'delete-other-windows)
+  ("M-o" #'other-window)
   ("C-w" #'user/kill-word-or-region)
   ("<C-return>" #'user/open-line-above)
   ("C-a" #'user/move-beginning-of-line)
@@ -993,7 +1013,7 @@ behavior added."
 
 (use-package diredfl
   :defer t
-  :ghook ('dired-mode-hook #'diredfl-mode))
+  :ghook 'dired-mode-hook)
 
 (use-package dired-git-info
   :general
@@ -1007,30 +1027,26 @@ behavior added."
 (use-package expand-region
   :general
   ("M-2" #'er/expand-region)
-  ("M-1" #'er/contract-region)
+  ;; ("M-1" #'er/contract-region)
   :custom
   (expand-region-fast-keys-enabled nil)
   (expand-region-autocopy-register "e"))
 
 (use-package symbol-overlay
   :preface
-  (define-global-minor-mode global-symbol-overlay-mode symbol-overlay-mode
-    (lambda ()
-      (if (< (buffer-size) (* 1024 1024))
-          (symbol-overlay-mode t)
-        (symbol-overlay-mode -1))))
+  (define-globalized-minor-mode global-symbol-overlay-mode symbol-overlay-mode symbol-overlay-mode)
   :general
   ("M-*" #'symbol-overlay-put)
   ("M-n" #'symbol-overlay-jump-next)
   ("M-p" #'symbol-overlay-jump-prev)
   ("M-8" #'symbol-overlay-toggle-in-scope)
-  :init
-  (global-symbol-overlay-mode t)
   :custom-face
   (symbol-overlay-default-face ((t (:inherit underline))))
   :custom
   (symbol-overlay-idle-time 0.25)
-  (symbol-overlay-displayed-window nil))
+  (symbol-overlay-displayed-window t)
+  :init
+  (global-symbol-overlay-mode t))
 
 (use-package beginend
   :preface
@@ -1123,107 +1139,46 @@ behavior added."
   :custom
   (smex-history-length 16))
 
-(use-package ivy
+(use-package helpful
   :general
-  ("C-c C-r" #'ivy-resume)
-  (:keymaps 'ivy-mode-map
-            "<escape>" #'keyboard-quit-context+)
+  ([remap describe-key] #'helpful-key)
+  ([remap describe-variable] #'helpful-variable)
+  ([remap describe-function] #'helpful-callable)
   :custom
-  (ivy-count-format "")
-  (ivy-height 9)
-  (ivy-use-virtual-buffers t)
-  (ivy-virtual-abbreviate 'full)
-  (ivy-wrap t)
-  :init
-  (ivy-mode t))
+  (helpful-max-buffers 1))
 
-(use-package swiper
-  :preface
-  (defun swiper-C-r (&optional arg)
-    "Move cursor vertically up ARG candidates.
-If the input is empty, select the previous history element instead."
-    (interactive "p")
-    (if (string= ivy-text "")
-        (ivy-previous-history-element 1)
-      (ivy-previous-line arg)))
-
-  (defun swiper-isearch-with-count (orig-func &rest args)
-    (let ((ivy-count-format (if (> (length ivy-count-format) 0) ivy-count-format "%d/%d ")))
-      (apply orig-func args)))
-
+(use-package selectrum-prescient
+  :custom
+  (selectrum-count-style 'current/matches)
   :general
-  ("C-s" #'swiper-isearch)
-  ("C-r" #'swiper-isearch-backward)
-  (:keymaps 'swiper-map
-            "C-r" #'swiper-C-r
-            "M-s" #'swiper-isearch-toggle)
-  (:keymaps 'isearch-mode-map
-            "M-s" #'swiper-isearch-toggle)
+  (:keymaps 'selectrum-minibuffer-map
+            "<prior>" #'selectrum-previous-page
+            "<next>"  #'selectrum-next-page)
   :init
-  (advice-add 'swiper-isearch :around #'swiper-isearch-with-count))
+  (selectrum-mode t)
+  (selectrum-prescient-mode t)
+  (prescient-persist-mode t))
 
-(use-package counsel
+(use-package marginalia
+  :after selectrum
+  :custom
+  (marginalia-annotators '(marginalia-annotators-heavy marginalia-annotators-light))
+  :init
+  (marginalia-mode t))
+
+(use-package consult
   :general
-  (:prefix "M-s"
-           "c" #'counsel-rg
-           "g" #'counsel-git-grep
-           "s" #'swiper)
-  :preface
-  ;; http://xenodium.com/emacss-counsel-m-x-meets-multiple-cursors/index.html
-  (defun user/counsel-M-x-action (orig-fun &rest r)
-    "Additional support for multiple cursors."
-    (apply orig-fun r)
-    (let ((cmd (intern (string-trim-left (nth 0 r) "\\^"))))
-      (when (and (boundp 'multiple-cursors-mode)
-                 multiple-cursors-mode
-                 cmd
-                 (not (memq cmd mc--default-cmds-to-run-once))
-                 (not (memq cmd mc/cmds-to-run-once))
-                 (or mc/always-run-for-all
-                     (memq cmd mc--default-cmds-to-run-for-all)
-                     (memq cmd mc/cmds-to-run-for-all)
-                     (mc/prompt-for-inclusion-in-whitelist cmd)))
-        (mc/execute-command-for-all-fake-cursors cmd))))
-  :custom
-  (counsel-describe-function-preselect 'ivy-function-called-at-point)
-  (counsel-grep-post-action-hook '(recenter))
-  (counsel-mode-override-describe-bindings t)
-  :init
-  (counsel-mode t)
-  (advice-add #'counsel-M-x-action :around #'user/counsel-M-x-action))
-
-(use-package ivy-rich
-  :disabled
-  :after ivy
-  :custom
-  (ivy-rich-switch-buffer-align-virtual-buffer t)
-  (ivy-rich-path-style 'abbrev)
-  :init
-  (ivy-rich-mode t))
-
-(use-package ivy-posframe
-  :after ivy
-  :preface
-  (defun user/ivy-posframe-get-size ()
-    (list
-     :height ivy-posframe-height
-     :width ivy-posframe-width
-     :min-height (or ivy-posframe-min-height
-                     (let ((height (+ ivy-height 1)))
-                       (min height (or ivy-posframe-height height))))
-     :min-width (or ivy-posframe-min-width
-                    (let ((width (round (* (frame-width) 0.4))))
-                      (min width (or ivy-posframe-width width))))))
-  :custom
-  (ivy-posframe-display-functions-alist
-   '((swiper . ivy-display-function-fallback)
-     (swiper-isearch . ivy-display-function-fallback)
-     (swiper-isearch-backward . ivy-display-function-fallback)
-     (t . ivy-posframe-display-at-point)))
-  (ivy-posframe-parameters '((internal-border-width . 3)))
-  (ivy-posframe-size-function #'user/ivy-posframe-get-size)
-  :config
-  (ivy-posframe-mode t))
+  ([remap switch-to-buffer] #'consult-buffer)
+  ([remap switch-to-buffer-other-window] #'consult-buffer-other-window)
+  ([remap switch-to-buffer-other-frame] #'consult-buffer-other-frame)
+  ([remap copy-to-register] #'consult-register)
+  ([remap bookmark-jump] #'consult-bookmark)
+  ([remap yank-pop] #'consult-yank-pop)
+  ([remap imenu] #'consult-imenu)
+  ("M-g i" #'consult-imenu)
+  ("M-s M-s" #'consult-line-symbol-at-point)
+  ("M-g l" #'consult-line)
+  ("M-g o" #'consult-outline))
 
 (use-package company
   :general
@@ -1328,11 +1283,15 @@ That way we don't remove the whole regexp for a simple typo.
     (isearch-update))
 
   :general
+  ("C-s" #'isearch-forward-regexp)
+  ("C-M-s" #'isearch-forward)
+  ("C-r" #'isearch-backward-regexp)
+  ("C-M-r" #'isearch-backward)
   (:keymaps 'isearch-mode-map
-            "M-o"            #'isearch-occur
-            "<tab>"          #'isearch-repeat-forward
-            "<backtab>"      #'isearch-repeat-backward
-            "<C-backspace>"  #'isearch-delete-previous)
+             "M-o"            #'isearch-occur
+             "<tab>"          #'isearch-repeat-forward
+             "<backtab>"      #'isearch-repeat-backward
+             "<C-backspace>"  #'isearch-delete-previous)
 
   :custom
   (isearch-lazy-count t)
@@ -1372,6 +1331,8 @@ That way we don't remove the whole regexp for a simple typo.
   #'hs-minor-mode
   #'electric-indent-local-mode
   #'electric-pair-local-mode)
+
+(use-package imenu)
 
 (defun validate-balance ()
   "Check for unbalanced parentheses in the current buffer.
@@ -1413,7 +1374,7 @@ found, an error is signaled."
 (use-package comment-dwim-2
   :general ("M-;" #'comment-dwim-2))
 
-(use-package counsel-etags :defer t)
+;; (use-package counsel-etags :defer t)
 
 (use-package dumb-jump
   :defer t
@@ -1730,21 +1691,17 @@ found, an error is signaled."
   ;; (lsp-print-performance t)
 
   :config
-  (push "[/\\\\]\\.ccls-cache$" lsp-file-watch-ignored)
-  (push "[/\\\\]\\.clangd$" lsp-file-watch-ignored)
-  (push "[/\\\\]\\.vscode$" lsp-file-watch-ignored)
-
   (csetq lsp-clients-clangd-args
-         '("-j=7"
+         '("-j=6"
            "--all-scopes-completion"
            "--completion-style=detailed"
            "--header-insertion=never"
            "--pch-storage=memory"
            "--background-index"
+           "--cross-file-rename"
            "--clang-tidy"
            "--suggest-missing-includes"
-           "--log=error"
-           )))
+           "--log=error")))
 
 (use-package lsp-ui
   :commands lsp-ui-mode
@@ -1773,7 +1730,7 @@ found, an error is signaled."
 
 (use-package flycheck-pos-tip
   :after flycheck
-  :ghook ('global-flycheck-mode-hook #'flycheck-pos-tip-mode))
+  :ghook 'global-flycheck-mode-hook)
 
 (use-package imenu :ensure nil
   :general
@@ -1783,11 +1740,6 @@ found, an error is signaled."
   :custom
   (imenu-auto-rescan t "Rescan before showing results")
   (imenu-auto-rescan-maxout (* 2 1024 1024) "Ignore buffers bigger than this"))
-
-(use-package imenu-anywhere
-  :general
-  (:keymaps 'prog-mode-map
-            "M-I" #'imenu-anywhere))
 
 (use-package yasnippet
   :custom
@@ -1896,7 +1848,7 @@ found, an error is signaled."
   (multi-term-scroll-show-maximum-output t))
 
 (use-package eterm-256color
-  :ghook ('term-mode-hook #'eterm-256color-mode))
+  :ghook 'term-mode-hook)
 
 ;;
 ;; Debugging
@@ -1916,7 +1868,7 @@ found, an error is signaled."
 ;;
 
 (use-package magit
-  :general ("C-x g" #'magit-status)
+  :defer t
   :ghook ('git-commit-mode-hook #'git-commit-turn-on-flyspell)
 
   :custom
@@ -1997,7 +1949,7 @@ found, an error is signaled."
   :after vc
   :custom
   (diff-hl-draw-borders t)
-  (diff-hl-side 'right)
+  (diff-hl-side 'left)
   :config
   (global-diff-hl-mode t))
 
