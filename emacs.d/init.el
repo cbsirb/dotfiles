@@ -1204,16 +1204,6 @@ behavior added."
   :init
   (global-company-mode t))
 
-(use-package company-posframe
-  :disabled
-  :after company
-  :custom
-  (company-posframe-quickhelp-delay nil)
-  (company-posframe-show-indicator nil)
-  (company-posframe-show-metadata nil)
-  :config
-  (company-posframe-mode t))
-
 (use-package eacl
   :general ("C-x C-l" #'eacl-complete-line))
 
