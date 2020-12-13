@@ -40,17 +40,17 @@ See `load' for ORIG-FN FILE NOERROR NOMESSAGE NOSUFFIX MUST-SUFFIX."
 
 (csetq
  package-selected-packages
- '(beginend cmake-font-lock cmake-mode comment-dwim-2 company consult
+ '(beginend cmake-font-lock cmake-mode comment-dwim-2 ccls company consult
    cython-mode diff-hl dired-du dired-git-info dired-narrow diredfl dumb-jump
    eacl elfeed eterm-256color eterm-256color-mode expand-region flycheck
-   flycheck-pos-tip geiser general git-timemachine helpful haskell-mode hl-todo
-   hydra iedit iy-go-to-char js2-mode json-mode log4j-mode lsp-mode lsp-ui magit
-   magit-gitflow marginalia minions modern-cpp-font-lock modus-operandi-theme
-   modus-vivendi-theme multi-term multiple-cursors nasm-mode no-littering nov
-   org pdf-tools pyvenv rainbow-delimiters rainbow-mode realgud rg rust-mode
-   selectrum-prescient smex string-inflection symbol-overlay tree-sitter
-   tree-sitter-langs undo-tree use-package vc-msg visual-fill-column web-mode
-   wgrep which-key yaml-mode yasnippet))
+   flycheck-pos-tip geiser general git-timemachine goggles helpful haskell-mode
+   hl-todo hydra iedit iy-go-to-char js2-mode json-mode log4j-mode lsp-mode
+   lsp-ui magit magit-gitflow marginalia minions modern-cpp-font-lock
+   modus-operandi-theme modus-vivendi-theme multi-term multiple-cursors
+   nasm-mode no-littering nov org pdf-tools pyvenv rainbow-delimiters
+   rainbow-mode realgud rg rust-mode selectrum-prescient smex string-inflection
+   symbol-overlay tree-sitter tree-sitter-langs undo-tree use-package vc-msg
+   visual-fill-column web-mode wgrep which-key yaml-mode yasnippet))
 
 (when (< emacs-major-version 27)
   (load-file (expand-file-name "early-init.el" user-emacs-directory)))
