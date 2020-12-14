@@ -110,9 +110,6 @@ See `load' for ORIG-FN FILE NOERROR NOMESSAGE NOSUFFIX MUST-SUFFIX."
 ;;
 ;; Packages needed no matter what, and usually others are depended on it
 ;;
-(eval-when-compile
-  (require 'use-package))
-
 (use-package general)
 
 (use-package cus-edit+ :ensure nil
@@ -499,7 +496,9 @@ See `load' for ORIG-FN FILE NOERROR NOMESSAGE NOSUFFIX MUST-SUFFIX."
 (add-hook 'minibuffer-setup-hook #'user/minibuffer-setup-hook)
 (add-hook 'minibuffer-exit-hook #'user/minibuffer-exit-hook)
 
-(with-eval-after-load 'xref
+(use-package xref :ensure nil
+  :defer t
+  :config
   (add-to-list 'xref-prompt-for-identifier 'xref-find-references t))
 
 ;; Thank you u/ouroboroslisp
@@ -849,8 +848,9 @@ behavior added."
   (push no-littering-var-directory recentf-exclude)
   (push no-littering-etc-directory recentf-exclude)
 
-  (recentf-mode t)
-  (run-at-time (* 1 60) (* 1 60) #'recentf-save-list))
+  (run-at-time (* 1 60) (* 1 60) #'recentf-save-list)
+
+  :ghook ('after-init-hook #'recentf-mode))
 
 (use-package ibuffer :ensure nil
   :preface
@@ -1045,8 +1045,8 @@ behavior added."
   :custom
   (symbol-overlay-idle-time 0.25)
   (symbol-overlay-displayed-window t)
-  :init
-  (global-symbol-overlay-mode t))
+  :ghook
+  ('after-init-hook #'global-symbol-overlay-mode))
 
 (use-package beginend
   :preface
@@ -1136,6 +1136,7 @@ behavior added."
 ;;
 
 (use-package smex
+  :disabled
   :custom
   (smex-history-length 16))
 
@@ -1201,8 +1202,7 @@ behavior added."
   (company-tooltip-flip-when-above nil)
   ;; (company-occurrence-weight-function #'company-occurrence-prefer-any-closest)
   ;; (company-transformers '(company-sort-by-occurrence))
-  :init
-  (global-company-mode t))
+  :ghook ('after-init-hook #'global-company-mode))
 
 (use-package eacl
   :general ("C-x C-l" #'eacl-complete-line))
@@ -1239,8 +1239,6 @@ behavior added."
 ;;
 ;; Searching
 ;;
-
-(add-hook 'grep-mode-hook #'hide-trailing-whitespace)
 
 (use-package isearch :ensure nil
   :preface
@@ -1289,9 +1287,13 @@ That way we don't remove the whole regexp for a simple typo.
   (isearch-allow-scroll 'unlimited)
   (isearch-yank-on-move 'shift))
 
-(push ".ccls-cache" grep-find-ignored-directories)
-(push ".vscode" grep-find-ignored-directories)
-(push ".clangd" grep-find-ignored-directories)
+(use-package grep :ensure nil
+  :defer t
+  :general ('grep-mode-hook #'hide-trailing-whitespace)
+  :config
+  (push ".ccls-cache" grep-find-ignored-directories)
+  (push ".vscode" grep-find-ignored-directories)
+  (push ".clangd" grep-find-ignored-directories))
 
 (use-package rg
   :general
@@ -1322,7 +1324,7 @@ That way we don't remove the whole regexp for a simple typo.
   #'electric-indent-local-mode
   #'electric-pair-local-mode)
 
-(use-package imenu)
+(use-package imenu  :ensure nil)
 
 (defun validate-balance ()
   "Check for unbalanced parentheses in the current buffer.
@@ -1352,7 +1354,7 @@ found, an error is signaled."
   (show-paren-delay 0)
   (show-paren-when-point-inside-paren t)
   (show-paren-when-point-in-periphery t)
-  :ghook ('after-init-hook #'show-paren-mode t))
+  :ghook ('after-init-hook #'show-paren-mode))
 
 (use-package geiser)
 
@@ -1473,9 +1475,7 @@ found, an error is signaled."
   (defun user/c-mode-toggle-funcall ()
     "Transpose multi-line call to one-line and vice-versa."
     (interactive)
-    (let ((initial-pos (point))
-          (bosl) (eosl)
-          (bos) (eos))
+    (let (bosl eosl bos eos)
       (save-excursion
         (c-end-of-statement)
         (setq eos (point))
@@ -1737,9 +1737,8 @@ found, an error is signaled."
   (yas-triggers-in-field t "Snippets inside snippets")
   (yas-wrap-around-region t)
   (yas-also-auto-indent-first-line t)
-  :config
-  (yas-global-mode t)
-  (yas-reload-all))
+  :general
+  ('after-init-hook yas-global-mode))
 
 ;;
 ;; Small emacs enhacements
@@ -1768,23 +1767,20 @@ found, an error is signaled."
       ad-do-it)))
 
 (use-package goggles
+  :general
+  ('after-init-hook #'goggles-mode)
   :custom
   (goggles-pulse t)
-  :init
-  (goggles-mode t)
   :config
   ;; Disable kill/delete since it will pulse on any kill-word/company-complete
   (goggles-kill t)
   (goggles-delete t))
 
-(use-package visual-fill-column
-  :commands (visual-fill-column-mode global-visual-fill-column-mode))
+(use-package visual-fill-column :defer t)
 
-(use-package rainbow-mode
-  :commands rainbow-mode)
+(use-package rainbow-mode :defer t)
 
-(use-package rainbow-delimiters
-  :commands rainbow-delimiters-mode)
+(use-package rainbow-delimiters :defer t)
 
 (use-package which-key
   :custom
@@ -1844,13 +1840,15 @@ found, an error is signaled."
 ;;
 
 (use-package gud :ensure nil
+  :defer t
   :custom
   (gdb-many-windows t))
 
 (use-package realgud
-  :commands (realgud:bashdb realgud:gdb realgud:gub realgud:ipdb
-                            realgud:jdb realgud:kshdb realgud:nodejs realgud:pdb
-                            realgud:perldb realgud:zshdb))
+  :defer t)
+  ;; :commands (realgud:bashdb realgud:gdb realgud:gub realgud:ipdb
+  ;;                           realgud:jdb realgud:kshdb realgud:nodejs realgud:pdb
+  ;;                           realgud:perldb realgud:zshdb))
 
 ;;
 ;; Version Control
@@ -1859,7 +1857,8 @@ found, an error is signaled."
 (use-package magit
   :defer t
   :ghook ('git-commit-mode-hook #'git-commit-turn-on-flyspell)
-
+  :general
+  ("C-c g" #'magit-file-dispatch)
   :custom
   (magit-diff-arguments
    '("--ignore-space-change" "--ignore-all-space"
@@ -1921,6 +1920,7 @@ found, an error is signaled."
   (project-find-functions (list #'user/project-find-root)))
 
 (use-package vc :ensure nil
+  :defer t
   :config
   (push ".ccls-cache" vc-directory-exclusion-list)
   (push ".vscode" vc-directory-exclusion-list)
@@ -1976,7 +1976,7 @@ found, an error is signaled."
 ;; No category
 ;;
 (use-package nov
-  :ghook ('nov-mode-hook #'turn-on-visual-line-mode)
+  :gfhook #'turn-on-visual-line-mode
   :mode ("\\.epub\\'" . nov-mode)
   :custom
   (nov-text-width 80))
