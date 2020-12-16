@@ -1154,7 +1154,8 @@ behavior added."
   :general
   (:keymaps 'selectrum-minibuffer-map
             "<prior>" #'selectrum-previous-page
-            "<next>"  #'selectrum-next-page)
+            "<next>"  #'selectrum-next-page
+            "<C-backspace>" #'backward-kill-sexp)
   :init
   (selectrum-mode t)
   (selectrum-prescient-mode t)
