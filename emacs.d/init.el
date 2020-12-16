@@ -1670,7 +1670,7 @@ found, an error is signaled."
   (lsp-auto-guess-root nil)
   (lsp-restart 'auto-restart)
   (lsp-pyls-plugins-rope-completion-enabled nil "This is very very slow (allow only jedi completions)")
-  (lsp-eldoc-render-all t)
+  (lsp-eldoc-render-all nil)
   (lsp-prefer-capf t)
   (lsp-keymap-prefix "<C-m>")
 
@@ -1698,18 +1698,23 @@ found, an error is signaled."
   :commands lsp-ui-mode
   :general
   (:keymaps 'lsp-mode-map
+            "<f2>" #'lsp-ui-doc-glance)
+  (:keymaps 'lsp-mode-map
             :prefix "M-g"
             "r" #'lsp-ui-peek-find-references
             "d" #'lsp-ui-peek-find-definitions)
   :custom
   (lsp-ui-doc-enable nil "Enable it per file if really needed")
   (lsp-ui-doc-include-signature t)
+  (lsp-ui-doc-header nil)
+  (lsp-ui-doc-position 'at-point)
 
   (lsp-ui-peek-always-show t "Usefull for peeking definitions")
 
   (lsp-ui-sideline-enable nil "Enable it per file if really needed")
+  (lsp-ui-sideline-show-diagnostics t)
   (lsp-ui-sideline-show-hover nil)
-  (lsp-ui-sideline-show-symbol nil)
+  (lsp-ui-sideline-show-symbol t)
   (lsp-ui-sideline-ignore-duplicate t))
 
 (use-package flycheck
