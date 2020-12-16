@@ -84,6 +84,11 @@ alias dlna-restart='sudo systemctl stop minidlna.service; sudo minidlnad -R; sle
 
 alias temps="paste <(cat /sys/class/thermal/thermal_zone*/type) <(cat /sys/class/thermal/thermal_zone*/temp) | column -s $'\t' -t | sed 's/...$/.0°C/'"
 
+# An alias won't work since we need parameters
+mosh-tmux () {
+    mosh "$@" -- tmux new -ADs mosh-session
+}
+
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
 
