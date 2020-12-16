@@ -1659,7 +1659,7 @@ found, an error is signaled."
   ('lsp-mode-hook #'lsp-enable-which-key-integration)
 
   :custom
-  ;; performance reasons (and they're not really usefull for me)
+  ;; performance reasons (and they're not really useful for me)
   (lsp-enable-on-type-formatting nil)
   (lsp-enable-folding nil)
   (lsp-enable-indentation nil)
@@ -1709,7 +1709,7 @@ found, an error is signaled."
   (lsp-ui-doc-header nil)
   (lsp-ui-doc-position 'at-point)
 
-  (lsp-ui-peek-always-show t "Usefull for peeking definitions")
+  (lsp-ui-peek-always-show t "Useful for peeking definitions")
 
   (lsp-ui-sideline-enable nil "Enable it per file if really needed")
   (lsp-ui-sideline-show-diagnostics t)

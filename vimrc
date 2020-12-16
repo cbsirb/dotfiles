@@ -23,7 +23,7 @@ set noswapfile
 set nobackup
 set nofoldenable
 
-set exrc              " Dangerous but usefull
+set exrc              " Dangerous but useful
 
 set autoindent
 set smartindent
