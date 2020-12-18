@@ -76,28 +76,34 @@ See `load' for ORIG-FN FILE NOERROR NOMESSAGE NOSUFFIX MUST-SUFFIX."
 (csetq use-package-always-ensure t)
 (csetq use-package-compute-statistics nil)
 
-(defun package-update-now ()
-  "Update all the packages."
-  (interactive)
-
-  (split-window-below -10)
-  (other-window 1)
-
+(defun package--update-now ()
+  "Update all the packages.
+This is meant to be called by other functions (eg: `make-thread')."
   (package-list-packages-no-fetch)
-  (package-refresh-contents)
-  (package-menu-mark-upgrades)
+  (let ((package-buffer (current-buffer))
+        (updated nil))
+    (bury-buffer)
+    (with-current-buffer package-buffer
 
-  (with-demoted-errors "Nothing to update! (%S)"
-    (package-menu-execute))
+      (package-refresh-contents)
+      (package-menu-mark-upgrades)
 
-  (when-let* ((buf (get-buffer "*Packages*")))
-    (switch-to-buffer buf)
-    (kill-buffer-and-window)))
+      (with-demoted-errors "Nothing to update! (%S)"
+        (package-menu-execute)
+        (setq updated t)))
+
+    (kill-buffer package-buffer)
+    (if updated
+        (message "Packages updated!"))))
+
+(defun package-update-now ()
+  "Update all the packages asynchronous."
+  (interactive)
+  (make-thread #'package--update-now "update-packages"))
 
 (defun package-rebuild-all ()
   "Rebuild all the packages."
   (interactive)
-
   (byte-recompile-directory package-user-dir nil 'force))
 
 (defun user/gc-on-last-frame-out-of-focus ()
