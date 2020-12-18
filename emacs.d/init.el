@@ -1170,8 +1170,11 @@ behavior added."
 
 (use-package marginalia
   :after selectrum
+  :general
+  (:keympas 'minibuffer-local-map
+            "C-o" #'marginalia-cycle-annotators)
   :custom
-  (marginalia-annotators '(marginalia-annotators-heavy marginalia-annotators-light))
+  (marginalia-annotators '(marginalia-annotators-light marginalia-annotators-heavy))
   :init
   (marginalia-mode t))
 
