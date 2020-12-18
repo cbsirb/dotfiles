@@ -1188,8 +1188,8 @@ behavior added."
   ([remap yank-pop] #'consult-yank-pop)
   ([remap imenu] #'consult-imenu)
   ("M-g i" #'consult-imenu)
+  ("M-s l" #'consult-line)
   ("M-s M-s" #'consult-line-symbol-at-point)
-  ("M-g l" #'consult-line)
   ("M-g o" #'consult-outline))
 
 (use-package consult-selectrum
@@ -1314,8 +1314,7 @@ That way we don't remove the whole regexp for a simple typo.
   (:prefix "M-s"
            "d" #'rg-dwim
            "r" #'rg
-           "p" #'rg-project
-           "l" #'rg-literal)
+           "p" #'rg-project)
   :custom
   (rg-custom-type-aliases nil)
   (rg-ignore-case 'smart)
