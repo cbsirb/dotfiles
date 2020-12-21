@@ -1788,14 +1788,16 @@ found, an error is signaled."
       ad-do-it)))
 
 (use-package goggles
-  :general
+  :preface
+  (defun user/disable-some-goggles ()
+    "Disable kill/delete since it will pulse on any kill-word/company-complete."
+    (goggles-kill t)
+    (goggles-delete t))
+  :ghook
   ('after-init-hook #'goggles-mode)
+  ('goggles-mode-hook #'user/disable-some-goggles)
   :custom
-  (goggles-pulse t)
-  :config
-  ;; Disable kill/delete since it will pulse on any kill-word/company-complete
-  (goggles-kill t)
-  (goggles-delete t))
+  (goggles-pulse t))
 
 (use-package visual-fill-column :defer t)
 
