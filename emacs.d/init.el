@@ -1335,7 +1335,7 @@ That way we don't remove the whole regexp for a simple typo.
   :defer t
   :gfhook
   #'hide-trailing-whitespace
-  ;; #'which-function-mode
+  #'which-function-mode
   #'hs-minor-mode
   #'electric-indent-local-mode
   #'electric-pair-local-mode)
