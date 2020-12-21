@@ -1303,7 +1303,7 @@ That way we don't remove the whole regexp for a simple typo.
 
 (use-package grep :ensure nil
   :defer t
-  :general ('grep-mode-hook #'hide-trailing-whitespace)
+  :ghook ('grep-mode-hook #'hide-trailing-whitespace)
   :config
   (push ".ccls-cache" grep-find-ignored-directories)
   (push ".vscode" grep-find-ignored-directories)
@@ -1755,8 +1755,8 @@ found, an error is signaled."
   (yas-triggers-in-field t "Snippets inside snippets")
   (yas-wrap-around-region t)
   (yas-also-auto-indent-first-line t)
-  :general
-  ('after-init-hook yas-global-mode))
+  :ghook
+  ('after-init-hook #'yas-global-mode))
 
 ;;
 ;; Small emacs enhacements
