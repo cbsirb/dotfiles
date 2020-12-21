@@ -125,6 +125,11 @@ This is meant to be called by other functions (eg: `make-thread')."
   (custom-file null-device "Don't store customizations"))
 
 (use-package modus-operandi-theme
+  :defer t
+  :preface
+  (defun user/load-default-theme ()
+    (load-theme 'modus-operandi t))
+  :ghook ('after-init-hook #'user/load-default-theme)
   :custom
   (modus-operandi-theme-visible-fringes nil)
   (modus-operandi-theme-fringes 'subtle)
@@ -134,9 +139,7 @@ This is meant to be called by other functions (eg: `make-thread')."
   (modus-operandi-theme-intense-paren-match t)
   (modus-operandi-theme-proportional-fonts nil)
   (modus-operandi-theme-section-headings t)
-  (modus-operandi-theme-completions 'opinionated)
-  :config
-  (load-theme 'modus-operandi t))
+  (modus-operandi-theme-completions 'opinionated))
 
 (use-package modus-vivendi-theme
   :disabled
