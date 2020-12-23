@@ -1823,8 +1823,7 @@ found, an error is signaled."
 
 (use-package which-key
   :custom
-  (which-key-side-window-location 'bottom)
-  (which-key-idle-delay 0.75)
+  (which-key-idle-delay 0.5)
   (which-key-sort-order 'which-key-prefix-then-key-order)
   :config
   (which-key-mode t))
