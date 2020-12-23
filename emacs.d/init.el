@@ -284,6 +284,9 @@ This is meant to be called by other functions (eg: `make-thread')."
 (csetq bidi-paragraph-direction 'left-to-right)
 (csetq bidi-inhibit-bpa t)
 
+;; Disable some decorations in c/c++
+;; (setq font-lock-maximum-decoration '((c-mode . 2) (c++-mode . 2) (t . t)))
+
 ;; "Smooth" mouse scrolling, one line at a time
 (csetq mouse-wheel-scroll-amount
        '(1
@@ -299,7 +302,8 @@ This is meant to be called by other functions (eg: `make-thread')."
   (csetq x-stretch-cursor t)
   (csetq x-wait-for-event-timeout nil))
 
-(csetq read-process-output-max (* read-process-output-max 16))
+(setq process-adaptive-read-buffering nil)
+(setq read-process-output-max (* 1024 1024))
 
 (csetq tooltip-resize-echo-area t)
 (csetq tooltip-delay 0.5)
