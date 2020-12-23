@@ -387,6 +387,7 @@ This is meant to be called by other functions (eg: `make-thread')."
 
 ;; Some special file names
 (add-to-list 'auto-mode-alist '("\\.?bash.*" . shell-script-mode))
+(add-to-list 'auto-mode-alist '("PKGBUILD\\'" . shell-script-mode))
 
 (when (member "Symbola" (font-family-list))
   (set-fontset-font t 'unicode "Symbola" nil 'prepend))
