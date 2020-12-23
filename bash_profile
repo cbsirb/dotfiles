@@ -2,6 +2,8 @@
 
 [[ -f ~/.profile ]] && . ~/.profile
 
+[[ -f ~/.env_private ]] && . ~/.env_private
+
 if [[ $- == *i* ]]; then
   [[ -f ~/.bashrc ]] && . ~/.bashrc
 fi

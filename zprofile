@@ -92,6 +92,10 @@ else
     export MOZ_X11_EGL=1
 fi
 
+if [[ -f ~/.env_private ]]; then
+   source ~/.env_private
+fi
+
 #
 # Other stuff
 #
