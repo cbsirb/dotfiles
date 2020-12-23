@@ -71,7 +71,7 @@ alias piks="pikaur -Ss"
 alias pacS="pacman -Qs"
 alias pacl="pacman -Ql"
 alias pacman-list-orphans="pacman --query --deps --unrequired"
-alias pacman-clean="sudo pacman -Rns $(pacman --quiet --query --deps --unrequired)"
+alias pacman-clean='sudo pacman -Rns $(pacman --quiet --query --deps --unrequired)'
 alias pacu="pikaur -Syu"
 
 alias path='echo -e ${PATH//:/\\n}'
