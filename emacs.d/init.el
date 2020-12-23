@@ -12,7 +12,6 @@
   `(funcall (or (get ',variable 'custom-set) 'set-default) ',variable ,value))
 
 (defvar user/gc-cons-threshold (* 16 gc-cons-threshold))
-(defvar user/file-name-handler-alist file-name-handler-alist)
 
 (defun user/hide-load-messages (orig-fn file &optional noerror _nomessage nosuffix must-suffix)
   "Will hide the load messages.
@@ -34,7 +33,6 @@ See `load' for ORIG-FN FILE NOERROR NOMESSAGE NOSUFFIX MUST-SUFFIX."
             (garbage-collect)))
 
 (csetq gc-cons-threshold most-positive-fixnum)
-(csetq file-name-handler-alist nil)
 (csetq load-prefer-newer t)
 (csetq package-user-dir (expand-file-name "elpa" user-emacs-directory))
 
