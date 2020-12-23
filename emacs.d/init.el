@@ -843,6 +843,9 @@ behavior added."
    '((tab-mark ?\t [187 ?\t])))
   (whitespace-style '(face tabs tab-mark trailing)))
 
+(use-package display-line-numbers :ensure nil
+  :ghook ('after-init-hook #'global-display-line-numbers-mode))
+
 (use-package recentf :ensure nil
   :custom
   (recentf-auto-cleanup 'never)
