@@ -1695,11 +1695,15 @@ found, an error is signaled."
   (lsp-enable-semantic-highlighting nil)
   (lsp-enable-imenu t)
   (lsp-auto-guess-root nil)
-  (lsp-restart 'auto-restart)
-  (lsp-pyls-plugins-rope-completion-enabled nil "This is very very slow (allow only jedi completions)")
+  (lsp-restart 'interactive)
+  ;; (lsp-pyls-plugins-rope-completion-enabled nil "This is very very slow (allow only jedi completions)")
   (lsp-eldoc-render-all nil)
-  (lsp-prefer-capf t)
   (lsp-keymap-prefix "<C-m>")
+
+  ;; Not usefull for now
+  (lsp-modeline-code-actions-enable nil)
+  (lsp-modeline-diagnostics-enable nil)
+  (lsp-modeline-workspace-status-enable nil)
 
   ;; for now disable it since I have >50k per repo
   (lsp-file-watch-threshold 9000)
