@@ -2004,12 +2004,13 @@ found, an error is signaled."
   :custom
   (nov-text-width 80))
 
-(use-package pdf-tools
-  :mode ("\\.pdf\\'" . pdf-view-mode)
-  :ghook ('pdf-view-mode-hook #'pdf-tools-enable-minor-modes)
-  :custom
-  (pdf-view-display-size 'fit-page)
-  (pdf-view-resize-factor 1.1))
+;; (use-package pdf-tools
+;;   :disabled
+;;   :mode ("\\.pdf\\'" . pdf-view-mode)
+;;   :ghook ('pdf-view-mode-hook #'pdf-tools-enable-minor-modes)
+;;   :custom
+;;   (pdf-view-display-size 'fit-page)
+;;   (pdf-view-resize-factor 1.1))
 
 (use-package elfeed
   :commands (elfeed elfeed-update)
