@@ -258,9 +258,6 @@ This is meant to be called by other functions (eg: `make-thread')."
          (bottom . right)
          (t . nil)))
 
-(csetq display-line-numbers-grow-only t)
-(csetq display-line-numbers-width-start t)
-
 (csetq command-line-ns-option-alist nil)
 
 ;; misc stuff
@@ -840,6 +837,9 @@ behavior added."
   (whitespace-style '(face tabs tab-mark trailing)))
 
 (use-package display-line-numbers :ensure nil
+  :custom
+  (display-line-numbers-grow-only nil)
+  (display-line-numbers-width-start nil)
   :ghook ('after-init-hook #'global-display-line-numbers-mode))
 
 (use-package recentf :ensure nil
