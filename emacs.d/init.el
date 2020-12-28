@@ -13,19 +13,9 @@
 
 (defvar user/gc-cons-threshold (* 16 gc-cons-threshold))
 
-(defun user/hide-load-messages (orig-fn file &optional noerror _nomessage nosuffix must-suffix)
-  "Will hide the load messages.
-See `load' for ORIG-FN FILE NOERROR NOMESSAGE NOSUFFIX MUST-SUFFIX."
-  (apply orig-fn file (list noerror t nosuffix must-suffix)))
-
-(advice-add #'load :around #'user/hide-load-messages)
-
 (add-hook 'after-init-hook
           (lambda ()
             (csetq gc-cons-threshold user/gc-cons-threshold)
-
-
-            (advice-remove #'load #'user/hide-load-messages)
 
             (message "Time to load init file: %s" (emacs-init-time))
             (garbage-collect)))
