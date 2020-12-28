@@ -127,7 +127,6 @@ This is meant to be called by other functions (eg: `make-thread')."
     (load-theme 'modus-operandi t))
   :ghook ('after-init-hook #'user/load-default-theme)
   :custom
-  (modus-operandi-theme-visible-fringes nil)
   (modus-operandi-theme-fringes 'subtle)
   (modus-operandi-theme-bold-constructs t)
   (modus-operandi-theme-slanted-constructs nil)
