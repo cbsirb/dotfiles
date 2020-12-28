@@ -7,9 +7,6 @@
 (advice-add #'package--ensure-init-file :override #'ignore)
 (advice-add #'x-apply-session-resources :override #'ignore)
 
-(defvar user/file-name-handler-alist file-name-handler-alist)
-(setq file-name-handler-alist nil)
-
 (setq jka-compr-load-suffixes nil)
 (jka-compr-update)
 

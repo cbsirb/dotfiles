@@ -24,8 +24,6 @@ See `load' for ORIG-FN FILE NOERROR NOMESSAGE NOSUFFIX MUST-SUFFIX."
           (lambda ()
             (csetq gc-cons-threshold user/gc-cons-threshold)
 
-            ;; Don't just blindly set it to the old value, maybe someone decided to add something to it
-            (csetq file-name-handler-alist (append file-name-handler-alist user/file-name-handler-alist))
 
             (advice-remove #'load #'user/hide-load-messages)
 
