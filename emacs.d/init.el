@@ -403,11 +403,14 @@ This is meant to be called by other functions (eg: `make-thread')."
   (diff-font-lock-syntax 'hunk-also)
   (diff-switches '("-u" "-p" "-w")))
 
-(csetq ediff-diff-options "-w")
-(csetq ediff-highlight-all-diffs nil)
-(csetq ediff-show-clashes-only t)
-(csetq ediff-split-window-function #'split-window-horizontally)
-(csetq ediff-window-setup-function #'ediff-setup-windows-plain)
+(use-package ediff :ensure nil
+  :defer t
+  :custom
+  (ediff-highlight-all-diffs t)
+  (ediff-diff-options "-w")
+  (ediff-show-clashes-only t)
+  (ediff-split-window-function #'split-window-horizontally)
+  (ediff-window-setup-function #'ediff-setup-windows-plain))
 
 (csetq vc-follow-symlinks t)
 (csetq vc-git-diff-switches '("--ignore-space-change" "--ignore-all-space" "--no-ext-diff" "--stat" "--diff-algorithm=histogram"))
