@@ -462,12 +462,12 @@ This is meant to be called by other functions (eg: `make-thread')."
   "Run `garbage-collect' and print stats about memory usage."
   (interactive)
   (message (cl-loop for (type size used free) in (garbage-collect)
-                    for used = (* used size)
-                    for free = (* (or free 0) size)
-                    for total = (file-size-human-readable (+ used free))
-                    for used = (file-size-human-readable used)
-                    for free = (file-size-human-readable free)
-                    concat (format "%s: %s + %s = %s\n" type used free total))))
+                    for used-r = (* used size)
+                    for free-r = (* (or free 0) size)
+                    for total = (file-size-human-readable (+ used-r free-r))
+                    for used-h = (file-size-human-readable used-r)
+                    for free-h = (file-size-human-readable free-r)
+                    concat (format "%s: %s + %s = %s\n" type used-h free-h total))))
 
 (defun user/minibuffer-setup-hook ()
   "Hook to run when entering the minibuffer."
