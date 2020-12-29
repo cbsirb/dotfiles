@@ -756,11 +756,6 @@ behavior added."
 (general-define-key [remap just-one-space] #'cycle-spacing)
 (general-define-key [remap newline] #'newline-and-indent)
 
-;; (general-define-key [remap isearch-forward] #'isearch-forward-regexp)
-;; (general-define-key [remap isearch-forward-regexp] #'isearch-forward)
-;; (general-define-key [remap isearch-backward] #'isearch-backward-regexp)
-;; (general-define-key [remap isearch-backward-regexp] #'isearch-backward)
-
 (general-define-key [remap keyboard-quit] #'keyboard-quit-context+)
 (general-define-key [remap minibuffer-keyboard-quit] #'keyboard-quit-context+)
 (general-define-key [remap dabbrev-expand] #'hippie-expand)
