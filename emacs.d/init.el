@@ -1964,13 +1964,16 @@ found, an error is signaled."
   (calendar-date-style 'iso))
 
 (use-package org
+  :preface
+  (defun user/org-return-ident ()
+    "Exactly the same as `org-return-indent', but not obsolete."
+    (interactive)
+    (org-return t))
   :general
   ("C-c n" #'org-capture
    "C-c a" #'org-agenda)
   (:keymaps 'org-mode-map
-            "RET" #'org-return-indent)
-
-  :pin org
+            "RET" #'user/org-return-ident)
 
   :custom
   (org-capture-templates
