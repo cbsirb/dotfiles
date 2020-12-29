@@ -21,7 +21,6 @@
             (garbage-collect)))
 
 (csetq gc-cons-threshold most-positive-fixnum)
-(csetq load-prefer-newer t)
 (csetq package-user-dir (expand-file-name "elpa" user-emacs-directory))
 
 (csetq

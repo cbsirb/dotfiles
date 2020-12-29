@@ -10,6 +10,8 @@
 (setq jka-compr-load-suffixes nil)
 (jka-compr-update)
 
+(setq load-prefer-newer t)
+
 (setq default-frame-alist
       '((vertical-scroll-bars)
         (menu-bar-lines . 0)
