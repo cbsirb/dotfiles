@@ -264,10 +264,9 @@ This is meant to be called by other functions (eg: `make-thread')."
 (csetq scroll-preserve-screen-position t)
 (csetq fast-but-imprecise-scrolling t)
 
-(when (eq system-type 'gnu/linux)
-  (csetq x-underline-at-descent-line t)
-  (csetq x-stretch-cursor t)
-  (csetq x-wait-for-event-timeout nil))
+(csetq x-underline-at-descent-line t)
+(csetq x-stretch-cursor t)
+(csetq x-wait-for-event-timeout nil)
 
 (setq process-adaptive-read-buffering nil)
 (setq read-process-output-max (* 1024 1024))
@@ -1828,8 +1827,6 @@ found, an error is signaled."
   (require 'esh-module))
 
 (use-package multi-term
-  :if (eq system-type 'gnu/linux)
-
   :general
   ("C-z" #'multi-term-next)
   ("C-c z c" #'multi-term)
