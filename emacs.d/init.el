@@ -106,7 +106,7 @@ This is meant to be called by other functions (eg: `make-thread')."
 ;;
 (use-package general)
 
-(use-package cus-edit+ :ensure nil
+(use-package cus-edit :ensure nil
   :defer t
   :custom
   (custom-file null-device "Don't store customizations"))
