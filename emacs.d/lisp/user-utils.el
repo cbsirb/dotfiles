@@ -299,7 +299,7 @@ This is the same as using \\[set-mark-command] with the prefix argument."
   (deactivate-mark nil))
 
 (defun user/scroll-half-page (direction)
-  "Scrolls half page down if `direction' is non-nil, otherwise will scroll half page up."
+  "Scrolls half page down if `DIRECTION' is non-nil, otherwise will scroll half page up."
   (let ((opos (cdr (nth 6 (posn-at-point)))))
     ;; opos = original position line relative to window
     (move-to-window-line nil)     ;; Move cursor to middle line
@@ -324,21 +324,23 @@ This is the same as using \\[set-mark-command] with the prefix argument."
 
 ;;;###autoload
 (defun user/split-window-right ()
-  "Does `split-window-right' and moves focus to the window."
+  "`split-window-right' and focus to the window."
   (interactive)
   (split-window-right)
   (other-window 1))
 
 ;;;###autoload
 (defun user/split-window-below ()
-  "Does `split-window-below' and moves focus to the window."
+  "`split-window-below' and focus to the window."
   (interactive)
   (split-window-below)
   (other-window 1))
 
 ;;;###autoload
 (defun user/yank-rectangle-as-newlines+ (&optional pos)
-  "Yank the rectangle, inserting new lines (as it should). Thanks to /u/clemera"
+  "Yank the rectangle, inserting new lines (as it should).
+
+If `POS' is not passed, it uses `point'. Thanks to /u/clemera"
   (interactive)
   (let ((pos (or pos (point))))
     (save-restriction
