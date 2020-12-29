@@ -1118,7 +1118,7 @@ behavior added."
       (advice-add fn :around #'mc-prompt-once-advice)))
 
   :config
-  (mc-prompt-once #'zap-up-to-char #'sp-rewrap-sexp))
+  (mc-prompt-once #'zap-up-to-char))
 
 ;;
 ;; Completion-related
