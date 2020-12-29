@@ -61,6 +61,9 @@
 (csetq use-package-always-ensure t)
 (csetq use-package-compute-statistics nil)
 
+(eval-when-compile
+  (require 'use-package))
+
 (defun package--update-now ()
   "Update all the packages.
 This is meant to be called by other functions (eg: `make-thread')."
