@@ -1025,7 +1025,8 @@ behavior added."
 
 (use-package symbol-overlay
   :preface
-  (define-globalized-minor-mode global-symbol-overlay-mode symbol-overlay-mode symbol-overlay-mode)
+  (define-globalized-minor-mode global-symbol-overlay-mode
+    symbol-overlay-mode symbol-overlay-mode :group 'symbol-overlay)
   :general
   ("M-*" #'symbol-overlay-put)
   ("M-n" #'symbol-overlay-jump-next)
