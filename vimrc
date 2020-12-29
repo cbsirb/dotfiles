@@ -1,9 +1,50 @@
-source ~/.vim/packages.vim
+packadd minpac
 
-if !has('nvim')
-  unlet! skip_defaults_vim
-  source $VIMRUNTIME/defaults.vim
-endif
+call minpac#init()
+
+call minpac#add('k-takata/minpac', {'type':'opt'})
+
+call minpac#add('tpope/vim-apathy')
+call minpac#add('tpope/vim-characterize')
+call minpac#add('tpope/vim-commentary')
+call minpac#add('tpope/vim-endwise')
+call minpac#add('tpope/vim-fugitive')
+call minpac#add('tpope/vim-git')
+call minpac#add('tpope/vim-ragtag')
+call minpac#add('tpope/vim-repeat')
+call minpac#add('tpope/vim-rsi')
+call minpac#add('tpope/vim-sleuth')
+call minpac#add('tpope/vim-unimpaired')
+call minpac#add('tpope/vim-vinegar')
+call minpac#add('tpope/vim-surround')
+
+call minpac#add('romainl/vim-qf')
+call minpac#add('romainl/vim-qlist')
+call minpac#add('romainl/vim-tinyMRU')
+
+call minpac#add('tommcdo/vim-lion')
+
+call minpac#add('elzr/vim-json')
+call minpac#add('Vimjas/vim-python-pep8-indent')
+
+call minpac#add('hrsh7th/vim-vsnip')
+call minpac#add('hrsh7th/vim-vsnip-integ')
+
+call minpac#add('kana/vim-textobj-user')
+call minpac#add('kana/vim-textobj-indent')    " i
+call minpac#add('sgur/vim-textobj-parameter') " ,
+
+call minpac#add('junegunn/fzf')
+
+call minpac#add('natebosch/vim-lsc')
+
+call minpac#add('robertmeta/nofrils', {'type':'opt'})
+call minpac#add('romainl/Apprentice', {'type':'opt'})
+call minpac#add('romainl/flattened', {'type':'opt'})
+call minpac#add('ajgrf/parchment', {'type':'opt'})
+
+unlet! skip_defaults_vim
+source $VIMRUNTIME/defaults.vim
 
 packadd matchit
 
@@ -81,13 +122,11 @@ set sessionoptions-=options
 
 set undofile
 
-if !has('nvim')
-  set viminfo+=n~/.vim/cache/viminfo
-  set undodir=~/.vim/cache/undo
-  set backupdir=~/.vim/cache/backup
-  set dir=~/.vim/cache/swap
-  set viewdir=~/.vim/cache/view
-endif
+set viminfo+=n~/.vim/cache/viminfo
+set undodir=~/.vim/cache/undo
+set backupdir=~/.vim/cache/backup
+set dir=~/.vim/cache/swap
+set viewdir=~/.vim/cache/view
 
 set colorcolumn=+1
 set nocursorline
@@ -121,8 +160,8 @@ augroup VIMRC
   autocmd BufLeave * if !&diff | let b:winview = winsaveview() | endif
   autocmd BufEnter * if exists('b:winview') && !&diff | call winrestview(b:winview) | unlet! b:winview | endif
 
-  " autocmd VimEnter,WinEnter,BufWinEnter,FocusGained,CmdwinEnter * setlocal cursorline
-  " autocmd WinLeave,FocusLost,CmdwinLeave * setlocal nocursorline
+  autocmd VimEnter,WinEnter,BufWinEnter,FocusGained,CmdwinEnter * setlocal cursorline
+  autocmd WinLeave,FocusLost,CmdwinLeave * setlocal nocursorline
 
   autocmd CmdlineEnter /,\? :set hlsearch
 
@@ -132,6 +171,9 @@ augroup END
 """"""""""""
 " Commands "
 """"""""""""
+command! PackUpdate packadd minpac | source $MYVIMRC | redraw | call minpac#update()
+command! PackClean  packadd minpac | source $MYVIMRC | call minpac#clean()
+
 command! -nargs=+ -complete=file_in_path -bar Grep  silent! grep! <args> | redraw! | copen
 command! -nargs=+ -complete=file_in_path -bar LGrep silent! lgrep! <args> | redraw! | lopen
 
