@@ -110,36 +110,21 @@ This is meant to be called by other functions (eg: `make-thread')."
   :custom
   (custom-file null-device "Don't store customizations"))
 
-(use-package modus-operandi-theme
+(use-package modus-themes
   :defer t
   :preface
   (defun user/load-default-theme ()
     (load-theme 'modus-operandi t))
   :ghook ('after-init-hook #'user/load-default-theme)
   :custom
-  (modus-operandi-theme-fringes 'subtle)
-  (modus-operandi-theme-bold-constructs t)
-  (modus-operandi-theme-slanted-constructs nil)
-  (modus-operandi-theme-3d-modeline nil)
-  (modus-operandi-theme-intense-paren-match t)
-  (modus-operandi-theme-proportional-fonts nil)
-  (modus-operandi-theme-section-headings t)
-  (modus-operandi-theme-completions 'opinionated))
-
-(use-package modus-vivendi-theme
-  :disabled
-  :custom
-  (modus-vivendi-theme-visible-fringes nil)
-  (modus-vivendi-theme-fringes 'subtle)
-  (modus-vivendi-theme-bold-constructs t)
-  (modus-vivendi-theme-slanted-constructs nil)
-  (modus-vivendi-theme-3d-modeline nil)
-  (modus-vivendi-theme-intense-paren-match t)
-  (modus-vivendi-theme-proportional-fonts nil)
-  (modus-vivendi-theme-section-headings t)
-  (modus-vivendi-theme-completions 'opinionated)
-  :config
-  (load-theme 'modus-vivendi t))
+  (modus-themes-fringes 'subtle)
+  (modus-themes-bold-constructs t)
+  (modus-themes-slanted-constructs nil)
+  (modus-themes-3d-modeline nil)
+  (modus-themes-intense-paren-match t)
+  (modus-themes-proportional-fonts nil)
+  (modus-themes-section-headings t)
+  (modus-themes-completions 'opinionated))
 
 (use-package minions
   :custom
