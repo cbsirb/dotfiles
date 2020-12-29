@@ -368,7 +368,7 @@ This is meant to be called by other functions (eg: `make-thread')."
         (slot . -1))
       display-buffer-alist)
 
-(push `(,(rx string-start "*" (or "Help" "helpful" "Backtrace" "Warnings" "Compile-Log"))
+(push `(,(rx string-start "*" (or "Backtrace" "Warnings" "Compile-Log"))
         (display-buffer-reuse-window
          display-buffer-in-side-window)
         (side            . bottom)
