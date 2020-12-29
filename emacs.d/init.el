@@ -761,9 +761,6 @@ behavior added."
 (general-define-key [remap minibuffer-keyboard-quit] #'keyboard-quit-context+)
 (general-define-key [remap dabbrev-expand] #'hippie-expand)
 
-(general-define-key "<f8>" #'profiler-start)
-(general-define-key "<f9>" #'profiler-stop)
-
 (general-define-key
  :prefix "M-s"
  "o" #'occur-at-point)
@@ -780,6 +777,11 @@ behavior added."
 ;;
 ;; Mostly built-in packages. No real order, they are not dependent on each other...
 ;;
+(use-package profiler :ensure nil
+  :general
+  ("<f8>" #'profiler-start)
+  ("<f9>" #'profiler-stop))
+
 (use-package whitespace :ensure nil
   :preface
   (defun normalize-file ()
