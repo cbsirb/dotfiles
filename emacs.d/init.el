@@ -136,8 +136,7 @@ This is meant to be called by other functions (eg: `make-thread')."
   (minions-mode t))
 
 (use-package hl-todo
-  :config
-  (global-hl-todo-mode t))
+  :ghook ('after-init-hook #'global-hl-todo-mode))
 
 (use-package ignoramus :ensure nil
   :config
@@ -310,8 +309,7 @@ This is meant to be called by other functions (eg: `make-thread')."
 (global-auto-revert-mode t)
 
 (use-package user-auto-revert
-  :disabled
-  :load-path "lisp")
+  :disabled)
 
 ;;
 ;; Mode-line
@@ -686,8 +684,7 @@ PARSE-START indicates where the parsing should start in the file (point)."
   "<C-next>"
   "<C-prior>")
 
-(use-package user-utils
-  :load-path "lisp"
+(use-package user-utils :ensure nil
   :general
   ("M-`" #'user/open-terminal)
   ("M-]" #'user/next-error)
@@ -1934,7 +1931,7 @@ found, an error is signaled."
   (push ".clangd" vc-directory-exclusion-list))
 
 (use-package vc-msg
-  :commands (vc-msg-show)
+  :defer t
   :custom
   (vc-msg-git-show-commit-function #'magit-show-commit))
 
@@ -1952,7 +1949,7 @@ found, an error is signaled."
 ;;
 ;; Misc (user-defined)
 ;;
-(use-package user-advices :load-path "lisp")
+(use-package user-advices :ensure nil)
 
 ;;
 ;; org. stuff
@@ -1964,16 +1961,11 @@ found, an error is signaled."
   (calendar-date-style 'iso))
 
 (use-package org
-  :preface
-  (defun user/org-return-ident ()
-    "Exactly the same as `org-return-indent', but not obsolete."
-    (interactive)
-    (org-return t))
   :general
   ("C-c n" #'org-capture
    "C-c a" #'org-agenda)
   (:keymaps 'org-mode-map
-            "RET" #'user/org-return-ident)
+            "RET" #'org-return-and-maybe-indent)
 
   :custom
   (org-capture-templates
