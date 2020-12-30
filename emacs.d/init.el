@@ -1848,18 +1848,13 @@ found, an error is signaled."
   :custom
   (gdb-many-windows t))
 
-(use-package realgud
-  :defer t)
-  ;; :commands (realgud:bashdb realgud:gdb realgud:gub realgud:ipdb
-  ;;                           realgud:jdb realgud:kshdb realgud:nodejs realgud:pdb
-  ;;                           realgud:perldb realgud:zshdb))
+(use-package realgud :defer t)
 
 ;;
 ;; Version Control
 ;;
 
 (use-package magit
-  :defer t
   :ghook ('git-commit-mode-hook #'git-commit-turn-on-flyspell)
   :general
   ("C-c g" #'magit-file-dispatch)
