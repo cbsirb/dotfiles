@@ -184,8 +184,7 @@ This is meant to be called by other functions (eg: `make-thread')."
 (set-default-coding-systems 'utf-8)
 (set-language-environment "UTF-8")
 (set-charset-priority 'unicode)
-(when (display-graphic-p)
-  (csetq x-select-request-type '(UTF8_STRING COMPOUND_TEXT TEXT STRING)))
+(csetq x-select-request-type '(UTF8_STRING COMPOUND_TEXT TEXT STRING))
 
 ;; files.el
 (csetq enable-local-variables :safe)
@@ -195,7 +194,6 @@ This is meant to be called by other functions (eg: `make-thread')."
 (csetq make-backup-files nil)
 (csetq auto-save-default nil)
 (csetq large-file-warning-threshold (* 50 1024 1024))
-(csetq directory-free-space-args "-kh")
 (csetq save-silently t)
 (csetq require-final-newline t)
 (file-name-shadow-mode t)
