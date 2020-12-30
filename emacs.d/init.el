@@ -1231,6 +1231,20 @@ behavior added."
   (json-reformat:indent-width 4)
   (json-reformat:pretty-string? t))
 
+(use-package nov
+  :gfhook #'turn-on-visual-line-mode
+  :mode ("\\.epub\\'" . nov-mode)
+  :custom
+  (nov-text-width 80))
+
+;; (use-package pdf-tools
+;;   :disabled
+;;   :mode ("\\.pdf\\'" . pdf-view-mode)
+;;   :ghook ('pdf-view-mode-hook #'pdf-tools-enable-minor-modes)
+;;   :custom
+;;   (pdf-view-display-size 'fit-page)
+;;   (pdf-view-resize-factor 1.1))
+
 ;;
 ;; Searching
 ;;
@@ -1966,23 +1980,6 @@ found, an error is signaled."
       "* TODO %?\n  %i\n  %a" :empty-lines 1)
      ("n" "Note" entry (file "~/org/notes.org")
       "* NOTE %? %^G\n%U" :empty-lines 1))))
-
-;;
-;; No category
-;;
-(use-package nov
-  :gfhook #'turn-on-visual-line-mode
-  :mode ("\\.epub\\'" . nov-mode)
-  :custom
-  (nov-text-width 80))
-
-;; (use-package pdf-tools
-;;   :disabled
-;;   :mode ("\\.pdf\\'" . pdf-view-mode)
-;;   :ghook ('pdf-view-mode-hook #'pdf-tools-enable-minor-modes)
-;;   :custom
-;;   (pdf-view-display-size 'fit-page)
-;;   (pdf-view-resize-factor 1.1))
 
 (use-package elfeed
   :commands (elfeed elfeed-update)
