@@ -1191,7 +1191,7 @@ behavior added."
   (company-dabbrev-ignore-case t)
   (company-idle-delay 0)
   (company-minimum-prefix-length 2)
-  (company-require-match nil)
+  ;; (company-require-match nil)
   (company-selection-wrap-around t)
   (company-tooltip-align-annotations t)
   (company-tooltip-flip-when-above nil)
