@@ -1950,8 +1950,7 @@ found, an error is signaled."
   :custom
   (diff-hl-draw-borders t)
   (diff-hl-side 'left)
-  :config
-  (global-diff-hl-mode t))
+  :ghook ('after-init-hook #'global-diff-hl-mode))
 
 ;;
 ;; Misc (user-defined)
