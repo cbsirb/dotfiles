@@ -1674,6 +1674,9 @@ found, an error is signaled."
   ('c-mode-common-hook #'lsp t)
   ('python-mode-hook #'lsp t)
   ('rust-mode-hook #'lsp t)
+  ('cmake-mode-hook #'lsp t)
+  ('sh-mode-hook #'lsp t)
+  ('yaml-mode-hook #'lsp t)
   ('lsp-managed-mode-hook #'user/setup-lsp-completion)
   ('lsp-mode-hook #'lsp-enable-which-key-integration)
 
