@@ -27,7 +27,7 @@
  package-selected-packages
  '(beginend cmake-font-lock cmake-mode comment-dwim-2 ccls company consult
    consult-selectrum cython-mode diff-hl dired-du dired-git-info dired-narrow
-   diredfl dumb-jump eacl elfeed eterm-256color eterm-256color-mode
+   diredfl dumb-jump eacl elfeed embark eterm-256color eterm-256color-mode
    expand-region flycheck flycheck-pos-tip geiser general git-timemachine
    goggles helpful haskell-mode hl-todo hydra iedit iy-go-to-char js2-mode
    json-mode log4j-mode lsp-mode lsp-ui magit magit-gitflow marginalia minions
@@ -1175,6 +1175,18 @@ behavior added."
 
 (use-package consult-selectrum
   :after consult)
+
+;; I'm still thinking about this, I like it but I don't find it very useful
+(use-package embark
+  :general
+  (:keymaps 'minibuffer-local-map
+            "C-;" #'embark-act-noexit
+            "C-:" #'embark-act
+            "M-e" #'embark-export
+            "C-l" #'embark-live-occur
+            "M-q" #'embark-occur-toggle-view)
+  (:keymaps 'embark-meta-map
+            "?" #'embark-keymap-help))
 
 (use-package company
   :general
