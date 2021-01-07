@@ -312,6 +312,8 @@ This is meant to be called by other functions (eg: `make-thread')."
 ;;
 ;; Mode-line
 ;;
+(csetq mode-line-compact 'long)
+
 (csetq mode-line-buffer-identification
        '(:eval (format-mode-line
                 (propertized-buffer-identification
