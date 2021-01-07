@@ -2046,6 +2046,8 @@ found, an error is signaled."
            ("https://www.youtube.com/feeds/videos.xml?channel_id=UCRPdsCVuH53rcbTcEkuY4uQ" tech)        ;; Moores Law Is Dead
            ("https://www.youtube.com/feeds/videos.xml?channel_id=UC3azLjQuz9s5qk76KEXaTvA" tech)        ;; suckerpinch
            ("https://www.youtube.com/feeds/videos.xml?channel_id=UCq7dxy_qYNEBcHqQVCbc20w" tech)        ;; WhatsACreel
+           ("https://www.youtube.com/feeds/videos.xml?channel_id=UClcE-kVhqyiHCcjYwcpfj9w" tech)        ;; LiveOverflow
+           ("https://www.youtube.com/feeds/videos.xml?channel_id=UC0uTPqBCFIpZxlz_Lv1tk_g" tech)        ;; Protesilaos Stavrou
 
            ("https://www.youtube.com/feeds/videos.xml?channel_id=UCNf56PUyMI0wUyZ8KRhg2AQ" cinema)      ;; Cinema Nippon
            ("https://www.youtube.com/feeds/videos.xml?channel_id=UC7GV-3hrA9kDKrren0QMKMg" cinema)      ;; CinemaTyler
@@ -2108,6 +2110,7 @@ found, an error is signaled."
            ("https://stopa.io/feed.rss" tech)
            ("https://kliu.io/index.xml" tech)
            ("https://drewdevault.com/blog/index.xml" tech)
+           ("https://protesilaos.com/codelog.xml" tech)
            ("https://obscuritory.com/feed/" pop)
            ("https://planet.emacslife.com/atom.xml" emacs)
            ("https://www.phoronix.com/rss.php" linux phoronix)
