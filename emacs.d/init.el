@@ -1136,8 +1136,8 @@ behavior added."
             "C-;" #'embark-act-noexit
             "C-:" #'embark-act
             "M-e" #'embark-export
-            "C-l" #'embark-live-occur
-            "M-q" #'embark-occur-toggle-view)
+            "C-l" #'embark-collect-live
+            "M-q" #'embark-collect-toggle-view)
   (:keymaps 'embark-meta-map
             "?" #'embark-keymap-help))
 
