@@ -204,7 +204,6 @@ This is meant to be called by other functions (eg: `make-thread')."
 (csetq auto-window-vscroll nil)
 (csetq use-dialog-box nil)
 (csetq minibuffer-electric-default-mode t)
-(csetq enable-recursive-minibuffers nil)
 (csetq echo-keystrokes 0.1)
 (csetq delete-by-moving-to-trash t)
 (csetq create-lockfiles nil)
@@ -1143,6 +1142,7 @@ behavior added."
 (use-package selectrum-prescient
   :custom
   (selectrum-count-style 'current/matches)
+  (enable-recursive-minibuffers t)
   :general
   (:keymaps 'selectrum-minibuffer-map
             "<prior>" #'selectrum-previous-page
