@@ -79,12 +79,9 @@
 ;;
 ;; Packages needed no matter what, and usually others are depended on it
 ;;
-(use-package general)
+(csetq custom-file null-device)
 
-(use-package cus-edit :ensure nil
-  :defer
-  :custom
-  (custom-file null-device "Don't store customizations"))
+(use-package general)
 
 (use-package modus-themes
   :preface
