@@ -64,31 +64,6 @@
 (eval-when-compile
   (require 'use-package))
 
-(defun package--update-now ()
-  "Update all the packages.
-This is meant to be called by other functions (eg: `make-thread')."
-  (package-list-packages-no-fetch)
-  (let ((package-buffer (current-buffer))
-        (updated nil))
-    (bury-buffer)
-    (with-current-buffer package-buffer
-
-      (package-refresh-contents)
-      (package-menu-mark-upgrades)
-
-      (with-demoted-errors "Nothing to update! (%S)"
-        (package-menu-execute)
-        (setq updated t)))
-
-    (kill-buffer package-buffer)
-    (if updated
-        (message "Packages updated!"))))
-
-(defun package-update-now ()
-  "Update all the packages asynchronous."
-  (interactive)
-  (make-thread #'package--update-now "update-packages"))
-
 (defun package-rebuild-all ()
   "Rebuild all the packages."
   (interactive)
