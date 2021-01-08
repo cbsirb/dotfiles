@@ -82,12 +82,12 @@
 (use-package general)
 
 (use-package cus-edit :ensure nil
-  :defer t
+  :defer
   :custom
   (custom-file null-device "Don't store customizations"))
 
 (use-package modus-themes
-  :defer t
+  :defer
   :preface
   (defun user/load-default-theme ()
     (load-theme 'modus-operandi t))
@@ -126,7 +126,7 @@
   (exec-path-from-shell-initialize))
 
 (use-package hydra
-  :defer t
+  :defer
   :config
   (hydra-add-font-lock))
 
@@ -352,7 +352,7 @@
 (push `(,(rx "*Completions*")
         (display-buffer-use-some-window
          display-buffer-pop-up-window)
-	(window-height 0.25)
+        (window-height 0.25)
         (reusable-frames . nil)
         (inhibit-same-window . t))
       display-buffer-alist)
@@ -376,7 +376,7 @@
   (diff-switches '("-u" "-p" "-w")))
 
 (use-package ediff :ensure nil
-  :defer t
+  :defer
   :custom
   (ediff-highlight-all-diffs t)
   (ediff-diff-options "-w")
@@ -454,7 +454,7 @@
 (add-hook 'minibuffer-exit-hook #'user/minibuffer-exit-hook)
 
 (use-package xref :ensure nil
-  :defer t
+  :defer
   :config
   (add-to-list 'xref-prompt-for-identifier 'xref-find-references t))
 
@@ -971,7 +971,7 @@ behavior added."
   (dired-narrow-exit-when-one-left t))
 
 (use-package diredfl
-  :defer t
+  :defer
   :ghook 'dired-mode-hook)
 
 (use-package dired-git-info
@@ -1196,21 +1196,20 @@ behavior added."
 ;; Extra modes
 ;;
 
-(use-package cmake-mode :defer t)
+(use-package cmake-mode :defer)
 
-(use-package yaml-mode :defer t)
+(use-package yaml-mode :defer)
 
 (use-package cmake-font-lock
   :ghook ('cmake-mode-hook #'cmake-font-lock-activate))
 
-(use-package cython-mode :defer t)
+(use-package cython-mode :defer)
 
 (use-package nasm-mode
   :mode "\\.asm\\'")
 
 (use-package log4j-mode
-  :mode "\\.log\\'"
-  :defer t)
+  :mode "\\.log\\'")
 
 (use-package json-mode
   :mode "\\.json\\'"
@@ -1287,7 +1286,7 @@ That way we don't remove the whole regexp for a simple typo.
   (isearch-yank-on-move 'shift))
 
 (use-package grep :ensure nil
-  :defer t
+  :defer
   :ghook ('grep-mode-hook #'hide-trailing-whitespace)
   :config
   (push ".ccls-cache" grep-find-ignored-directories)
@@ -1306,7 +1305,7 @@ That way we don't remove the whole regexp for a simple typo.
   (rg-hide-command nil))
 
 (use-package wgrep
-  :defer t
+  :defer
   :custom
   (wgrep-auto-save-buffer t))
 
@@ -1314,7 +1313,7 @@ That way we don't remove the whole regexp for a simple typo.
 ;; Programming
 ;;
 (use-package prog-mode :ensure nil
-  :defer t
+  :defer
   :gfhook
   #'hide-trailing-whitespace
   #'which-function-mode
@@ -1364,10 +1363,10 @@ found, an error is signaled."
 (use-package comment-dwim-2
   :general ("M-;" #'comment-dwim-2))
 
-;; (use-package counsel-etags :defer t)
+;; (use-package counsel-etags :defer)
 
 (use-package dumb-jump
-  :defer t
+  :defer
   :ghook ('dumb-jump-after-jump-hook #'recenter-top-bottom))
 
 (use-package cc-mode :ensure nil
@@ -1600,8 +1599,7 @@ found, an error is signaled."
 
   :ghook ('python-mode-hook #'user/auto-virtualenv))
 
-(use-package haskell-mode
-  :defer t)
+(use-package haskell-mode :defer)
 
 (use-package js2-mode
   :mode "\\.js\\'"
@@ -1788,11 +1786,11 @@ found, an error is signaled."
   :custom
   (goggles-pulse t))
 
-(use-package visual-fill-column :defer t)
+(use-package visual-fill-column :defer)
 
-(use-package rainbow-mode :defer t)
+(use-package rainbow-mode :defer)
 
-(use-package rainbow-delimiters :defer t)
+(use-package rainbow-delimiters :defer)
 
 (use-package which-key
   :custom
@@ -1849,11 +1847,11 @@ found, an error is signaled."
 ;;
 
 (use-package gud :ensure nil
-  :defer t
+  :defer
   :custom
   (gdb-many-windows t))
 
-(use-package realgud :defer t)
+(use-package realgud :defer)
 
 ;;
 ;; Version Control
@@ -1924,14 +1922,14 @@ found, an error is signaled."
   (project-find-functions (list #'user/project-find-root)))
 
 (use-package vc :ensure nil
-  :defer t
+  :defer
   :config
   (push ".ccls-cache" vc-directory-exclusion-list)
   (push ".vscode" vc-directory-exclusion-list)
   (push ".clangd" vc-directory-exclusion-list))
 
 (use-package vc-msg
-  :defer t
+  :defer
   :custom
   (vc-msg-git-show-commit-function #'magit-show-commit))
 
@@ -1954,7 +1952,7 @@ found, an error is signaled."
 ;; org. stuff
 ;;
 (use-package calendar :ensure nil
-  :defer t
+  :defer
   :custom
   (calendar-week-start-day 1)
   (calendar-date-style 'iso))
