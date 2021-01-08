@@ -1089,20 +1089,6 @@ behavior added."
   :custom
   (smex-history-length 16))
 
-(use-package helpful
-  :disabled
-  :preface
-  (defun user/helpful--variable-at-point (fn &rest args)
-    (ignore-errors (apply fn args)))
-  :general
-  ([remap describe-key] #'helpful-key)
-  ([remap describe-variable] #'helpful-variable)
-  ([remap describe-function] #'helpful-callable)
-  :custom
-  (helpful-max-buffers 1)
-  :config
-  (advice-add 'helpful--variable-at-point :around #'user/helpful--variable-at-point))
-
 (use-package selectrum-prescient
   :custom
   (selectrum-count-style 'current/matches)
