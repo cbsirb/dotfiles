@@ -1517,7 +1517,7 @@ found, an error is signaled."
   (c-add-style "sane-k&r" user/k&r-style)
   (c-add-style "webkit" user/webkit-style)
 
-  (advice-add 'c-electric-brace :around #'user/cleanup-empty-lines)
+  ;; (advice-add 'c-electric-brace :around #'user/cleanup-empty-lines)
 
   (csetq c-default-style '((java-mode . "java")
                            (awk-mode . "awk")
