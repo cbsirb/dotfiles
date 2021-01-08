@@ -13,12 +13,15 @@
 
 (defvar user/gc-cons-threshold (* 16 gc-cons-threshold))
 
-(add-hook 'after-init-hook
-          (lambda ()
-            (csetq gc-cons-threshold user/gc-cons-threshold)
+(defun user/after-init ()
+  "Will run after init to restore some stuff."
 
-            (message "Time to load init file: %s" (emacs-init-time))
-            (garbage-collect)))
+  (csetq gc-cons-threshold user/gc-cons-threshold)
+
+  (message "emacs-init-time: %s" (emacs-init-time))
+  (garbage-collect))
+
+(add-hook 'after-init-hook #'user/after-init)
 
 (csetq gc-cons-threshold most-positive-fixnum)
 (csetq package-user-dir (expand-file-name "elpa" user-emacs-directory))
