@@ -106,9 +106,6 @@
   (push 'overwrite-mode minions-direct)
   (minions-mode t))
 
-(use-package hl-todo
-  :ghook ('after-init-hook #'global-hl-todo-mode))
-
 (use-package ignoramus :ensure nil
   :config
   (ignoramus-setup))
@@ -1187,6 +1184,9 @@ behavior added."
 ;;
 ;; Extra modes
 ;;
+
+(use-package hl-todo
+  :ghook ('after-init-hook #'global-hl-todo-mode))
 
 (use-package cmake-mode :defer)
 
