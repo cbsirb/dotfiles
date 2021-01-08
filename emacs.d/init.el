@@ -40,9 +40,6 @@
    tree-sitter tree-sitter-langs undo-tree use-package vc-msg visual-fill-column
    web-mode wgrep which-key yaml-mode yasnippet))
 
-(when (< emacs-major-version 27)
-  (load-file (expand-file-name "early-init.el" user-emacs-directory)))
-
 (unless (bound-and-true-p package--initialized)
   (package-initialize))
 
