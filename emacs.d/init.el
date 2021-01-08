@@ -87,7 +87,6 @@
   (custom-file null-device "Don't store customizations"))
 
 (use-package modus-themes
-  :defer
   :preface
   (defun user/load-default-theme ()
     (load-theme 'modus-operandi t))
@@ -129,9 +128,6 @@
   :defer
   :config
   (hydra-add-font-lock))
-
-;; TBD
-;; (use-package frog-menu)
 
 ;;
 ;; Some default settings that I like
@@ -971,7 +967,6 @@ behavior added."
   (dired-narrow-exit-when-one-left t))
 
 (use-package diredfl
-  :defer
   :ghook 'dired-mode-hook)
 
 (use-package dired-git-info
@@ -1286,7 +1281,6 @@ That way we don't remove the whole regexp for a simple typo.
   (isearch-yank-on-move 'shift))
 
 (use-package grep :ensure nil
-  :defer
   :ghook ('grep-mode-hook #'hide-trailing-whitespace)
   :config
   (push ".ccls-cache" grep-find-ignored-directories)
@@ -1353,20 +1347,14 @@ found, an error is signaled."
   (show-paren-when-point-in-periphery t)
   :ghook ('after-init-hook #'show-paren-mode))
 
-(use-package geiser)
+(use-package geiser :defer)
 
-(use-package string-inflection)
-;; :general
-;; (:keymaps 'prog-mode-map
-;;           "C-M-j" #'string-inflection-all-cycle))
+(use-package string-inflection :defer)
 
 (use-package comment-dwim-2
   :general ("M-;" #'comment-dwim-2))
 
-;; (use-package counsel-etags :defer)
-
 (use-package dumb-jump
-  :defer
   :ghook ('dumb-jump-after-jump-hook #'recenter-top-bottom))
 
 (use-package cc-mode :ensure nil
