@@ -1172,8 +1172,9 @@ behavior added."
   ([remap imenu] #'consult-imenu)
   ("M-g i" #'consult-imenu)
   ("M-s l" #'consult-line)
-  ("M-s M-s" #'consult-line-symbol-at-point)
-  ("M-g o" #'consult-outline))
+  ("M-g o" #'consult-outline)
+  :custom
+  (consult-preview-key nil))
 
 (use-package consult-selectrum
   :after consult)
