@@ -1123,17 +1123,18 @@ behavior added."
   ("M-s l" #'consult-line)
   ("M-g o" #'consult-outline)
   :custom
-  (consult-preview-key nil))
+  (consult-preview-key nil)
+  (consult-narrow-key "<"))
 
 (use-package consult-selectrum
-  :after consult)
+  :after selectrum)
 
 ;; I'm still thinking about this, I like it but I don't find it very useful
 (use-package embark
   :general
   (:keymaps 'minibuffer-local-map
-            "C-;" #'embark-act-noexit
-            "C-:" #'embark-act
+            "C-'" #'embark-act-noexit
+            "C-\"" #'embark-act
             "M-e" #'embark-export
             "C-l" #'embark-collect-live
             "M-q" #'embark-collect-toggle-view)
