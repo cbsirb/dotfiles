@@ -11,19 +11,18 @@
   "Set the VARIABLE to VALUE, but use `set-default' if needed."
   `(funcall (or (get ',variable 'custom-set) 'set-default) ',variable ,value))
 
-(defvar user/gc-cons-threshold (* 16 gc-cons-threshold))
+(defvar user/gc-cons-threshold 12800000)
 
 (defun user/after-init ()
   "Will run after init to restore some stuff."
 
-  (csetq gc-cons-threshold user/gc-cons-threshold)
-
   (message "emacs-init-time: %s" (emacs-init-time))
+
+  (csetq gc-cons-threshold user/gc-cons-threshold)
   (garbage-collect))
 
 (add-hook 'after-init-hook #'user/after-init)
 
-(csetq gc-cons-threshold most-positive-fixnum)
 (csetq package-user-dir (expand-file-name "elpa" user-emacs-directory))
 
 (csetq
