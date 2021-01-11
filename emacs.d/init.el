@@ -1142,7 +1142,12 @@ behavior added."
             "?" #'embark-keymap-help))
 
 (use-package company
+  :preface
+  (defun user/setup-company-backends ()
+    (csetq company-backends (remove 'company-capf company-backends))
+    (push 'company-capf company-backends))
   :general
+  ("C-c C-." #'company-complete)
   (:keymaps 'company-active-map
             "ESC" #'company-abort
             "<tab>" #'company-complete-selection
@@ -1155,6 +1160,7 @@ behavior added."
   (company-dabbrev-downcase nil)
   (company-dabbrev-ignore-case t)
   (company-idle-delay 0)
+  (company-echo-delay 0)
   (company-minimum-prefix-length 2)
   ;; (company-require-match nil)
   (company-selection-wrap-around t)
@@ -1162,7 +1168,9 @@ behavior added."
   (company-tooltip-flip-when-above nil)
   ;; (company-occurrence-weight-function #'company-occurrence-prefer-any-closest)
   ;; (company-transformers '(company-sort-by-occurrence))
-  :ghook ('after-init-hook #'global-company-mode))
+  :ghook
+  ('after-init-hook #'global-company-mode)
+  ('global-company-mode-hook #'user/setup-company-backends))
 
 (use-package eacl
   :general ("C-x C-l" #'eacl-complete-line))
@@ -1612,11 +1620,6 @@ found, an error is signaled."
 (use-package lsp-mode
   :commands (lsp lsp-mode)
 
-  :preface
-  (defun user/setup-lsp-completion ()
-    (setq-local company-backends (remove 'company-capf company-backends))
-    (push 'company-capf company-backends))
-
   :ghook
   ('c-mode-common-hook #'lsp t)
   ('python-mode-hook #'lsp t)
@@ -1624,7 +1627,6 @@ found, an error is signaled."
   ('cmake-mode-hook #'lsp t)
   ('sh-mode-hook #'lsp t)
   ('yaml-mode-hook #'lsp t)
-  ('lsp-managed-mode-hook #'user/setup-lsp-completion)
   ('lsp-mode-hook #'lsp-enable-which-key-integration)
 
   :custom
