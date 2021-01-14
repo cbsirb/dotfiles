@@ -1205,6 +1205,11 @@ behavior added."
   (json-reformat:indent-width 4)
   (json-reformat:pretty-string? t))
 
+(use-package markdown-mode
+  :mode (("\\.md\\'" . markdown-mode)
+         ("\\.markdown\\'" . markdown-mode)
+         ("README\\.md\\'" . gfm-mode)))
+
 (use-package nov
   :gfhook #'turn-on-visual-line-mode
   :mode ("\\.epub\\'" . nov-mode)
