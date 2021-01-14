@@ -1160,7 +1160,6 @@ behavior added."
   (company-dabbrev-downcase nil)
   (company-dabbrev-ignore-case t)
   (company-idle-delay 0)
-  (company-echo-delay 0)
   (company-minimum-prefix-length 2)
   ;; (company-require-match nil)
   (company-selection-wrap-around t)
