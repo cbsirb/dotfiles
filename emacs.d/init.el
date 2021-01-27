@@ -774,7 +774,9 @@ behavior added."
   :custom
   (display-line-numbers-grow-only nil)
   (display-line-numbers-width-start nil)
-  :ghook ('after-init-hook #'global-display-line-numbers-mode))
+  :ghook
+  ('prog-mode-hook #'display-line-numbers-mode)
+  ('text-mode-hook #'display-line-numbers-mode))
 
 (use-package recentf :ensure nil
   :custom
