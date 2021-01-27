@@ -2053,6 +2053,7 @@ found, an error is signaled."
            ("https://www.youtube.com/feeds/videos.xml?channel_id=UCdN4aXTrHAtfgbVG9HjBmxQ" pop)         ;; Kay & Peele
            ("https://www.youtube.com/feeds/videos.xml?channel_id=UCi7l9chXMljpUft67vw78qw" pop)         ;; Sideways
            ("https://www.youtube.com/feeds/videos.xml?channel_id=UCyNtlmLB73-7gtlBz00XOQQ" pop)         ;; Folding Ideas
+           ("https://www.youtube.com/feeds/videos.xml?channel_id=UCt_t6FwNsqr3WWoL6dFqG9w" pop)         ;; BrainCraft
 
            ("https://www.youtube.com/feeds/videos.xml?channel_id=UCct9aR7HC79Cv2g-9oDOTLw" religion)    ;; ReligionForBreakfast
 
