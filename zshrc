@@ -89,6 +89,10 @@ mosh-tmux () {
     mosh "$@" -- tmux new -ADs mosh-session
 }
 
+mosh-screen() {
+    mosh "$@" -- screen -DR mosh-session
+}
+
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
 
