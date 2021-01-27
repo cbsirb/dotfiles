@@ -1863,7 +1863,7 @@ found, an error is signaled."
   ("C-c p f" 'project-find-file)
   ("C-c p a" 'ff-find-other-file)
   :preface
-  (defvar user/project-roots '("compile_commands.json" "requirements.txt" "pyproject.toml" ".git" ".svn" ".hg")
+  (defvar user/project-roots '("compile_commands.json" "requirements.txt" "pyproject.toml" ".git" ".svn" ".hg" ".project" ".projectile")
     "Files or directories that mark the root of a project.")
 
   (defvar user/project-root nil
