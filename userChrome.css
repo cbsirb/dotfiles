@@ -1,10 +1,10 @@
-#main-window[tabsintitlebar="true"]:not([extradragspace="true"]) #TabsToolbar {
-  opacity: 0;
-  pointer-events: none;
-}
-#main-window:not([tabsintitlebar="true"]) #TabsToolbar {
-  visibility: collapse !important;
-}
+/* #main-window[tabsintitlebar="true"]:not([extradragspace="true"]) #TabsToolbar { */
+/*   opacity: 0; */
+/*   pointer-events: none; */
+/* } */
+/* #main-window:not([tabsintitlebar="true"]) #TabsToolbar { */
+/*   visibility: collapse !important; */
+/* } */
 
 #sidebar-header {
   display: none !important;
@@ -13,66 +13,3 @@
 #sidebar {
   min-width: 35px !important;
 }
-
-/* Unloaded tabs different color */
-/* .tabbrowser-tab[pending] { */
-/*   color: darkgrey !important; */
-/* } */
-
-
-/*Collapse in default state and add transition*/
-/* #sidebar-box[sidebarcommand="treestyletab_piro_sakura_ne_jp-sidebar-action"] { */
-/*     overflow: hidden; */
-/*     min-width: 50px; */
-/*     max-width: 50px; */
-/*     transition: all 0.2s ease; */
-/*     border-right: 1px solid #0c0c0d; */
-/*     z-index: 2; */
-/* } */
-
-/* /\*Expand to 200px on hover*\/ */
-/* #sidebar-box[sidebarcommand="treestyletab_piro_sakura_ne_jp-sidebar-action"]:hover, */
-/* #sidebar-box[sidebarcommand="treestyletab_piro_sakura_ne_jp-sidebar-action"] #sidebar { */
-/*     min-width: 200px !important; */
-/*     max-width: 200px !important; */
-/* } */
-
-/* :root { */
-/*     --sidebar-hover-width: 10px; */
-/*     --sidebar-visible-width: 200px; */
-/* } */
-
-/* #sidebar-box { */
-/*     position: relative !important; */
-/*     overflow-x: hidden !important; */
-/*     margin-left: calc(var(--sidebar-hover-width) * -1) !important; */
-/*     right: var(--sidebar-hover-width) !important; */
-/*     min-width: var(--sidebar-hover-width) !important; */
-/*     max-width: var(--sidebar-hover-width) !important; */
-/*     border-right: 1px solid var(--sidebar-border-color); */
-/* } */
-
-/* #sidebar-box:hover { */
-/*     margin-left: calc(var(--sidebar-visible-width) * -1) !important; */
-/*     right: var(--sidebar-visible-width) !important; */
-/*     min-width: var(--sidebar-visible-width) !important; */
-/*     max-width: var(--sidebar-visible-width) !important; */
-/* } */
-
-/* #sidebar { */
-/*     opacity: 0 !important; */
-/* } */
-
-/* #sidebar-box:hover #sidebar { */
-/*     opacity: 1 !important; */
-/* } */
-
-/* /\* #sidebar-header is hidden by default, change "none" to "inherit" to restore it. *\/ */
-/* #sidebar-header { */
-/*     display: none !important; */
-/* } */
-
-/* #sidebar-splitter styles the divider between the sidebar and the rest of the browser. */
-/* #sidebar-splitter { */
-/*     display: none; */
-/* } */
