@@ -405,7 +405,7 @@ let g:lsc_auto_map = {
     \  'GoToDefinition': 'gd',
     \  'FindReferences': 'gr',
     \  'Rename': 'gR',
-    \  'ShowHover': 'K',
+    \  'ShowHover': 'gh',
     \  'FindCodeActions': 'ga',
     \  'Completion': 'omnifunc',
     \}
