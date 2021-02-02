@@ -1091,6 +1091,21 @@ behavior added."
   (smex-history-length 16))
 
 (use-package selectrum-prescient
+  :preface
+  (defun user/execute-extended-command (orig-fun &rest r)
+    "Additional support for multiple cursors."
+    (apply orig-fun r)
+    (let ((cmd (intern (string-trim-left (nth 1 r) "\\^"))))
+      (when (and (boundp 'multiple-cursors-mode)
+                 multiple-cursors-mode
+                 cmd
+                 (not (memq cmd mc--default-cmds-to-run-once))
+                 (not (memq cmd mc/cmds-to-run-once))
+                 (or mc/always-run-for-all
+                     (memq cmd mc--default-cmds-to-run-for-all)
+                     (memq cmd mc/cmds-to-run-for-all)
+                     (mc/prompt-for-inclusion-in-whitelist cmd)))
+        (mc/execute-command-for-all-fake-cursors cmd))))
   :custom
   (selectrum-count-style 'current/matches)
   (enable-recursive-minibuffers t)
@@ -1102,7 +1117,8 @@ behavior added."
   :init
   (selectrum-mode t)
   (selectrum-prescient-mode t)
-  (prescient-persist-mode t))
+  (prescient-persist-mode t)
+  (advice-add #'execute-extended-command :around #'user/execute-extended-command))
 
 (use-package marginalia
   :after selectrum
