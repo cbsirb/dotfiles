@@ -34,10 +34,10 @@
    goggles helpful haskell-mode hl-todo hydra iedit iy-go-to-char js2-mode
    json-mode log4j-mode lsp-mode lsp-ui magit magit-gitflow marginalia minions
    modern-cpp-font-lock modus-themes multi-term multiple-cursors nasm-mode
-   no-littering nov org pdf-tools pyvenv rainbow-delimiters rainbow-mode realgud
-   rg rust-mode selectrum-prescient smex string-inflection symbol-overlay
-   tree-sitter tree-sitter-langs undo-tree use-package vc-msg visual-fill-column
-   web-mode wgrep which-key yaml-mode yasnippet))
+   no-littering nov org pdf-tools pyvenv racket-mode rainbow-delimiters
+   rainbow-mode realgud rg rust-mode selectrum-prescient smex string-inflection
+   symbol-overlay tree-sitter tree-sitter-langs undo-tree use-package vc-msg
+   visual-fill-column web-mode wgrep which-key yaml-mode yasnippet))
 
 (unless (bound-and-true-p package--initialized)
   (package-initialize))
@@ -1585,6 +1585,17 @@ found, an error is signaled."
   :ghook ('python-mode-hook #'user/auto-virtualenv))
 
 (use-package haskell-mode :defer)
+
+(use-package racket-mode
+  :defer
+  :preface
+  (defun user/racket-xp-hide-info ()
+    (remove-hook 'pre-redisplay-functions
+                 #'racket-xp-pre-redisplay
+                 t))
+  :ghook
+  ('racket-mode-hook #'racket-xp-mode)
+  ('racket-xp-mode-hook #'user/racket-xp-hide-info))
 
 (use-package js2-mode
   :mode "\\.js\\'"
