@@ -1111,6 +1111,7 @@ behavior added."
   (enable-recursive-minibuffers t)
   :general
   (:keymaps 'selectrum-minibuffer-map
+            "<escape>" #'keyboard-quit-context+
             "<prior>" #'selectrum-previous-page
             "<next>"  #'selectrum-next-page
             "<C-backspace>" #'backward-kill-sexp)
