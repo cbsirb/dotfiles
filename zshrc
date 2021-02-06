@@ -38,6 +38,7 @@ alias tmux="tmux -2"
 alias gdb='gdb -q'
 alias cls='printf "\033c"'
 alias fd='fd -HL'
+alias ip='ip -c'
 
 # Own git
 alias g='git'
