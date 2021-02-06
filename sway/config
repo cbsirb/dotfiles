@@ -254,10 +254,10 @@ bar {
 
 ### Windows
 
-assign [app_id="firefox" title="— Firefox"] $ws2
-assign [app_id="firefox" title="^Firefox"]   $ws2
+assign [app_id="firefox" title="— Firefox"]    $ws2
+assign [app_id="firefox" title="^Firefox"]      $ws2
 
-assign [app_id="thunderbird" title="- Mozilla Thunderbird$"] $ws10
+assign [app_id="evolution" title="— Evolution$"] $ws10
 
 assign [class="^Spotify$"] $ws9
 assign [title="Spotify Premium"] $ws9
@@ -281,11 +281,11 @@ for_window [app_id="firefox"]                                   floating enable
 for_window [app_id="firefox" title="— Firefox"]                floating disable
 for_window [app_id="firefox" title="^Firefox"]                  floating disable
 
-# On the mail desktop everything is floating, except thunderbird main window itself
-# Every thunderbird window (reminders, events, etc.) is floating everywhere, except the main one
+# On the mail desktop everything is floating, except evolution main window itself
+# Every evolution window (reminders, events, etc.) is floating everywhere, except the main one
 for_window [workspace="$ws10"]                                      floating enable
-for_window [app_id="thunderbird"]                                   floating enable
-for_window [app_id="thunderbird" title="- Mozilla Thunderbird$"]    floating disable
+for_window [app_id="evolution"]                                     floating enable
+for_window [app_id="evolution" title="— Evolution$"]               floating disable
 
 for_window [workspace="$ws9"]                           floating enable
 for_window [workspace="$ws9" class="^Spotify$"]         floating disable

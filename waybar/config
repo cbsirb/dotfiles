@@ -37,7 +37,7 @@
     },
     "custom/clock": {
         "interval": 5,
-        "exec": "date +'%d %b, %H:%M'",
+        "exec": "date +'%H:%M'",
         "on-click": "alacritty -t force_float -d 70 35 -e watch -n60 cal -y",
         "tooltip": false
     },
@@ -66,8 +66,7 @@
         "tooltip-format-wifi": "{ifname} {ipaddr}",
         "format-wifi": "  {essid:.8} ({signalStrength}%)",
         "format-ethernet": " lan",
-        "format-disconnected": "(no network)",
-        "on-click": "alacritty -t force_float -d 70 50 -e nmtui-connect"
+        "format-disconnected": "(no network)"
     },
     "network#vpn": {
         "interface": "tun0",
