@@ -1601,7 +1601,7 @@ found, an error is signaled."
 (use-package haskell-mode :defer)
 
 (use-package racket-mode
-  :defer
+  :mode "\\.rkt\\'"
   :preface
   (defun user/racket-xp-hide-info ()
     (remove-hook 'pre-redisplay-functions
