@@ -274,7 +274,9 @@ for_window [app_id="blueman-manager"]   floating enable
 for_window [app_id="virt-manager"]      floating enable
 
 # On the www destkop everything is floating, except firefox main window itself
-for_window [workspace="$ws2"]                                   floating enable
+# for_window [workspace="$ws2"]                                   floating enable
+
+# Every firefox window is floating, except firefox main window itself
 for_window [app_id="firefox" title="^Picture-in-Picture$"]      sticky enable
 for_window [app_id="firefox"]                                   floating enable
 for_window [app_id="firefox" title="— Firefox"]                floating disable
@@ -289,9 +291,7 @@ for_window [app_id="evolution" title="— Evolution$"]               floating di
 for_window [workspace="$ws9"]                           floating enable
 for_window [workspace="$ws9" class="^Spotify$"]         floating disable
 
-for_window [app_id="org.kde.krunner"] border pixel
-
-for_window [class="^zoom$"]         floating enable
+for_window [app_id="^zoom$"]        floating enable
 for_window [class="^Slack$"]        floating enable
 
 for_window [class="^force_float$"]  floating enable
