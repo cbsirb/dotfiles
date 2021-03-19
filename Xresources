@@ -18,7 +18,7 @@ xterm*termName: xterm-256color
 xterm*locale: true
 xterm*metaSendsEscape: true
 xterm*eightBitInput: false
-xterm*faceName: xft:Iosevka Extended:style=Regular:size=10.5:style=Regular
+xterm*faceName: xft:Iosevka Extended:size=10.5:style=Regular
 
 xterm*multiScroll: true
 xterm*jumpScroll: true
@@ -90,83 +90,46 @@ URxvt*skipBuiltinGlyphs: true
 URxvt*perl-ext:
 URxvt*perl-ext-common:
 
-!! No colorscheme (white text, black background)
-! *background: #000000
-! *foreground: #ffffff
+! Theme: modus-vivendi
+*background: #000000
+*foreground: #ffffff
+*color0: #000000
+*color1: #ff8059
+*color2: #44bc44
+*color3: #eecc00
+*color4: #2fafff
+*color5: #feacd0
+*color6: #00d3d0
+*color7: #bfbfbf
+*color8: #595959
+*color9: #f4923b
+*color10: #70c900
+*color11: #cfdf30
+*color12: #79a8ff
+*color13: #b6a0ff
+*color14: #6ae4b9
+*color15: #ffffff
+*cursorColor: #000000
 
-! special
-*foreground:   #000000
-*background:   #ffffff
-*cursorColor:  #000000
+xterm*background: #000000
+xterm*foreground: #ffffff
+xterm*color0: #000000
+xterm*color1: #ff8059
+xterm*color2: #44bc44
+xterm*color3: #eecc00
+xterm*color4: #2fafff
+xterm*color5: #feacd0
+xterm*color6: #00d3d0
+xterm*color7: #bfbfbf
+xterm*color8: #595959
+xterm*color9: #f4923b
+xterm*color10: #70c900
+xterm*color11: #cfdf30
+xterm*color12: #79a8ff
+xterm*color13: #b6a0ff
+xterm*color14: #6ae4b9
+xterm*color15: #ffffff
+xterm*cursorColor: #000000
 
-! black
-*color0:       #000000
-*color8:       #000000
-
-! red
-*color1:       #a80000
-*color9:       #b60000
-
-! green
-*color2:       #005200
-*color10:      #006800
-
-! yellow
-*color3:       #8b3800
-*color11:      #904200
-
-! blue
-*color4:       #005589
-*color12:      #1111ee
-
-! magenta
-*color5:       #721045
-*color13:      #7000e0
-
-! cyan
-*color6:       #5e8d87
-*color14:      #205b93
-
-! white
-*color7:       #ffffff
-*color15:      #ffffff
-
-URxvt*intensityStyles:  true
-XTerm*boldColors:       false
-
-! special
-xterm*foreground:   #000000
-xterm*background:   #ffffff
-xterm*cursorColor:  #000000
-
-! black
-xterm*color0:       #000000
-xterm*color8:       #000000
-
-! red
-xterm*color1:       #a80000
-xterm*color9:       #b60000
-
-! green
-xterm*color2:       #005200
-xterm*color10:      #006800
-
-! yellow
-xterm*color3:       #8b3800
-xterm*color11:      #904200
-
-! blue
-xterm*color4:       #005589
-xterm*color12:      #1111ee
-
-! magenta
-xterm*color5:       #721045
-xterm*color13:      #7000e0
-
-! cyan
-xterm*color6:       #5e8d87
-xterm*color14:      #205b93
-
-! white
-xterm*color7:       #ffffff
-xterm*color15:      #ffffff
+urxvt*intensityStyles:  true
+xterm*boldColors:       false
