@@ -312,6 +312,16 @@
 (csetq indicate-empty-lines t)
 (csetq fill-column 80)
 
+(defun tabs-spaces-toggle ()
+  "Toggle between tabs and spaces in the current file."
+  (interactive)
+  (if indent-tabs-mode
+      (progn
+        (message "Switch from TABS to SPACES")
+        (setq-local indent-tabs-mode nil))
+    (message "Switch from SPACES to TABS")
+    (setq-local indent-tabs-mode t)))
+
 (add-hook 'text-mode-hook #'auto-fill-mode)
 
 ;; Some special file names
