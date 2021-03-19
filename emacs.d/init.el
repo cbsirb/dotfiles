@@ -657,11 +657,12 @@ PARSE-START indicates where the parsing should start in the file (point)."
   "C-x >"
   "C-x <"
   "<C-next>"
-  "<C-prior>")
+  "<C-prior>"
+  "M-`")
 
 (use-package user-utils :ensure nil
   :general
-  ("M-`" #'user/open-terminal)
+  ;; ("M-`" #'user/open-terminal)
   ("M-]" #'user/next-error)
   ("M-[" #'user/prev-error)
   ("M-j" #'user/join-line)
