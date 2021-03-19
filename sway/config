@@ -53,14 +53,13 @@ bindswitch --reload --locked lid:off output $laptop enable
 
 ### Idle configuration
 exec swayidle -w \
-         timeout 300 'swaymsg "output * dpms off"' \
+         timeout 600 'swaymsg "output * dpms off"' \
          resume 'swaymsg "output * dpms on"' \
          before-sleep '$lock_cmd'
 
 exec swaymsg -- exec autocutsel -fork
 exec swaymsg -- exec mako
 exec swaymsg -- exec autotiling
-exec swaymsg -- exec krunner -d
 
 exec_always {
     gsettings set org.gnome.desktop.interface gtk-theme 'Breeze'
