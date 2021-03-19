@@ -327,6 +327,7 @@
 ;; Some special file names
 (add-to-list 'auto-mode-alist '("\\.?bash.*" . shell-script-mode))
 (add-to-list 'auto-mode-alist '("PKGBUILD\\'" . shell-script-mode))
+(add-to-list 'auto-mode-alist '("Makefile.*" . makefile-mode))
 
 (when (member "Symbola" (font-family-list))
   (set-fontset-font t 'unicode "Symbola" nil 'prepend))
