@@ -94,6 +94,35 @@ mosh-screen() {
     mosh "$@" -- screen -DR mosh-session
 }
 
+countdown() {
+    total=$1
+    shift
+
+    if [[ "$total" =~ "^[0-9]+:[0-9]+$" ]]; then
+        IFS=: read -r minutes seconds <<< $total
+        if (($seconds>59)); then
+            echo "Invalid time format (expected MM:SS)"
+            return 1
+        fi
+        total=$(($minutes*60))
+        total=$(($total+$seconds))
+    fi
+
+    counter=$total
+    while ((counter>0)) {
+        printf "\033[2K%02d:%02d/%02d:%02d         \\r" $((counter/60)) $((counter%60)) $(($total/60)) $(($total%60))
+        sleep 1
+        counter=$((counter-1))
+    }
+
+    setsid paplay /usr/share/sounds/freedesktop/stereo/complete.oga
+    if (( $#>=1 )); then
+        notify-send "Countdown done" "$@"
+    fi
+
+    echo -e "\033[2KDone"
+}
+
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
 
