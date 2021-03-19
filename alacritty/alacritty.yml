@@ -56,135 +56,40 @@ font:
 
 draw_bold_text_with_bright_colors: false
 
-# Colors (Tomorrow Night Bright)
-#colors:
-#  # Default colors
-#  primary:
-#    background: '0x232627'
-#    foreground: '0xfcfcfc'
-
-#    # Bright and dim foreground colors
-#    #
-#    # The dimmed foreground color is calculated automatically if it is not present.
-#    # If the bright foreground color is not set, or `draw_bold_text_with_bright_colors`
-#    # is `false`, the normal foreground color will be used.
-#    # dim_foreground: '#cdcdcd'
-#    # bright_foreground: '#ffffff'
-
-#  # custom_cursor_colors: true
-
-#  # # Colors the cursor will use if `custom_cursor_colors` is true
-#  # cursor:
-#  #   text: '0x000000'
-#  #   cursor: '0xffffff'
-
-#  # Normal colors
-#  normal:
-#    black:   '0x232627'
-#    red:     '0xed1515'
-#    green:   '0x11d116'
-#    yellow:  '0xf67400'
-#    blue:    '0x1d99f3'
-#    magenta: '0x9b59b6'
-#    cyan:    '0x1abc9c'
-#    white:   '0xfcfcfc'
-
-#  # # Bright colors
-#  bright:
-#    black:   '0x7f8c8d'
-#    red:     '0xc0392b'
-#    green:   '0x1cdc9a'
-#    yellow:  '0xfdbc4b'
-#    blue:    '0x3daee9'
-#    magenta: '0x8e44ad'
-#    cyan:    '0x16a085'
-#    white:   '0xffffff'
-
-#  # Dim colors (Optional)
-#  dim:
-#    black:   '0x31363b'
-#    red:     '0x783228'
-#    green:   '0x17a262'
-#    yellow:  '0xb65619'
-#    blue:    '0x1b668f'
-#    magenta: '0x614a73'
-#    cyan:    '0x186c60'
-#    white:   '0x63686d'
-
-#  # Indexed Colors
-#  #
-#  # The indexed colors include all colors from 16 to 256.
-#  # When these are not set, they're filled with sensible defaults.
-#  #
-#  # Example:
-#  #   `- { index: 16, color: '0xff00ff' }`
-#  #
-#  indexed_colors: []
-
-# Modus Operandi
 colors:
-  # Default colors
   primary:
-    background: '0xffffff'
-    foreground: '0x000000'
-
-    # Bright and dim foreground colors
-    #
-    # The dimmed foreground color is calculated automatically if it is not present.
-    # If the bright foreground color is not set, or `draw_bold_text_with_bright_colors`
-    # is `false`, the normal foreground color will be used.
-    # dim_foreground: '#cdcdcd'
-    # bright_foreground: '#ffffff'
-
-  # custom_cursor_colors: true
-
-  # # Colors the cursor will use if `custom_cursor_colors` is true
-  # cursor:
-  #   text: '0x000000'
-  #   cursor: '0xffffff'
-
-  # Normal colors
+    background: '#000000'
+    foreground: '#ffffff'
+  cursor:
+    text: '#000000'
+    cursor: '#ffffff'
   normal:
-    black:   '0x000000'
-    red:     '0xa80000'
-    green:   '0x005200'
-    yellow:  '0x8b3800'
-    blue:    '0x0030a6'
-    magenta: '0x721045'
-    cyan:    '0x005589'
-    white:   '0xffffff'
-
-  # # Bright colors
+    black: '#000000'
+    red: '#ff8059'
+    green: '#44bc44'
+    yellow: '#eecc00'
+    blue: '#2fafff'
+    magenta: '#feacd0'
+    cyan: '#00d3d0'
+    white: '#ffffff'
   bright:
-    black:   '0x000000'
-    red:     '0xb60000'
-    green:   '0x006800'
-    yellow:  '0x904200'
-    blue:    '0x1111ee'
-    magenta: '0x7000e0'
-    cyan:    '0x205b93'
-    white:   '0xffffff'
-
-  # Dim colors (Optional)
-  dim:
-    black:   '0x000000'
-    red:     '0x4d0006'
-    green:   '0x003000'
-    yellow:  '0x3a2a00'
-    blue:    '0x001170'
-    magenta: '0x381050'
-    cyan:    '0x003434'
-    white:   '0xffffff'
-
-  # Indexed Colors
-  #
-  # The indexed colors include all colors from 16 to 256.
-  # When these are not set, they're filled with sensible defaults.
-  #
-  # Example:
-  #   `- { index: 16, color: '0xff00ff' }`
-  #
-  indexed_colors: []
+    black: '#595959'
+    red: '#f4923b'
+    green: '#70c900'
+    yellow: '#cfdf30'
+    blue: '#79a8ff'
+    magenta: '#f78fe7'
+    cyan: '#4ae8fc'
+    white: '#ffffff'
+  faint:
+    black: '#555555'
+    red: '#ffa0a0'
+    green: '#88cf88'
+    yellow: '#d2b580'
+    blue: '#92baff'
+    magenta: '#e0b2d6'
+    cyan: '#90c4ed'
+    white: '#dddddd'
 
 bell:
   animation: EaseOutExpo
