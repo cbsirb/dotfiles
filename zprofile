@@ -18,7 +18,7 @@ fi
 # Browser
 #
 
-export BROWSER='x-www-browser'
+export BROWSER='firefox-nightly'
 
 #
 # Editors
