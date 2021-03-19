@@ -31,8 +31,8 @@ set $lock_cmd swaylock
 set $laptop eDP-1
 set $main_display "Philips Consumer Electronics Company PHL 272B8Q UK01948018974"
 
-set $all_menu wofi --show run --no-actions
-set $menu wofi --show drun --no-actions
+set $all_menu rofi -markup -show run
+set $menu rofi -markup -show drun
 
 ### Output configuration
 
@@ -89,9 +89,8 @@ input type:keyboard {
 
 bindsym $mod+Return exec swaymsg -- exec $term
 
-# bindsym $mod+p exec swaymsg -- exec $menu
-# bindsym $mod+Shift+p exec $all_menu
-bindsym $mod+p exec swaymsg -- exec krunner
+bindsym $mod+p exec swaymsg -- exec $menu
+bindsym $mod+Shift+p exec swaymsg -- exec $all_menu
 
 floating_modifier $mod normal
 
