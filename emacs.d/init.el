@@ -27,17 +27,18 @@
 
 (csetq
  package-selected-packages
- '(beginend cmake-font-lock cmake-mode comment-dwim-2 ccls company consult
-   consult-selectrum cython-mode diff-hl dired-du dired-git-info dired-narrow
-   diredfl dumb-jump eacl elfeed embark eterm-256color eterm-256color-mode
+ '(auto-package-update beginend cmake-font-lock cmake-mode comment-dwim-2 ccls
+   company counsel cython-mode diff-hl dired-du dired-git-info dired-narrow
+   diredfl dumb-jump eacl elfeed eterm-256color eterm-256color-mode
    expand-region flycheck flycheck-pos-tip geiser general git-timemachine
-   goggles helpful haskell-mode hl-todo hydra iedit iy-go-to-char js2-mode
-   json-mode log4j-mode lsp-mode lsp-ui magit magit-gitflow marginalia minions
-   modern-cpp-font-lock modus-themes multi-term multiple-cursors nasm-mode
-   no-littering nov org pdf-tools pyvenv racket-mode rainbow-delimiters
-   rainbow-mode realgud rg rust-mode selectrum-prescient smex string-inflection
-   symbol-overlay tree-sitter tree-sitter-langs undo-tree use-package vc-msg
-   visual-fill-column web-mode wgrep which-key yaml-mode yasnippet))
+   goggles helpful haskell-mode hl-todo hydra ivy ivy-rich iedit iy-go-to-char
+   js2-mode json-mode log4j-mode lsp-mode lsp-ui magit magit-gitflow marginalia
+   minions modern-cpp-font-lock modus-themes multi-term multiple-cursors
+   nasm-mode no-littering nov org pdf-tools pyvenv racket-mode
+   rainbow-delimiters rainbow-mode realgud rg rust-mode selectrum-prescient smex
+   string-inflection symbol-overlay tree-sitter tree-sitter-langs undo-tree
+   use-package vc-msg visual-fill-column web-mode wgrep which-key yaml-mode
+   yasnippet))
 
 (unless (bound-and-true-p package--initialized)
   (package-initialize))
@@ -969,6 +970,11 @@ behavior added."
   (:keymaps 'dired-mode-map
             ")" #'dired-git-info-mode))
 
+(use-package auto-package-update
+  :custom
+  (auto-package-update-delete-old-versions t)
+  :defer t)
+
 ;;
 ;; Editing & navigation
 ;;
@@ -1086,16 +1092,34 @@ behavior added."
 ;;
 
 (use-package smex
-  :disabled
   :custom
   (smex-history-length 16))
 
-(use-package selectrum-prescient
+(use-package ivy
+  :general
+  (:keymaps 'ivy-mode-map
+            "<escape>" #'keyboard-quit-context+)
+  :custom
+  (ivy-count-format "")
+  (ivy-height 7)
+  (ivy-use-virtual-buffers t)
+  (ivy-virtual-abbreviate 'full)
+  (ivy-wrap t)
+  :init
+  (ivy-mode t))
+
+(use-package counsel
+  :general
+  (:prefix "M-s"
+           "c" #'counsel-rg
+           "g" #'counsel-git-grep
+           "s" #'swiper)
   :preface
-  (defun user/execute-extended-command (orig-fun &rest r)
+  ;; http://xenodium.com/emacss-counsel-m-x-meets-multiple-cursors/index.html
+  (defun user/counsel-M-x-action (orig-fun &rest r)
     "Additional support for multiple cursors."
     (apply orig-fun r)
-    (let ((cmd (intern (string-trim-left (nth 1 r) "\\^"))))
+    (let ((cmd (intern (string-trim-left (nth 0 r) "\\^"))))
       (when (and (boundp 'multiple-cursors-mode)
                  multiple-cursors-mode
                  cmd
@@ -1107,58 +1131,21 @@ behavior added."
                      (mc/prompt-for-inclusion-in-whitelist cmd)))
         (mc/execute-command-for-all-fake-cursors cmd))))
   :custom
-  (selectrum-count-style 'current/matches)
-  (enable-recursive-minibuffers t)
-  :general
-  (:keymaps 'selectrum-minibuffer-map
-            "<escape>" #'keyboard-quit-context+
-            "<prior>" #'selectrum-previous-page
-            "<next>"  #'selectrum-next-page
-            "<C-backspace>" #'backward-kill-sexp)
+  (counsel-describe-function-preselect 'ivy-function-called-at-point)
+  (counsel-grep-post-action-hook '(recenter))
+  (counsel-mode-override-describe-bindings t)
   :init
-  (selectrum-mode t)
-  (selectrum-prescient-mode t)
-  (prescient-persist-mode t)
-  (advice-add #'execute-extended-command :around #'user/execute-extended-command))
+  (counsel-mode t)
+  (advice-add #'counsel-M-x-action :around #'user/counsel-M-x-action))
 
-(use-package marginalia
-  :after selectrum
-  :general
-  (:keympas 'minibuffer-local-map
-            "C-o" #'marginalia-cycle)
+(use-package ivy-rich
+  :after ivy
+  (ivy-rich-switch-buffer-align-virtual-buffer t)
+  (ivy-rich-path-style 'abbrev)
   :init
-  (marginalia-mode t))
-
-(use-package consult
-  :general
-  ([remap switch-to-buffer] #'consult-buffer)
-  ([remap switch-to-buffer-other-window] #'consult-buffer-other-window)
-  ([remap switch-to-buffer-other-frame] #'consult-buffer-other-frame)
-  ([remap copy-to-register] #'consult-register)
-  ([remap bookmark-jump] #'consult-bookmark)
-  ([remap yank-pop] #'consult-yank-pop)
-  ([remap imenu] #'consult-imenu)
-  ("M-g i" #'consult-imenu)
-  ("M-s l" #'consult-line)
-  ("M-g o" #'consult-outline)
-  :custom
-  (consult-preview-key nil)
-  (consult-narrow-key "<"))
-
-(use-package consult-selectrum
-  :after selectrum)
-
-;; I'm still thinking about this, I like it but I don't find it very useful
-(use-package embark
-  :general
-  (:keymaps 'minibuffer-local-map
-            "C-'" #'embark-act-noexit
-            "C-\"" #'embark-act
-            "M-e" #'embark-export
-            "C-l" #'embark-collect-live
-            "M-q" #'embark-collect-toggle-view)
-  (:keymaps 'embark-meta-map
-            "?" #'embark-keymap-help))
+  (ivy-rich-mode t)
+  :config
+  (setcdr (assq t ivy-format-functions-alist) #'ivy-format-function-line))
 
 (use-package company
   :preface
