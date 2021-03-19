@@ -1360,8 +1360,6 @@ found, an error is signaled."
   (show-paren-when-point-in-periphery t)
   :ghook ('after-init-hook #'show-paren-mode))
 
-(use-package geiser :defer)
-
 (use-package string-inflection :defer)
 
 (use-package comment-dwim-2
