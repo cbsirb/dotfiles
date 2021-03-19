@@ -220,8 +220,8 @@ bindsym --locked XF86AudioMicMute        exec pactl set-source-mute @DEFAULT_SOU
 bindsym --locked $mod+Ctrl+Up            exec pactl set-sink-volume @DEFAULT_SINK@ +3%
 bindsym --locked $mod+Ctrl+Down          exec pactl set-sink-volume @DEFAULT_SINK@ -3%
 
-bindsym --locked XF86MonBrightnessUp     exec sudo brightnessctl set 10%+
-bindsym --locked XF86MonBrightnessDown   exec sudo brightnessctl set 10%-
+bindsym --locked XF86MonBrightnessUp     exec brightnessctl set 10%+
+bindsym --locked XF86MonBrightnessDown   exec brightnessctl set 10%-
 
 bindsym $mod+Mod1+l exec $lock_cmd
 
