@@ -34,10 +34,11 @@
    goggles helpful haskell-mode hl-todo hydra ivy ivy-rich iedit iy-go-to-char
    js2-mode json-mode log4j-mode lsp-mode lsp-ui magit magit-gitflow marginalia
    minions modern-cpp-font-lock modus-themes multi-term multiple-cursors
-   nasm-mode no-littering nov org pdf-tools racket-mode rainbow-delimiters
-   rainbow-mode realgud rg rust-mode selectrum-prescient smex string-inflection
-   symbol-overlay tree-sitter tree-sitter-langs undo-tree use-package vc-msg
-   visual-fill-column web-mode wgrep which-key yaml-mode yasnippet))
+   nasm-mode no-littering nov org pdf-tools projectile racket-mode
+   rainbow-delimiters rainbow-mode realgud rg rust-mode selectrum-prescient smex
+   string-inflection symbol-overlay tree-sitter tree-sitter-langs undo-tree
+   use-package vc-msg visual-fill-column web-mode wgrep which-key yaml-mode
+   yasnippet))
 
 (unless (bound-and-true-p package--initialized)
   (package-initialize))
@@ -281,7 +282,10 @@
        '(:eval (format-mode-line
                 (propertized-buffer-identification
                  (or (when-let* ((buffer-file-truename buffer-file-truename)
-                                 (prj (cdr-safe (project-current)))
+                                 ;; (prj (cdr-safe (project-current)))
+                                 (prj (if (fboundp 'projectile-project-root)
+					  (projectile-project-root)
+					default-directory))
                                  (prj-parent (directory-file-name (expand-file-name prj))))
                       (concat (file-relative-name (file-name-directory buffer-file-truename) prj-parent) (file-name-nondirectory buffer-file-truename)))
                   "%b")))))
@@ -1871,6 +1875,7 @@ found, an error is signaled."
   :commands (git-timemachine git-timemachine-toggle))
 
 (use-package project
+  :disabled
   :ensure nil
   :general
   ("C-c p f" 'project-find-file)
@@ -1912,6 +1917,11 @@ found, an error is signaled."
 
   :custom
   (project-find-functions (list #'user/project-find-root)))
+
+(use-package projectile
+  :general
+  ("C-c p" 'projectile-command-map)
+  :ghook ('after-init-hook #'projectile-mode))
 
 (use-package vc :ensure nil
   :defer
