@@ -2094,6 +2094,7 @@ found, an error is signaled."
            ("https://venam.nixers.net/blog/feed.xml" tech)
            ("https://vermaden.wordpress.com/feed.xml" tech)
            ("https://blog.benjojo.co.uk/rss.xml" tech)
+           ("https://www.gridbugs.org/feed.xml" tech)
            ("https://obscuritory.com/feed/" pop)
            ("https://planet.emacslife.com/atom.xml" emacs)
            ("https://www.phoronix.com/rss.php" linux phoronix)
