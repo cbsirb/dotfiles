@@ -87,6 +87,80 @@
   :preface
   (defun user/load-default-theme ()
     (load-theme 'modus-operandi t))
+
+  (defun modus-themes-exporter-xcolors ()
+    "Template for generic Xcolors."
+    (interactive)
+    (modus-themes-with-colors
+      (let ((theme-name (format "%s" (car custom-enabled-themes))))
+        (insert
+         (concat
+          "! Theme: " theme-name "\n"
+          "! Description: Generic Xcolors port of " theme-name " (Modus themes for Emacs)" "\n"
+          "! Author: Protesilaos Stavrou, <https://protesilaos.com>" "\n"
+          "*background: " bg-main "\n"
+          "*foreground: " fg-main "\n"
+          "*color0: " "#000000" "\n"
+          "*color1: " red "\n"
+          "*color2: " green "\n"
+          "*color3: " yellow "\n"
+          "*color4: " blue "\n"
+          "*color5: " magenta "\n"
+          "*color6: " cyan "\n"
+          "*color7: " "#bfbfbf" "\n"
+          "*color8: " "#595959" "\n"
+          "*color9: " red-alt "\n"
+          "*color10: " green-alt "\n"
+          "*color11: " yellow-alt "\n"
+          "*color12: " blue-alt "\n"
+          "*color13: " magenta-alt-other "\n"
+          "*color14: " cyan-alt-other "\n"
+          "*color15: " "#ffffff" "\n")))))
+
+  (defun modus-themes-exporter-alacritty ()
+    (interactive)
+    (modus-themes-with-colors
+      (insert
+       (concat
+        "colors:\n"
+        "  primary:\n"
+        "    background: '" bg-main "'\n"
+        "    foreground: '" fg-main "'\n"
+
+        "  cursor:\n"
+        "    text: '" bg-main "'\n"
+        "    cursor: '" fg-main "'\n"
+
+        "  normal:\n"
+        "    black: '" "#000000" "'\n"
+        "    red: '" red "'\n"
+        "    green: '" green "'\n"
+        "    yellow: '" yellow "'\n"
+        "    blue: '" blue "'\n"
+        "    magenta: '" magenta "'\n"
+        "    cyan: '" cyan "'\n"
+        "    white: '" "#bfbfbf" "'\n"
+
+        "  bright:\n"
+        "    black: '" "#595959" "'\n"
+        "    red: '" red-alt "'\n"
+        "    green: '" green-alt "'\n"
+        "    yellow: '" yellow-alt "'\n"
+        "    blue: '" blue-alt "'\n"
+        "    magenta: '" magenta-alt-other "'\n"
+        "    cyan: '" cyan-alt-other "'\n"
+        "    white: '" "#ffffff" "'\n"
+
+        "  faint:\n"
+        "    black: '" "#555555" "'\n"
+        "    red: '" red-faint "'\n"
+        "    green: '" green-faint "'\n"
+        "    yellow: '" yellow-faint "'\n"
+        "    blue: '" blue-faint "'\n"
+        "    magenta: '" magenta-faint "'\n"
+        "    cyan: '" cyan-faint "'\n"
+        "    white: '" "#dddddd" "'\n"))))
+
   :ghook ('after-init-hook #'user/load-default-theme)
   :custom
   (modus-themes-fringes 'subtle)
