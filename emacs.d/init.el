@@ -34,7 +34,7 @@
    goggles helpful haskell-mode hl-todo hydra ivy ivy-rich iedit iy-go-to-char
    js2-mode json-mode log4j-mode lsp-mode lsp-ui magit magit-gitflow marginalia
    minions modern-cpp-font-lock modus-themes multi-term multiple-cursors
-   nasm-mode no-littering nov org pdf-tools projectile racket-mode
+   nasm-mode no-littering nov org pdf-tools projectile pyenv poetry racket-mode
    rainbow-delimiters rainbow-mode realgud rg rust-mode selectrum-prescient smex
    string-inflection symbol-overlay tree-sitter tree-sitter-langs undo-tree
    use-package vc-msg visual-fill-column web-mode wgrep which-key yaml-mode
@@ -804,6 +804,7 @@ behavior added."
                     "PKGBUILD"
                     "/usr/.*\\'"
                     "/tmp/.*\\'"
+                    "/.cache/pypoetry/virtualenvs/.*\\'"
                     #'ignoramus-boring-p))
   (recentf-max-saved-items 500)
   (recentf-max-menu-items 100)
@@ -1587,6 +1588,20 @@ found, an error is signaled."
            "from IPython.core.completerlib import module_completion")
     (csetq python-shell-completion-string-code
            "';'.join(get_ipython().Completer.all_completions('''%s'''), module_completion('''%s'''))\n")))
+
+(use-package pyvenv
+  :preface
+  (defun user/auto-virtualenv ()
+    (pyvenv-mode t)
+
+    ;; A dolist would be appropriate, but I only use venv as virtualenv name
+    ;; This also works with lsp-mode since it will use the python inside
+    (let ((root (locate-dominating-file default-directory "venv")))
+      (if (and root (file-exists-p root))
+          (pyvenv-activate (expand-file-name "venv" root)))))
+  :ghook ('python-mode-hook #'user/auto-virtualenv))
+
+(use-package poetry)
 
 (use-package haskell-mode :defer)
 
