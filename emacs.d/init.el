@@ -1083,8 +1083,8 @@ behavior added."
     symbol-overlay-mode symbol-overlay-mode :group 'symbol-overlay)
   :general
   ("M-*" #'symbol-overlay-put)
-  ("M-n" #'symbol-overlay-jump-next)
-  ("M-p" #'symbol-overlay-jump-prev)
+  ("<M-down>" #'symbol-overlay-jump-next)
+  ("<M-up>" #'symbol-overlay-jump-prev)
   ("M-8" #'symbol-overlay-toggle-in-scope)
   :custom-face
   (symbol-overlay-default-face ((t (:inherit underline))))
@@ -1383,6 +1383,7 @@ That way we don't remove the whole regexp for a simple typo.
   (:prefix "M-s"
            "d" #'rg-dwim
            "r" #'rg
+           "l" #'rg-literal
            "p" #'rg-project)
   :custom
   (rg-custom-type-aliases nil)
@@ -2009,7 +2010,7 @@ found, an error is signaled."
 
 (use-package projectile
   :general
-  ("C-c p" 'projectile-command-map)
+  ("M-p" 'projectile-command-map)
   :ghook ('after-init-hook #'projectile-mode))
 
 (use-package vc :ensure nil
