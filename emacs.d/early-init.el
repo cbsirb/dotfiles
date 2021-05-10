@@ -29,12 +29,12 @@
 (set-face-attribute 'default nil
                     :family "Iosevka Extended"
                     :height 105
-                    :weight 'normal)
+                    :weight 'semi-bold)
 
 (set-face-attribute 'fixed-pitch nil
                     :family "Iosevka Extended"
-                    :weight 'normal)
+                    :weight 'semi-bold)
 
 (set-face-attribute 'variable-pitch nil
                     :family "Fira Sans"
-                    :weight 'normal)
+                    :weight 'semi-bold)
