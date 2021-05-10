@@ -2118,6 +2118,7 @@ found, an error is signaled."
            ("https://www.youtube.com/feeds/videos.xml?channel_id=UCq7dxy_qYNEBcHqQVCbc20w" tech)        ;; WhatsACreel
            ("https://www.youtube.com/feeds/videos.xml?channel_id=UClcE-kVhqyiHCcjYwcpfj9w" tech)        ;; LiveOverflow
            ("https://www.youtube.com/feeds/videos.xml?channel_id=UC0uTPqBCFIpZxlz_Lv1tk_g" tech)        ;; Protesilaos Stavrou
+           ("https://www.youtube.com/feeds/videos.xml?channel_id=UCUzQJ3JBuQ9w-po4TXRJHiA" tech)        ;; jdh
 
            ("https://www.youtube.com/feeds/videos.xml?channel_id=UCNf56PUyMI0wUyZ8KRhg2AQ" cinema)      ;; Cinema Nippon
            ("https://www.youtube.com/feeds/videos.xml?channel_id=UC7GV-3hrA9kDKrren0QMKMg" cinema)      ;; CinemaTyler
@@ -2185,8 +2186,10 @@ found, an error is signaled."
            ("https://www.murilopereira.com/index.xml" tech)
            ("https://venam.nixers.net/blog/feed.xml" tech)
            ("https://vermaden.wordpress.com/feed.xml" tech)
-           ("https://blog.benjojo.co.uk/rss.xml" tech)
            ("https://www.gridbugs.org/feed.xml" tech)
+           ("https://blog.benjojo.co.uk/rss.xml" tech)
+           ("https://lemire.me/blog/feed/" tech)
+           ("https://blog.royalsloth.eu/posts/index.xml" tech)
            ("https://obscuritory.com/feed/" pop)
            ("https://planet.emacslife.com/atom.xml" emacs)
            ("https://www.phoronix.com/rss.php" linux phoronix)
