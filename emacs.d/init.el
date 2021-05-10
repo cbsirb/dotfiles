@@ -1376,7 +1376,8 @@ That way we don't remove the whole regexp for a simple typo.
   :config
   (push ".ccls-cache" grep-find-ignored-directories)
   (push ".vscode" grep-find-ignored-directories)
-  (push ".clangd" grep-find-ignored-directories))
+  (push ".clangd" grep-find-ignored-directories)
+  (push ".idea" grep-find-ignored-directories))
 
 (use-package rg
   :general
@@ -2018,7 +2019,8 @@ found, an error is signaled."
   :config
   (push ".ccls-cache" vc-directory-exclusion-list)
   (push ".vscode" vc-directory-exclusion-list)
-  (push ".clangd" vc-directory-exclusion-list))
+  (push ".clangd" vc-directory-exclusion-list)
+  (push ".idea" vc-directory-exclusion-list))
 
 (use-package vc-msg
   :defer
