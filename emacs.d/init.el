@@ -27,18 +27,18 @@
 
 (csetq
  package-selected-packages
- '(auto-package-update beginend cmake-font-lock cmake-mode comment-dwim-2 ccls
-   company counsel cython-mode diff-hl dired-du dired-git-info dired-narrow
-   diredfl dumb-jump eacl elfeed eterm-256color eterm-256color-mode
-   expand-region flycheck flycheck-pos-tip geiser general git-timemachine
-   goggles helpful haskell-mode hl-todo hydra ivy ivy-rich iedit iy-go-to-char
-   js2-mode json-mode log4j-mode lsp-mode lsp-ui magit magit-gitflow marginalia
-   minions modern-cpp-font-lock modus-themes multi-term multiple-cursors
-   nasm-mode no-littering nov org pdf-tools projectile pyenv poetry racket-mode
-   rainbow-delimiters rainbow-mode realgud rg rust-mode selectrum-prescient smex
-   string-inflection symbol-overlay tree-sitter tree-sitter-langs undo-tree
-   use-package vc-msg visual-fill-column web-mode wgrep which-key yaml-mode
-   yasnippet))
+ '(auto-package-update beginend clang-format+ cmake-font-lock cmake-mode
+   comment-dwim-2 ccls company counsel cython-mode diff-hl dired-du
+   dired-git-info dired-narrow diredfl dumb-jump eacl elfeed eterm-256color
+   eterm-256color-mode expand-region flycheck flycheck-pos-tip geiser general
+   git-timemachine goggles helpful haskell-mode hl-todo hydra ivy ivy-rich iedit
+   iy-go-to-char js2-mode json-mode log4j-mode lsp-mode lsp-ui magit
+   magit-gitflow marginalia minions modern-cpp-font-lock modus-themes multi-term
+   multiple-cursors nasm-mode no-littering nov org pdf-tools projectile pyenv
+   poetry racket-mode rainbow-delimiters rainbow-mode realgud rg rust-mode
+   selectrum-prescient smex string-inflection symbol-overlay tree-sitter
+   tree-sitter-langs undo-tree use-package vc-msg visual-fill-column web-mode
+   wgrep which-key yaml-mode yasnippet))
 
 (unless (bound-and-true-p package--initialized)
   (package-initialize))
@@ -1614,6 +1614,11 @@ found, an error is signaled."
                            (awk-mode . "awk")
                            (c++-mode . "webkit")
                            (other . "sane-k&r"))))
+
+(use-package clang-format+
+  :after cc-mode
+  :ghook ('c-mode-common-hook #'clang-format+-mode)
+  :custom (clang-format+-context 'modification))
 
 (use-package modern-cpp-font-lock
   :after cc-mode
