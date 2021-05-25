@@ -1196,7 +1196,14 @@ behavior added."
   (ivy-virtual-abbreviate 'full)
   (ivy-wrap t)
   :init
-  (ivy-mode t))
+  (ivy-mode t)
+  :config
+  (dolist (func '(counsel-describe-function
+                  counsel-describe-symbol
+                  counsel-describe-face
+                  counsel-describe-variable
+                  counsel-descbinds))
+    (push (cons func 'ivy--regex-ignore-order) ivy-re-builders-alist)))
 
 (use-package counsel
   :general
