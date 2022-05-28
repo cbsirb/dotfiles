@@ -1,5 +1,6 @@
 [alias]
     co = checkout
+    sw = switch
     br = branch
     st = status
     fa = fetch --all
@@ -36,6 +37,7 @@
     # ignore executable bit
     fileMode = false
     excludesfile = ~/dotfiles/.gitignore-global
+	autocrlf = input
 
 [diff]
     algorithm = histogram
@@ -51,3 +53,19 @@
 
 [includeIf "gitdir:~/work/"]
     path = .gitconfig-work
+
+[pager]
+    diff = delta
+    log = delta
+    reflog = delta
+    show = delta
+
+[delta]
+    plus-style = "syntax #012800"
+    minus-style = "syntax #340001"
+    syntax-theme = Monokai Extended
+    navigate = true
+    # side-by-side = true
+
+[interactive]
+    diffFilter = delta --color-only

@@ -1,0 +1,85 @@
+{
+    "layer": "top",
+    "height": 28,
+    "modules-left": ["sway/workspaces", "sway/mode", "wlr/taskbar"],
+    "modules-center": ["sway/window"],
+    "modules-right": ["tray", "idle_inhibitor", "sway/language", "battery", "pulseaudio", "network", "network#vpn", "clock"],
+    "position": "top",
+    "sway/mode": {
+        "tooltip": false,
+        "format": "<span style=\"italic\">{}</span>"
+    },
+    "sway/workspaces": {
+        "disable-scroll": true
+    },
+    "sway/window": {
+        "max-length": 128,
+        "on-click-middle": "swaymsg kill",
+        "on-click-right": "swaymsg floating toggle"
+    },
+    "wlr/taskbar": {
+        "on-click": "activate",
+        "on-click-middle": "close"
+    },
+    "tray": {
+        "icon-size": 18,
+        "spacing": 8
+    },
+    "battery": {
+        "tooltip-format": "{time}",
+        "states": {
+            "full": 99,
+            "warning": 30,
+            "critical": 15
+        },
+        "format": "{icon} {capacity}%",
+        "format-icons": ["", "", "", "", ""]
+    },
+    "clock": {
+        "interval": 5,
+        "format": "{:%H:%M}",
+        "tooltip-format": "<big>{:%Y %B}</big>\n<tt><big>{calendar}</big></tt>",
+        "on-click": "foot --title=force_float -W 70x38 sh -c 'cal -y; $SHELL'",
+    },
+    "memory": {
+        "tooltip": false,
+        "states": {
+            "warning": 50,
+            "critical": 85
+        },
+        "format": "mem: {}%",
+        "on-click": "alacritty -t force_float -d 112 30 -e htop"
+    },
+    "pulseaudio": {
+        "tooltip-format": "{format_source}",
+        "format": "{icon} {volume}%",
+        "format-bluetooth": "{icon}  {volume}%",
+        "format-icons": {
+            "headphone": "",
+            "default": ["", ""]
+        },
+        "format-muted": "",
+        "on-click": "pavucontrol"
+    },
+    "network": {
+        "tooltip-format-ethernet": "{ifname} - {ipaddr}",
+        "tooltip-format-wifi": "{ifname} {ipaddr}",
+        "format-wifi": "  {essid:.8} ({signalStrength}%)",
+        "format-ethernet": " lan",
+        "format-disconnected": "(no network)"
+    },
+    "network#vpn": {
+        "interface": "vpn0",
+        "tooltip-format": "{ifname} - {ipaddr}",
+        "tooltip-format-disconnected": "",
+        "format-ethernet": "",
+        "format-disconnected": ""
+    },
+    "idle_inhibitor": {
+        "format": "{icon}",
+        "format-icons": {
+            "activated": "",
+            "deactivated": ""
+        }
+    }
+}

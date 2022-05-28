@@ -3,6 +3,10 @@ syntax: glob
 .ccls-cache/
 .clangd/
 .vscode/
+.idea/
+venv/
+__pycache__/
+.mypy_cache/
 tags
 TAGS
 .ccls
@@ -12,5 +16,6 @@ TAGS
 .dir-locals.el
 .vimrc
 .ycm_extra_conf.py
-compile_commands.json*
 .gdb_history
+poetry.lock
+compile_commands.json*

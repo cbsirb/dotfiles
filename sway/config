@@ -21,29 +21,33 @@ set $ws10 10: mail
 # set $size_arg -d 112 30
 
 set $term konsole
+# set $term foot
 
-set $term_cmd $term
-set $float_arg -p tabtitle=force_float
+# set $float_arg -p tabtitle=force_float
+# set $size_arg -W 120x28
+
+set $float_arg --title=force_float
 set $term_float_cmd $term $float_arg
 
-set $lock_cmd swaylock
+set $lock_cmd swaylock --screenshots --clock --effect-pixelate=10 --indicator --indicator-thickness 7
 
 set $laptop eDP-1
 set $main_display "Philips Consumer Electronics Company PHL 272B8Q UK01948018974"
 
-set $all_menu rofi -markup -show run
-set $menu rofi -markup -show drun
+set $all_menu wofi --show run
+set $menu wofi --show drun
+
 
 ### Output configuration
 
 output $laptop {
-    background /usr/share/backgrounds/sway/Sway_Wallpaper_Blue_1920x1080.png fill
+    background ~/Pictures/Wallpapers/catdog-wallpaper.png fill
     resolution 1920x1080
     position 2560 0
 }
 
 output $main_display {
-    background /usr/share/backgrounds/sway/Sway_Wallpaper_Blue_1920x1080.png fill
+    background ~/Pictures/Wallpapers/catdog-wallpaper.png fill
     resolution 2560x1440
     position 0 0
 }
@@ -57,15 +61,28 @@ exec swayidle -w \
          resume 'swaymsg "output * dpms on"' \
          before-sleep '$lock_cmd'
 
+exec swaymsg -- focus output $main_display
+
 exec swaymsg -- exec autocutsel -fork
 exec swaymsg -- exec mako
-exec swaymsg -- exec autotiling
+# exec swaymsg -- exec autotiling
+exec swaymsg -- exec nm-applet --indicator
 
-exec_always {
-    gsettings set org.gnome.desktop.interface gtk-theme 'Breeze'
-    gsettings set org.gnome.desktop.interface cursor-theme 'breeze_cursors'
-    gsettings set org.gnome.desktop.interface icon-theme 'Papirus'
-}
+exec env RUST_BACKTRACE=1 swayrd > /tmp/swayrd.log 2>&1
+
+set $wob_socket $XDG_RUNTIME_DIR/wob.sock
+exec mkfifo $wob_socket
+exec tail -f $wob_socket | wob -a bottom -M 250
+exec dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP=sway
+exec /usr/lib/polkit-kde-authentication-agent-1
+
+exec_always $HOME/.local/bin/import-gsettings
+
+# exec_always {
+#     gsettings set org.gnome.desktop.interface gtk-theme 'Breeze'
+#     gsettings set org.gnome.desktop.interface cursor-theme 'breeze_cursors'
+#     gsettings set org.gnome.desktop.interface icon-theme 'Papirus'
+# }
 
 seat seat0 xcursor_theme breeze_cursors 24
 
@@ -81,7 +98,11 @@ input type:keyboard {
     repeat_delay 250
     repeat_rate 50
     xkb_options ctrl:nocaps,grp:ctrls_toggle
-    xkb_layout us,ro(std)
+    xkb_layout us,ro
+}
+
+input type:pointer {
+    pointer_accel -0.7
 }
 
 ### Key bindings
@@ -181,8 +202,8 @@ bindsym $mod+Shift+x move workspace to output right
 
 bindsym $mod+o focus output right
 
-bindsym $mod+Shift+grave move scratchpad
-bindsym $mod+grave scratchpad show
+bindsym $mod+Shift+minus move scratchpad
+bindsym $mod+minus scratchpad show
 
 mode "resize" {
     bindsym $left   resize shrink width 10px
@@ -203,6 +224,7 @@ bindsym $mod+r mode "resize"
 bindsym $mod+w [app_id="firefox"] focus
 bindsym $mod+i exec emacs
 bindsym $mod+e exec dolphin
+bindsym $mod+grave exec slack --enable-features=UseOzonePlatform --ozone-platform=wayland
 
 bindsym $mod+u [urgent=latest] focus
 
@@ -213,19 +235,29 @@ bindsym --locked XF86AudioNext   exec playerctl next
 bindsym --locked XF86AudioPrev   exec playerctl previous
 bindsym --locked XF86AudioPlay   exec playerctl play-pause
 
-bindsym --locked XF86AudioRaiseVolume    exec pactl set-sink-volume @DEFAULT_SINK@ +3%
-bindsym --locked XF86AudioLowerVolume    exec pactl set-sink-volume @DEFAULT_SINK@ -3%
-bindsym --locked XF86AudioMute           exec pactl set-sink-mute @DEFAULT_SINK@ toggle
-bindsym --locked XF86AudioMicMute        exec pactl set-source-mute @DEFAULT_SOURCE@ toggle
-bindsym --locked $mod+Ctrl+Up            exec pactl set-sink-volume @DEFAULT_SINK@ +3%
-bindsym --locked $mod+Ctrl+Down          exec pactl set-sink-volume @DEFAULT_SINK@ -3%
+bindsym --locked XF86AudioRaiseVolume    exec volume_change +3%
+bindsym --locked XF86AudioLowerVolume    exec volume_change -3%
+bindsym --locked XF86AudioMute           exec volume_mute
+bindsym --locked XF86AudioMicMute        exec mic_mute
+bindsym --locked $mod+Ctrl+Up            exec volume_change +3%
+bindsym --locked $mod+Ctrl+Down          exec volume_change -3%
 
-bindsym --locked XF86MonBrightnessUp     exec brightnessctl set 10%+
-bindsym --locked XF86MonBrightnessDown   exec brightnessctl set 10%-
+bindsym --locked XF86MonBrightnessUp     exec brightness_change 10%+
+bindsym --locked XF86MonBrightnessDown   exec brightness_change 10%-
 
 bindsym $mod+Mod1+l exec $lock_cmd
 
-bindsym --locked Print exec grim -t png ~/Pictures/Screenshots/$(date +%Y-%m-%d_%H-%M-%S).png
+bindsym Mod1+tab exec env RUST_BACKTRACE=1 swayr switch-to-urgent-or-lru-window >> /tmp/swayr.log 2>&1
+bindsym $mod+tab exec env RUST_BACKTRACE=1 swayr switch-window >> /tmp/swayr.log 2>&1
+
+bindsym $mod+apostrophe exec env RUST_BACKTRACE=1 swayr next-window all-workspaces >> /tmp/swayr.log 2>&1
+bindsym $mod+semicolon exec env RUST_BACKTRACE=1 swayr prev-window all-workspaces >> /tmp/swayr.log 2>&1
+
+bindsym --locked Print exec wscreenshot --area
+bindsym --locked Mod1+Print exec wscreenshot --window
+bindsym --locked Ctrl+Print exec wscreenshot --screen
+
+bindsym $mod+question exec $term_float_cmd sh -c 'swaymsg -t get_tree | jq ".. | select(.type?) | select(.focused==true)"; $SHELL'
 
 # F12 and F12+Fn on microsoft keyboard
 bindsym $mod+Ctrl+XF86TouchpadOff       exec $term_float_cmd
@@ -255,25 +287,37 @@ bar {
 assign [app_id="firefox" title="— Firefox"]    $ws2
 assign [app_id="firefox" title="^Firefox"]      $ws2
 
-assign [app_id="evolution" title="— Evolution$"] $ws10
+# assign [app_id="evolution" title="— Evolution$"] $ws10
 
-assign [class="^Spotify$"] $ws9
-assign [title="Spotify Premium"] $ws9
+# If I start it on 9 directly, then it moves it :^)
+for_window [class="Spotify"] move window to workspace $ws9
 
-for_window [window_role="pop-up"]       floating enable
-for_window [window_role="About"]        floating enable
-for_window [window_role="task_dialog"]  floating enable
-for_window [window_type="dialog"]       floating enable
-for_window [window_type="splash"]       floating enable
+for_window [window_role="pop-up"]           floating enable
+for_window [window_role="bubble"]           floating enable
+for_window [window_role="dialog"]           floating enable
+for_window [window_role="About"]            floating enable
+for_window [window_role="task_dialog"]      floating enable
+for_window [window_type="splash"]           floating enable
 
-for_window [app_id="org.kde.kcalc"]     floating enable, border pixel
-for_window [app_id="pavucontrol"]       floating enable
-for_window [app_id="mpv"]               floating enable
-for_window [app_id="blueman-manager"]   floating enable
-for_window [app_id="virt-manager"]      floating enable
+for_window [app_id="org.kde.kcalc"]         floating enable, border pixel
+for_window [app_id="pavucontrol"]           floating enable
+for_window [app_id="mpv"]                   floating enable
+for_window [app_id="blueman-manager"]       floating enable
+for_window [app_id="virt-manager"]          floating enable
+for_window [app_id="nm-connection-editor"]  floating enable
+for_window [app_id="nm-openconnect-auth-dialog"]  floating enable
+for_window [app_id="org.kde.polkit-kde-authentication-agent-1"] floating enable
+
+# Inhibit idle for some windows
+for_window [app_id="firefox"]           inhibit_idle fullscreen
+for_window [app_id="chromium"]          inhibit_idle fullscreen
+for_window [app_id="mpv"]               inhibit_idle fullscreen
+
+# personal dev. project
+for_window [app_id="ro.docnot.python3"] floating enable
 
 # On the www destkop everything is floating, except firefox main window itself
-# for_window [workspace="$ws2"]                                   floating enable
+for_window [workspace="$ws2"]                                   floating enable
 
 # Every firefox window is floating, except firefox main window itself
 for_window [app_id="firefox" title="^Picture-in-Picture$"]      sticky enable
@@ -283,15 +327,19 @@ for_window [app_id="firefox" title="^Firefox"]                  floating disable
 
 # On the mail desktop everything is floating, except evolution main window itself
 # Every evolution window (reminders, events, etc.) is floating everywhere, except the main one
-for_window [workspace="$ws10"]                                      floating enable
-for_window [app_id="evolution"]                                     floating enable
-for_window [app_id="evolution" title="— Evolution$"]               floating disable
+# NOTE: No mode mail destkop, I use Outlook in the browser
+# for_window [workspace="$ws10"]                                      floating enable
+# for_window [app_id="evolution"]                                     floating enable
+# for_window [app_id="evolution" title="— Evolution$"]               floating disable
 
 for_window [workspace="$ws9"]                           floating enable
 for_window [workspace="$ws9" class="^Spotify$"]         floating disable
 
-for_window [app_id="^zoom$"]        floating enable
-for_window [class="^Slack$"]        floating enable
+for_window [app_id="^zoom$"]            floating enable
+for_window [app_id="^Slack$"]           floating enable
+for_window [class="^Slack$"]            floating enable
+for_window [title="^Slack "]            floating enable
+for_window [app_id="org.kde.dolphin"]   floating enable
 
 for_window [class="^force_float$"]  floating enable
 for_window [title="^force_float"]   floating enable
@@ -325,7 +373,7 @@ titlebar_padding 3 1
 default_border pixel 2
 hide_edge_borders none
 
-### Other files 
+### Other files
 
 include /etc/sway/config.d/*
 include ~/.config/sway/config.d/*

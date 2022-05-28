@@ -11,6 +11,12 @@
   "Set the VARIABLE to VALUE, but use `set-default' if needed."
   `(funcall (or (get ',variable 'custom-set) 'set-default) ',variable ,value))
 
+(defmacro setq-if-exists (variable value)
+  "Set VARIABLE to VALUE. Error out if VARIABLE is not special."
+  `(if (special-variable-p ',variable)
+       (setq ,variable ,value)
+     (error (format "Variable %s does not exist" ',variable))))
+
 (defvar user/gc-cons-threshold 12800000)
 
 (defun user/after-init ()
@@ -22,23 +28,24 @@
   (garbage-collect))
 
 (add-hook 'after-init-hook #'user/after-init)
-
 (csetq package-user-dir (expand-file-name "elpa" user-emacs-directory))
 
 (csetq
  package-selected-packages
  '(auto-package-update beginend clang-format+ cmake-font-lock cmake-mode
-   comment-dwim-2 ccls company counsel cython-mode diff-hl dired-du
-   dired-git-info dired-narrow diredfl dumb-jump eacl elfeed eterm-256color
-   eterm-256color-mode expand-region flycheck flycheck-pos-tip geiser general
-   git-timemachine goggles helpful haskell-mode hl-todo hydra ivy ivy-rich iedit
-   iy-go-to-char js2-mode json-mode log4j-mode lsp-mode lsp-ui magit
-   magit-gitflow marginalia minions modern-cpp-font-lock modus-themes multi-term
-   multiple-cursors nasm-mode no-littering nov org pdf-tools projectile pyenv
-   poetry racket-mode rainbow-delimiters rainbow-mode realgud rg rust-mode
-   selectrum-prescient smex string-inflection symbol-overlay tree-sitter
-   tree-sitter-langs undo-tree use-package vc-msg visual-fill-column web-mode
-   wgrep which-key yaml-mode yasnippet))
+   comment-dwim-2 ccls consult consult-flycheck company cycle-at-point
+   cython-mode diff-hl dired-du dired-git-info dired-narrow diredfl dumb-jump
+   eacl elfeed embark embark-consult eterm-256color eterm-256color-mode
+   expand-region fish-mode flycheck flycheck-pos-tip geiser general
+   git-timemachine helpful haskell-mode hl-todo ignoramus iy-go-to-char js2-mode
+   json-mode json-reformat log4j-mode lsp-mode lsp-ui magit magit-gitflow
+   marginalia minions modern-cpp-font-lock modus-themes multi-term
+   multiple-cursors nasm-mode no-littering nov orderless org org-bullets
+   org-modern pdf-tools projectile pyenv python-black poetry racket-mode
+   rainbow-delimiters rainbow-mode realgud rg rust-mode string-inflection
+   symbol-overlay tree-sitter tree-sitter-langs undo-fu undo-fu-session
+   use-package vertico vc-msg visual-fill-column vterm web-mode wgrep which-key
+   yaml-mode yasnippet))
 
 (unless (bound-and-true-p package--initialized)
   (package-initialize))
@@ -84,103 +91,31 @@
 (use-package general)
 
 (use-package modus-themes
-  :preface
-  (defun user/load-default-theme ()
-    (load-theme 'modus-operandi t))
-
-  (defun modus-themes-exporter-xcolors ()
-    "Template for generic Xcolors."
-    (interactive)
-    (modus-themes-with-colors
-      (let ((theme-name (format "%s" (car custom-enabled-themes))))
-        (insert
-         (concat
-          "! Theme: " theme-name "\n"
-          "! Description: Generic Xcolors port of " theme-name " (Modus themes for Emacs)" "\n"
-          "! Author: Protesilaos Stavrou, <https://protesilaos.com>" "\n"
-          "*background: " bg-main "\n"
-          "*foreground: " fg-main "\n"
-          "*color0: " "#000000" "\n"
-          "*color1: " red "\n"
-          "*color2: " green "\n"
-          "*color3: " yellow "\n"
-          "*color4: " blue "\n"
-          "*color5: " magenta "\n"
-          "*color6: " cyan "\n"
-          "*color7: " "#bfbfbf" "\n"
-          "*color8: " "#595959" "\n"
-          "*color9: " red-alt "\n"
-          "*color10: " green-alt "\n"
-          "*color11: " yellow-alt "\n"
-          "*color12: " blue-alt "\n"
-          "*color13: " magenta-alt-other "\n"
-          "*color14: " cyan-alt-other "\n"
-          "*color15: " "#ffffff" "\n")))))
-
-  (defun modus-themes-exporter-alacritty ()
-    (interactive)
-    (modus-themes-with-colors
-      (insert
-       (concat
-        "colors:\n"
-        "  primary:\n"
-        "    background: '" bg-main "'\n"
-        "    foreground: '" fg-main "'\n"
-
-        "  cursor:\n"
-        "    text: '" bg-main "'\n"
-        "    cursor: '" fg-main "'\n"
-
-        "  normal:\n"
-        "    black: '" "#000000" "'\n"
-        "    red: '" red "'\n"
-        "    green: '" green "'\n"
-        "    yellow: '" yellow "'\n"
-        "    blue: '" blue "'\n"
-        "    magenta: '" magenta "'\n"
-        "    cyan: '" cyan "'\n"
-        "    white: '" "#bfbfbf" "'\n"
-
-        "  bright:\n"
-        "    black: '" "#595959" "'\n"
-        "    red: '" red-alt "'\n"
-        "    green: '" green-alt "'\n"
-        "    yellow: '" yellow-alt "'\n"
-        "    blue: '" blue-alt "'\n"
-        "    magenta: '" magenta-alt-other "'\n"
-        "    cyan: '" cyan-alt-other "'\n"
-        "    white: '" "#ffffff" "'\n"
-
-        "  faint:\n"
-        "    black: '" "#555555" "'\n"
-        "    red: '" red-faint "'\n"
-        "    green: '" green-faint "'\n"
-        "    yellow: '" yellow-faint "'\n"
-        "    blue: '" blue-faint "'\n"
-        "    magenta: '" magenta-faint "'\n"
-        "    cyan: '" cyan-faint "'\n"
-        "    white: '" "#dddddd" "'\n"))))
-
-  :ghook ('after-init-hook #'user/load-default-theme)
+  :pin "melpa"
+  :ghook ('after-init-hook (lambda () (load-theme 'modus-operandi t)))
   :custom
+  (modus-themes-variable-pitch-ui t)
   (modus-themes-fringes 'subtle)
   (modus-themes-bold-constructs t)
-  (modus-themes-slanted-constructs nil)
-  (modus-themes-3d-modeline nil)
-  (modus-themes-intense-paren-match t)
-  (modus-themes-proportional-fonts nil)
+  (modus-themes-italic-constructs nil)
+  (modus-themes-paren-match '(bold intense))
+  (modus-themes-mixed-fonts t)
   (modus-themes-section-headings t)
-  (modus-themes-completions 'opinionated))
+  (modus-themes-completions '((matches . (extrabold background intense))
+                              (selection . (extrabold accented intense))
+                              (popup . (accented)))))
 
 (use-package minions
+  ;; :custom
+  ;; (minions-mode-line-delimiters '("" . ""))
   :custom
-  (minions-mode-line-delimiters '("" . ""))
+  (minions-mode-line-lighter ";")
   :config
-  (push 'flycheck-mode minions-direct)
-  (push 'overwrite-mode minions-direct)
+  (push 'flycheck-mode minions-prominent-modes)
+  (push 'overwrite-mode minions-prominent-modes)
   (minions-mode t))
 
-(use-package ignoramus :ensure nil
+(use-package ignoramus
   :config
   (ignoramus-setup))
 
@@ -192,11 +127,6 @@
   :config
   (exec-path-from-shell-initialize))
 
-(use-package hydra
-  :defer
-  :config
-  (hydra-add-font-lock))
-
 ;;
 ;; Some default settings that I like
 ;;
@@ -204,15 +134,6 @@
 (defalias 'yes-or-no-p 'y-or-n-p)
 (defalias 'ff 'find-file)
 (defalias 'ffo 'find-file-other-window)
-
-;; startup.el
-(csetq initial-major-mode 'fundamental-mode)
-(csetq initial-scratch-message "")
-(csetq inhibit-startup-buffer-menu t)
-(csetq inhibit-splash-screen t)
-(csetq inhibit-startup-echo-area-message t)
-(csetq inhibit-startup-message t)
-(advice-add #'display-startup-echo-area-message :override #'ignore)
 
 ;; mule.el
 (csetq locale-coding-system 'utf-8)
@@ -300,6 +221,9 @@
 (csetq scroll-preserve-screen-position t)
 (csetq fast-but-imprecise-scrolling t)
 
+(setq pixel-scroll-precision-large-scroll-height 5.0)
+;; (setq pixel-scroll-precision-interpolation-factor 30)
+
 (csetq x-underline-at-descent-line t)
 (csetq x-stretch-cursor t)
 (csetq x-wait-for-event-timeout nil)
@@ -316,6 +240,8 @@
 
 (csetq uniquify-buffer-name-style 'post-forward-angle-brackets)
 (csetq uniquify-after-kill-buffer-p t)
+
+(csetq warning-suppress-types '((comp)))
 
 ;; simple.el
 (csetq mark-ring-max 128)
@@ -337,6 +263,8 @@
 (size-indication-mode -1)
 (line-number-mode t)
 (column-number-mode t)
+(pixel-scroll-precision-mode t)
+(global-so-long-mode t)
 
 (winner-mode t)
 (minibuffer-depth-indicate-mode t)
@@ -350,7 +278,7 @@
 ;;
 ;; Mode-line
 ;;
-(csetq mode-line-compact 'long)
+;; (csetq mode-line-compact 'long)
 
 (csetq mode-line-buffer-identification
        '(:eval (format-mode-line
@@ -368,13 +296,25 @@
   "Will returing the same thing as variable `vc-mode', but with a hard-coded max length."
   (if vc-mode
       (let ((backend (vc-backend buffer-file-name))) ;; vc-backend returns nil if given a non-string
-        (substring vc-mode (+ 2 (if (eq backend 'Hg) 2 3)) (min 30 (length vc-mode))))
+        (concat (substring vc-mode (+ 2 (if (eq backend 'Hg) 2 3)) (min 30 (length vc-mode))) "    "))
     ""))
 
 (csetq mode-line-format
-       '("%e" mode-line-front-space mode-line-mule-info mode-line-client mode-line-modified mode-line-remote mode-line-frame-identification mode-line-buffer-identification "   " mode-line-position
+       '("%e"
+         mode-line-front-space
+         mode-line-mule-info
+         mode-line-client
+         mode-line-modified
+         mode-line-remote
+         mode-line-frame-identification
+         mode-line-buffer-identification
+         "    "
+         mode-line-position
          (:eval (mode-line-vc))
-         "  " minions-mode-line-modes mode-line-misc-info mode-line-end-spaces))
+         minions-mode-line-modes
+         "    "
+         mode-line-misc-info
+         mode-line-end-spaces))
 
 ;; Enable these functions
 (mapc (lambda (x) (put x 'disabled nil))
@@ -435,6 +375,15 @@
         (inhibit-same-window . t))
       display-buffer-alist)
 
+(push `(,(rx "*Pp ")
+        (display-buffer-reuse-window
+         display-buffer-in-side-window)
+        (side            . bottom)
+        (reusable-frames . nil)
+        (window-height   . 0.25)
+        (slot . -1))
+      display-buffer-alist)
+
 ;;
 ;; Customization that doesn't require use-package
 ;;
@@ -446,7 +395,7 @@
                         (set-auto-mode)))))
 
 (use-package diff :ensure nil
-  :commands diff-mode
+  :commands diff-mode diff-delete-empty-files diff-make-unified
   :gfhook #'diff-delete-empty-files #'diff-make-unified #'smerge-mode
   :custom
   (diff-font-lock-prettify t)
@@ -463,7 +412,9 @@
   (ediff-window-setup-function #'ediff-setup-windows-plain))
 
 (csetq vc-follow-symlinks t)
-(csetq vc-git-diff-switches '("--ignore-space-change" "--ignore-all-space" "--no-ext-diff" "--stat" "--diff-algorithm=histogram"))
+(csetq vc-git-diff-switches
+       '("--ignore-space-change" "--ignore-all-space"
+         "--no-ext-diff" "--stat" "--diff-algorithm=histogram"))
 (csetq vc-git-print-log-follow t)
 
 (csetq tab-bar-close-button-show nil)
@@ -727,7 +678,6 @@ PARSE-START indicates where the parsing should start in the file (point)."
 
 (general-unbind
   "<f2>"
-  "M-o"
   "C-x C-z"
   "C-x f"
   "C-x m"
@@ -810,6 +760,9 @@ behavior added."
 (general-define-key [remap keyboard-quit] #'keyboard-quit-context+)
 (general-define-key [remap minibuffer-keyboard-quit] #'keyboard-quit-context+)
 (general-define-key [remap dabbrev-expand] #'hippie-expand)
+
+;; (general-define-key [remap eval-last-sexp] #'pp-eval-last-sexp)
+(general-define-key [remap eval-expression] #'pp-eval-expression)
 
 (general-define-key
  :prefix "M-s"
@@ -903,9 +856,7 @@ behavior added."
   :custom
   (ibuffer-saved-filter-groups
    '(("default"
-
       ("X" (mode . exwm-mode))
-
       ("Dired" (mode . dired-mode))
 
       ;; Need to be before "Programming" otherwise
@@ -913,11 +864,8 @@ behavior added."
       ("Emacs config" (filename . ".emacs.d"))
 
       ("Org-Mode" (mode . org-mode))
-
       ("Programming" (derived-mode . prog-mode))
-
       ("Magit" (name . "magit"))
-
       ("Processes" (process))
 
       ("Special" (or (name . "\*Messages\*")
@@ -953,7 +901,8 @@ behavior added."
         (setq compile-fn #'compile))
     (if ask
         (call-interactively compile-fn)
-      (funcall compile-fn compile-command))))
+      (let ((compilation-read-command nil))
+        (funcall compile-fn nil)))))
 
   (defun user/compilation-done (buffer msg)
     (let ((bufwin (get-buffer-window buffer))
@@ -971,6 +920,7 @@ behavior added."
       (ansi-color-apply-on-region compilation-filter-start (point-max))))
 
   :general
+  ("<f5>" #'compile-without-ask)
   ([remap comment-region] #'compile-without-ask)
   ("C-c c" #'compile-without-ask)
   (:keymaps '(compilation-mode-map comint-mode-map)
@@ -1065,6 +1015,7 @@ behavior added."
   (auto-package-update-delete-old-versions t)
   :defer t)
 
+
 ;;
 ;; Editing & navigation
 ;;
@@ -1095,6 +1046,7 @@ behavior added."
   ('after-init-hook #'global-symbol-overlay-mode))
 
 (use-package beginend
+  :disabled
   :preface
   (defun user/recenter-after-beginend-jump ()
     (recenter))
@@ -1102,25 +1054,6 @@ behavior added."
   (beginend-global-mode t)
   :config
   (advice-add #'beginend-prog-mode-goto-beginning :after #'user/recenter-after-beginend-jump))
-
-(use-package iedit
-  :preface
-  (defun iedit-scoped (orig-fn)
-    "Call `iedit-mode' with function-local scope when in
- prog-mode derived mode, or global scope if called with a
- universal prefix."
-    (interactive)
-    (pcase-exhaustive current-prefix-arg
-      ('nil (if iedit-mode
-                (funcall orig-fn)
-              (if (derived-mode-p 'prog-mode)
-                  (funcall orig-fn '(0))
-                (funcall orig-fn))))
-      ('(4) (funcall orig-fn))))
-  :general
-  ("C-;" #'iedit-mode)
-  :config
-  (advice-add #'iedit-mode :around #'iedit-scoped))
 
 (use-package iy-go-to-char
   :disabled
@@ -1182,67 +1115,74 @@ behavior added."
 ;;
 
 (use-package smex
+  :disabled
   :custom
-  (smex-history-length 16))
+  (smex-history-length 64))
 
-(use-package ivy
+(use-package orderless
+  :pin "melpa"
+  :custom
+  ;; Configure a custom style dispatcher (see the Consult wiki)
+  ;; (setq orderless-style-dispatchers '(+orderless-dispatch))
+  (completion-styles '(orderless)))
+
+(use-package vertico
+  :custom
+  (enable-recursive-minibuffers t)
+  (vertico-resize t)
   :general
-  (:keymaps 'ivy-mode-map
-            "<escape>" #'keyboard-quit-context+)
-  :custom
-  (ivy-count-format "")
-  (ivy-height 7)
-  (ivy-use-virtual-buffers t)
-  (ivy-virtual-abbreviate 'full)
-  (ivy-wrap t)
+  (:keymaps 'vertico-map
+            "<escape>" #'keyboard-quit-context+
+            "<prior>" #'vertico-scroll-down
+            "<next>"  #'vertico-scroll-up)
   :init
-  (ivy-mode t)
-  :config
-  (dolist (func '(counsel-describe-function
-                  counsel-describe-symbol
-                  counsel-describe-face
-                  counsel-describe-variable
-                  counsel-descbinds))
-    (push (cons func 'ivy--regex-ignore-order) ivy-re-builders-alist)))
+  (vertico-mode t)
+  (vertico-reverse-mode t))
 
-(use-package counsel
+(use-package marginalia
+  :after vertico
   :general
-  (:prefix "M-s"
-           "c" #'counsel-rg
-           "g" #'counsel-git-grep
-           "s" #'swiper)
-  :preface
-  ;; http://xenodium.com/emacss-counsel-m-x-meets-multiple-cursors/index.html
-  (defun user/counsel-M-x-action (orig-fun &rest r)
-    "Additional support for multiple cursors."
-    (apply orig-fun r)
-    (let ((cmd (intern (string-trim-left (nth 0 r) "\\^"))))
-      (when (and (boundp 'multiple-cursors-mode)
-                 multiple-cursors-mode
-                 cmd
-                 (not (memq cmd mc--default-cmds-to-run-once))
-                 (not (memq cmd mc/cmds-to-run-once))
-                 (or mc/always-run-for-all
-                     (memq cmd mc--default-cmds-to-run-for-all)
-                     (memq cmd mc/cmds-to-run-for-all)
-                     (mc/prompt-for-inclusion-in-whitelist cmd)))
-        (mc/execute-command-for-all-fake-cursors cmd))))
-  :custom
-  (counsel-describe-function-preselect 'ivy-function-called-at-point)
-  (counsel-grep-post-action-hook '(recenter))
-  (counsel-mode-override-describe-bindings t)
+  (:keympas 'minibuffer-local-map
+            "C-o" #'marginalia-cycle)
   :init
-  (counsel-mode t)
-  (advice-add #'counsel-M-x-action :around #'user/counsel-M-x-action))
+  (marginalia-mode t))
 
-(use-package ivy-rich
-  :after ivy
-  (ivy-rich-switch-buffer-align-virtual-buffer t)
-  (ivy-rich-path-style 'abbrev)
-  :init
-  (ivy-rich-mode t)
+(use-package consult
+  :general
+  ([remap switch-to-buffer] #'consult-buffer)
+  ([remap switch-to-buffer-other-window] #'consult-buffer-other-window)
+  ([remap switch-to-buffer-other-frame] #'consult-buffer-other-frame)
+  ([remap copy-to-register] #'consult-register)
+  ([remap bookmark-jump] #'consult-bookmark)
+  ([remap yank-pop] #'consult-yank-pop)
+  ([remap imenu] #'consult-imenu)
+  ([remap goto-line] #'consult-goto-line)
+  ("M-g i" #'consult-imenu)
+  ("M-g I" #'consult-imenu-multi)
+  ("M-s l" #'consult-line)
+  ("M-s L" #'consult-line-multi)
+  ("M-g o" #'consult-outline)
+  :custom
+  (xref-show-xrefs-function #'consult-xref)
+  (xref-show-definitions-function #'consult-xref)
+  (consult-preview-key (kbd "M-."))
+  (consult-narrow-key "<"))
+
+(use-package embark
+  :general
+  ("C-;" #'embark-act)
+  ("C-:" #'embark-dwim)
+  :custom
+  (prefix-help-command #'embark-prefix-help-command)
   :config
-  (setcdr (assq t ivy-format-functions-alist) #'ivy-format-function-line))
+  ;; Hide the mode line of the Embark live/completions buffers
+  (push '("\\`\\*Embark Collect \\(Live\\|Completions\\)\\*"
+          nil
+          (window-parameters (mode-line-format . none)))
+        display-buffer-alist))
+
+(use-package embark-consult
+  :after (embark consult))
 
 (use-package company
   :preface
@@ -1298,6 +1238,8 @@ behavior added."
 
 (use-package log4j-mode
   :mode "\\.log\\'")
+
+(use-package json-reformat :defer)
 
 (use-package json-mode
   :mode "\\.json\\'"
@@ -1391,7 +1333,6 @@ That way we don't remove the whole regexp for a simple typo.
   (:prefix "M-s"
            "d" #'rg-dwim
            "r" #'rg
-           "l" #'rg-literal
            "p" #'rg-project)
   :custom
   (rg-custom-type-aliases nil)
@@ -1451,6 +1392,17 @@ found, an error is signaled."
 
 (use-package comment-dwim-2
   :general ("M-;" #'comment-dwim-2))
+
+(use-package cycle-at-point
+  :general ("C-=" #'cycle-at-point))
+
+(use-package tree-sitter
+  :ghook
+  ('after-init-hook #'global-tree-sitter-mode)
+  ('tree-sitter-after-on-hook #'tree-sitter-hl-mode))
+
+(use-package tree-sitter-langs
+  :after tree-sitter)
 
 (use-package dumb-jump
   :ghook ('dumb-jump-after-jump-hook #'recenter-top-bottom))
@@ -1538,7 +1490,11 @@ found, an error is signaled."
                           (topmost-intro-cont      .  0)
                           (knr-argdecl-intro       . -4)
                           (brace-list-open         .  0)
-                          (brace-list-intro        .  4)))
+                          (brace-list-intro        .  4)
+                          (namespace-open          .  0)
+                          (namespace-close         .  0)
+                          (innamespace             .  0)
+                          ))
       (c-cleanup-list  . (brace-else-brace
                           brace-elseif-brace
                           brace-catch-brace
@@ -1624,7 +1580,7 @@ found, an error is signaled."
 
 (use-package clang-format+
   :after cc-mode
-  :ghook ('c-mode-common-hook #'clang-format+-mode)
+  ;; :ghook ('c-mode-common-hook #'clang-format+-mode)
   :custom (clang-format+-context 'modification))
 
 (use-package modern-cpp-font-lock
@@ -1634,25 +1590,12 @@ found, an error is signaled."
 (use-package ccls
   :after cc-mode
   :when (executable-find "ccls")
-  :preface
-  (defun user/ccls-callee-hierarchy ()
-    (interactive)
-    (ccls-call-hierarchy t))
-
-  (defhydra user/ccls-show (:exit t)
-    ("i" ccls-inheritance-hierarchy "base inheritance")
-    ("I" ccls-inheritance-hierarchy "derived inheritance")
-    ("c" ccls-call-hierarchy "callers")
-    ("C" user/ccls-callee-hierarchy "callee")
-    ("m" ccls-member-hierarchy "members")
-    ("." lsp-ui-peek-find-references "references")
-    ("s" lsp-ui-peek-find-workspace-symbol "symbol"))
-
   :custom
   (ccls-sem-highlight-method 'font-lock)
   (ccls-initialization-options
    '(:diagnostics (:onOpen 0 :onSave 0 :onChange -1 :spellChecking :json-false)
-     :highlight (:largeFileSize 0)))
+     :highlight (:largeFileSize 0)
+     :index (:blacklist ["/app/.*" "/examples/.*"])))
   :config
   (push "compile_commands.json" ccls-root-files))
 
@@ -1677,7 +1620,12 @@ found, an error is signaled."
     (csetq python-shell-completion-string-code
            "';'.join(get_ipython().Completer.all_completions('''%s'''), module_completion('''%s'''))\n")))
 
+(use-package python-black
+  :after python
+  :defer)
+
 (use-package pyvenv
+  :disabled
   :preface
   (defun user/auto-virtualenv ()
     (pyvenv-mode t)
@@ -1689,7 +1637,11 @@ found, an error is signaled."
           (pyvenv-activate (expand-file-name "venv" root)))))
   :ghook ('python-mode-hook #'user/auto-virtualenv))
 
-(use-package poetry)
+(use-package poetry
+  :disabled
+  :custom
+  (poetry-tracking-strategy 'switch-buffer)
+  :ghook ('after-init-hook #'poetry-tracking-mode))
 
 (use-package haskell-mode :defer)
 
@@ -1745,12 +1697,12 @@ found, an error is signaled."
   :commands (lsp lsp-mode)
 
   :ghook
-  ('c-mode-common-hook #'lsp t)
-  ('python-mode-hook #'lsp t)
-  ('rust-mode-hook #'lsp t)
-  ('cmake-mode-hook #'lsp t)
-  ('sh-mode-hook #'lsp t)
-  ('yaml-mode-hook #'lsp t)
+  ('c-mode-common-hook #'lsp-deferred t)
+  ('python-mode-hook #'lsp-deferred t)
+  ('rust-mode-hook #'lsp-deferred t)
+  ('cmake-mode-hook #'lsp-deferred t)
+  ('sh-mode-hook #'lsp-deferred t)
+  ('yaml-mode-hook #'lsp-deferred t)
   ('lsp-mode-hook #'lsp-enable-which-key-integration)
 
   :custom
@@ -1762,9 +1714,10 @@ found, an error is signaled."
   (lsp-enable-symbol-highlighting nil)
   (lsp-enable-semantic-highlighting nil)
   (lsp-enable-imenu t)
+  (lsp-lens-enable nil)
   (lsp-auto-guess-root nil)
   (lsp-restart 'interactive)
-  ;; (lsp-pyls-plugins-rope-completion-enabled nil "This is very very slow (allow only jedi completions)")
+  (lsp-pylsp-plugins-flake8-max-line-length 100)
   (lsp-eldoc-render-all nil)
   (lsp-keymap-prefix "<C-m>")
 
@@ -1816,12 +1769,21 @@ found, an error is signaled."
   (lsp-ui-sideline-show-symbol t)
   (lsp-ui-sideline-ignore-duplicate t))
 
+(use-package imenu-list
+  :defer t
+  :custom
+  (imenu-list-auto-resize t)
+  (imenu-list-position 'left))
+
 (use-package flycheck
   :ghook ('after-init-hook #'global-flycheck-mode)
   :custom
   (flycheck-keymap-prefix (kbd "M-'"))
   (flycheck-check-syntax-automatically '(save idle-buffer-switch mode-enabled))
   (flycheck-idle-buffer-switch-delay 0.1))
+
+(use-package consult-flycheck
+  :after consult)
 
 (use-package flycheck-pos-tip
   :after flycheck
@@ -1849,41 +1811,39 @@ found, an error is signaled."
 ;; Small emacs enhacements
 ;;
 
-(use-package undo-tree
+(use-package undo-fu
+  :general
+  ([remap undo] #'undo-fu-only-undo)
+  ([remap undo-redo] #'undo-fu-only-redo)
   :custom
-  (undo-tree-auto-save-history nil)
-  (undo-tree-visualizer-diff t)
-  (undo-tree-visualizer-timestamps t)
-  (undo-tree-enable-undo-in-region t)
+  (undo-fu-allow-undo-in-region t))
 
-  :config
-  (global-undo-tree-mode t)
-
-  ;; Keep region when undoing in region
-  (defadvice undo-tree-keep-region (around keep-region activate)
-    (if (use-region-p)
-        (let ((m (set-marker (make-marker) (mark)))
-              (p (set-marker (make-marker) (point))))
-          ad-do-it
-          (goto-char p)
-          (set-mark m)
-          (set-marker p nil)
-          (set-marker m nil))
-      ad-do-it)))
-
-(use-package goggles
-  :disabled
-  :preface
-  (defun user/disable-some-goggles ()
-    "Disable kill/delete since it will pulse on any kill-word/company-complete."
-    (goggles-kill t)
-    (goggles-delete t))
-  :ghook
-  ('text-mode-hook #'goggles-mode)
-  ('prog-mode-hook #'goggles-mode)
-  ('goggles-mode-hook #'user/disable-some-goggles)
+(use-package undo-fu-session
+  :ghook ('after-init-hook #'global-undo-fu-session-mode)
   :custom
-  (goggles-pulse t))
+  (undo-fu-session-incompatible-files '("/COMMIT_EDITMSG\\'" "/git-rebase-todo\\'")))
+
+;; (use-package undo-tree
+;;   :custom
+;;   (undo-tree-auto-save-history nil)
+;;   (undo-tree-visualizer-diff t)
+;;   (undo-tree-visualizer-timestamps t)
+;;   (undo-tree-enable-undo-in-region t)
+
+;;   :config
+;;   (global-undo-tree-mode t)
+
+;;   ;; Keep region when undoing in region
+;;   (defadvice undo-tree-keep-region (around keep-region activate)
+;;     (if (use-region-p)
+;;         (let ((m (set-marker (make-marker) (mark)))
+;;               (p (set-marker (make-marker) (point))))
+;;           ad-do-it
+;;           (goto-char p)
+;;           (set-mark m)
+;;           (set-marker p nil)
+;;           (set-marker m nil))
+;;       ad-do-it)))
 
 (use-package visual-fill-column :defer)
 
@@ -1901,6 +1861,8 @@ found, an error is signaled."
 ;;
 ;; Shell and Terminals
 ;;
+
+(use-package fish-mode :defer)
 
 (use-package eshell :ensure nil
   :commands eshell
@@ -1925,7 +1887,7 @@ found, an error is signaled."
 
 (use-package multi-term
   :general
-  ("C-z" #'multi-term-next)
+  ;; ("C-z" #'multi-term-next)
   ("C-c z c" #'multi-term)
   ("C-c z d" #'multi-term-dedicated-toggle)
   ("C-c z n" #'multi-term-next)
@@ -1937,6 +1899,13 @@ found, an error is signaled."
   (term-buffer-maximum-size 0)
   (multi-term-dedicated-select-after-open-p t)
   (multi-term-scroll-show-maximum-output t))
+
+(use-package vterm
+  :general
+  ("C-z" #'vterm)
+  :config
+  ;; custom doesn't work for this, it's a defvar not a defcustom
+  (csetq vterm-timer-delay nil))
 
 (use-package eterm-256color
   :ghook 'term-mode-hook)
@@ -1977,54 +1946,13 @@ found, an error is signaled."
 (use-package git-timemachine
   :commands (git-timemachine git-timemachine-toggle))
 
-(use-package project
-  :disabled
-  :ensure nil
-  :general
-  ("C-c p f" 'project-find-file)
-  ("C-c p a" 'ff-find-other-file)
-  :preface
-  (defvar user/project-roots '(".project" ".projectile" "compile_commands.json" "requirements.txt" "pyproject.toml" ".git" ".svn" ".hg")
-    "Files or directories that mark the root of a project.")
-
-  (defvar user/project-root nil
-    "The project for this current buffer. Keep this cached so we
-    won't call `locate-dominating-file' each time. The special
-    value of `'no-project' means that this file does not belong
-    to a project.")
-  (make-variable-buffer-local 'user/project-root)
-
-  (defun user/project-find-root (path)
-    "Search (recursive) for root markers in PATH."
-
-    (if (stringp user/project-root)
-        (cons 'transient user/project-root)
-
-      (if user/project-root
-          nil
-        (unless (file-directory-p path)
-          (setq path (file-name-directory path)))
-
-        (let ((found-project (catch 'done
-                               (dolist (proot user/project-roots)
-                                 (if-let ((root (locate-dominating-file path proot)))
-                                     (progn
-                                       (setq-local user/project-root root)
-                                       (throw 'done root))
-                                   nil)))))
-          (if found-project
-              (cons 'transient found-project)
-            (setq-local user/project-root 'no-project)
-            nil)
-          ))))
-
-  :custom
-  (project-find-functions (list #'user/project-find-root)))
-
 (use-package projectile
   :general
   ("M-p" 'projectile-command-map)
-  :ghook ('after-init-hook #'projectile-mode))
+  :ghook ('after-init-hook #'projectile-mode)
+  :config
+  (with-eval-after-load "consult"
+    (setq consult-project-root-function #'projectile-project-root)))
 
 (use-package vc :ensure nil
   :defer
@@ -2064,6 +1992,7 @@ found, an error is signaled."
   (calendar-date-style 'iso))
 
 (use-package org
+  :pin "gnu"
   :general
   ("C-c n" #'org-capture
    "C-c a" #'org-agenda)
@@ -2071,11 +2000,42 @@ found, an error is signaled."
             "RET" #'org-return-and-maybe-indent)
 
   :custom
+  ;; with modernize only
+  (org-auto-align-tags nil)
+  (org-tags-column 0)
+  (org-catch-invisible-edits 'show-and-error)
+  (org-special-ctrl-a/e t)
+  (org-insert-heading-respect-content t)
+  (org-hide-emphasis markers t)
+  (org-pretty-entities t)
+
+  (org-ellipsis "…")
+
+  (org-agenda-block-separator ?─)
+  (org-agenda-time-grid '((daily today require-timed)
+                          (800 1000 1200 1400 1600 1800 2000)
+                          " ┄┄┄┄┄ " "┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄"))
+  (org-agenda-current-time-string
+   "⭠ now ─────────────────────────────────────────────────")
+
   (org-capture-templates
    '(("t" "Todo" entry (file+headline "~/org/todo.org" "Tasks")
       "* TODO %?\n  %i\n  %a" :empty-lines 1)
      ("n" "Note" entry (file "~/org/notes.org")
       "* NOTE %? %^G\n%U" :empty-lines 1))))
+
+(use-package org-bullets
+  :after org
+  :ghook 'org-mode-hook)
+
+(use-package org-modern
+  :disabled
+  :after org
+  :ghook
+  ('org-mode-hook #'org-modern-mode)
+  ('org-agenda-finalized-hook #'org-modern-agenda)
+  :custom
+  (org-modern-hide-stars 'leading))
 
 (use-package elfeed
   :commands (elfeed elfeed-update)
@@ -2101,11 +2061,11 @@ found, an error is signaled."
   (csetq elfeed-feeds
          '(("https://www.youtube.com/feeds/videos.xml?channel_id=UC3ts8coMP645hZw9JSD3pqQ" tech)        ;; Andreas Kling
            ("https://www.youtube.com/feeds/videos.xml?channel_id=UCgWip0vxtqu34rZrFeCpUow" tech)        ;; Tim Morgan
-           ;; ("https://vimeo.com/andrewrk/videos/rss")                                                    ;; Andrew Kelly
            ("https://www.youtube.com/feeds/videos.xml?channel_id=UC-_ZS52_S34Spofk4-lAedA" tech)        ;; Valtteri Koskivuori
            ("https://www.youtube.com/feeds/videos.xml?channel_id=UC3KNgU1jlleVcn8f7DY9bdg" tech)        ;; Dimitriy Kubyshkin
            ("https://www.youtube.com/feeds/videos.xml?channel_id=UC7S6EpMQ5QNGRg7uJmJWXNw" tech)        ;; QueueQueueHack
            ("https://www.youtube.com/feeds/videos.xml?channel_id=UCBa659QWEk1AI4Tg--mrJ2A" tech)        ;; Tom Scott
+           ("https://www.youtube.com/feeds/videos.xml?channel_id=UCHC4G4X-OR5WkY-IquRGa3Q" tech)        ;; Tom Scott 2nd
            ("https://www.youtube.com/feeds/videos.xml?channel_id=UCKTehwyGCKF-b2wo0RKwrcg" tech)        ;; Bisqwit
            ("https://www.youtube.com/feeds/videos.xml?channel_id=UCbfYPyITQ-7l4upoX8nvctg" tech)        ;; Two Minute Papers
            ("https://www.youtube.com/feeds/videos.xml?channel_id=UCS0N5baNlQWJCUrhCEo8WlA" tech)        ;; Ben Eater
@@ -2118,20 +2078,22 @@ found, an error is signaled."
            ("https://www.youtube.com/feeds/videos.xml?channel_id=UCS4FAVeYW_IaZqAbqhlvxlA" tech)        ;; ContextFree
            ("https://www.youtube.com/feeds/videos.xml?channel_id=UCBLr7ISa_YDy5qeATupf26w" tech)        ;; AlgorithmsLive!
            ("https://www.youtube.com/feeds/videos.xml?channel_id=UCYO_jab_esuFRV4b17AJtAw" tech)        ;; 3blue1brown
-           ("https://www.youtube.com/feeds/videos.xml?channel_id=UCRPMAqdtSgd0Ipeef7iFsKw" tech)        ;; Gurav Sen
            ("https://www.youtube.com/feeds/videos.xml?channel_id=UC1kBxkk2bcG78YBX7LMl9pQ" tech)        ;; codereport
-           ("https://www.youtube.com/feeds/videos.xml?channel_id=UCwgKmJM4ZJQRJ-U5NjvR2dg" tech)        ;; comma.ai
            ("https://www.youtube.com/feeds/videos.xml?channel_id=UC_iD0xppBwwsrM9DegC5cQQ" tech)        ;; Jon Gjengset (rust)
            ("https://www.youtube.com/feeds/videos.xml?channel_id=UCguWV1bZg1QiWbY32vGnOLw" tech)        ;; Bitwise
            ("https://www.youtube.com/feeds/videos.xml?channel_id=UCrUL8K81R4VBzm-KOYwrcxQ" tech)        ;; Engineer Man
            ("https://www.youtube.com/feeds/videos.xml?channel_id=UCJ0-OtVpF0wOKEqT2Z1HEtA" tech)        ;; ElectroBOOM
-           ("https://www.youtube.com/feeds/videos.xml?channel_id=UCRPdsCVuH53rcbTcEkuY4uQ" tech)        ;; Moores Law Is Dead
            ("https://www.youtube.com/feeds/videos.xml?channel_id=UC3azLjQuz9s5qk76KEXaTvA" tech)        ;; suckerpinch
            ("https://www.youtube.com/feeds/videos.xml?channel_id=UCq7dxy_qYNEBcHqQVCbc20w" tech)        ;; WhatsACreel
            ("https://www.youtube.com/feeds/videos.xml?channel_id=UClcE-kVhqyiHCcjYwcpfj9w" tech)        ;; LiveOverflow
            ("https://www.youtube.com/feeds/videos.xml?channel_id=UC0uTPqBCFIpZxlz_Lv1tk_g" tech)        ;; Protesilaos Stavrou
            ("https://www.youtube.com/feeds/videos.xml?channel_id=UCUzQJ3JBuQ9w-po4TXRJHiA" tech)        ;; jdh
            ("https://www.youtube.com/feeds/videos.xml?channel_id=UCq-PF3nIPg5KO8po0dHcXsQ" tech)        ;; Marko Tasic
+           ("https://www.youtube.com/feeds/videos.xml?channel_id=UC-yuWVUplUJZvieEligKBkA" tech)        ;; javidx9
+           ("https://www.youtube.com/feeds/videos.xml?channel_id=UCrW38UKhlPoApXiuKNghuig" tech)        ;; Systems with JT
+           ("https://www.youtube.com/feeds/videos.xml?channel_id=UCBLthWZ0AdU-tTpKCBs8PGQ" tech)        ;; Kofybrek
+           ("https://www.youtube.com/feeds/videos.xml?channel_id=UCxwcmRAmBRzZMNS37dCgmHA" tech)        ;; RoboNuggie
+           ("https://www.youtube.com/feeds/videos.xml?channel_id=UCov_51F0betb6hJ6Gumxg3Q" tech)        ;; AI and Games
 
            ("https://www.youtube.com/feeds/videos.xml?channel_id=UCNf56PUyMI0wUyZ8KRhg2AQ" cinema)      ;; Cinema Nippon
            ("https://www.youtube.com/feeds/videos.xml?channel_id=UC7GV-3hrA9kDKrren0QMKMg" cinema)      ;; CinemaTyler
@@ -2161,13 +2123,10 @@ found, an error is signaled."
            ("https://www.youtube.com/feeds/videos.xml?channel_id=UCotwjyJnb-4KW7bmsOoLfkg" science)     ;; Art of the Problem
            ("https://www.youtube.com/feeds/videos.xml?channel_id=UCzR-rom72PHN9Zg7RML9EbA" science)     ;; PBS Eons
            ("https://www.youtube.com/feeds/videos.xml?channel_id=UC9Lp_AA5M2cMGrlvnnIns-g" science)     ;; Bizarre Beasts
-           ("https://www.youtube.com/feeds/videos.xml?channel_id=UCgRBRE1DUP2w7HTH9j_L4OQ" science)     ;; Medlife Crisis
-           ("https://www.youtube.com/feeds/videos.xml?channel_id=UC7_gcs09iThXybpVgjHZ_7g" science)     ;; PBS Space Time
            ("https://www.youtube.com/feeds/videos.xml?channel_id=UCSIvk78tK2TiviLQn4fSHaw" science)     ;; Up and Atom
            ("https://www.youtube.com/feeds/videos.xml?channel_id=UCMk_WSPy3EE16aK5HLzCJzw" science)     ;; NativLang
 
            ("https://www.youtube.com/feeds/videos.xml?channel_id=UC8XjmAEDVZSCQjI150cb4QA" pop)         ;; Knowing Better
-           ("https://www.youtube.com/feeds/videos.xml?channel_id=UCSriLWQC2J6wNeWXOGlIV4w" pop)         ;; Corporis
            ("https://www.youtube.com/feeds/videos.xml?channel_id=UC2C_jShtL725hvbm1arSV9w" pop)         ;; GCP Grey
            ("https://www.youtube.com/feeds/videos.xml?channel_id=UCuPgdqQKpq4T4zeqmTelnFg" pop)         ;; kaptainkristian
            ("https://www.youtube.com/feeds/videos.xml?channel_id=UC-gjznzViwMols6dz89qLbg" pop)         ;; Entertain The Elk
@@ -2178,10 +2137,13 @@ found, an error is signaled."
            ("https://www.youtube.com/feeds/videos.xml?channel_id=UCs_bV79AmugXVvjaASibPnw" pop)         ;; KhAnubis
            ("https://www.youtube.com/feeds/videos.xml?channel_id=UCXkNod_JcH7PleOjwK_8rYQ" pop)         ;; Polyphonic
            ("https://www.youtube.com/feeds/videos.xml?channel_id=UC9RM-iSvTu1uPJb8X5yp3EQ" pop)         ;; Wendover
-           ("https://www.youtube.com/feeds/videos.xml?channel_id=UCdN4aXTrHAtfgbVG9HjBmxQ" pop)         ;; Kay & Peele
+           ("https://www.youtube.com/feeds/videos.xml?channel_id=UCTWKe1zATFV6d0o6oLS9sgw" pop)         ;; Extremities
            ("https://www.youtube.com/feeds/videos.xml?channel_id=UCi7l9chXMljpUft67vw78qw" pop)         ;; Sideways
            ("https://www.youtube.com/feeds/videos.xml?channel_id=UCyNtlmLB73-7gtlBz00XOQQ" pop)         ;; Folding Ideas
-           ("https://www.youtube.com/feeds/videos.xml?channel_id=UCt_t6FwNsqr3WWoL6dFqG9w" pop)         ;; BrainCraft
+           ("https://www.youtube.com/feeds/videos.xml?channel_id=UCKzJFdi57J53Vr_BkTfN3uQ" pop)         ;; Primer
+
+           ("https://www.youtube.com/feeds/videos.xml?channel_id=UCdPPmAd9qlG80qeSm74-eww" weird)       ;; In Praise of Shadows
+           ("https://www.youtube.com/feeds/videos.xml?channel_id=UCF9LcCkPbnCxiTQhbKa-xvw" weird)       ;; kirstenlepore
 
            ("https://www.youtube.com/feeds/videos.xml?channel_id=UCct9aR7HC79Cv2g-9oDOTLw" religion)    ;; ReligionForBreakfast
 
@@ -2202,6 +2164,10 @@ found, an error is signaled."
            ("https://blog.benjojo.co.uk/rss.xml" tech)
            ("https://lemire.me/blog/feed/" tech)
            ("https://blog.royalsloth.eu/posts/index.xml" tech)
+           ("https://maskray.me/blog/atom.xml" tech)
+           ("https://nullprogram.com/feed/" tech)
+           ("https://blog.yiningkarlli.com/feeds/posts/default/index.xml" tech)
+           ("https://crpgaddict.blogspot.com/feeds/posts/default" pop)
            ("https://obscuritory.com/feed/" pop)
            ("https://planet.emacslife.com/atom.xml" emacs)
            ("https://www.phoronix.com/rss.php" linux phoronix)

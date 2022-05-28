@@ -1,0 +1,79 @@
+{
+    "layer": "top",
+    "height": 28,
+    "modules-left": [],
+    "modules-center": ["wlr/taskbar"],
+    "modules-right": ["tray", "battery", "pulseaudio", "network", "network#vpn", "clock"],
+    "position": "bottom",
+    "wlr/taskbar": {
+        "all-outputs": true,
+        "icon-size": 18,
+        "on-click": "activate",
+        "on-click-right": "minimize-raise",
+        "on-click-middle": "close"
+    },
+    "tray": {
+        "icon-size": 18,
+        "spacing": 8
+    },
+    "battery": {
+        "tooltip-format": "{capacity}% {time}",
+        "states": {
+            "full": 97,
+            "warning": 30,
+            "critical": 15
+        },
+        "format": "{icon} {capacity}%",
+        "format-icons": ["", "", "", "", ""]
+    },
+    "custom/clock": {
+        "rotate": true,
+        "interval": 5,
+        "exec": "date +'%H:%M'",
+        "tooltip": false
+    },
+    "clock": {
+        "interval": 60,
+        "format": "{:%H:%M}"
+    },
+    "memory": {
+        "tooltip": false,
+        "states": {
+            "warning": 50,
+            "critical": 85
+        },
+        "format": "mem: {}%",
+        "on-click": "alacritty -t force_float -d 112 30 -e htop"
+    },
+    "pulseaudio": {
+        "format": "{icon} {volume}%",
+        "format-bluetooth": "{icon} ",
+        "format-icons": {
+            "headphone": "",
+            "default": ["", ""]
+        },
+        "format-muted": "",
+        "on-click": "pavucontrol"
+    },
+    "network": {
+        "tooltip-format-ethernet": "{ifname} {ipaddr}",
+        "tooltip-format-wifi": "{ifname} {ipaddr}",
+        "format-wifi": "  {essid:.8}",
+        "format-ethernet": " lan",
+        "format-disconnected": "(no network)"
+    },
+    "network#vpn": {
+        "interface": "tun0",
+        "tooltip-format": "{ifname} {ipaddr}",
+        "tooltip-format-disconnected": "No VPN",
+        "format-ethernet": "",
+        "format-disconnected": ""
+    },
+    "idle_inhibitor": {
+        "format": "{icon}",
+        "format-icons": {
+            "activated": "",
+            "deactivated": ""
+        }
+    }
+}

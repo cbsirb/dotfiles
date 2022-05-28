@@ -94,6 +94,10 @@ mosh-screen() {
     mosh "$@" -- screen -DR mosh-session
 }
 
+sshp() {
+    sshpass -p 2top90! ssh "$@"
+}
+
 countdown() {
     total=$1
     shift

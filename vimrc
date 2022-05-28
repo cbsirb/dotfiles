@@ -396,7 +396,7 @@ let g:lsc_server_commands = {
     \         },
     \     },
     \ },
-    \ 'python' : 'pyls',
+    \ 'python' : 'pylsp',
     \ 'sh': 'bash-language-server start',
     \}
 
