@@ -19,3 +19,5 @@
 /mpd/log
 /mpd/pid
 /mpd/sticker.sql
+/emacs.d/custom-unused.el
+/emacs.d/package-quickstart.elc
