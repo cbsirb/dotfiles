@@ -98,7 +98,6 @@
   (modus-themes-italic-constructs t)
   (modus-themes-paren-match '(bold intense))
   (modus-themes-mixed-fonts t)
-  (modus-themes-section-headings t)
   (modus-themes-hl-line '(intense))
   (modus-themes-completions '((matches . (extrabold background intense))
                               (selection . (extrabold accented intense))
