@@ -17,35 +17,34 @@
        (setq ,variable ,value)
      (error (format "Variable %s does not exist" ',variable))))
 
-(defvar user/gc-cons-threshold 12800000)
+(defvar user/gc-cons-threshold 134217728)
 
-(defun user/after-init ()
-  "Will run after init to restore some stuff."
-
-  (message "emacs-init-time: %s" (emacs-init-time))
-
-  (csetq gc-cons-threshold user/gc-cons-threshold)
-  (garbage-collect))
-
-(add-hook 'after-init-hook #'user/after-init)
-(csetq package-user-dir (expand-file-name "elpa" user-emacs-directory))
+(csetq custom-file (expand-file-name "custom-unused.el" user-emacs-directory))
 
 (csetq
  package-selected-packages
- '(auto-package-update beginend clang-format+ cmake-font-lock cmake-mode
-   comment-dwim-2 ccls consult consult-flycheck company cycle-at-point
-   cython-mode diff-hl dired-du dired-git-info dired-narrow diredfl dumb-jump
-   eacl elfeed embark embark-consult eterm-256color eterm-256color-mode
-   expand-region fish-mode flycheck flycheck-pos-tip geiser general
-   git-timemachine helpful haskell-mode hl-todo ignoramus iy-go-to-char js2-mode
-   json-mode json-reformat log4j-mode lsp-mode lsp-ui magit magit-gitflow
-   marginalia minions modern-cpp-font-lock modus-themes multi-term
-   multiple-cursors nasm-mode no-littering nov orderless org org-bullets
-   org-modern pdf-tools projectile pyenv python-black poetry racket-mode
-   rainbow-delimiters rainbow-mode realgud rg rust-mode string-inflection
-   symbol-overlay tree-sitter tree-sitter-langs undo-fu undo-fu-session
-   use-package vertico vc-msg visual-fill-column vterm web-mode wgrep which-key
-   yaml-mode yasnippet))
+ '(adoc-mode avy clang-format+ comment-dwim-2 company consult
+   cycle-at-point cython-mode denote diff-hl dired-du dired-git-info
+   dired-narrow dumb-jump elfeed embark embark-consult eterm-256color
+   expand-region fish-mode general git-timemachine haskell-mode hl-todo
+   ignoramus imenu-list js2-mode json-mode json-reformat just-mode lin
+   log4j-mode magit magit-gitflow marginalia markdown-mode minions modus-themes
+   multiple-cursors mwim nasm-mode nix-mode no-littering nov orderless
+   org-bullets projectile python-black racket-mode rainbow-delimiters
+   rainbow-mode realgud rg rust-mode string-inflection symbol-overlay undo-fu
+   undo-fu-session use-package vc-msg vertico visual-fill-column web-mode wgrep
+   which-key yaml-mode yasnippet))
+
+(defun user/after-init ()
+  "Will run after init to restore some stuff."
+  (message "emacs-init-time: %s" (emacs-init-time))
+  (csetq gc-cons-threshold user/gc-cons-threshold)
+  (garbage-collect))
+
+;; (setq garbage-collection-messages t)
+
+(add-hook 'after-init-hook #'user/after-init)
+(csetq package-user-dir (expand-file-name "elpa" user-emacs-directory))
 
 (unless (bound-and-true-p package--initialized)
   (package-initialize))
@@ -64,7 +63,7 @@
   (package-install 'use-package))
 
 (csetq use-package-enable-imenu-support t)
-(csetq use-package-expand-minimally t)
+(csetq use-package-expand-minimally nil)
 (csetq use-package-always-ensure t)
 (csetq use-package-compute-statistics nil)
 
@@ -72,7 +71,7 @@
   (require 'use-package))
 
 (defun package-rebuild-all ()
-  "Rebuild all the packages."
+  "Rebuild all the user-installed packages."
   (interactive)
   (byte-recompile-directory package-user-dir nil 'force))
 
@@ -86,7 +85,6 @@
 ;;
 ;; Packages needed no matter what, and usually others are depended on it
 ;;
-(csetq custom-file null-device)
 
 (use-package general)
 
@@ -97,17 +95,20 @@
   (modus-themes-variable-pitch-ui t)
   (modus-themes-fringes 'subtle)
   (modus-themes-bold-constructs t)
-  (modus-themes-italic-constructs nil)
+  (modus-themes-italic-constructs t)
   (modus-themes-paren-match '(bold intense))
   (modus-themes-mixed-fonts t)
   (modus-themes-section-headings t)
+  (modus-themes-hl-line '(intense))
   (modus-themes-completions '((matches . (extrabold background intense))
                               (selection . (extrabold accented intense))
                               (popup . (accented)))))
 
+(use-package lin
+  :ghook ('after-init-hook #'lin-global-mode)
+  ('after-init-hook #'global-hl-line-mode))
+
 (use-package minions
-  ;; :custom
-  ;; (minions-mode-line-delimiters '("" . ""))
   :custom
   (minions-mode-line-lighter ";")
   :config
@@ -135,7 +136,6 @@
 (defalias 'ff 'find-file)
 (defalias 'ffo 'find-file-other-window)
 
-;; mule.el
 (csetq locale-coding-system 'utf-8)
 (prefer-coding-system 'utf-8)
 (set-terminal-coding-system 'utf-8)
@@ -146,7 +146,6 @@
 (set-charset-priority 'unicode)
 (csetq x-select-request-type '(UTF8_STRING COMPOUND_TEXT TEXT STRING))
 
-;; files.el
 (csetq enable-local-variables :safe)
 (csetq backup-by-copying t)
 (csetq view-read-only t)
@@ -158,7 +157,6 @@
 (csetq require-final-newline t)
 (file-name-shadow-mode t)
 
-;; C
 (csetq completion-ignore-case t)
 (csetq system-time-locale "C")
 (csetq auto-window-vscroll nil)
@@ -180,10 +178,7 @@
 (csetq inhibit-compacting-font-caches t)
 (csetq frame-resize-pixelwise t)
 (csetq window-combination-resize t)
-(csetq frame-title-format
-       '(:eval (if (buffer-file-name)
-                   (abbreviate-file-name (buffer-file-name))
-                 "%b")))
+(csetq frame-title-format '(:eval "%b - Emacs"))
 (csetq indicate-buffer-boundaries
        '((top . right)
          (bottom . right)
@@ -191,7 +186,6 @@
 
 (csetq command-line-ns-option-alist nil)
 
-;; misc stuff
 (csetq read-file-name-completion-ignore-case t)
 (csetq bookmark-save-flag t)
 (csetq column-number-indicator-zero-based nil)
@@ -201,10 +195,9 @@
 (csetq ad-redefinition-action 'accept)
 (csetq woman-use-topic-at-point-default t)
 (csetq apropos-do-all t)
-(csetq idle-update-delay 1)
+;; (csetq idle-update-delay 1)
 (csetq custom-buffer-done-kill t)
 
-;; Some bidi stuff
 (csetq bidi-paragraph-direction 'left-to-right)
 (csetq bidi-inhibit-bpa t)
 
@@ -218,11 +211,8 @@
          ((meta) . 0.5)
          ((control) . text-scale)))
 (csetq scroll-conservatively 101)
-(csetq scroll-preserve-screen-position t)
+;; (csetq scroll-preserve-screen-position t)
 (csetq fast-but-imprecise-scrolling t)
-
-(setq pixel-scroll-precision-large-scroll-height 5.0)
-;; (setq pixel-scroll-precision-interpolation-factor 30)
 
 (csetq x-underline-at-descent-line t)
 (csetq x-stretch-cursor t)
@@ -235,15 +225,11 @@
 (csetq tooltip-delay 0.5)
 (csetq x-gtk-use-system-tooltips nil)
 
-(csetq tramp-default-method "ssh")
-(csetq tramp-verbose 2)
-
 (csetq uniquify-buffer-name-style 'post-forward-angle-brackets)
 (csetq uniquify-after-kill-buffer-p t)
 
 (csetq warning-suppress-types '((comp)))
 
-;; simple.el
 (csetq mark-ring-max 128)
 (csetq global-mark-ring-max 256)
 (csetq save-interprogram-paste-before-kill t)
@@ -257,13 +243,17 @@
 (csetq shell-command-prompt-show-cwd t)
 (csetq set-mark-command-repeat-pop t)
 
+;; window-system is not enough when the daemon is used
+(when (or (memq window-system '(pgtk))
+          (getenv "WAYLAND_DISPLAY"))
+  (push 'text/plain\;charset=utf-8 x-select-request-type))
+
 (transient-mark-mode t)
 (auto-save-mode -1)
 (delete-selection-mode t)
 (size-indication-mode -1)
 (line-number-mode t)
 (column-number-mode t)
-(pixel-scroll-precision-mode t)
 (global-so-long-mode t)
 
 (winner-mode t)
@@ -272,31 +262,17 @@
 (save-place-mode t)
 (global-auto-revert-mode t)
 
-(use-package user-auto-revert
-  :disabled)
+(pixel-scroll-precision-mode t)
 
 ;;
 ;; Mode-line
 ;;
 ;; (csetq mode-line-compact 'long)
 
-(csetq mode-line-buffer-identification
-       '(:eval (format-mode-line
-                (propertized-buffer-identification
-                 (or (when-let* ((buffer-file-truename buffer-file-truename)
-                                 ;; (prj (cdr-safe (project-current)))
-                                 (prj (if (fboundp 'projectile-project-root)
-                                          (projectile-project-root)
-                                        default-directory))
-                                 (prj-parent (directory-file-name (expand-file-name prj))))
-                      (concat (file-relative-name (file-name-directory buffer-file-truename) prj-parent) (file-name-nondirectory buffer-file-truename)))
-                  "%b")))))
-
 (defun mode-line-vc ()
-  "Will returing the same thing as variable `vc-mode', but with a hard-coded max length."
+  "Will returing the same thing as variable `vc-mode', but with a hard-coded max length and no Git:."
   (if vc-mode
-      (let ((backend (vc-backend buffer-file-name))) ;; vc-backend returns nil if given a non-string
-        (concat (substring vc-mode (+ 2 (if (eq backend 'Hg) 2 3)) (min 30 (length vc-mode))) "    "))
+      (concat (substring vc-mode 5 (min 30 (length vc-mode))) "    ")
     ""))
 
 (csetq mode-line-format
@@ -305,7 +281,7 @@
          mode-line-mule-info
          mode-line-client
          mode-line-modified
-         mode-line-remote
+         ;; mode-line-remote
          mode-line-frame-identification
          mode-line-buffer-identification
          "    "
@@ -329,7 +305,7 @@
 (csetq indicate-empty-lines t)
 (csetq fill-column 80)
 
-(defun tabs-spaces-toggle ()
+(defun toggle-tabs-spaces ()
   "Toggle between tabs and spaces in the current file."
   (interactive)
   (if indent-tabs-mode
@@ -348,6 +324,9 @@
 
 (when (member "Symbola" (font-family-list))
   (set-fontset-font t 'unicode "Symbola" nil 'prepend))
+
+(when (member "all-the-icons" (font-family-list))
+  (set-fontset-font t 'unicode "all-the-icons" nil 'append))
 
 (push `(,(rx string-start "*" (or "Fly" "compilation"))
         (display-buffer-reuse-window
@@ -411,14 +390,11 @@
   (ediff-split-window-function #'split-window-horizontally)
   (ediff-window-setup-function #'ediff-setup-windows-plain))
 
-(csetq vc-follow-symlinks t)
-(csetq vc-git-diff-switches
-       '("--ignore-space-change" "--ignore-all-space"
-         "--no-ext-diff" "--stat" "--diff-algorithm=histogram"))
-(csetq vc-git-print-log-follow t)
-
-(csetq tab-bar-close-button-show nil)
-(csetq tab-bar-show 1)
+(use-package tab-bar :ensure nil
+  :defer
+  :custom
+  (tab-bar-close-button-show nil)
+  (tab-bar-show 1))
 
 (use-package savehist :ensure nil
   :custom
@@ -431,29 +407,44 @@
   :config
   (savehist-mode t))
 
-(csetq hexl-bits 8)
+(use-package hexl :ensure nil
+  :defer
+  :custom
+  (hexl-bits 8))
 
-(csetq dabbrev-case-replace nil)
-(csetq dabbrev-abbrev-skip-leading-regexp "[^ ]*[<>=*$]")
+(use-package dabbrev :ensure nil
+  :defer
+  :custom
+  (dabbrev-case-replace nil)
+  (dabbrev-abbrev-skip-leading-regexp "[^ ]*[<>=*$]"))
 
-(csetq hippie-expand-try-functions-list
-       '(try-expand-dabbrev-visible
-         try-expand-dabbrev
-         try-expand-dabbrev-all-buffers
-         try-expand-dabbrev-from-kill
-         try-expand-list
-         try-expand-list-all-buffers
-         try-complete-file-name-partially
-         try-complete-file-name
-         try-expand-all-abbrevs))
-(csetq hippie-expand-verbose nil)
+(use-package hippie-exp :ensure nil
+  :defer
+  :custom
+  (hippie-expand-try-functions-qlist
+   '(try-expand-dabbrev-visible
+     try-expand-dabbrev
+     try-expand-dabbrev-all-buffers
+     try-expand-dabbrev-from-kill
+     try-expand-list
+     try-expand-list-all-buffers
+     try-complete-file-name-partially
+     try-complete-file-name
+     try-expand-all-abbrevs))
+  (hippie-expand-verbose nil))
 
-(csetq ispell-program-name (executable-find "aspell"))
-(csetq ispell-extra-args '("--sug-mode=normal" "--keyboard=standard"))
+(use-package ispell :ensure nil
+  :defer
+  :custom
+  (ispell-program-name (executable-find "aspell"))
+  (ispell-extra-args '("--sug-mode=normal" "--keyboard=standard")))
 
-(csetq flyspell-issue-welcome-flag nil)
-(csetq flyspell-issue-message-flag nil)
-(csetq flyspell-use-meta-tab nil)
+(use-package flyspell :ensure nil
+  :defer
+  :custom
+  (flyspell-issue-welcome-flag nil)
+  (flyspell-issue-message-flag nil)
+  (flyspell-use-meta-tab nil))
 
 (defun hide-trailing-whitespace ()
   "Used for hooks to various modes."
@@ -485,6 +476,7 @@
 (use-package xref :ensure nil
   :defer
   :config
+  (csetq xref-search-program 'ripgrep)
   (add-to-list 'xref-prompt-for-identifier 'xref-find-references t))
 
 ;; Thank you u/ouroboroslisp
@@ -685,11 +677,12 @@ PARSE-START indicates where the parsing should start in the file (point)."
   "C-x <"
   "<C-next>"
   "<C-prior>"
-  "M-`")
+  "M-`"
+  "M-'")
 
 (use-package user-utils :ensure nil
   :general
-  ;; ("M-`" #'user/open-terminal)
+  ("M-`" #'user/open-terminal)
   ("M-]" #'user/next-error)
   ("M-[" #'user/prev-error)
   ("M-j" #'user/join-line)
@@ -704,8 +697,10 @@ PARSE-START indicates where the parsing should start in the file (point)."
   ("M-o" #'other-window)
   ("C-w" #'user/kill-word-or-region)
   ("<C-return>" #'user/open-line-above)
-  ("C-a" #'user/move-beginning-of-line)
-  ("C-e" #'move-end-of-line))
+  ;; mwim replaced this
+  ;; ("C-a" #'user/move-beginning-of-line)
+  ;; ("C-e" #'move-end-of-line)
+  )
 
 (defun keyboard-quit-context+ ()
   "Quit current context.
@@ -764,6 +759,8 @@ behavior added."
 ;; (general-define-key [remap eval-last-sexp] #'pp-eval-last-sexp)
 (general-define-key [remap eval-expression] #'pp-eval-expression)
 
+(general-define-key "S-<down-mouse-1>" #'mouse-set-mark)
+
 (general-define-key
  :prefix "M-s"
  "o" #'occur-at-point)
@@ -784,6 +781,27 @@ behavior added."
   :general
   ("<f8>" #'profiler-start)
   ("<f9>" #'profiler-stop))
+
+;; (use-package docker-tramp
+;;   :disabled
+;;   :custom
+;;   (docker-tramp-docker-:executable "podman"))
+
+(use-package tramp
+  :defer
+  :custom
+  (tramp-default-method "ssh")
+  (tramp-verbose 2)
+  :config
+  (push
+   (cons
+    "docker"
+    '((tramp-login-program "podman")
+      (tramp-login-args (("exec" "-it") ("%h") ("/bin/bash")))
+      (tramp-remote-shell "/bin/bash")
+      (tramp-remote-shell-args ("-i") ("-c"))))
+   tramp-methods)
+  (push '("/docker:" "direct-async-process" t) tramp-connection-properties))
 
 (use-package whitespace :ensure nil
   :preface
@@ -806,7 +824,7 @@ behavior added."
   :ghook 'prog-mode-hook
 
   :custom-face
-  (whitespace-tab ((t (:background nil :foreground "light gray"))))
+  (whitespace-tab ((t (:background "unspecified" :foreground "light gray"))))
 
   :custom
   (whitespace-display-mappings
@@ -822,15 +840,34 @@ behavior added."
   ('text-mode-hook #'display-line-numbers-mode))
 
 (use-package recentf :ensure nil
+  :preface
+  (defadvice write-region (around recentf-no-message)
+    (ad-set-arg 4 'nomsg)
+    ad-do-it
+    (set-buffer-modified-p nil))
+
+  (defadvice recentf-save-list (around no-message activate)
+    "Suppress the output from `write-region' to minibuffer during the `recentf-save-list'."
+    (let ((activated (ad-is-active 'write-region)))
+      (ad-enable-advice 'write-region 'around 'recentf-no-message)
+      (ad-activate 'write-region)
+      (unwind-protect
+          ad-do-it
+        (ad-disable-advice 'write-region 'around 'recentf-no-message)
+        (if activated
+            (ad-activate 'write-region)
+          (ad-deactivate 'write-region)))))
+
   :custom
   (recentf-auto-cleanup 'never)
   (recentf-exclude (list
                     "/elpa/.*\\'"
                     "/.ccls-cache/.*\\'"
-                    "/.clangd/.*\\'"
+                    "/.cache/.*\\'"
                     "PKGBUILD"
                     "/usr/.*\\'"
                     "/tmp/.*\\'"
+                    "/nix/store/.*\\'"
                     "/.cache/pypoetry/virtualenvs/.*\\'"
                     #'ignoramus-boring-p))
   (recentf-max-saved-items 500)
@@ -884,7 +921,8 @@ behavior added."
             "C-n"    #'comint-next-input
             "C-p"    #'comint-previous-input
             "C-r"    #'comint-history-isearch-backward)
-  :ghook ('comint-output-filter-functions #'comint-strip-ctrl-m)
+  ;; TODO: Is this needed on Linux? Disabled 06/14/2022. Re-evaluate in a few months
+  ;; :ghook ('comint-output-filter-functions #'comint-strip-ctrl-m)
   :custom
   (comint-process-echoes t)
   (comint-prompt-read-only t)
@@ -975,7 +1013,7 @@ behavior added."
   (dired-dwim-target t)
   (dired-hide-details-hide-information-lines nil)
   (dired-hide-details-hide-symlink-targets nil)
-  (dired-listing-switches "-lFaGh1v --group-directories-first")
+  (dired-listing-switches "-lFAGh1v --group-directories-first")
   (dired-ls-F-marks-symlinks t)
   (dired-recursive-copies 'always)
   (dired-omit-verbose nil))
@@ -1003,17 +1041,13 @@ behavior added."
   (dired-narrow-exit-when-one-left t))
 
 (use-package diredfl
+  :disabled
   :ghook 'dired-mode-hook)
 
 (use-package dired-git-info
   :general
   (:keymaps 'dired-mode-map
             ")" #'dired-git-info-mode))
-
-(use-package auto-package-update
-  :custom
-  (auto-package-update-delete-old-versions t)
-  :defer t)
 
 
 ;;
@@ -1029,6 +1063,7 @@ behavior added."
   (expand-region-autocopy-register "e"))
 
 (use-package symbol-overlay
+  :disabled ;; Until fixes the vertico & company break
   :preface
   (define-globalized-minor-mode global-symbol-overlay-mode
     symbol-overlay-mode symbol-overlay-mode :group 'symbol-overlay)
@@ -1045,21 +1080,64 @@ behavior added."
   :ghook
   ('after-init-hook #'global-symbol-overlay-mode))
 
-(use-package beginend
-  :disabled
-  :preface
-  (defun user/recenter-after-beginend-jump ()
-    (recenter))
-  :config
-  (beginend-global-mode t)
-  :config
-  (advice-add #'beginend-prog-mode-goto-beginning :after #'user/recenter-after-beginend-jump))
-
-(use-package iy-go-to-char
-  :disabled
+(use-package mwim
   :general
-  ("M-m" #'iy-go-to-char)
-  ("M-M" #'iy-go-to-char-backward))
+  ([remap move-beginning-of-line] #'mwim-beginning-of-code-or-line) ;; maybe
+  ([remap move-end-of-line] #'mwim-end-of-code-or-line))
+
+(use-package avy
+  :general
+  ("C-'" #'avy-goto-char-timer)
+  :preface
+  (defun avy-action-kill-whole-line (pt)
+    (save-excursion
+      (goto-char pt)
+      (kill-whole-line))
+    (select-window
+     (cdr
+      (ring-ref avy-ring 0)))
+    t)
+
+  (defun avy-action-copy-whole-line (pt)
+    (save-excursion
+      (goto-char pt)
+      (cl-destructuring-bind (start . end)
+          (bounds-of-thing-at-point 'line)
+        (copy-region-as-kill start end)))
+    (select-window
+     (cdr
+      (ring-ref avy-ring 0)))
+    t)
+
+  (defun avy-action-yank-whole-line (pt)
+    (avy-action-copy-whole-line pt)
+    (save-excursion (yank))
+    t)
+
+  (defun avy-action-teleport-whole-line (pt)
+    (avy-action-kill-whole-line pt)
+    (save-excursion (yank)) t)
+
+  (defun avy-action-embark (pt)
+    (unwind-protect
+        (save-excursion
+          (goto-char pt)
+          (embark-act))
+      (select-window
+       (cdr (ring-ref avy-ring 0))))
+    t)
+
+  :config
+  (setf (alist-get ?  avy-dispatch-alist) 'avy-action-mark-to-char
+        (alist-get ?t avy-dispatch-alist) 'avy-action-teleport
+        (alist-get ?T avy-dispatch-alist) 'avy-action-teleport-whole-line
+        (alist-get ?y avy-dispatch-alist) 'avy-action-yank
+        (alist-get ?w avy-dispatch-alist) 'avy-action-copy
+        (alist-get ?W avy-dispatch-alist) 'avy-action-copy-whole-line
+        (alist-get ?Y avy-dispatch-alist) 'avy-action-yank-whole-line
+        (alist-get ?k avy-dispatch-alist) 'avy-action-kill-stay
+        (alist-get ?K avy-dispatch-alist) 'avy-action-kill-whole-line)
+  )
 
 (use-package multiple-cursors
   :general
@@ -1114,17 +1192,14 @@ behavior added."
 ;; Completion-related
 ;;
 
-(use-package smex
-  :disabled
-  :custom
-  (smex-history-length 64))
-
 (use-package orderless
   :pin "melpa"
   :custom
   ;; Configure a custom style dispatcher (see the Consult wiki)
   ;; (setq orderless-style-dispatchers '(+orderless-dispatch))
-  (completion-styles '(orderless)))
+  (completion-styles '(orderless))
+  :init
+  (require 'orderless))
 
 (use-package vertico
   :custom
@@ -1144,7 +1219,7 @@ behavior added."
   :general
   (:keympas 'minibuffer-local-map
             "C-o" #'marginalia-cycle)
-  :init
+  :config
   (marginalia-mode t))
 
 (use-package consult
@@ -1188,6 +1263,7 @@ behavior added."
   :preface
   (defun user/setup-company-backends ()
     (csetq company-backends (remove 'company-capf company-backends))
+    (csetq company-backends (remove 'company-clang company-backends))
     (push 'company-capf company-backends))
   :general
   ("C-c C-." #'company-complete)
@@ -1214,22 +1290,12 @@ behavior added."
   ('after-init-hook #'global-company-mode)
   ('global-company-mode-hook #'user/setup-company-backends))
 
-(use-package eacl
-  :general ("C-x C-l" #'eacl-complete-line))
-
 ;;
 ;; Extra modes
 ;;
 
 (use-package hl-todo
   :ghook ('after-init-hook #'global-hl-todo-mode))
-
-(use-package cmake-mode :defer)
-
-(use-package yaml-mode :defer)
-
-(use-package cmake-font-lock
-  :ghook ('cmake-mode-hook #'cmake-font-lock-activate))
 
 (use-package cython-mode :defer)
 
@@ -1238,6 +1304,8 @@ behavior added."
 
 (use-package log4j-mode
   :mode "\\.log\\'")
+
+(use-package yaml-mode :defer)
 
 (use-package json-reformat :defer)
 
@@ -1254,6 +1322,9 @@ behavior added."
   :mode (("\\.md\\'" . markdown-mode)
          ("\\.markdown\\'" . markdown-mode)
          ("README\\.md\\'" . gfm-mode)))
+
+(use-package adoc-mode
+  :defer t)
 
 (use-package nov
   :gfhook #'turn-on-visual-line-mode
@@ -1272,7 +1343,6 @@ behavior added."
 ;;
 ;; Searching
 ;;
-
 (use-package isearch :ensure nil
   :preface
   (defun isearch-delete-previous ()
@@ -1325,7 +1395,7 @@ That way we don't remove the whole regexp for a simple typo.
   :config
   (push ".ccls-cache" grep-find-ignored-directories)
   (push ".vscode" grep-find-ignored-directories)
-  (push ".clangd" grep-find-ignored-directories)
+  (push ".cache" grep-find-ignored-directories)
   (push ".idea" grep-find-ignored-directories))
 
 (use-package rg
@@ -1351,12 +1421,10 @@ That way we don't remove the whole regexp for a simple typo.
   :defer
   :gfhook
   #'hide-trailing-whitespace
-  #'which-function-mode
+  ;; #'which-function-mode
   #'hs-minor-mode
   #'electric-indent-local-mode
   #'electric-pair-local-mode)
-
-(use-package imenu  :ensure nil)
 
 (defun validate-balance ()
   "Check for unbalanced parentheses in the current buffer.
@@ -1379,7 +1447,7 @@ found, an error is signaled."
       "Unmatched bracket or quote at line %d"
       (line-number-at-pos (nth 2 data))))))
 
-(add-hook 'after-save-hook #'validate-balance)
+;; (add-hook 'after-save-hook #'validate-balance)
 
 (use-package paren :ensure nil
   :custom
@@ -1396,16 +1464,41 @@ found, an error is signaled."
 (use-package cycle-at-point
   :general ("C-=" #'cycle-at-point))
 
-(use-package tree-sitter
-  :ghook
-  ('after-init-hook #'global-tree-sitter-mode)
-  ('tree-sitter-after-on-hook #'tree-sitter-hl-mode))
+(use-package treesit
+  :pin "manual"
 
-(use-package tree-sitter-langs
-  :after tree-sitter)
+  ;; FIXME: Find a package which does this, or write one :^)
+  ;; :preface
+  ;; (defun remap-some ()
+  ;;     (when (and (eq (char-before) last-command-event) ; Sanity check.
+  ;;                (not executing-kbd-macro)
+  ;;                (not noninteractive)
+  ;;                (equal (buffer-substring (- (point) 2) (point)) ";;"))
+  ;;       (replace-string ";;" "::" nil (- (point) 2) (point))))
+  ;; :ghook
+  ;; ('post-self-insert-hook #'remap-some)
+
+  :custom
+  (treesit-font-lock-level 4)
+  (c-ts-mode-indent-offset 4)
+  (c-ts-mode-indent-style 'k&r)
+  :config
+  (push '(css-mode . css-ts-mode) major-mode-remap-alist)
+  (push '(python-mode . python-ts-mode) major-mode-remap-alist)
+  (push '(javascript-mode . js-ts-mode) major-mode-remap-alist)
+  (push '(sh-mode . bash-ts-mode) major-mode-remap-alist)
+  (push '(c-mode . c-ts-mode) major-mode-remap-alist)
+  (push '(c++-mode . c++-ts-mode) major-mode-remap-alist))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (use-package dumb-jump
   :ghook ('dumb-jump-after-jump-hook #'recenter-top-bottom))
+
+(use-package nix-mode
+  :mode "\\.nix\\'")
+
+(use-package just-mode)
 
 (use-package cc-mode :ensure nil
   :general
@@ -1566,7 +1659,7 @@ found, an error is signaled."
                          (c-mode . doxygen)
                          (c++-mode . doxygen)))
 
-  :config
+  :init
   (c-add-style "allman" user/allman-style)
   (c-add-style "sane-k&r" user/k&r-style)
   (c-add-style "webkit" user/webkit-style)
@@ -1583,21 +1676,18 @@ found, an error is signaled."
   ;; :ghook ('c-mode-common-hook #'clang-format+-mode)
   :custom (clang-format+-context 'modification))
 
-(use-package modern-cpp-font-lock
-  :after cc-mode
-  :ghook ('c++-mode-hook #'modern-c++-font-lock-mode))
-
-(use-package ccls
-  :after cc-mode
-  :when (executable-find "ccls")
-  :custom
-  (ccls-sem-highlight-method 'font-lock)
-  (ccls-initialization-options
-   '(:diagnostics (:onOpen 0 :onSave 0 :onChange -1 :spellChecking :json-false)
-     :highlight (:largeFileSize 0)
-     :index (:blacklist ["/app/.*" "/examples/.*"])))
-  :config
-  (push "compile_commands.json" ccls-root-files))
+;; Leave it commented for now. CCLS is useful only for lsp (also disabled for now)
+;; (use-package ccls
+;;   :after cc-mode
+;;   :when (executable-find "ccls")
+;;   :custom
+;;   (ccls-sem-highlight-method 'font-lock)
+;;   (ccls-initialization-options
+;;    '(:diagnostics (:onOpen 0 :onSave 0 :onChange -1 :spellChecking :json-false)
+;;      :highlight (:largeFileSize 0)
+;;      :index (:blacklist ["/app/.*" "/examples/.*"]) ))
+;;   :config
+;;   (push "compile_commands.json" ccls-root-files))
 
 (use-package rust-mode
   :commands rust-mode
@@ -1623,25 +1713,6 @@ found, an error is signaled."
 (use-package python-black
   :after python
   :defer)
-
-(use-package pyvenv
-  :disabled
-  :preface
-  (defun user/auto-virtualenv ()
-    (pyvenv-mode t)
-
-    ;; A dolist would be appropriate, but I only use venv as virtualenv name
-    ;; This also works with lsp-mode since it will use the python inside
-    (let ((root (locate-dominating-file default-directory "venv")))
-      (if (and root (file-exists-p root))
-          (pyvenv-activate (expand-file-name "venv" root)))))
-  :ghook ('python-mode-hook #'user/auto-virtualenv))
-
-(use-package poetry
-  :disabled
-  :custom
-  (poetry-tracking-strategy 'switch-buffer)
-  :ghook ('after-init-hook #'poetry-tracking-mode))
 
 (use-package haskell-mode :defer)
 
@@ -1693,101 +1764,193 @@ found, an error is signaled."
   (web-mode-engines-alist '(("django" . "\\.html\\'"))))
 
 ;; Define this after all the languages (lsp must be added first in lang-mode-hook)
-(use-package lsp-mode
-  :commands (lsp lsp-mode)
+;; (use-package lsp-mode
+;;   :commands (lsp lsp-mode)
 
+;;   :ghook
+;;   ('c-mode-common-hook #'lsp-deferred t)
+;;   ('python-mode-hook #'lsp-deferred t)
+;;   ('rust-mode-hook #'lsp-deferred t)
+;;   ('cmake-mode-hook #'lsp-deferred t)
+;;   ('sh-mode-hook #'lsp-deferred t)
+;;   ('yaml-mode-hook #'lsp-deferred t)
+;;   ('lsp-mode-hook #'lsp-enable-which-key-integration)
+
+;;   :custom
+;;   ;; performance reasons (and they're not really useful for me)
+;;   (lsp-enable-on-type-formatting nil)
+;;   (lsp-enable-folding nil)
+;;   (lsp-enable-indentation nil)
+;;   (lsp-before-save-edits nil)
+;;   (lsp-enable-symbol-highlighting nil)
+;;   (lsp-enable-semantic-highlighting nil)
+;;   (lsp-enable-imenu t)
+;;   (lsp-lens-enable nil)
+;;   (lsp-auto-guess-root nil)
+;;   (lsp-restart 'interactive)
+;;   (lsp-pylsp-plugins-flake8-max-line-length 100)
+;;   (lsp-eldoc-render-all nil)
+;;   (lsp-keymap-prefix "<C-m>")
+
+;;   ;; Not usefull for now
+;;   (lsp-modeline-code-actions-enable nil)
+;;   (lsp-modeline-diagnostics-enable nil)
+;;   (lsp-modeline-workspace-status-enable nil)
+
+;;   ;; for now disable it since I have >50k per repo
+;;   (lsp-file-watch-threshold 9000)
+;;   (lsp-enable-file-watchers nil)
+
+;;   (lsp-modeline-diagnostics-scope :file)
+
+;;   ;; (lsp-log-io t)
+
+;;   :config
+;;   (csetq lsp-clients-clangd-args
+;;          '("-j=6"
+;;            "--completion-style=detailed"
+;;            "--header-insertion=never"
+;;            "--pch-storage=memory"
+;;            "--background-index"
+;;            "--cross-file-rename"
+;;            "--clang-tidy"
+;;            "--suggest-missing-includes"
+;;            ))
+
+;;   (defun lsp-tramp-connection (local-command &optional generate-error-file-fn)
+;;     "Create LSP stdio connection named name.
+;; LOCAL-COMMAND is either list of strings, string or function which
+;; returns the command to execute."
+
+;;     (list :connect (lambda (filter sentinel name environment-fn)
+;;                      (let* ((final-command (list "sh" "-c"
+;;                                                  (string-join (append
+;;                                                                (cons "stty raw > /dev/null;" (lsp-resolve-final-function local-command))
+;;                                                                (list
+;;                                                                 (concat "2>"
+;;                                                                         (or (when generate-error-file-fn
+;;                                                                               (funcall generate-error-file-fn "name"))
+;;                                                                             (format "/tmp/%s-%s-stderr" "name"
+;;                                                                                     (cl-incf lsp--stderr-index))))))
+;;                                                               " "))
+;;                                                    )
+;;                             (process-name (generate-new-buffer-name name))
+;;                             ;; (stderr-buf (stderr-buf (format "*%s::stderr*" process-name)))
+;;                             (process-environment
+;;                              (lsp--compute-process-environment environment-fn))
+;;                             (proc (make-process
+;;                                    :name process-name
+;;                                    :buffer (format "*%s*" process-name)
+;;                                    :command (lsp-resolve-final-function final-command)
+;;                                    :connection-type 'pipe
+;;                                    :coding 'utf-8-emacs-unix
+;;                                    :noquery t
+;;                                    :filter filter
+;;                                    :sentinel sentinel
+;;                                    :file-handler t)))
+;;                        (cons proc proc)))
+;;           :test? (lambda () (-> local-command lsp-resolve-final-function
+;;                                 lsp-server-present?))))
+
+;;   (lsp-register-client
+;;    (make-lsp-client :new-connection (lsp-tramp-connection "clangd")
+;;                     :major-modes '(c-mode c++-mode)
+;;                     :remote? t
+;;                     :server-id 'clangd-remote)))
+
+;; (use-package lsp-ui
+;;   :commands lsp-ui-mode
+;;   :general
+;;   (:keymaps 'lsp-mode-map
+;;             "<f2>" #'lsp-ui-doc-glance)
+;;   (:keymaps 'lsp-mode-map
+;;             :prefix "M-g"
+;;             "r" #'lsp-ui-peek-find-references
+;;             "d" #'lsp-ui-peek-find-definitions)
+;;   :custom
+;;   (lsp-ui-doc-enable nil "Enable it per file if really needed")
+;;   (lsp-ui-doc-include-signature t)
+;;   (lsp-ui-doc-header nil)
+;;   (lsp-ui-doc-position 'at-point)
+
+;;   (lsp-ui-peek-always-show t "Useful for peeking definitions")
+
+;;   (lsp-ui-sideline-enable nil "Enable it per file if really needed")
+;;   (lsp-ui-sideline-show-diagnostics t)
+;;   (lsp-ui-sideline-show-hover nil)
+;;   (lsp-ui-sideline-show-symbol t)
+;;   (lsp-ui-sideline-ignore-duplicate t))
+
+;; (use-package flycheck
+;;   :ghook ('after-init-hook #'global-flycheck-mode)
+;;   :custom
+;;   (flycheck-keymap-prefix (kbd "M-'"))
+;;   (flycheck-check-syntax-automatically '(save idle-buffer-switch mode-enabled))
+;;   (flycheck-idle-buffer-switch-delay 0.1))
+
+;; (use-package consult-flycheck
+;;   :after consult)
+
+;; (use-package flycheck-pos-tip
+;;   :after flycheck
+;;   :ghook 'global-flycheck-mode-hook)
+
+(use-package eglot
+  :pin "elpa"
   :ghook
-  ('c-mode-common-hook #'lsp-deferred t)
-  ('python-mode-hook #'lsp-deferred t)
-  ('rust-mode-hook #'lsp-deferred t)
-  ('cmake-mode-hook #'lsp-deferred t)
-  ('sh-mode-hook #'lsp-deferred t)
-  ('yaml-mode-hook #'lsp-deferred t)
-  ('lsp-mode-hook #'lsp-enable-which-key-integration)
-
+  ('c-mode-common-hook #'eglot-ensure t)
+  ('c-ts-mode-hook #'eglot-ensure t)
+  ('c++-ts-mode-hook #'eglot-ensure t)
+  ('python-mode-hook #'eglot-ensure t)
+  ('python-ts-mode-hook #'eglot-ensure t)
+  ('rust-mode-hook #'eglot-ensure t)
+  ('cmake-ts-mode-hook #'eglot-ensure t)
+  ;; ('sh-mode-hook #'eglot-ensure t)
+  ;; ('bash-ts-mode-hook #'eglot-ensure t)
+  ('yaml-mode-hook #'eglot-ensure t)
+  :defer
   :custom
-  ;; performance reasons (and they're not really useful for me)
-  (lsp-enable-on-type-formatting nil)
-  (lsp-enable-folding nil)
-  (lsp-enable-indentation nil)
-  (lsp-before-save-edits nil)
-  (lsp-enable-symbol-highlighting nil)
-  (lsp-enable-semantic-highlighting nil)
-  (lsp-enable-imenu t)
-  (lsp-lens-enable nil)
-  (lsp-auto-guess-root nil)
-  (lsp-restart 'interactive)
-  (lsp-pylsp-plugins-flake8-max-line-length 100)
-  (lsp-eldoc-render-all nil)
-  (lsp-keymap-prefix "<C-m>")
-
-  ;; Not usefull for now
-  (lsp-modeline-code-actions-enable nil)
-  (lsp-modeline-diagnostics-enable nil)
-  (lsp-modeline-workspace-status-enable nil)
-
-  ;; for now disable it since I have >50k per repo
-  (lsp-file-watch-threshold 9000)
-  (lsp-enable-file-watchers nil)
-
-  ;; Enable this when things are slow
-  ;; (lsp-print-performance t)
-
+  (eglot-extend-to-xref t)
+  (eglot-events-buffer-size 0)
+  (eglot-ignored-server-capabilities
+   '(:hoverProvider :documentHighlightProvider))                   ;; eldoc + this takes up a lot of space
+  (eglot-send-changes-idle-time 1.0)
   :config
-  (csetq lsp-clients-clangd-args
-         '("-j=6"
-           "--all-scopes-completion"
-           "--completion-style=detailed"
-           "--header-insertion=never"
-           "--pch-storage=memory"
-           "--background-index"
-           "--cross-file-rename"
-           "--clang-tidy"
-           "--suggest-missing-includes"
-           "--log=error")))
+  (add-to-list
+   'eglot-server-programs
+   `((c-mode c++-mode) .
+     ,(eglot-alternatives
+       '("ccls"
+         ("clangd"
+          "-j=6"
+          ;; "--all-scopes-completion"
+          "--completion-style=detailed"
+          "--header-insertion=never"
+          "--pch-storage=memory"
+          ;; "--log=error"
+          "--background-index"
+          "--cross-file-rename"
+          "--clang-tidy")))))
+  ;; Just so I don't forget about this
+  ;; (setq-default eglot-workspace-configuration
+  ;;               '((haskell
+  ;;                  (maxCompletions . 200))))
+  (push '((eglot (styles orderless))) completion-category-overrides))
 
-(use-package lsp-ui
-  :commands lsp-ui-mode
+(use-package flymake
+  :preface
+  (defun user/flymake-mode-line-format ()
+    (if (bound-and-true-p flymake-mode)
+        flymake-mode-line-format
+      ""))
   :general
-  (:keymaps 'lsp-mode-map
-            "<f2>" #'lsp-ui-doc-glance)
-  (:keymaps 'lsp-mode-map
-            :prefix "M-g"
-            "r" #'lsp-ui-peek-find-references
-            "d" #'lsp-ui-peek-find-definitions)
-  :custom
-  (lsp-ui-doc-enable nil "Enable it per file if really needed")
-  (lsp-ui-doc-include-signature t)
-  (lsp-ui-doc-header nil)
-  (lsp-ui-doc-position 'at-point)
-
-  (lsp-ui-peek-always-show t "Useful for peeking definitions")
-
-  (lsp-ui-sideline-enable nil "Enable it per file if really needed")
-  (lsp-ui-sideline-show-diagnostics t)
-  (lsp-ui-sideline-show-hover nil)
-  (lsp-ui-sideline-show-symbol t)
-  (lsp-ui-sideline-ignore-duplicate t))
-
-(use-package imenu-list
-  :defer t
-  :custom
-  (imenu-list-auto-resize t)
-  (imenu-list-position 'left))
-
-(use-package flycheck
-  :ghook ('after-init-hook #'global-flycheck-mode)
-  :custom
-  (flycheck-keymap-prefix (kbd "M-'"))
-  (flycheck-check-syntax-automatically '(save idle-buffer-switch mode-enabled))
-  (flycheck-idle-buffer-switch-delay 0.1))
-
-(use-package consult-flycheck
-  :after consult)
-
-(use-package flycheck-pos-tip
-  :after flycheck
-  :ghook 'global-flycheck-mode-hook)
+  (:prefix "M-'"
+           "l" #'flymake-show-buffer-diagnostics
+           "n" #'flymake-goto-next-error
+           "p" #'flymake-goto-prev-error)
+  :init
+  (remove-hook 'flymake-diagnostic-functions 'flymake-proc-legacy-flymake)
+  (add-to-list 'mode-line-misc-info '(:eval (user/flymake-mode-line-format)) t))
 
 (use-package imenu :ensure nil
   :general
@@ -1797,6 +1960,12 @@ found, an error is signaled."
   :custom
   (imenu-auto-rescan t "Rescan before showing results")
   (imenu-auto-rescan-maxout (* 2 1024 1024) "Ignore buffers bigger than this"))
+
+(use-package imenu-list
+  :defer t
+  :custom
+  (imenu-list-auto-resize t)
+  (imenu-list-position 'left))
 
 (use-package yasnippet
   :custom
@@ -1822,28 +1991,6 @@ found, an error is signaled."
   :ghook ('after-init-hook #'global-undo-fu-session-mode)
   :custom
   (undo-fu-session-incompatible-files '("/COMMIT_EDITMSG\\'" "/git-rebase-todo\\'")))
-
-;; (use-package undo-tree
-;;   :custom
-;;   (undo-tree-auto-save-history nil)
-;;   (undo-tree-visualizer-diff t)
-;;   (undo-tree-visualizer-timestamps t)
-;;   (undo-tree-enable-undo-in-region t)
-
-;;   :config
-;;   (global-undo-tree-mode t)
-
-;;   ;; Keep region when undoing in region
-;;   (defadvice undo-tree-keep-region (around keep-region activate)
-;;     (if (use-region-p)
-;;         (let ((m (set-marker (make-marker) (mark)))
-;;               (p (set-marker (make-marker) (point))))
-;;           ad-do-it
-;;           (goto-char p)
-;;           (set-mark m)
-;;           (set-marker p nil)
-;;           (set-marker m nil))
-;;       ad-do-it)))
 
 (use-package visual-fill-column :defer)
 
@@ -1885,25 +2032,13 @@ found, an error is signaled."
   :config
   (require 'esh-module))
 
-(use-package multi-term
-  :general
-  ;; ("C-z" #'multi-term-next)
-  ("C-c z c" #'multi-term)
-  ("C-c z d" #'multi-term-dedicated-toggle)
-  ("C-c z n" #'multi-term-next)
-  ("C-c z p" #'multi-term-prev)
-
-  :custom
-  ;; (multi-term-program "screen")
-  ;; (multi-term-program-switches "-DR")
-  (term-buffer-maximum-size 0)
-  (multi-term-dedicated-select-after-open-p t)
-  (multi-term-scroll-show-maximum-output t))
-
 (use-package vterm
+  :pin "manual"
+  :ghook ('vterm-mode-hook (lambda () (setq-local global-hl-line-mode nil)))
   :general
   ("C-z" #'vterm)
   :config
+  ;; (csetq vterm-keymap-exceptions (remove "C-u" vterm-keymap-exceptions))
   ;; custom doesn't work for this, it's a defvar not a defcustom
   (csetq vterm-timer-delay nil))
 
@@ -1949,17 +2084,20 @@ found, an error is signaled."
 (use-package projectile
   :general
   ("M-p" 'projectile-command-map)
-  :ghook ('after-init-hook #'projectile-mode)
-  :config
-  (with-eval-after-load "consult"
-    (setq consult-project-root-function #'projectile-project-root)))
+  :ghook ('after-init-hook #'projectile-mode))
 
 (use-package vc :ensure nil
   :defer
+  :custom
+  (vc-follow-symlinks t)
+  (vc-git-diff-switches
+   '("--ignore-space-change" "--ignore-all-space"
+     "--no-ext-diff" "--stat" "--diff-algorithm=histogram"))
+  (vc-git-print-log-follow t)
   :config
   (push ".ccls-cache" vc-directory-exclusion-list)
   (push ".vscode" vc-directory-exclusion-list)
-  (push ".clangd" vc-directory-exclusion-list)
+  (push ".cache" vc-directory-exclusion-list)
   (push ".idea" vc-directory-exclusion-list))
 
 (use-package vc-msg
@@ -1992,12 +2130,14 @@ found, an error is signaled."
   (calendar-date-style 'iso))
 
 (use-package org
-  :pin "gnu"
+  :pin "elpa"
   :general
   ("C-c n" #'org-capture
    "C-c a" #'org-agenda)
   (:keymaps 'org-mode-map
             "RET" #'org-return-and-maybe-indent)
+
+  :ghook ('org-mode-hook (lambda () (toggle-word-wrap -1)))
 
   :custom
   ;; with modernize only
@@ -2037,149 +2177,13 @@ found, an error is signaled."
   :custom
   (org-modern-hide-stars 'leading))
 
-(use-package elfeed
-  :commands (elfeed elfeed-update)
-  :preface
-  (defun user/elfeed-visual-line-toggle ()
-    (interactive)
-    (setq-local fill-column 120)
-    (visual-fill-column-mode 'toggle)
-    (visual-line-mode 'toggle))
+(use-package denote
+  :ghook
+  ('dired-mode-hook #'denote-dired-mode-in-directories)
+  :custom
+  (denote-known-keywords '("emacs" "nix" "work" "cpp" "tech" "general")))
 
-  :general
-  ("C-x w" #'elfeed)
-  (:keymaps 'elfeed-show-mode-map
-            "v" #'user/elfeed-visual-line-toggle
-            "w" #'elfeed-show-visit)
-  (:keymaps 'elfeed-search-mode-map
-            "U" #'elfeed-update)
-
-  :init
-  (csetq elfeed-search-title-max-width 100)
-  (csetq elfeed-search-title-min-width 30)
-  (csetq elfeed-search-filter "+unread")
-  (csetq elfeed-feeds
-         '(("https://www.youtube.com/feeds/videos.xml?channel_id=UC3ts8coMP645hZw9JSD3pqQ" tech)        ;; Andreas Kling
-           ("https://www.youtube.com/feeds/videos.xml?channel_id=UCgWip0vxtqu34rZrFeCpUow" tech)        ;; Tim Morgan
-           ("https://www.youtube.com/feeds/videos.xml?channel_id=UC-_ZS52_S34Spofk4-lAedA" tech)        ;; Valtteri Koskivuori
-           ("https://www.youtube.com/feeds/videos.xml?channel_id=UC3KNgU1jlleVcn8f7DY9bdg" tech)        ;; Dimitriy Kubyshkin
-           ("https://www.youtube.com/feeds/videos.xml?channel_id=UC7S6EpMQ5QNGRg7uJmJWXNw" tech)        ;; QueueQueueHack
-           ("https://www.youtube.com/feeds/videos.xml?channel_id=UCBa659QWEk1AI4Tg--mrJ2A" tech)        ;; Tom Scott
-           ("https://www.youtube.com/feeds/videos.xml?channel_id=UCHC4G4X-OR5WkY-IquRGa3Q" tech)        ;; Tom Scott 2nd
-           ("https://www.youtube.com/feeds/videos.xml?channel_id=UCKTehwyGCKF-b2wo0RKwrcg" tech)        ;; Bisqwit
-           ("https://www.youtube.com/feeds/videos.xml?channel_id=UCbfYPyITQ-7l4upoX8nvctg" tech)        ;; Two Minute Papers
-           ("https://www.youtube.com/feeds/videos.xml?channel_id=UCS0N5baNlQWJCUrhCEo8WlA" tech)        ;; Ben Eater
-           ("https://www.youtube.com/feeds/videos.xml?channel_id=UCxHAlbZQNFU2LgEtiqd2Maw" tech)        ;; Jason Turner
-           ("https://www.youtube.com/feeds/videos.xml?channel_id=UCG7yIWtVwcENg_ZS-nahg5g" tech)        ;; CNLohr
-           ("https://www.youtube.com/feeds/videos.xml?channel_id=UCRDQEDxAVuxcsyeEoOpSoRA" tech)        ;; Mark Furneaux
-           ("https://www.youtube.com/feeds/videos.xml?channel_id=UCkf4VIqu3Acnfzuk3kRIFwA" tech)        ;; gotbletu
-           ("https://www.youtube.com/feeds/videos.xml?channel_id=UCUQo7nzH1sXVpzL92VesANw" tech)        ;; DIY Perks
-           ("https://www.youtube.com/feeds/videos.xml?channel_id=UCy0tKL1T7wFoYcxCe0xjN6Q" tech)        ;; Technology Connections
-           ("https://www.youtube.com/feeds/videos.xml?channel_id=UCS4FAVeYW_IaZqAbqhlvxlA" tech)        ;; ContextFree
-           ("https://www.youtube.com/feeds/videos.xml?channel_id=UCBLr7ISa_YDy5qeATupf26w" tech)        ;; AlgorithmsLive!
-           ("https://www.youtube.com/feeds/videos.xml?channel_id=UCYO_jab_esuFRV4b17AJtAw" tech)        ;; 3blue1brown
-           ("https://www.youtube.com/feeds/videos.xml?channel_id=UC1kBxkk2bcG78YBX7LMl9pQ" tech)        ;; codereport
-           ("https://www.youtube.com/feeds/videos.xml?channel_id=UC_iD0xppBwwsrM9DegC5cQQ" tech)        ;; Jon Gjengset (rust)
-           ("https://www.youtube.com/feeds/videos.xml?channel_id=UCguWV1bZg1QiWbY32vGnOLw" tech)        ;; Bitwise
-           ("https://www.youtube.com/feeds/videos.xml?channel_id=UCrUL8K81R4VBzm-KOYwrcxQ" tech)        ;; Engineer Man
-           ("https://www.youtube.com/feeds/videos.xml?channel_id=UCJ0-OtVpF0wOKEqT2Z1HEtA" tech)        ;; ElectroBOOM
-           ("https://www.youtube.com/feeds/videos.xml?channel_id=UC3azLjQuz9s5qk76KEXaTvA" tech)        ;; suckerpinch
-           ("https://www.youtube.com/feeds/videos.xml?channel_id=UCq7dxy_qYNEBcHqQVCbc20w" tech)        ;; WhatsACreel
-           ("https://www.youtube.com/feeds/videos.xml?channel_id=UClcE-kVhqyiHCcjYwcpfj9w" tech)        ;; LiveOverflow
-           ("https://www.youtube.com/feeds/videos.xml?channel_id=UC0uTPqBCFIpZxlz_Lv1tk_g" tech)        ;; Protesilaos Stavrou
-           ("https://www.youtube.com/feeds/videos.xml?channel_id=UCUzQJ3JBuQ9w-po4TXRJHiA" tech)        ;; jdh
-           ("https://www.youtube.com/feeds/videos.xml?channel_id=UCq-PF3nIPg5KO8po0dHcXsQ" tech)        ;; Marko Tasic
-           ("https://www.youtube.com/feeds/videos.xml?channel_id=UC-yuWVUplUJZvieEligKBkA" tech)        ;; javidx9
-           ("https://www.youtube.com/feeds/videos.xml?channel_id=UCrW38UKhlPoApXiuKNghuig" tech)        ;; Systems with JT
-           ("https://www.youtube.com/feeds/videos.xml?channel_id=UCBLthWZ0AdU-tTpKCBs8PGQ" tech)        ;; Kofybrek
-           ("https://www.youtube.com/feeds/videos.xml?channel_id=UCxwcmRAmBRzZMNS37dCgmHA" tech)        ;; RoboNuggie
-           ("https://www.youtube.com/feeds/videos.xml?channel_id=UCov_51F0betb6hJ6Gumxg3Q" tech)        ;; AI and Games
-
-           ("https://www.youtube.com/feeds/videos.xml?channel_id=UCNf56PUyMI0wUyZ8KRhg2AQ" cinema)      ;; Cinema Nippon
-           ("https://www.youtube.com/feeds/videos.xml?channel_id=UC7GV-3hrA9kDKrren0QMKMg" cinema)      ;; CinemaTyler
-           ("https://www.youtube.com/feeds/videos.xml?channel_id=UCAGkSxTlleqxRauEqupyVPw" cinema)      ;; The Cinema Cartography
-           ("https://www.youtube.com/feeds/videos.xml?channel_id=UCErSSa3CaP_GJxmFpdjG9Jw" cinema)      ;; Lessons from the Screenplay
-           ("https://www.youtube.com/feeds/videos.xml?channel_id=UCKlnkrjfJKGpuZ3-kkhiaXQ" cinema)      ;; Film Histories
-           ("https://www.youtube.com/feeds/videos.xml?channel_id=UCbphDfwSJmxk1Ny_3Oicrng" cinema)      ;; Storytellers
-           ("https://www.youtube.com/feeds/videos.xml?channel_id=UCx0L2ZdYfiq-tsAXb8IXpQg" cinema)      ;; JustWrite
-           ("https://www.youtube.com/feeds/videos.xml?channel_id=UCxO_ya-RmAXCXJCU54AxYFw" cinema)      ;; New Frame Plus
-           ("https://www.youtube.com/feeds/videos.xml?channel_id=UCCVmAQ9b63_oxitZ9Zgh8nA" cinema)      ;; Lucas Gravey
-           ("https://www.youtube.com/feeds/videos.xml?channel_id=UCZ7g7HfH1gWmhgxW47IcW7Q" cinema)      ;; Beyond the Frame
-           ("https://www.youtube.com/feeds/videos.xml?channel_id=UCI9DUIgtRGHNH_HmSTcfUbA" cinema)      ;; The Closer Look
-           ("https://www.youtube.com/feeds/videos.xml?channel_id=UCL5kBJmBUVFLYBDiSiK1VDw" cinema)      ;; Criswell
-           ("https://www.youtube.com/feeds/videos.xml?channel_id=UCWTFGPpNQ0Ms6afXhaWDiRw" cinema)      ;; Now You See It
-           ("https://www.youtube.com/feeds/videos.xml?channel_id=UChcSRqitXAm2BXtxTzP1azQ" cinema)      ;; kubricklynch
-
-           ("https://www.youtube.com/feeds/videos.xml?channel_id=UCQD-0MjUbDBwm2UTVYr0Dag" history)     ;; Suibhne
-           ("https://www.youtube.com/feeds/videos.xml?channel_id=UCKMnl27hDMKvch--noWe5CA" history)     ;; Cogito
-
-           ("https://www.youtube.com/feeds/videos.xml?channel_id=UCO6nDCimkF79NZRRb8YiDcA" art)         ;; Storied (Monstrum)
-           ("https://www.youtube.com/feeds/videos.xml?channel_id=UCmQThz1OLYt8mb2PU540LOA" art)         ;; The Art Assignment
-
-           ("https://www.youtube.com/feeds/videos.xml?channel_id=UCoW-z7WLeh9IAcr85tnDG6Q" literature)  ;; Malazan
-
-           ("https://www.youtube.com/feeds/videos.xml?channel_id=UCsXVk37bltHxD1rDPwtNM8Q" science)     ;; Kurzgesagt
-           ("https://www.youtube.com/feeds/videos.xml?channel_id=UC-3SbfTPJsL8fJAPKiVqBLg" science)     ;; Deep Look
-           ("https://www.youtube.com/feeds/videos.xml?channel_id=UCotwjyJnb-4KW7bmsOoLfkg" science)     ;; Art of the Problem
-           ("https://www.youtube.com/feeds/videos.xml?channel_id=UCzR-rom72PHN9Zg7RML9EbA" science)     ;; PBS Eons
-           ("https://www.youtube.com/feeds/videos.xml?channel_id=UC9Lp_AA5M2cMGrlvnnIns-g" science)     ;; Bizarre Beasts
-           ("https://www.youtube.com/feeds/videos.xml?channel_id=UCSIvk78tK2TiviLQn4fSHaw" science)     ;; Up and Atom
-           ("https://www.youtube.com/feeds/videos.xml?channel_id=UCMk_WSPy3EE16aK5HLzCJzw" science)     ;; NativLang
-
-           ("https://www.youtube.com/feeds/videos.xml?channel_id=UC8XjmAEDVZSCQjI150cb4QA" pop)         ;; Knowing Better
-           ("https://www.youtube.com/feeds/videos.xml?channel_id=UC2C_jShtL725hvbm1arSV9w" pop)         ;; GCP Grey
-           ("https://www.youtube.com/feeds/videos.xml?channel_id=UCuPgdqQKpq4T4zeqmTelnFg" pop)         ;; kaptainkristian
-           ("https://www.youtube.com/feeds/videos.xml?channel_id=UC-gjznzViwMols6dz89qLbg" pop)         ;; Entertain The Elk
-           ("https://www.youtube.com/feeds/videos.xml?channel_id=UCHiwtz2tCEfS17N9A-WoSSw" pop)         ;; Pop Culture Detective
-           ("https://www.youtube.com/feeds/videos.xml?channel_id=UCqJ-Xo29CKyLTjn6z2XwYAw" pop)         ;; Game Maker's Toolkit
-           ("https://www.youtube.com/feeds/videos.xml?channel_id=UCaPRCWnFAzeI3_tr--Qw5qg" pop)         ;; Human Interests
-           ("https://www.youtube.com/feeds/videos.xml?channel_id=UCiB8h9jD2Mlxx96ZFnGDSJw" pop)         ;; Origin Of Everything
-           ("https://www.youtube.com/feeds/videos.xml?channel_id=UCs_bV79AmugXVvjaASibPnw" pop)         ;; KhAnubis
-           ("https://www.youtube.com/feeds/videos.xml?channel_id=UCXkNod_JcH7PleOjwK_8rYQ" pop)         ;; Polyphonic
-           ("https://www.youtube.com/feeds/videos.xml?channel_id=UC9RM-iSvTu1uPJb8X5yp3EQ" pop)         ;; Wendover
-           ("https://www.youtube.com/feeds/videos.xml?channel_id=UCTWKe1zATFV6d0o6oLS9sgw" pop)         ;; Extremities
-           ("https://www.youtube.com/feeds/videos.xml?channel_id=UCi7l9chXMljpUft67vw78qw" pop)         ;; Sideways
-           ("https://www.youtube.com/feeds/videos.xml?channel_id=UCyNtlmLB73-7gtlBz00XOQQ" pop)         ;; Folding Ideas
-           ("https://www.youtube.com/feeds/videos.xml?channel_id=UCKzJFdi57J53Vr_BkTfN3uQ" pop)         ;; Primer
-
-           ("https://www.youtube.com/feeds/videos.xml?channel_id=UCdPPmAd9qlG80qeSm74-eww" weird)       ;; In Praise of Shadows
-           ("https://www.youtube.com/feeds/videos.xml?channel_id=UCF9LcCkPbnCxiTQhbKa-xvw" weird)       ;; kirstenlepore
-
-           ("https://www.youtube.com/feeds/videos.xml?channel_id=UCct9aR7HC79Cv2g-9oDOTLw" religion)    ;; ReligionForBreakfast
-
-           ("https://andreyorst.gitlab.io/feed.xml" tech)
-           ("https://fabiensanglard.net/rss.xml" tech)
-           ("https://danluu.com/atom.xml" tech)
-           ("https://rachelbythebay.com/w/atom.xml" tech)
-           ("https://trofi.github.io/feed/atom.xml" tech)
-           ("https://virtuallyfun.com/wordpress/feed" tech)
-           ("https://stopa.io/feed.rss" tech)
-           ("https://kliu.io/index.xml" tech)
-           ("https://drewdevault.com/blog/index.xml" tech)
-           ("https://protesilaos.com/codelog.xml" tech)
-           ("https://www.murilopereira.com/index.xml" tech)
-           ("https://venam.nixers.net/blog/feed.xml" tech)
-           ("https://vermaden.wordpress.com/feed.xml" tech)
-           ("https://www.gridbugs.org/feed.xml" tech)
-           ("https://blog.benjojo.co.uk/rss.xml" tech)
-           ("https://lemire.me/blog/feed/" tech)
-           ("https://blog.royalsloth.eu/posts/index.xml" tech)
-           ("https://maskray.me/blog/atom.xml" tech)
-           ("https://nullprogram.com/feed/" tech)
-           ("https://blog.yiningkarlli.com/feeds/posts/default/index.xml" tech)
-           ("https://crpgaddict.blogspot.com/feeds/posts/default" pop)
-           ("https://obscuritory.com/feed/" pop)
-           ("https://planet.emacslife.com/atom.xml" emacs)
-           ("https://www.phoronix.com/rss.php" linux phoronix)
-           ("https://xkcd.com/atom.xml" comic)
-           ))
-  :config
-  (add-hook 'elfeed-new-entry-hook
-            (elfeed-make-tagger :feed-url "youtube\\.com"
-                                :add '(video youtube)))
-  (add-hook 'elfeed-new-entry-hook
-            (elfeed-make-tagger :before "1 months ago"
-                                :remove 'unread)))
+(require 'feeds)
 
 (provide 'init)
 ;;; init.el ends here

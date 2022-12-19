@@ -23,15 +23,13 @@
 
 (setq package-archives '(("melpa" . "https://melpa.org/packages/")
                          ("org" . "https://orgmode.org/elpa/")
-                         ("gnu" . "https://elpa.gnu.org/packages/")))
+                         ;; ("elpa-devel" . "https://elpa.gnu.org/devel/")
+                         ("elpa" . "https://elpa.gnu.org/packages/")))
 
 (setq package-quickstart t)
 (setq package-enable-at-startup t)
 (advice-add #'package--ensure-init-file :override #'ignore)
 (advice-add #'x-apply-session-resources :override #'ignore)
-
-(setq jka-compr-load-suffixes nil)
-(jka-compr-update)
 
 (setq load-prefer-newer t)
 
@@ -47,6 +45,7 @@
 (setq inhibit-splash-screen t)
 (setq inhibit-startup-echo-area-message t)
 (setq inhibit-startup-message t)
+(setq inhibit-x-resources t)
 (advice-add #'display-startup-echo-area-message :override #'ignore)
 
 (set-face-attribute 'default nil
@@ -56,6 +55,7 @@
 
 (set-face-attribute 'fixed-pitch nil
                     :family "Iosevka Extended"
+                    :height 105
                     :weight 'semi-bold)
 
 (set-face-attribute 'variable-pitch nil

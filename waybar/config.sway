@@ -39,7 +39,7 @@
         "interval": 5,
         "format": "{:%H:%M}",
         "tooltip-format": "<big>{:%Y %B}</big>\n<tt><big>{calendar}</big></tt>",
-        "on-click": "foot --title=force_float -W 70x38 sh -c 'cal -y; $SHELL'",
+        "on-click": "foot --title=force_float -W 50x26 sh -c 'cal -y; $SHELL'",
     },
     "memory": {
         "tooltip": false,
@@ -69,7 +69,7 @@
         "format-disconnected": "(no network)"
     },
     "network#vpn": {
-        "interface": "vpn0",
+        "interface": "tun0",
         "tooltip-format": "{ifname} - {ipaddr}",
         "tooltip-format-disconnected": "",
         "format-ethernet": "",
