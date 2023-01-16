@@ -24,7 +24,9 @@
 (setq package-archives '(("melpa" . "https://melpa.org/packages/")
                          ("org" . "https://orgmode.org/elpa/")
                          ;; ("elpa-devel" . "https://elpa.gnu.org/devel/")
-                         ("elpa" . "https://elpa.gnu.org/packages/")))
+                         ("elpa" . "https://elpa.gnu.org/packages/")
+                         ;; ("nongnu" . "https://elpa.nongnu.org/nongnu/")
+                         ))
 
 (setq package-quickstart t)
 (setq package-enable-at-startup t)

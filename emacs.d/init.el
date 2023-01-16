@@ -23,9 +23,9 @@
 
 (csetq
  package-selected-packages
- '(adoc-mode avy clang-format+ comment-dwim-2 company consult
+ '(adoc-mode avy clang-format+ cape comment-dwim-2 consult corfu
    cycle-at-point cython-mode denote diff-hl dired-du dired-git-info
-   dired-narrow dumb-jump elfeed embark embark-consult eterm-256color
+   dired-narrow direnv dumb-jump elfeed embark embark-consult eterm-256color
    expand-region fish-mode general git-timemachine haskell-mode hl-todo
    ignoramus imenu-list js2-mode json-mode json-reformat just-mode lin
    log4j-mode magit magit-gitflow marginalia markdown-mode minions modus-themes
@@ -861,6 +861,7 @@ behavior added."
   (recentf-auto-cleanup 'never)
   (recentf-exclude (list
                     "/elpa/.*\\'"
+                    "/venv/.*\\'"
                     "/.ccls-cache/.*\\'"
                     "/.cache/.*\\'"
                     "PKGBUILD"
@@ -1062,7 +1063,6 @@ behavior added."
   (expand-region-autocopy-register "e"))
 
 (use-package symbol-overlay
-  :disabled ;; Until fixes the vertico & company break
   :preface
   (define-globalized-minor-mode global-symbol-overlay-mode
     symbol-overlay-mode symbol-overlay-mode :group 'symbol-overlay)
@@ -1222,6 +1222,7 @@ behavior added."
   (marginalia-mode t))
 
 (use-package consult
+  :pin "elpa"
   :general
   ([remap switch-to-buffer] #'consult-buffer)
   ([remap switch-to-buffer-other-window] #'consult-buffer-other-window)
@@ -1258,39 +1259,72 @@ behavior added."
 (use-package embark-consult
   :after (embark consult))
 
-(use-package company
+;; (use-package company
+;;   :preface
+;;   (defun user/setup-company-backends ()
+;;     (csetq company-backends (remove 'company-capf company-backends))
+;;     (csetq company-backends (remove 'company-clang company-backends))
+;;     (push 'company-capf company-backends))
+;;   :general
+;;   ("C-c C-." #'company-complete)
+;;   (:keymaps 'company-active-map
+;;             "ESC" #'company-abort
+;;             "<tab>" #'company-complete-selection
+;;             "C-n" #'company-select-next
+;;             "C-p" #'company-select-previous
+;;             "C-w" nil)
+;;   :custom
+;;   (company-global-modes '(not term-mode gud-mode shell-mode))
+;;   (company-dabbrev-code-ignore-case t)
+;;   (company-dabbrev-downcase nil)
+;;   (company-dabbrev-ignore-case t)
+;;   (company-idle-delay 0)
+;;   (company-minimum-prefix-length 2)
+;;   ;; (company-require-match nil)
+;;   (company-selection-wrap-around t)
+;;   (company-tooltip-align-annotations t)
+;;   (company-tooltip-flip-when-above nil)
+;;   ;; (company-occurrence-weight-function #'company-occurrence-prefer-any-closest)
+;;   ;; (company-transformers '(company-sort-by-occurrence))
+;;   :ghook
+;;   ('after-init-hook #'global-company-mode)
+;;   ('global-company-mode-hook #'user/setup-company-backends))
+
+(use-package corfu
   :preface
-  (defun user/setup-company-backends ()
-    (csetq company-backends (remove 'company-capf company-backends))
-    (csetq company-backends (remove 'company-clang company-backends))
-    (push 'company-capf company-backends))
-  :general
-  ("C-c C-." #'company-complete)
-  (:keymaps 'company-active-map
-            "ESC" #'company-abort
-            "<tab>" #'company-complete-selection
-            "C-n" #'company-select-next
-            "C-p" #'company-select-previous
-            "C-w" nil)
+  (defun corfu-enable-always-in-minibuffer ()
+    "Enable Corfu in the minibuffer if Vertico/Mct are not active."
+    (unless (or (bound-and-true-p mct--active)
+                (bound-and-true-p vertico--input)
+                (eq (current-local-map) read-passwd-map))
+      (setq-local corfu-echo-delay nil ;; Disable automatic echo and popup
+                  corfu-popupinfo-delay nil)
+      (corfu-mode t)))
   :custom
-  (company-global-modes '(not term-mode gud-mode shell-mode))
-  (company-dabbrev-code-ignore-case t)
-  (company-dabbrev-downcase nil)
-  (company-dabbrev-ignore-case t)
-  (company-idle-delay 0)
-  (company-minimum-prefix-length 2)
-  ;; (company-require-match nil)
-  (company-selection-wrap-around t)
-  (company-tooltip-align-annotations t)
-  (company-tooltip-flip-when-above nil)
-  ;; (company-occurrence-weight-function #'company-occurrence-prefer-any-closest)
-  ;; (company-transformers '(company-sort-by-occurrence))
+  (corfu-cycle t)
+  (corfu-auto t)
+  (corfu-auto-delay 0)
+  (corfu-separator ?\s)          ;; Orderless field separator
+  (corfu-quit-no-match 'separator)
+  (corfu-scroll-margin 3)
+  (completion-cycle-threshold 3)
+  (corfu-echo-delay '(1.0 . 0.1))
   :ghook
-  ('after-init-hook #'global-company-mode)
-  ('global-company-mode-hook #'user/setup-company-backends))
+  ('after-init-hook #'global-corfu-mode)
+  ('global-corfu-mode-hook #'corfu-echo-mode)
+  ('global-corfu-mode-hook #'corfu-history-mode)
+  :init
+  (add-hook 'minibuffer-setup-hook #'corfu-enable-always-in-minibuffer t))
+
+(use-package cape
+  :general
+  ("C-c C-l" #'cape-line)
+  :init
+  (add-to-list 'completion-at-point-functions #'cape-file))
+
 
 ;;
-;; Extra modes
+;; extra modes
 ;;
 
 (use-package hl-todo
@@ -1463,9 +1497,7 @@ found, an error is signaled."
 (use-package cycle-at-point
   :general ("C-=" #'cycle-at-point))
 
-(use-package treesit
-  :pin "manual"
-
+(use-package treesit :ensure nil
   ;; FIXME: Find a package which does this, or write one :^)
   ;; :preface
   ;; (defun remap-some ()
@@ -1488,6 +1520,10 @@ found, an error is signaled."
   (push '(sh-mode . bash-ts-mode) major-mode-remap-alist)
   (push '(c-mode . c-ts-mode) major-mode-remap-alist)
   (push '(c++-mode . c++-ts-mode) major-mode-remap-alist))
+
+(use-package direnv
+  :config
+  (direnv-mode))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -1934,7 +1970,8 @@ found, an error is signaled."
   ;; (setq-default eglot-workspace-configuration
   ;;               '((haskell
   ;;                  (maxCompletions . 200))))
-  (push '((eglot (styles orderless))) completion-category-overrides))
+  ;; (push '((eglot (styles orderless))) completion-category-overrides)
+  )
 
 (use-package flymake
   :preface
@@ -2031,8 +2068,7 @@ found, an error is signaled."
   :config
   (require 'esh-module))
 
-(use-package vterm
-  :pin "manual"
+(use-package vterm :ensure nil
   :ghook ('vterm-mode-hook (lambda () (setq-local global-hl-line-mode nil)))
   :general
   ("C-z" #'vterm)
