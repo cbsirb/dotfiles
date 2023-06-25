@@ -66,6 +66,7 @@
            ("https://www.youtube.com/feeds/videos.xml?channel_id=UCE5dIscvDxrb7CD5uiJJOiw" tech)        ;; Adrian's digital basement
            ("https://www.youtube.com/feeds/videos.xml?channel_id=UCV0t1y4h_6-2SqEpXBXgwFQ" tech)        ;; AngetheGreat
            ("https://www.youtube.com/feeds/videos.xml?channel_id=UCrqM0Ym_NbK1fqeQG2VIohg" tech)        ;; Tsoding Daily
+           ("https://www.youtube.com/feeds/videos.xml?channel_id=UCs4fQRyl1TJvoeOdekW6lYA" tech)        ;; fasterthanali
 
            ("https://www.youtube.com/feeds/videos.xml?channel_id=UCNf56PUyMI0wUyZ8KRhg2AQ" cinema)      ;; Cinema Nippon
            ("https://www.youtube.com/feeds/videos.xml?channel_id=UC7GV-3hrA9kDKrren0QMKMg" cinema)      ;; CinemaTyler
@@ -86,6 +87,7 @@
            ("https://www.youtube.com/feeds/videos.xml?channel_id=UCKMnl27hDMKvch--noWe5CA" history)     ;; Cogito
            ("https://www.youtube.com/feeds/videos.xml?channel_id=UCqBiWcuTF8IaLH7wBqnihsQ" history)     ;; Told in Stone
            ("https://www.youtube.com/feeds/videos.xml?channel_id=UCytq3DBifaIwY376ARqdxWA" history)     ;; Scenic Routes to the Past
+           ("https://www.youtube.com/feeds/videos.xml?channel_id=UCxF6aSKsz4cJxsgeJ4fogAQ" history)     ;; Classics In Color
 
            ("https://www.youtube.com/feeds/videos.xml?channel_id=UCO6nDCimkF79NZRRb8YiDcA" art)         ;; Storied (Monstrum)
            ("https://www.youtube.com/feeds/videos.xml?channel_id=UCmQThz1OLYt8mb2PU540LOA" art)         ;; The Art Assignment
@@ -119,10 +121,13 @@
            ("https://www.youtube.com/feeds/videos.xml?channel_id=UCdPPmAd9qlG80qeSm74-eww" weird)       ;; In Praise of Shadows
            ("https://www.youtube.com/feeds/videos.xml?channel_id=UCF9LcCkPbnCxiTQhbKa-xvw" weird)       ;; kirstenlepore
 
-           ("https://www.youtube.com/feeds/videos.xml?channel_id=UCct9aR7HC79Cv2g-9oDOTLw" religion)    ;; ReligionForBreakfast
+           ;; ("https://www.youtube.com/feeds/videos.xml?channel_id=UCct9aR7HC79Cv2g-9oDOTLw" religion)    ;; ReligionForBreakfast
 
+           ("https://awesomekling.github.io/feed.xml" tech)
+           ("https://fasterthanli.me/index.xml" tech)
            ("https://andreyorst.gitlab.io/feed.xml" tech)
            ("https://fabiensanglard.net/rss.xml" tech)
+           ("https://eli.thegreenplace.net/feeds/all.atom.xml" tech)
            ("https://danluu.com/atom.xml" tech)
            ("https://rachelbythebay.com/w/atom.xml" tech)
            ("https://trofi.github.io/feed/atom.xml" tech)
@@ -144,6 +149,8 @@
            ("http://blog.pkh.me/rss.xml" tech)
            ("https://www.yet-another-blog.com/index.xml" tech)
            ("https://xeiaso.net/blog.rss" tech)
+           ("https://www.thecodedmessage.com/index.xml" tech)
+           ("https://axleos.com/blog/index.xml" tech)
            ("https://crpgaddict.blogspot.com/feeds/posts/default" pop)
            ("https://obscuritory.com/feed/" pop)
            ("https://planet.emacslife.com/atom.xml" emacs)

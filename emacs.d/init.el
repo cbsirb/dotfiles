@@ -19,21 +19,28 @@
 
 (defvar user/gc-cons-threshold 134217728)
 
+;;; FIXME: er--expand-region-1 fails with native-comp, but I don't have time to
+;;; investigate further
+;; (require 'comp)
+;; (add-to-list 'native-comp-jit-compilation-deny-list "expand-region-core.el")
+
+(csetq native-compile-prune-cache t)
 (csetq custom-file (expand-file-name "custom-unused.el" user-emacs-directory))
 
 (csetq
  package-selected-packages
- '(adoc-mode avy clang-format+ cape comment-dwim-2 consult corfu
+ '(corfu kind-icon
+   adoc-mode avy clang-format+ cape comment-dwim-2 consult
    cycle-at-point cython-mode denote diff-hl dired-du dired-git-info
    dired-narrow direnv dumb-jump elfeed embark embark-consult eterm-256color
    expand-region fish-mode general git-timemachine haskell-mode hl-todo
-   ignoramus imenu-list js2-mode json-mode json-reformat just-mode lin
+   ignoramus imenu-list js2-mode json-reformat just-mode lin
    log4j-mode magit magit-gitflow marginalia markdown-mode minions modus-themes
    multiple-cursors mwim nasm-mode nix-mode no-littering nov orderless
    org-bullets projectile python-black racket-mode rainbow-delimiters
    rainbow-mode realgud rg rust-mode string-inflection symbol-overlay undo-fu
    undo-fu-session use-package vc-msg vertico visual-fill-column web-mode wgrep
-   which-key yaml-mode yasnippet))
+   which-key yasnippet))
 
 (defun user/after-init ()
   "Will run after init to restore some stuff."
@@ -93,12 +100,9 @@
   :ghook ('after-init-hook (lambda () (load-theme 'modus-operandi t)))
   :custom
   (modus-themes-variable-pitch-ui t)
-  (modus-themes-fringes 'subtle)
   (modus-themes-bold-constructs t)
   (modus-themes-italic-constructs t)
-  (modus-themes-paren-match '(bold intense))
   (modus-themes-mixed-fonts t)
-  (modus-themes-hl-line '(intense))
   (modus-themes-completions '((matches . (extrabold background intense))
                               (selection . (extrabold accented intense))
                               (popup . (accented)))))
@@ -245,7 +249,8 @@
 ;; window-system is not enough when the daemon is used
 (when (or (memq window-system '(pgtk))
           (getenv "WAYLAND_DISPLAY"))
-  (push 'text/plain\;charset=utf-8 x-select-request-type))
+  (push 'text/plain\;charset=utf-8 x-select-request-type)
+  (csetq pgtk-wait-for-event-timeout 0))
 
 (transient-mark-mode t)
 (auto-save-mode -1)
@@ -680,6 +685,7 @@ PARSE-START indicates where the parsing should start in the file (point)."
   "M-'")
 
 (use-package user-utils :ensure nil
+  :commands (sudo-edit) 
   :general
   ("M-`" #'user/open-terminal)
   ("M-]" #'user/next-error)
@@ -697,9 +703,8 @@ PARSE-START indicates where the parsing should start in the file (point)."
   ("C-w" #'user/kill-word-or-region)
   ("<C-return>" #'user/open-line-above)
   ;; mwim replaced this
-  ;; ("C-a" #'user/move-beginning-of-line)
-  ;; ("C-e" #'move-end-of-line)
-  )
+  ("C-a" #'user/move-beginning-of-line)
+  ("C-e" #'move-end-of-line))
 
 (defun keyboard-quit-context+ ()
   "Quit current context.
@@ -1080,6 +1085,7 @@ behavior added."
   ('after-init-hook #'global-symbol-overlay-mode))
 
 (use-package mwim
+  :disabled
   :general
   ([remap move-beginning-of-line] #'mwim-beginning-of-code-or-line) ;; maybe
   ([remap move-end-of-line] #'mwim-end-of-code-or-line))
@@ -1139,6 +1145,7 @@ behavior added."
   )
 
 (use-package multiple-cursors
+  :demand                               ; :config is not executed without this :(
   :general
   ("C-S-<mouse-1>" #'mc/toggle-cursor-on-click)
 
@@ -1185,6 +1192,7 @@ behavior added."
       (advice-add fn :around #'mc-prompt-once-advice)))
 
   :config
+  (push 'corfu-mode mc/unsupported-minor-modes)
   (mc-prompt-once #'zap-up-to-char))
 
 ;;
@@ -1240,7 +1248,7 @@ behavior added."
   :custom
   (xref-show-xrefs-function #'consult-xref)
   (xref-show-definitions-function #'consult-xref)
-  (consult-preview-key (kbd "M-."))
+  (consult-preview-key "M-.")
   (consult-narrow-key "<"))
 
 (use-package embark
@@ -1287,7 +1295,7 @@ behavior added."
 ;;   ;; (company-occurrence-weight-function #'company-occurrence-prefer-any-closest)
 ;;   ;; (company-transformers '(company-sort-by-occurrence))
 ;;   :ghook
-;;   ('after-init-hook #'global-company-mode)
+;;   ;;('after-init-hook #'global-company-mode)
 ;;   ('global-company-mode-hook #'user/setup-company-backends))
 
 (use-package corfu
@@ -1301,9 +1309,10 @@ behavior added."
                   corfu-popupinfo-delay nil)
       (corfu-mode t)))
   :custom
-  (corfu-cycle t)
+  ;;(corfu-cycle t)
   (corfu-auto t)
-  (corfu-auto-delay 0)
+  (corfu-auto-delay 0.0)
+  (corfu-auto-prefix 2)
   (corfu-separator ?\s)          ;; Orderless field separator
   (corfu-quit-no-match 'separator)
   (corfu-scroll-margin 3)
@@ -1314,7 +1323,16 @@ behavior added."
   ('global-corfu-mode-hook #'corfu-echo-mode)
   ('global-corfu-mode-hook #'corfu-history-mode)
   :init
-  (add-hook 'minibuffer-setup-hook #'corfu-enable-always-in-minibuffer t))
+  (add-hook 'minibuffer-setup-hook #'corfu-enable-always-in-minibuffer t)
+  :config
+  (general-unbind corfu-map "M-p" "M-n"))
+
+(use-package kind-icon
+  :after corfu
+  :custom
+  (kind-icon-default-face 'corfu-default) ; to compute blended backgrounds correctly
+  :config
+  (add-to-list 'corfu-margin-formatters #'kind-icon-margin-formatter))
 
 (use-package cape
   :general
@@ -1338,17 +1356,9 @@ behavior added."
 (use-package log4j-mode
   :mode "\\.log\\'")
 
-(use-package yaml-mode :defer)
-
-(use-package json-reformat :defer)
-
-(use-package json-mode
-  :mode "\\.json\\'"
-  :general
-  (:keymaps 'json-mode-map
-            "M-q" #'json-reformat-region)
+(use-package json-reformat :defer
   :custom
-  (json-reformat:indent-width 4)
+  (json-reformat:indent-width 2)
   (json-reformat:pretty-string? t))
 
 (use-package markdown-mode
@@ -1455,9 +1465,27 @@ That way we don't remove the whole regexp for a simple typo.
   :gfhook
   #'hide-trailing-whitespace
   ;; #'which-function-mode
-  #'hs-minor-mode
-  #'electric-indent-local-mode
-  #'electric-pair-local-mode)
+  #'hs-minor-mode)
+
+(use-package electric
+  :preface
+  (defun user/electric-pair-open-newline-between-pairs ()
+    (when (and (eq last-command-event ?\n)
+               (< (1+ (point-min)) (point) (point-max))
+               (eq (save-excursion
+                     (skip-chars-backward "\t\s")
+                     (char-before (1- (point))))
+                   (matching-paren (char-after))))
+      (save-mark-and-excursion
+        (newline 1 t)
+        (er/expand-region 1)
+        (indent-region (region-beginning) (region-end)))))
+  :ghook
+  ('prog-mode-hook #'electric-indent-local-mode)
+  ('prog-mode-hook #'electric-pair-local-mode)
+  :custom
+  (electric-pair-open-newline-between-pairs #'user/electric-pair-open-newline-between-pairs))
+
 
 (defun validate-balance ()
   "Check for unbalanced parentheses in the current buffer.
@@ -1487,6 +1515,7 @@ found, an error is signaled."
   (show-paren-delay 0)
   (show-paren-when-point-inside-paren t)
   (show-paren-when-point-in-periphery t)
+  (show-paren-context-when-offscreen t)
   :ghook ('after-init-hook #'show-paren-mode))
 
 (use-package string-inflection :defer)
@@ -1497,31 +1526,55 @@ found, an error is signaled."
 (use-package cycle-at-point
   :general ("C-=" #'cycle-at-point))
 
-(use-package treesit :ensure nil
-  ;; FIXME: Find a package which does this, or write one :^)
-  ;; :preface
-  ;; (defun remap-some ()
-  ;;     (when (and (eq (char-before) last-command-event) ; Sanity check.
-  ;;                (not executing-kbd-macro)
-  ;;                (not noninteractive)
-  ;;                (equal (buffer-substring (- (point) 2) (point)) ";;"))
-  ;;       (replace-string ";;" "::" nil (- (point) 2) (point))))
-  ;; :ghook
-  ;; ('post-self-insert-hook #'remap-some)
+;; FIXME: Find a package which does this, or write one :^)
+;; (defun remap-some ()
+;;     (when (and (eq (char-before) last-command-event) ; Sanity check.
+;;                (not executing-kbd-macro)
+;;                (not noninteractive)
+;;                (equal (buffer-substring (- (point) 2) (point)) ";;"))
+;;       (replace-string ";;" "::" nil (- (point) 2) (point))))
+;; :ghook
+;; ('post-self-insert-hook #'remap-some)
 
+
+(when-let ((emacs-packages-deps (file-expand-wildcards "/nix/store/*-emacs-packages-deps/lib")))
+  (push (car emacs-packages-deps) treesit-extra-load-path))
+
+(use-package treesit :ensure nil
+  :when treesit-extra-load-path
   :custom
-  (treesit-font-lock-level 4)
+  ;;(treesit-font-lock-level 4)
   (c-ts-mode-indent-offset 4)
-  (c-ts-mode-indent-style 'k&r)
+  (c-ts-mode-indent-style #'k&r)
+
   :config
+  (push '("CMakeLists.txt\\'" . cmake-ts-mode) auto-mode-alist)
+  (push '("Dockerfile\\'" . dockerfile-ts-mode) auto-mode-alist)
+  (push '("\\.yaml\\'" . yaml-ts-mode) auto-mode-alist)
+  (push '("\\.tsx\\'" . tsx-ts-mode) auto-mode-alist)
+  (push '("\\.jsx\\'" . tsx-ts-mode) auto-mode-alist)
+  (push '("\\.ts\\'" . typescript-ts-mode) auto-mode-alist)
+  (push '("\\.toml\\'" . toml-ts-mode) auto-mode-alist)
+
   (push '(css-mode . css-ts-mode) major-mode-remap-alist)
   (push '(python-mode . python-ts-mode) major-mode-remap-alist)
   (push '(javascript-mode . js-ts-mode) major-mode-remap-alist)
+  (push '(java-mode . java-ts-mode) major-mode-remap-alist)
+  (push '(ruby-mode . ruby-ts-mode) major-mode-remap-alist)
+  (push '(yaml-mode . yaml-ts-mode) major-mode-remap-alist)
+  (push '(js-json-mode . json-ts-mode) major-mode-remap-alist)
+  (push '(rust-mode . rust-ts-mode) major-mode-remap-alist)
   (push '(sh-mode . bash-ts-mode) major-mode-remap-alist)
+  (push '(csharp-mode . csharp-ts-mode) major-mode-remap-alist)
   (push '(c-mode . c-ts-mode) major-mode-remap-alist)
-  (push '(c++-mode . c++-ts-mode) major-mode-remap-alist))
+  (push '(c++-mode . c++-ts-mode) major-mode-remap-alist)
+  (push '(csharp-mode . csharp-ts-mode) major-mode-remap-alist)
+  (push '(html-mode . html-ts-mode) major-mode-remap-alist)
+  )
 
 (use-package direnv
+  :custom
+  (direnv-always-show-summary nil)
   :config
   (direnv-mode))
 
@@ -1804,12 +1857,26 @@ found, an error is signaled."
 
 ;;   :ghook
 ;;   ('c-mode-common-hook #'lsp-deferred t)
+;;   ('c-ts-mode-hook #'lsp-deferred t)
+;;   ('c++-ts-mode-hook #'lsp-deferred t)
+;;   ('python-ts-mode-hook #'lsp-deferred t)
 ;;   ('python-mode-hook #'lsp-deferred t)
 ;;   ('rust-mode-hook #'lsp-deferred t)
-;;   ('cmake-mode-hook #'lsp-deferred t)
-;;   ('sh-mode-hook #'lsp-deferred t)
-;;   ('yaml-mode-hook #'lsp-deferred t)
+;;   ('rust-ts-mode-hook #'lsp-deferred t)
+;;   ('cmake-ts-mode-hook #'lsp-deferred t)
+;;   ;; ('yaml-ts-mode-hook #'lsp-deferred t)
 ;;   ('lsp-mode-hook #'lsp-enable-which-key-integration)
+
+;;   ;;   ('c-mode-common-hook #'eglot-ensure t)
+;;   ;;   ('c-ts-mode-hook #'eglot-ensure t)
+;;   ;;   ('c++-ts-mode-hook #'eglot-ensure t)
+;;   ;;   ('python-mode-hook #'eglot-ensure t)
+;;   ;;   ('python-ts-mode-hook #'eglot-ensure t)
+;;   ;;   ('rust-mode-hook #'eglot-ensure t)
+;;   ;;   ('cmake-ts-mode-hook #'eglot-ensure t)
+;;   ;;   ;; ('sh-mode-hook #'eglot-ensure t)
+;;   ;;   ;; ('bash-ts-mode-hook #'eglot-ensure t)
+;;   ;;   ('yaml-mode-hook #'eglot-ensure t)
 
 ;;   :custom
 ;;   ;; performance reasons (and they're not really useful for me)
@@ -1820,7 +1887,7 @@ found, an error is signaled."
 ;;   (lsp-enable-symbol-highlighting nil)
 ;;   (lsp-enable-semantic-highlighting nil)
 ;;   (lsp-enable-imenu t)
-;;   (lsp-lens-enable nil)
+;;   (lsp-lens-enable t) ;; CHANGED
 ;;   (lsp-auto-guess-root nil)
 ;;   (lsp-restart 'interactive)
 ;;   (lsp-pylsp-plugins-flake8-max-line-length 100)
@@ -1828,9 +1895,9 @@ found, an error is signaled."
 ;;   (lsp-keymap-prefix "<C-m>")
 
 ;;   ;; Not usefull for now
-;;   (lsp-modeline-code-actions-enable nil)
+;;   ;; (lsp-modeline-code-actions-enable nil)
 ;;   (lsp-modeline-diagnostics-enable nil)
-;;   (lsp-modeline-workspace-status-enable nil)
+;;   ;; (lsp-modeline-workspace-status-enable nil)
 
 ;;   ;; for now disable it since I have >50k per repo
 ;;   (lsp-file-watch-threshold 9000)
@@ -1841,16 +1908,16 @@ found, an error is signaled."
 ;;   ;; (lsp-log-io t)
 
 ;;   :config
-;;   (csetq lsp-clients-clangd-args
-;;          '("-j=6"
-;;            "--completion-style=detailed"
-;;            "--header-insertion=never"
-;;            "--pch-storage=memory"
-;;            "--background-index"
-;;            "--cross-file-rename"
-;;            "--clang-tidy"
-;;            "--suggest-missing-includes"
-;;            ))
+;;   (csetq lsp-clients-clangd-args '())
+;;   ;;        '("-j=6"
+;;   ;;          "--completion-style=detailed"
+;;   ;;          "--header-insertion=never"
+;;   ;;          "--pch-storage=memory"
+;;   ;;          "--background-index"
+;;   ;;          "--cross-file-rename"
+;;   ;;          "--clang-tidy"
+;;   ;;          "--suggest-missing-includes"
+;;   ;;          ))
 
 ;;   (defun lsp-tramp-connection (local-command &optional generate-error-file-fn)
 ;;     "Create LSP stdio connection named name.
@@ -1902,19 +1969,18 @@ found, an error is signaled."
 ;;             :prefix "M-g"
 ;;             "r" #'lsp-ui-peek-find-references
 ;;             "d" #'lsp-ui-peek-find-definitions)
-;;   :custom
-;;   (lsp-ui-doc-enable nil "Enable it per file if really needed")
-;;   (lsp-ui-doc-include-signature t)
-;;   (lsp-ui-doc-header nil)
-;;   (lsp-ui-doc-position 'at-point)
-
-;;   (lsp-ui-peek-always-show t "Useful for peeking definitions")
-
-;;   (lsp-ui-sideline-enable nil "Enable it per file if really needed")
-;;   (lsp-ui-sideline-show-diagnostics t)
-;;   (lsp-ui-sideline-show-hover nil)
-;;   (lsp-ui-sideline-show-symbol t)
-;;   (lsp-ui-sideline-ignore-duplicate t))
+;; :custom
+;; (lsp-ui-doc-enable t "Enable it per file if really needed")
+;; (lsp-ui-doc-include-signature t)
+;; (lsp-ui-doc-header nil)
+;; (lsp-ui-doc-position 'at-point)
+;; (lsp-ui-peek-always-show t "Useful for peeking definitions")
+;; (lsp-ui-sideline-enable t "Disable it per file if really needed")
+;; (lsp-ui-sideline-show-diagnostics t)
+;; (lsp-ui-sideline-show-hover nil)
+;; (lsp-ui-sideline-show-symbol nil)
+;; (lsp-ui-sideline-ignore-duplicate t)
+;; )
 
 ;; (use-package flycheck
 ;;   :ghook ('after-init-hook #'global-flycheck-mode)
@@ -1939,11 +2005,16 @@ found, an error is signaled."
   ('python-mode-hook #'eglot-ensure t)
   ('python-ts-mode-hook #'eglot-ensure t)
   ('rust-mode-hook #'eglot-ensure t)
+  ('rust-ts-mode-hook #'eglot-ensure t)
   ('cmake-ts-mode-hook #'eglot-ensure t)
   ;; ('sh-mode-hook #'eglot-ensure t)
   ;; ('bash-ts-mode-hook #'eglot-ensure t)
-  ('yaml-mode-hook #'eglot-ensure t)
+  ;; ('yaml-ts-mode-hook #'eglot-ensure t)
+  ('eglot-managed-mode-hook #'eglot-inlay-hints-mode)
   :defer
+  :general
+  (:keymaps 'eglot-mode-map
+            "M-RET" #'eglot-code-actions)
   :custom
   (eglot-extend-to-xref t)
   (eglot-events-buffer-size 0)
@@ -1953,19 +2024,21 @@ found, an error is signaled."
   :config
   (add-to-list
    'eglot-server-programs
-   `((c-mode c++-mode) .
-     ,(eglot-alternatives
-       '("ccls"
-         ("clangd"
-          "-j=6"
-          ;; "--all-scopes-completion"
-          "--completion-style=detailed"
-          "--header-insertion=never"
-          "--pch-storage=memory"
-          ;; "--log=error"
-          "--background-index"
-          "--cross-file-rename"
-          "--clang-tidy")))))
+   '((c-mode c++-mode c-ts-mode c++-ts-mode) .
+     ("clangd"
+      "-j=8"
+      "--malloc-trim"
+      "--background-index"
+      "--clang-tidy"
+      "--cross-file-rename"
+      "--completion-style=detailed"
+      "--pch-storage=memory"
+      "--header-insertion=never"
+      "--header-insertion-decorators=0")))
+  ;; (add-to-list
+  ;;  'eglot-server-programs
+  ;;  '((python-mode python-ts-mode) . ("ruff-lsp")))
+
   ;; Just so I don't forget about this
   ;; (setq-default eglot-workspace-configuration
   ;;               '((haskell
@@ -2004,6 +2077,7 @@ found, an error is signaled."
   (imenu-list-position 'left))
 
 (use-package yasnippet
+  :disabled
   :custom
   (yas-verbosity 1 "Only errors")
   (yas-triggers-in-field t "Snippets inside snippets")
@@ -2096,7 +2170,8 @@ found, an error is signaled."
 ;;
 
 (use-package magit
-  :ghook ('git-commit-mode-hook #'git-commit-turn-on-flyspell)
+  :ghook
+  ('git-commit-mode-hook #'git-commit-turn-on-flyspell)
   :general
   ("C-c g" #'magit-file-dispatch)
   :custom
@@ -2108,7 +2183,9 @@ found, an error is signaled."
   (magit-ediff-dwim-show-on-hunks t)
   (magit-display-buffer-function #'magit-display-buffer-fullframe-status-v1)
   (magit-process-popup-time 20)
-  (magit-refs-show-commit-count 'all))
+  (magit-refs-show-commit-count 'all)
+  :config
+  (magit-add-section-hook 'magit-status-sections-hook 'magit-insert-tracked-files nil 'append))
 
 (use-package magit-gitflow
   :ghook ('magit-mode-hook #'turn-on-magit-gitflow))
