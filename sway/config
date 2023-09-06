@@ -32,24 +32,26 @@ set $term_float_cmd $term $float_arg
 set $lock_cmd swaylock --screenshots --clock --effect-pixelate=10 --indicator --indicator-thickness 7
 
 set $laptop eDP-1
-set $main_display "Philips Consumer Electronics Company PHL 272B8Q UK01948018974"
+set $main_display "Lenovo Group Limited G27qe-20 U563BBCA"
 
-set $all_menu wofi --show run
-set $menu wofi --show drun
+set $menu fuzzel
 
 
 ### Output configuration
 
 output $laptop {
-    background ~/Pictures/Wallpapers/catdog-wallpaper.png fill
-    resolution 1920x1080
+    #background ~/Pictures/Wallpapers/catdog-wallpaper.png fill
+    resolution 2560x1600@240.003Hz
     position 2560 0
+    adaptive_sync on
+    scale 1.25
 }
 
 output $main_display {
-    background ~/Pictures/Wallpapers/catdog-wallpaper.png fill
+    # background ~/Pictures/Wallpapers/catdog-wallpaper.png fill
     resolution 2560x1440
     position 0 0
+    adaptive_sync on
 }
 
 bindswitch --reload --locked lid:on output $laptop disable
@@ -110,7 +112,6 @@ input type:pointer {
 bindsym $mod+Return exec swaymsg -- exec $term
 
 bindsym $mod+p exec swaymsg -- exec $menu
-bindsym $mod+Shift+p exec swaymsg -- exec $all_menu
 
 floating_modifier $mod normal
 
@@ -273,7 +274,7 @@ bar {
     # hidden_state hide
     modifier $mod
 
-    swaybar_command waybar
+    swaybar_command waybar -c ~/.config/waybar/config-sway.jsonc
 
     colors {
         statusline #ffffff
